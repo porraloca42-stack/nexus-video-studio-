@@ -10,8 +10,18 @@ def run(command):
         raise RuntimeError(result.stderr[-5000:])
     return result
 
-def normalize_clip(source, destination, duration, motion="push_in"):
+def normalize_clip(source, destination, duration, motion="preserve"):
     frames = max(1, int(float(duration) * FPS))
+    if motion == "preserve":
+        # Stock clips already contain photographed camera/subject movement.
+        # Preserve it instead of applying the same synthetic zoom to every scene.
+        filter_graph = (
+            f"scale=900:1600:force_original_aspect_ratio=increase,crop=900:1600,"
+            f"fps={FPS},eq=contrast=1.04:saturation=1.04:brightness=0.005,"
+            "setsar=1,format=yuv420p"
+        )
+        run(["ffmpeg", "-y", "-stream_loop", "-1", "-i", str(source), "-t", str(duration), "-vf", filter_graph, "-an", "-c:v", "libx264", "-preset", "veryfast", "-crf", "24", str(destination)])
+        return
     if motion == "pan_left":
         zoom = "1.06"
         x = f"iw/2-(iw/zoom/2)+(iw/zoom/2)*on/{frames}"
@@ -68,7 +78,7 @@ def render_video(media, audio_path, output):
         clips = []
         for index, item in enumerate(media):
             clip = temp_dir / f"scene_{index:02d}.mp4"
-            normalize_clip(item["path"], clip, item["duration"], item.get("camera_motion", "push_in"))
+            normalize_clip(item["path"], clip, item["duration"], item.get("camera_motion", "preserve"))
             clips.append(clip)
         concat = temp_dir / "concat.txt"
         concat.write_text("".join(f"file '{clip.as_posix()}'\n" for clip in clips), encoding="utf-8")
