@@ -64,8 +64,8 @@ def sanitize_scene_direction(direction, fallback_camera="push_in"):
         "camera": {
             "move": move,
             "intensity": _bounded_number(camera.get("intensity"), 0.65, 0.0, 1.0),
-            "startScale": _bounded_number(camera.get("start_scale"), 1.08, 1.0, 1.15),
-            "endScale": _bounded_number(camera.get("end_scale"), 1.15, 1.0, 1.15),
+            "startScale": _bounded_number(camera.get("start_scale"), 1.04, 1.02, 1.28),
+            "endScale": _bounded_number(camera.get("end_scale"), 1.22, 1.02, 1.28),
             "focus": focus,
         },
         "depthLayers": {
