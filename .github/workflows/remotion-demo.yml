@@ -6,6 +6,9 @@ on:
     branches: [main]
     paths:
       - "remotion/**"
+      - "nexus/remotion_renderer.py"
+      - "scripts/**"
+      - "tests/test_remotion_renderer.py"
       - ".github/workflows/remotion-demo.yml"
 
 jobs:
@@ -61,5 +64,6 @@ jobs:
           path: |
             remotion/out/nexus-demo.mp4
             remotion/out/nexus-manifest.mp4
+            remotion/out/nexus-adapter-integration.mp4
           if-no-files-found: error
           retention-days: 7
