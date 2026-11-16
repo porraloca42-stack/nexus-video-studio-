@@ -2,7 +2,7 @@ import base64, json, os, shutil, subprocess, tempfile
 from pathlib import Path
 import streamlit as st
 from nexus.director import create_storyboard, validate_storyboard
-from nexus.assets import (search_video_sources, search_coverr_videos, search_pixabay_videos, search_pexels_videos, download_file)
+from nexus.assets import search_video_sources, search_coverr_videos, download_file
 from nexus.audio import make_voice
 from nexus.render import render_video
 
@@ -170,23 +170,33 @@ with st.expander("Ferramentas avançadas · diagnóstico das bibliotecas de víd
     st.caption("Build do aplicativo: NEXUS-2026.11.16-library-diagnostics-1 · confirme esta identificação após a publicação.")
     st.caption("Testa autenticação, busca, download e leitura do MP4 em cada biblioteca que tiver chave configurada. As chaves nunca são exibidas.")
     if st.button("Testar todas as bibliotecas configuradas", type="secondary"):
+        # Use the established multi-source entry point rather than importing
+        # provider adapters directly in app.py. This keeps deployment imports
+        # compatible with previously deployed package revisions.
         providers = [
-            ("Coverr", secret("COVERR_API_KEY"), search_coverr_videos),
-            ("Pixabay", secret("PIXABAY_API_KEY"), search_pixabay_videos),
-            ("Pexels", secret("PEXELS_API_KEY"), search_pexels_videos),
+            ("Coverr", secret("COVERR_API_KEY"), {"coverr_key": secret("COVERR_API_KEY")}),
+            ("Pixabay", secret("PIXABAY_API_KEY"), {"pixabay_key": secret("PIXABAY_API_KEY")}),
+            ("Pexels", secret("PEXELS_API_KEY"), {"pexels_key": secret("PEXELS_API_KEY")}),
         ]
         tested = 0
         with tempfile.TemporaryDirectory(prefix="nexus_library_diagnostics_") as temp_dir:
-            for provider_name, api_key, search_fn in providers:
+            for provider_name, api_key, source_args in providers:
                 if not api_key:
                     st.warning(f"{provider_name}: chave não configurada nos Secrets.")
                     continue
                 tested += 1
                 try:
                     with st.spinner(f"Testando {provider_name}: autenticação, busca e download..."):
-                        results = search_fn("nature landscape", api_key, per_page=5)
+                        results, source_errors = search_video_sources(
+                            "nature landscape",
+                            per_page=5,
+                            relevance_query="nature landscape",
+                            min_relevance=0,
+                            **source_args,
+                        )
                         if not results:
-                            st.error(f"{provider_name}: a API respondeu, mas não retornou clipes MP4 utilizáveis.")
+                            detail = "; ".join(source_errors) if source_errors else "A API não retornou clipes relevantes e utilizáveis."
+                            st.error(f"{provider_name}: busca sem resultados — {detail}")
                             continue
                         chosen = next((item for item in results if item.get("vertical")), results[0])
                         clip_path = download_file(
@@ -213,13 +223,15 @@ with st.expander("Ferramentas avançadas · diagnóstico das bibliotecas de víd
                         if duration_seconds <= 0 or size_bytes <= 0:
                             raise RuntimeError("O MP4 não apresentou duração ou tamanho válidos.")
                         st.success(
-                            f"{provider_name}: conexão, {len(results)} resultados, download e leitura MP4 aprovados."
+                            f"{provider_name}: busca, {len(results)} candidatos, download e leitura MP4 aprovados."
                         )
                         st.caption(
                             f"{chosen.get('title') or provider_name} · "
                             f"{video.get('width')}×{video.get('height')} · "
                             f"{duration_seconds:.1f}s · {video.get('codec_name', 'codec desconhecido')}"
                         )
+                        if source_errors:
+                            st.caption("Avisos de busca: " + " | ".join(source_errors))
                 except Exception as exc:
                     st.error(f"{provider_name}: falha no teste — {exc}")
         if not tested:
