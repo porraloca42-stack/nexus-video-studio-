@@ -9,6 +9,7 @@ from nexus.audio import (
     list_fish_voices,
     list_fish_professional_narrators,
     _is_natural_brazilian_voice,
+    _is_human_narrator_voice,
     make_voice,
 )
 
@@ -203,6 +204,15 @@ class AudioOutputTests(unittest.TestCase):
         self.assertTrue(_is_natural_brazilian_voice(natural))
         self.assertFalse(_is_natural_brazilian_voice(character))
         self.assertFalse(_is_natural_brazilian_voice(european))
+
+    def test_professional_narrator_accepts_explicit_pt_br_language_metadata(self):
+        voice = {
+            "title": "Male Narrator",
+            "description": "Professional natural narration",
+            "tags": ["male", "narration"],
+            "languages": ["pt-BR"],
+        }
+        self.assertTrue(_is_human_narrator_voice(voice, "male"))
 
     def test_lists_private_personal_voice_models(self):
         session = FakeFishSession(payload={
