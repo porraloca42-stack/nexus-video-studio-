@@ -181,3 +181,12 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Commit faf7461: identificador visual atualizado para `NEXUS-2026.11.16-edge-tts-compat-1`.
 - Commit b7b7a19: testes unitários simulam as APIs moderna e legada e verificam gravação de áudio e arquivo SRT.
 - Pendente: resultado do GitHub Actions, confirmação do novo build no Streamlit e produção real completa. Ainda não declarar MP4 validado até FFprobe confirmar áudio, vídeo, duração e dimensões.
+
+
+## Recuperação de busca de clipes por correspondência semântica — 16/11/2026
+- Evidência do usuário: storyboard de 12 cenas/50s foi mantido, mas a produção interrompeu informando ausência de clipes para as cenas 4–12.
+- Diagnóstico no fluxo: a busca exigia no mínimo duas correspondências de termos da cena em título/descrição dos bancos de stock e encerrava sem recuperação quando o metadado usava sinônimos ou descrições mais curtas. O fluxo tentava consultas principais e alternativas, mas a validação semântica estrita descartava candidatos com apenas uma correspondência.
+- Commit b7da40b: adicionada recuperação semântica em duas etapas. Primeiro, mantém a exigência estrita de duas correspondências; depois de esgotar fontes e variantes, aceita apenas candidatos com pelo menos uma correspondência real com termos da cena e relevância mínima. Conteúdo sem qualquer sobreposição continua rejeitado; URLs já utilizadas continuam excluídas.
+- Commit e12d2a4: testes atualizados para cobrir recuperação por correspondência parcial e rejeição de stock sem relação semântica.
+- Aumento das variantes de busca de quatro para oito, derivadas exclusivamente da consulta específica da cena; sem dicionário temático fixo.
+- Pendente: GitHub Actions, implantação Streamlit e novo teste real. A API Coverr/Pixabay não foi chamada neste ambiente; não afirmar que as cenas 4–12 já encontraram clipes nem que o MP4 foi produzido.
