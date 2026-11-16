@@ -65,7 +65,8 @@ def generate_image(
             result = payload.get("result", payload)
             encoded = result.get("image") or result.get("image_base64")
             if encoded:
-                image_bytes = base64.b64decode(encoded)
+                encoded = encoded.split(",", 1)[-1] if encoded.startswith("data:") else encoded
+                image_bytes = base64.b64decode(encoded, validate=True)
         except (ValueError, TypeError, AttributeError) as exc:
             raise CloudflareAIError("Resposta JSON de imagem inválida do Cloudflare.") from exc
     else:
@@ -84,7 +85,7 @@ def generate_image(
         raise CloudflareAIError("A resposta do Cloudflare não é PNG, JPEG ou WebP válido.")
 
     destination = Path(output_path)
-    if destination.suffix.lower() not in {".png", ".jpg", ".jpeg", ".webp"}:
+    if destination.suffix.lower() != extension and not (extension == ".jpg" and destination.suffix.lower() == ".jpeg"):
         destination = destination.with_suffix(extension)
     destination.parent.mkdir(parents=True, exist_ok=True)
     destination.write_bytes(image_bytes)
