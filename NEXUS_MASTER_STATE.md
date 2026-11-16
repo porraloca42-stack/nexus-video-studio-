@@ -705,3 +705,10 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Commit `fbe5d8a`: o worker agora faz ajuste de tempo moderado por FFmpeg quando o TTS diverge até 15% da timeline, e aplica o mesmo fator aos timestamps SRT para manter legendas sincronizadas. Diferenças superiores a 15% continuam sendo bloqueadas para evitar áudio muito acelerado/lento.
 - Commit `cde5384`: adicionados testes para reescalonamento dos timestamps das legendas.
 - CI iniciado; ainda pendente. Novo render Cloudflare e MP4 final ainda não validados.
+
+
+### Correção final dos testes de sincronização SRT — 16/11/2026
+- A execução #43860063761 ainda falhou nos dois testes novos de SRT. Diagnóstico: expressão regular em `_retime_srt` continha barras invertidas duplicadas e não reconhecia timestamps SRT reais.
+- Commit `3e8f726`: corrigida a regex para reconhecer `HH:MM:SS,mmm` e aplicar o fator de sincronização às legendas.
+- Novas execuções de regressão #43861160198 e demo Remotion #43861160323 disparadas; aguardando conclusão.
+- O ajuste TTS/legendas está implementado, mas só será considerado aprovado após os testes verdes. Render Cloudflare real pós-correção permanece pendente.
