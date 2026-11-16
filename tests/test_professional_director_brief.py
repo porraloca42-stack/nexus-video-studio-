@@ -18,6 +18,11 @@ class ProfessionalDirectorBriefTests(unittest.TestCase):
             "keyword stuffing",
             "público provável",
             "primeira fala",
+            "DIREÇÃO CINEMATOGRÁFICA EXECUTÁVEL",
+            '"scene_direction"',
+            '"depth_layers"',
+            '"beats"',
+            "parallax_strength",
         ):
             with self.subTest(requirement=requirement):
                 self.assertIn(requirement, SYSTEM)
