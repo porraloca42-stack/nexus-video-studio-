@@ -1018,7 +1018,7 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - `nexus/audio.py`: Fish Audio S2.1 Pro Free tornou-se obrigatório; se faltar chave, voz ou a API falhar, a produção interrompe com erro claro. Não há fallback silencioso para voz robótica.
 - Biblioteca: endpoint `GET https://api.fish.audio/model` com paginação, busca por nome, filtro de idioma, modelos públicos e modelos próprios; amostras publicadas são exibidas e, quando ausentes, a interface permite gerar uma prévia curta usando `POST /v1/tts` com `reference_id`.
 - `app.py`: navegador de vozes Fish Audio, seis vozes por página, áudio de amostra antes do nome, seleção persistente na sessão, fonte pública ou Minhas vozes, idioma Português ou Todos. A voz selecionada é encaminhada ao worker e ao modo alternativo.
-- `requirements.txt` e workflow `.github/workflows/nexus-render-worker.yml`: dependência `edge-tts` removida.
+- `requirements.txt` e workflow `.github/workflows/nexus-render-worker.yml`: dependência `edge-tts` removida. O worker também não usa mais identificador de voz Edge como default; sem voz Fish selecionada, interrompe a geração.
 - Não é possível ler o valor de `FISH_API_KEY` do Secret pelo assistente. O usuário confirmou que adicionou a chave; validação real da consulta de vozes e TTS depende da aplicação publicada. Vozes públicas de terceiros podem ter restrições de direitos; verificar licença antes de uso comercial.
 
 ### Image-to-video: pesquisa e decisão pendente
@@ -1032,3 +1032,6 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Não validado: consulta real à biblioteca Fish, prévias reais, TTS real Fish, deploy Streamlit, produção editorial real com o novo motion pipeline.
 - Limitação conhecida: movimento de câmera e beats gráficos melhoram a percepção de dinamismo, mas para personagens/objetos com movimento natural será necessário image-to-video por cena. O usuário ainda precisa autorizar o custo e a infraestrutura temporária.
 - Próximo passo: aguardar CI mais recente; confirmar que o Streamlit carregou a nova versão; testar a biblioteca Fish e selecionar uma voz; executar um MP4 real; inspecionar qualidade. Depois, decidir se habilita Wan 2.7 I2V (ou outro modelo) com custo explícito.
+
+- Commit `01471d2`: removido também o último identificador legado `pt-BR-AntonioNeural` do default do worker. Busca no repositório não encontrou mais referências a `edge-tts`, `Edge TTS` ou esse ID de voz.
+- GitHub Actions run #439 (`43888932375`): unit-tests e Remotion typecheck concluíram com sucesso após remoção da dependência Edge; o smoke test Commons ainda estava em execução no momento da atualização.
