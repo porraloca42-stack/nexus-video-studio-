@@ -57,6 +57,29 @@ class VisualReviewTests(unittest.TestCase):
             self.assertIn("Estilo visual é critério secundário", prompt_text)
             self.assertTrue(any("inlineData" in part for part in payload["contents"][0]["parts"]))
 
+    def test_accepts_useful_indirect_visual_metaphor_above_lower_threshold(self):
+        response = FakeResponse()
+        response.json = lambda: {
+            "candidates": [{
+                "content": {"parts": [{
+                    "text": '{"selected_candidate": 1, "semantic_match": 61, "style_match": 70, "confidence": 61, "reason": "A pessoa organizando o calendário comunica planejamento."}'
+                }]}
+            }]
+        }
+        with tempfile.TemporaryDirectory() as temp:
+            frame = Path(temp) / "frame.jpg"
+            frame.write_bytes(b"fake-jpeg-frame")
+            with patch("nexus.director.discover_models", return_value=["gemini-test"]), patch(
+                "nexus.director.requests.post", return_value=response
+            ):
+                result = review_visual_candidates(
+                    {"voiceover": "Prepare-se para o que deseja construir.", "visual_action": "Pessoa organizando prioridades."},
+                    [{"candidate": {"source": "Pixabay"}, "frame_paths": [str(frame)]}],
+                    lambda name, default=None: "test-key" if name == "GEMINI_API_KEY" else "auto",
+                )
+        self.assertEqual(result["selected_candidate"], 1)
+        self.assertEqual(result["confidence"], 61)
+
     def test_rejects_candidate_below_visual_confidence_threshold(self):
         response = FakeResponse()
         response.json = lambda: {
