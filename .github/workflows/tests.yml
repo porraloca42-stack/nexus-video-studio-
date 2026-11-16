@@ -25,3 +25,21 @@ jobs:
         run: python -m compileall -q app.py nexus
       - name: Run regression tests
         run: python -m unittest discover -s tests -v
+  
+  commons-live-smoke:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install FFmpeg and requests
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          python -m pip install requests
+      - name: Search Commons, download a licensed video, and inspect it
+        run: python tests/live_commons_smoke.py
