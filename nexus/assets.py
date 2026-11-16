@@ -37,14 +37,14 @@ _QUERY_ALIASES = {
 }
 
 def build_query_variants(query, max_variants=8):
-    original = re.sub(r"\\s+", " ", str(query or "")).strip()
+    original = re.sub(r"\s+", " ", str(query or "")).strip()
     if not original:
         return []
     variants = []
     seen = set()
 
     def add(value):
-        value = re.sub(r"\\s+", " ", str(value or "")).strip()
+        value = re.sub(r"\s+", " ", str(value or "")).strip()
         key = value.casefold()
         if value and key not in seen and len(variants) < max_variants:
             seen.add(key)
