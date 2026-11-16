@@ -199,7 +199,7 @@ def _make_fish_voice(text, output, api_key, voice_id=None, session=None):
     return output, output.with_suffix(".srt")
 
 
-def make_voice(text, voice, output, fish_api_key=None, fish_voice_id=None, session=None):
+def make_voice(text, voice, output, fish_api_key=None, fish_voice_id=None, session=None, return_provider=False):
     output = Path(output)
     output.parent.mkdir(parents=True, exist_ok=True)
     subtitles = output.with_suffix(".srt")
@@ -211,8 +211,9 @@ def make_voice(text, voice, output, fish_api_key=None, fish_voice_id=None, sessi
             )
             if not output.exists() or output.stat().st_size == 0:
                 raise RuntimeError("Fish Audio retornou um arquivo de áudio vazio.")
-            return result
-        except Exception:
+            return (*result, "Fish Audio") if return_provider else result
+        except Exception as exc:
+            fish_error = str(exc)[:240]
             # Preserve a working production path while the external TTS provider
             # is unavailable, rate-limited, or outside its temporary free window.
             output.unlink(missing_ok=True)
@@ -236,4 +237,4 @@ def make_voice(text, voice, output, fish_api_key=None, fish_voice_id=None, sessi
         raise RuntimeError("O sintetizador não gerou um arquivo de áudio válido.")
     if not subtitles.exists():
         raise RuntimeError("Não foi possível criar o arquivo de legendas SRT.")
-    return output, subtitles
+    return (output, subtitles, "Edge TTS" + (f" (fallback: {fish_error})" if fish_api_key else "")) if return_provider else (output, subtitles)
