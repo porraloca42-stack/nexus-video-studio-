@@ -15,8 +15,10 @@ Aplicativo pessoal em nuvem para transformar tema ou roteiro em vídeo vertical 
 ## Preferências de produto
 - Prioridade: qualidade audiovisual e coerência semântica, não funcionalidades periféricas.
 - O diretor deve compreender o roteiro inteiro antes de criar cenas.
+- A resposta JSON do Gemini deve ser extraída de todas as partes textuais, tolerar cercas Markdown/preambulo e reportar motivo real de bloqueio/truncamento em vez de erro genérico.
+- O usuário escolhe a linguagem visual; cada cena devolve visual_style e style_search_terms, e os termos de estilo acompanham as buscas nas bibliotecas.
 - Cada cena deve representar a fala correspondente com ação concreta; evitar stock genérico, slideshows, colagens e repetição de zoom.
-- Um único estilo visual bloqueado por vídeo.
+- O usuário escolhe um estilo visual entre múltiplos presets; o estilo escolhido é enviado ao Gemini, aplicado por cena e incorporado às buscas de stock.
 - Preferir clipes reais em movimento; geração de vídeo por IA é uma etapa futura e não deve consumir créditos sem autorização.
 - Pesquisar em várias bibliotecas, comparar candidatos e futuramente avaliar visualmente os clipes antes de selecioná-los.
 - Alvo inicial: uso pessoal, cerca de 2 vídeos/dia, 50 segundos, 720p, 9:16.
@@ -56,6 +58,9 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - validate_storyboard agora recebe a duração solicitada e rejeita contagem inferior ao mínimo, soma de durações divergente em mais de 0,75s e cenas acima de 5s.
 - nexus/assets.py deriva variações apenas dos termos da busca específica criada pelo diretor; não existe mais mapa fixo de temas ou sinônimos.
 - nexus/render.py usa stream_loop para preencher o segmento quando o clipe-fonte for mais curto, evitando quadros vazios. Isso é uma proteção técnica, não substitui a seleção de clipes longos e variados.
+- Corrigido tratamento de resposta do Gemini em nexus/director.py: agrega todos os blocos de texto, remove cercas de código, tenta decodificação JSON direta e extração do primeiro objeto; informa bloqueio, resposta vazia ou MAX_TOKENS com diagnóstico específico. Limite de saída elevado para 8192 tokens.
+- app.py oferece 24 estilos visuais selecionáveis (cinematográfico, documentário, noir, publicidade premium, lifestyle, natureza, minimalista, vintage, VHS, cyberpunk, sci-fi, fantasia, surrealismo, anime 2D/3D, ilustração, aquarela, graphic novel, 3D, stop motion, macro e drone). O estilo é passado ao diretor, exibido no storyboard e anexado às buscas por cena.
+- validate_storyboard exige visual_style e style_search_terms em cada cena. Código publicado; ainda aguarda novo teste no Streamlit.
 - O usuário executou o download interno e confirmou em captura que o servidor recebeu e validou um MP4: H.264, 606×1080, 8 segundos, 4,65 MB. Download servidor→arquivo e leitura FFprobe estão TESTADOS. O arquivo ficou em diretório temporário do servidor e foi descartado ao fim do teste; não houve download para o celular, nem isso era o objetivo do diagnóstico.
 - A interface explica que o diagnóstico Coverr baixa o clipe temporariamente no servidor; o usuário não deve receber arquivos-fonte individuais.
 - Em 2026-11-16 foi publicado um fluxo de produção atualizado: botão “Produzir vídeo completo”; validação FFprobe de cada clipe baixado; geração de narração/legendas; render FFmpeg; validação do MP4 final com faixas de vídeo e áudio; armazenamento dos bytes do MP4 em session_state para manter prévia e botão de download após reruns. O código foi publicado, mas ainda NÃO foi executado pelo usuário nem validado com um MP4 real.
@@ -70,8 +75,9 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 2. CONCLUÍDO: autenticação e busca Coverr testadas com sucesso pelo usuário; cinco resultados retornados.
 3. CONCLUÍDO: download interno Coverr e validação FFprobe confirmados pelo usuário (H.264, 606×1080, 8 s, 4,65 MB).
 4. IMPLEMENTADO, AGUARDANDO RETESTE: fluxo de produção e entrega MP4 final. Primeiro teste parou antes do FFmpeg porque não houve resultados para as seis buscas específicas.
-5. PRÓXIMO: atualizar o app e gerar novo storyboard de 50s; confirmar pelo menos 10 cenas (meta 12–15), buscas específicas geradas pelo Gemini e soma exata de 50s.
-6. Retestar a busca por cena e validar relevância, variedade e duração dos clipes antes de renderizar.
+5. PRÓXIMO: testar a correção do JSON do Gemini no Streamlit; verificar se o storyboard gera 10+ cenas, soma correta e se cada cena contém visual_style/style_search_terms.
+6. Confirmar que o estilo selecionado aparece nas consultas de busca de cada cena.
+7. Retestar a busca por cena e validar relevância, variedade e duração dos clipes antes de renderizar.
 7. Implementar ranking semântico e avaliação multimodal dos candidatos.
 
 8. Renderizar o primeiro MP4 real de 40–50s, inspecionar qualidade e validar entrega do arquivo final.
