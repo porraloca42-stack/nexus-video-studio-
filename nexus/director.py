@@ -36,7 +36,7 @@ Retorne somente JSON válido:
 """
 
 def _model_version(name):
-    nums = re.findall(r"\\d+", name.lower())
+    nums = re.findall(r"\d+", name.lower())
     return tuple(int(n) for n in nums[:3]) if nums else (0,)
 
 def discover_model(api_key, requested="auto"):
