@@ -1043,3 +1043,47 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Commit `5a45495`: cards de voz Fish ajustados para mobile: player de áudio em largura maior antes do nome/descrição, escolha abaixo do preview; evita player estreito em três colunas. O CI correspondente (#447) estava em execução no momento desta anotação.
 
 - GitHub Actions run #447 (`43889447149`), commit `5a45495`: workflow completo `success` após o ajuste mobile da biblioteca Fish. Compilação Python, 75 testes, typecheck Remotion e smoke test Commons aprovados.
+
+## Integração Modal + LTX image-to-video — 16/11/2026
+
+### Decisão aprovada pelo usuário
+- Modal aprovado para executar geração image-to-video por GPU serverless.
+- Objetivo de produção: até aproximadamente 2 vídeos/dia, cada um com 40–50 segundos; a arquitetura deve suportar esse volume e medir o custo real antes de ampliar.
+- Estratégia editorial: cada cena do storyboard recebe um keyframe original Cloudflare e, no caminho principal, é animada como clipe MP4 por LTX-Video no Modal. Remotion compõe os clipes, áudio e movimentos de câmera na timeline final.
+- A intenção é movimento orgânico em todas as cenas, não apenas zoom/pan em imagens. Se Modal falhar, o worker interrompe a produção em vez de entregar silenciosamente um slideshow estático.
+
+### Código implementado no GitHub main
+- `modal_worker.py`: aplicação Modal `nexus-video-i2v`, classe `Inference`, pipeline `Lightricks/LTX-Video` na revisão fixada `a6d59ee37c13c58261aa79027d3e41cd41960925`; GPU H100; cache de pesos em Volume persistente; escala a zero após 60s sem uso; entrada de imagens e prompts em lote; exporta clipes MP4.
+- Resolução inicial de geração: 512×896, 24 fps. Duração por cena limitada a 2–5s; contagem de frames ajustada ao requisito LTX de 8n+1. A resolução final do MP4 composto continua 720×1280.
+- `nexus/modal_i2v.py`: adaptador do worker GitHub para chamar a classe Modal uma vez por lote, validar quantidade/tamanho dos clipes e gravar MP4s por cena. Usa prompt explícito de movimento quando presente e fallback derivado da ação, imagem e direção de câmera.
+- `nexus/remote_render_job.py`: após gerar e validar as imagens Cloudflare, chama Modal para animar todas as cenas; valida cada MP4 com FFprobe; Remotion recebe os MP4s em vez das imagens. Relatório inclui fonte visual, quantidade de clipes e tempo de inferência.
+- `.github/workflows/nexus-render-worker.yml`: instala o cliente Modal e encaminha `MODAL_TOKEN_ID` e `MODAL_TOKEN_SECRET` a partir dos GitHub Actions Secrets.
+- `.github/workflows/modal-deploy.yml`: workflow manual para implantar `modal_worker.py` depois que os dois secrets estiverem configurados.
+- `app.py`: rótulo e orientação do motor principal atualizados para Cloudflare + Modal I2V + Remotion; a interface lê a fonte visual real do relatório do worker.
+- `tests/test_modal_i2v.py`: testes simulados para prompts, lote, gravação de MP4 e rejeição de durações inválidas.
+- `tests/test_remote_render_job.py`: cenário de integração simulado atualizado para 10 cenas animadas antes do Remotion.
+- `.github/workflows/tests.yml`: compilação de sintaxe inclui `modal_worker.py`.
+
+### Custos e limites — não confundir hipótese com medição
+- Modal Starter: US$0/mês com US$30/mês em créditos de computação; não é receita nem pagamento ao usuário. É crédito de uso sujeito às regras do plano. GPU exige método de pagamento válido na conta.
+- O worker usa H100 e escala a zero com janela de 60 segundos. Isso reduz tempo ocioso, mas não elimina custos de cold start, carga do modelo, processamento, CPU/memória, armazenamento, retries ou tráfego.
+- A referência oficial do exemplo Modal/LTX estima cerca de 15s de inferência warm para um clipe de 5s, mas esse número ainda não foi reproduzido neste projeto. O exemplo oficial usa 25 frames por padrão (~1s a 24fps), embora seu comentário descreva 5s; portanto, qualquer projeção de custo baseada nessa referência é apenas cenário, não orçamento validado.
+- Não prometer que 2 vídeos/dia com todas as cenas animadas caberão nos créditos até medir tempo real por cena, cold start, tempo de carga do modelo e consumo total faturado. O piloto deve começar com um vídeo e revisão da fatura/uso antes de ampliar.
+- O checkpoint LTX-Video selecionado tem licença própria para os pesos, separada da licença do código. A licença pública menciona exigência de acordo comercial pago para entidades com receita anual igual ou superior a US$10 milhões; verificar o texto completo e as restrições aplicáveis ao uso monetizado antes de escalar comercialmente.
+
+### Estado de implementação, implantação e validação
+- Implementado no GitHub main: integração Modal/LTX e fluxo worker → Modal → Remotion; workflows e testes simulados adicionados.
+- Implantado no Modal: NÃO. Ainda depende de configurar secrets e executar o workflow manual de deploy.
+- Credenciais: `MODAL_TOKEN_ID` e `MODAL_TOKEN_SECRET` ainda NÃO foram fornecidos/configurados no GitHub Actions. Não solicitar que sejam enviados no chat.
+- Teste automatizado: pendente no momento da atualização; consultar GitHub Actions para os runs gerados pelos commits desta integração. Os testes simulados não comprovam chamada real ao Modal.
+- Teste real de GPU, qualidade image-to-video, duração vertical, custo e MP4 editorial: NÃO executado.
+- Nenhuma execução Modal/GPU foi disparada por esta integração durante a implementação; não houve consumo de créditos Modal nesta etapa.
+
+### Próximas etapas obrigatórias
+1. Confirmar CI Python, testes de regressão e typecheck Remotion após os commits desta integração; corrigir falhas.
+2. Usuário cria token de acesso Modal e configura os dois valores como GitHub Actions Secrets `MODAL_TOKEN_ID` e `MODAL_TOKEN_SECRET`; nunca colar tokens no chat.
+3. Executar manualmente o workflow `Deploy NEXUS Modal video worker`; confirmar deploy e app `nexus-video-i2v`.
+4. Fazer um piloto controlado com uma única cena representativa (imagem/personagem e ação), verificar identidade, anatomia, movimento, saída 9:16 e latência/custo real.
+5. Após aprovação visual do piloto, produzir um MP4 editorial de 40–50s com todas as cenas animadas; inspecionar continuidade, movimento, sincronização, codecs e custo total.
+6. Atualizar este registro com números observados e só então definir limite operacional de cenas e orçamento mensal.
+
