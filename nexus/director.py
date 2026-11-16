@@ -129,6 +129,4 @@ def validate_storyboard(plan):
             errors.append(f"Cena {index}: justificativa semântica superficial.")
         if len(scene.get("motion_events", [])) < 2:
             errors.append(f"Cena {index}: faltam microeventos.")
-    if abs(total - 50) > 20:
-        errors.append(f"A duração planejada ({total:.0f}s) está distante do formato vertical curto.")
     return errors
