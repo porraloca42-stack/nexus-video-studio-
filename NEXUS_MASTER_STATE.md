@@ -521,3 +521,5 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Correções adicionais em testes existentes após inspeção de falhas de CI: mocks/expectativas atualizados para o número real de consultas por provedor e nova redação do prompt de revisão. Commits `5a0291d` e `2bd05a5`.
 - CI #202 (43832119971) e #203 (43832130656) em execução/fila; execução #199–#201 falhou por expectativas de teste desatualizadas, não por erro de compilação. Não declarar as alterações validadas até CI verde.
 - Próxima validação: confirmar CI e, após atualização do Streamlit, gerar storyboard novo. Planos já salvos em `st.session_state` não são reescritos automaticamente; o usuário deve clicar “Planejar vídeo” novamente para que o estilo seja propagado a todas as cenas.
+
+- Hardening adicional no render: `app.py` agora reaplica `plan['style_lock']` a cada cena no início da produção, com fallback para planos salvos antigos sem `style_search_terms`; a busca e o diagnóstico passam a usar o estilo global mesmo quando o storyboard anterior veio incompleto. Commit `7da9c87`. CI correspondente #205 disparado; aguardar resultado.
