@@ -53,6 +53,96 @@ def search_coverr_videos(query, api_key, per_page=20):
     results.sort(key=lambda x: (x['vertical'], x['height'] >= 720, x['width'] * x['height']), reverse=True)
     return results
 
+def _commons_metadata_value(metadata, key):
+    value = (metadata.get(key) or {}).get("value", "")
+    return re.sub(r"\\s+", " ", re.sub(r"<[^>]+>", " ", str(value))).strip()
+
+
+def search_wikimedia_videos(query, per_page=20):
+    """Search Commons video files and keep only clearly commercial-use licenses.
+
+    To avoid ambiguous reuse conditions in commercial creator workflows, this
+    adapter accepts CC0, public-domain and CC BY (not BY-SA, NC or ND) files.
+    """
+    response = requests.get(
+        "https://commons.wikimedia.org/w/api.php",
+        params={
+            "action": "query",
+            "generator": "search",
+            "gsrsearch": f"filetype:video {query}",
+            "gsrnamespace": 6,
+            "gsrlimit": min(max(int(per_page), 1), 20),
+            "prop": "imageinfo",
+            "iiprop": "url|size|mime|extmetadata",
+            "format": "json",
+            "formatversion": 2,
+        },
+        headers={"User-Agent": "NEXUSVideoStudio/1.0 (https://github.com/porraloca42-stack/nexus-video-studio-)"},
+        timeout=45,
+    )
+    response.raise_for_status()
+    pages = (response.json().get("query") or {}).get("pages") or []
+    if isinstance(pages, dict):
+        pages = list(pages.values())
+
+    results = []
+    allowed_extensions = (".webm", ".ogv", ".mpg", ".mpeg")
+    for page in pages:
+        info_list = page.get("imageinfo") or []
+        if not info_list:
+            continue
+        info = info_list[0]
+        url = info.get("url", "")
+        mime = str(info.get("mime") or "").lower()
+        if not url or not url.lower().split("?", 1)[0].endswith(allowed_extensions):
+            continue
+        if mime and not mime.startswith("video/"):
+            continue
+
+        metadata = info.get("extmetadata") or {}
+        license_name = _commons_metadata_value(metadata, "LicenseShortName")
+        license_url = _commons_metadata_value(metadata, "LicenseUrl")
+        normalized_license = license_name.casefold().replace("-", " ").strip()
+        is_cc0 = "cc0" in normalized_license or "cc zero" in normalized_license
+        is_public_domain = "public domain" in normalized_license
+        is_cc_by = (
+            "cc by" in normalized_license
+            and "sa" not in normalized_license
+            and "nc" not in normalized_license
+            and "nd" not in normalized_license
+        )
+        if not (is_cc0 or is_public_domain or is_cc_by):
+            continue
+
+        width = int(info.get("width") or 0)
+        height = int(info.get("height") or 0)
+        if width < 320 or height < 240:
+            continue
+        title = str(page.get("title") or "").removeprefix("File:")
+        author = _commons_metadata_value(metadata, "Artist")
+        credit = _commons_metadata_value(metadata, "Credit")
+        description_url = info.get("descriptionurl") or (
+            "https://commons.wikimedia.org/wiki/" + str(page.get("title", "")).replace(" ", "_")
+        )
+        results.append({
+            "url": url,
+            "width": width,
+            "height": height,
+            "vertical": height > width,
+            "title": title,
+            "description": _commons_metadata_value(metadata, "ImageDescription"),
+            "source": "Wikimedia Commons",
+            "source_url": description_url,
+            "author": author,
+            "author_url": "",
+            "license": license_name,
+            "license_url": license_url,
+            "credit": credit or author,
+            "attribution_required": bool(is_cc_by),
+        })
+    return results
+
+
 def search_pixabay_videos(query, api_key, per_page=20):
     response = requests.get('https://pixabay.com/api/videos/', params={'key': api_key, 'q': query, 'per_page': per_page, 'safesearch': 'true'}, timeout=45)
     response.raise_for_status()
@@ -173,6 +263,7 @@ def search_video_sources(
     min_relevance=1.5,
     pexels_key='',
     style_query='',
+    wikimedia_enabled=False,
 ):
     """Search every enabled library for scene content and style, then rank together."""
     errors = []
@@ -189,6 +280,8 @@ def search_video_sources(
     all_candidates = []
 
     sources = []
+    if wikimedia_enabled:
+        sources.append(("Wikimedia Commons", search_wikimedia_videos, ""))
     if coverr_key:
         sources.append(("Coverr", search_coverr_videos, coverr_key))
     if pixabay_key:
