@@ -79,7 +79,7 @@ if st.button("Planejar vídeo", type="primary", use_container_width=True):
         with st.spinner("Analisando o conteúdo e dirigindo as cenas..."):
             try:
                 plan = create_storyboard(topic, style, duration, secret)
-                errors = validate_storyboard(plan)
+                errors = validate_storyboard(plan, duration)
                 st.session_state["nexus_plan"] = plan
                 st.session_state["nexus_errors"] = errors
                 st.session_state.pop("nexus_rendered_video", None)
