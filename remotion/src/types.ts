@@ -12,8 +12,7 @@ export type NexusScene = {
   asset?: string; imagePrompt?: string; cameraMotion?: CameraMove; motionEvents?: string[];
   sceneDirection?: SceneDirection; accent?: string;
 };
-export type NexusCaption = { text: string; startFrame: number; endFrame: number };
 export type NexusVideoProps = {
   width: number; height: number; fps: number; durationInFrames: number; title: string;
-  narrationAudio?: string; musicAudio?: string; scenes: NexusScene[]; captions: NexusCaption[];
+  narrationAudio?: string; musicAudio?: string; scenes: NexusScene[];
 };
