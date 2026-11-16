@@ -59,21 +59,13 @@ def _subtitle_cues(events, narration):
         if not group:
             return
         words = group
-        # Balance the phrase over no more than two short mobile-safe lines.
-        lines = []
-        current = ""
-        for word in words:
-            proposed = (current + " " + word).strip()
-            if current and len(proposed) > 30 and len(lines) == 0:
-                lines.append(current)
-                current = word
-            elif current and len(proposed) > 30:
-                break
-            else:
-                current = proposed
-        if current:
-            lines.append(current)
-        caption = "\n".join(lines[:2])
+        # Four words per cue make a compact, readable block on a phone.
+        split_at = (len(words) + 1) // 2
+        lines = [
+            " ".join(words[:split_at]).strip(),
+            " ".join(words[split_at:]).strip(),
+        ]
+        caption = "\\n".join(line for line in lines if line)
         cues.append((group_start, group_end, caption))
         group = []
         group_start = None
@@ -100,8 +92,11 @@ def _subtitle_cues(events, narration):
     # Ensure cues never overlap and stack on screen.
     normalized = []
     for index, (start, end, caption) in enumerate(cues):
-        next_start = cues[index + 1][0] if index + 1 < len(cues) else end
-        safe_end = min(int(end), int(next_start) - 40) if next_start > start else int(end)
+        if index + 1 < len(cues):
+            next_start = cues[index + 1][0]
+            safe_end = min(int(end), int(next_start) - 40)
+        else:
+            safe_end = int(end)
         safe_end = max(int(start) + 250, safe_end)
         normalized.append((max(0, int(start)), safe_end, caption))
     return normalized
