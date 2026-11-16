@@ -192,6 +192,7 @@ div[data-testid="stTextArea"] textarea,div[data-testid="stSelectbox"] div[data-b
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="nexus-hero"><div class="nexus-brand">NEXUS VIDEO STUDIO</div><div class="nexus-tagline">Transforme seu roteiro em vídeo</div></div>', unsafe_allow_html=True)
+st.caption("Versão: NEXUS-2026.11.16-srt-newline-1")
 
 if "nexus_style" not in st.session_state or st.session_state["nexus_style"] not in STYLE_OPTIONS:
     st.session_state["nexus_style"] = "Cinematográfico realista"
@@ -234,7 +235,6 @@ with settings_col2:
     voice = st.selectbox("Voz da narração", ["pt-BR-AntonioNeural", "pt-BR-FranciscaNeural", "pt-BR-ThalitaNeural"], format_func=lambda value: {"pt-BR-AntonioNeural":"Antônio · Masculina", "pt-BR-FranciscaNeural":"Francisca · Feminina", "pt-BR-ThalitaNeural":"Thalita · Feminina"}[value])
 
 with st.expander("Ferramentas avançadas · diagnóstico das bibliotecas de vídeo"):
-    st.caption("Build do aplicativo: NEXUS-2026.11.16-srt-newline-1 · confirme esta identificação após a publicação.")
     st.caption("Testa autenticação, busca, download e leitura do MP4 em cada biblioteca que tiver chave configurada. As chaves nunca são exibidas.")
     if st.button("Testar todas as bibliotecas configuradas", type="secondary"):
         providers = [
