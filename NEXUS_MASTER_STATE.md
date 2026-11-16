@@ -1369,3 +1369,12 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Solicitação do usuário: remover a faixa inferior branca do app móvel que exibe “Built with Streamlit” e o atalho “Fullscreen”.
 - Commit `4a80ee8` em `app.py`: ampliados os seletores CSS para ocultar o footer/status inferior do Streamlit e o viewer badge, incluindo variantes de classes dinâmicas usadas pelo badge. A alteração é somente visual; não modifica o pipeline de produção.
 - Estado: alteração gravada em `main`. Ainda não foi confirmada no deploy Streamlit nem visualmente no celular. O CSS atua dentro da aplicação; se a faixa for renderizada pelo contêiner externo da Streamlit Cloud fora do DOM do app, ela poderá permanecer e exigirá outra abordagem suportada pela plataforma.
+
+
+## Contorno externo para ocultar a barra do Streamlit Cloud — 16/11/2026
+- Nova evidência do usuário: abrir a URL com `?embed=true` removeu o cabeçalho/toolbar do viewer, mas a faixa fixa inferior “Built with Streamlit / Fullscreen” permaneceu. A captura confirma que o elemento é renderizado pelo shell externo de embed, fora do DOM controlado pelo CSS em `app.py`; portanto os seletores CSS internos não podem removê-lo.
+- Pesquisa na documentação oficial Streamlit confirma que `?embed=true` remove toolbar/padding/footer documentados, mas a barra promocional de embed com link Fullscreen é um componente separado do viewer. Discussões da comunidade registram que CSS interno não a oculta e usam uma máscara no documento pai.
+- Criado `mobile/index.html` (commit `833ed41`) como shell independente: carrega o app via iframe com `?embed=true` e sobrepõe uma máscara escura fixa no rodapé do viewport, cobrindo a faixa do viewer sem alterar o conteúdo interno. A máscara tem safe-area para dispositivos móveis.
+- Criado `.github/workflows/deploy-mobile-shell.yml` (commit `7bbee1b`) para publicar o shell em GitHub Pages; deploy requer Pages habilitado com GitHub Actions nas configurações do repositório. Atualizado o padding inferior mobile em `app.py` (commit `2f2c4f5`) para preservar espaço de rolagem atrás da máscara.
+- Estado: arquivos gravados em `main`; workflow ainda não foi confirmado como executado, GitHub Pages ainda não foi confirmado como habilitado e a máscara ainda não foi validada no celular. Não declarar missão concluída até abrir a URL Pages e conferir visualmente.
+- URL esperada após habilitar Pages: `https://porraloca42-stack.github.io/nexus-video-studio-/`.
