@@ -178,6 +178,13 @@ class FishAudioTests(unittest.TestCase):
                 fish_api_key="test-key", session=session
             )
             self.assertEqual(audio_path.read_bytes(), b"fish-mp3")
+            self.assertEqual(
+                make_voice("Olá mundo.", "pt-BR-AntonioNeural",
+                           Path(temp) / "voice-second.mp3",
+                           fish_api_key="test-key", session=session,
+                           return_provider=True)[2],
+                "Fish Audio",
+            )
             srt = subtitle_path.read_text(encoding="utf-8")
             self.assertIn("Olá mundo.", " ".join(srt.splitlines()[2:]))
             self.assertIn("00:00:00,000 --> 00:00:00,900", srt)
