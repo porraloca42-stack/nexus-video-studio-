@@ -120,8 +120,9 @@ def _fish_timestamp_cues(events, narration):
         alignment = event.get("alignment") or {}
         for item in alignment.get("segments") or []:
             try:
-                start = max(0, round(float(item.get("start", 0)) * 1000))
-                end = max(start + 1, round(float(item.get("end", 0)) * 1000))
+                chunk_offset = float(event.get("chunk_audio_offset_sec") or 0)
+                start = max(0, round((chunk_offset + float(item.get("start", 0))) * 1000))
+                end = max(start + 1, round((chunk_offset + float(item.get("end", 0))) * 1000))
                 word = str(item.get("text") or "").strip()
             except (TypeError, ValueError):
                 continue
