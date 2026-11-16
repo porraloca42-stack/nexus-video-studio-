@@ -192,24 +192,96 @@ def _fit_scene_durations(scenes, requested_duration):
 
 
 def create_storyboard(topic, style, duration, secret_reader):
+    target = int(round(float(duration)))
+    minimum_acceptable = max(1, target - 5)
+    maximum_acceptable = target + 5
     prompt = f"""ASSUNTO OU ROTEIRO COMPLETO:
 {topic}
 
 ESTILO VISUAL ESCOLHIDO PELO USUÁRIO (OBRIGATÓRIO EM TODAS AS CENAS): {style}
-DURAÇÃO TOTAL: {duration} segundos.
-Planeje primeiro a narrativa completa. Depois divida em cenas suficientes para cobrir a duração sem lacunas. Use como piso ceil(duração/5) cenas e meta ceil(duração/4) ou mais, com segmentos geralmente de 3–4 segundos. Para 50 segundos, crie 12–15 cenas e nunca menos de 10. A soma exata das durações DEVE ser igual a {duration} segundos (não aproximada). Antes de retornar o JSON, some todos os duration_seconds e confira que o total fecha exatamente em {duration}; distribua o tempo entre as cenas sem ultrapassar 5 segundos por cena. Nunca retorne storyboard incompleto. A quantidade e o conteúdo das cenas devem nascer da progressão do roteiro, não de temas predefinidos. Para cada trecho, gere buscas principal e alternativa próprias, específicas e diferentes, em inglês. Cada busca deve conter o assunto/ação da cena e termos visuais compatíveis com o estilo escolhido ({style}). Não reutilize palavras-chave genéricas nem acrescente objetos/ações que a fala não sustenta. Preserve a relação semântica exata entre cada fala e sua imagem. Escreva a narração em português brasileiro natural."""
+DURAÇÃO ESCOLHIDA PELO USUÁRIO: {target} segundos.
+REGRA DE PLANEJAMENTO: a primeira versão do storyboard pode somar entre {minimum_acceptable} e {maximum_acceptable} segundos. Trabalhe dentro dessa margem de cinco segundos para menos ou para mais. Nunca ignore a duração escolhida. Depois o sistema ajustará proporcionalmente a linha do tempo para a duração final exata de {target} segundos.
+Use no mínimo ceil(duração/5) cenas e prefira ceil(duração/4) ou mais. Para 50 segundos, planeje 12–15 cenas. Cada cena deve durar entre 2 e 5 segundos. A soma deve ficar dentro da margem informada.
+Cada cena PRECISA conter uma fala real em português brasileiro no campo voiceover. Não deixe voiceover vazio, nulo ou apenas espaços. Distribua todo o conteúdo narrado do roteiro entre as cenas, sem perder trechos nem repetir frases. Se o assunto for curto, desenvolva a explicação com conteúdo coerente, sem inventar fatos.
+Planeje primeiro a narrativa completa. Cada cena precisa de ação filmável específica, relacionada diretamente à fala. Para cada trecho, gere buscas principal e alternativa próprias, específicas e diferentes, em inglês. Preserve estilo visual, coerência semântica e continuidade narrativa. Retorne somente JSON válido no formato solicitado pelo sistema."""
+
     plan = _request(prompt, secret_reader)
     plan["style_lock"] = style
     scenes = plan.get("scenes", [])
-    if scenes:
-        original_total = sum(float(scene.get("duration_seconds", 0) or 0) for scene in scenes)
-        if abs(original_total - float(duration)) > 0.01:
-            fitted = _fit_scene_durations(scenes, duration)
-            plan["duration_adjustment"] = {
-                "original_seconds": round(original_total, 2),
-                "requested_seconds": int(round(float(duration))),
-                "scene_durations": fitted,
-            }
+    if not scenes:
+        raise RuntimeError("O diretor não criou nenhuma cena. Tente planejar novamente.")
+
+    def missing_voiceovers(items):
+        return [
+            index for index, scene in enumerate(items, 1)
+            if not str(scene.get("voiceover", "") or "").strip()
+        ]
+
+    original_total = sum(float(scene.get("duration_seconds", 0) or 0) for scene in scenes)
+    missing = missing_voiceovers(scenes)
+    outside_margin = not (minimum_acceptable <= original_total <= maximum_acceptable)
+
+    # One targeted correction pass gives the director a chance to fix incomplete
+    # narration or a runtime estimate outside the user's five-second tolerance.
+    if missing or outside_margin:
+        issues = []
+        if missing:
+            issues.append("voiceover vazio nas cenas: " + ", ".join(map(str, missing)))
+        if outside_margin:
+            issues.append(
+                f"a soma atual é {original_total:.1f}s, fora da faixa "
+                f"{minimum_acceptable}–{maximum_acceptable}s"
+            )
+        repair_prompt = f"""O storyboard anterior precisa de correção antes de ser aceito.
+
+ROTEIRO ORIGINAL:
+{topic}
+
+DURAÇÃO ESCOLHIDA: {target}s
+FAIXA ACEITÁVEL PARA ESTA RESPOSTA: {minimum_acceptable}–{maximum_acceptable}s
+ESTILO VISUAL: {style}
+
+PROBLEMAS ENCONTRADOS:
+{'; '.join(issues)}
+
+STORYBOARD A CORRIGIR:
+{json.dumps(plan, ensure_ascii=False)}
+
+Recrie o storyboard completo em JSON válido, preservando a progressão narrativa e as ações visuais que já estão corretas. Corrija todos os problemas listados. TODA cena deve ter voiceover preenchido com uma fala natural em português brasileiro, coerente com o roteiro e com a cena. Não deixe nenhum campo voiceover vazio. A soma de duration_seconds precisa ficar entre {minimum_acceptable} e {maximum_acceptable} segundos. Use cenas entre 2 e 5 segundos. Não omita cenas nem campos obrigatórios. Retorne somente o JSON completo no formato do sistema."""
+        corrected = _request(repair_prompt, secret_reader)
+        corrected["style_lock"] = style
+        corrected_scenes = corrected.get("scenes", [])
+        if not corrected_scenes:
+            raise RuntimeError("O diretor não conseguiu corrigir o storyboard. Gere o planejamento novamente.")
+        still_missing = missing_voiceovers(corrected_scenes)
+        if still_missing:
+            raise RuntimeError(
+                "O diretor ainda deixou a narração vazia nas cenas "
+                + ", ".join(map(str, still_missing))
+                + ". O planejamento foi interrompido para não produzir vídeo sem fala."
+            )
+        corrected_total = sum(
+            float(scene.get("duration_seconds", 0) or 0) for scene in corrected_scenes
+        )
+        if not (minimum_acceptable <= corrected_total <= maximum_acceptable):
+            raise RuntimeError(
+                f"Após a correção, a IA retornou {corrected_total:.1f}s. "
+                f"A faixa permitida para {target}s é {minimum_acceptable}–{maximum_acceptable}s. "
+                "Tente planejar novamente."
+            )
+        plan = corrected
+        scenes = corrected_scenes
+        original_total = corrected_total
+
+    # The AI may land anywhere inside the requested ±5s tolerance. The final
+    # timeline is then normalized to the exact duration selected by the user.
+    fitted = _fit_scene_durations(scenes, target)
+    plan["duration_adjustment"] = {
+        "ai_seconds": round(original_total, 2),
+        "requested_seconds": target,
+        "tolerance_seconds": 5,
+        "scene_durations": fitted,
+    }
     return plan
 
 def validate_storyboard(plan, requested_duration=None):
