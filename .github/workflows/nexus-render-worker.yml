@@ -13,7 +13,11 @@ on:
         required: true
         type: string
       voice:
-        description: Edge TTS voice
+        description: Edge TTS fallback voice
+        required: true
+        type: string
+      fish_credentials_encrypted:
+        description: Encrypted Fish Audio credentials
         required: true
         type: string
 
@@ -61,6 +65,7 @@ jobs:
           NEXUS_JOB_ID: ${{ inputs.job_id }}
           NEXUS_MANIFEST_ENCRYPTED: ${{ inputs.manifest_encrypted }}
           NEXUS_VOICE: ${{ inputs.voice }}
+          NEXUS_FISH_CREDENTIALS_ENCRYPTED: ${{ inputs.fish_credentials_encrypted }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_IMAGE_MODEL: "@cf/black-forest-labs/flux-2-klein-4b"
