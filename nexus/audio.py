@@ -114,8 +114,10 @@ def get_fish_voice(api_key, voice_id, *, session=None):
         raise FishAudioError("A Fish Audio retornou dados inválidos para a voz selecionada.")
     if item.get("type") not in (None, "", "tts") or item.get("state") not in (None, "", "trained"):
         raise FishAudioError("A voz selecionada não está disponível para narração.")
-    if item.get("visibility") not in (None, "", "public"):
-        raise FishAudioError("A voz selecionada não está publicada.")
+    # Fish Audio uses "unlist" for models hidden from search but accessible by direct URL.
+    # Allow public and unlisted models; private models remain blocked.
+    if item.get("visibility") not in (None, "", "public", "unlist"):
+        raise FishAudioError("A voz selecionada é privada e não está disponível.")
     samples = item.get("samples") or []
     sample = next((entry for entry in samples if isinstance(entry, dict) and entry.get("audio")), {})
     sample_audio = sample.get("audio") or sample.get("audio_url") or item.get("preview_url") or ""
