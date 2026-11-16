@@ -255,3 +255,9 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - O primeiro CI da correção de legendas falhou porque o arquivo de testes antigo ainda esperava a implementação anterior baseada em `SubMaker`. A implementação já havia removido essa dependência, mas os testes não foram atualizados de forma consistente devido a commits concorrentes.
 - Commit subsequente substitui os testes antigos por testes da implementação efetiva: eventos WordBoundary, fallback SentenceBoundary e fallback sem metadados temporais.
 - Até novo CI verde, a correção permanece não validada e não deve ser considerada implantada.
+
+
+### Revalidação dos testes SRT — 16/11/2026
+- O CI do commit `386bc2e` executou 19 testes: 18 passaram e 1 falhou por uma expectativa excessivamente rígida no teste de fallback por sentença (o algoritmo pode dividir uma frase longa em mais de uma legenda para manter legibilidade).
+- Ajustado o teste para validar o conteúdo integral, sem impor quantidade fixa de blocos.
+- Aguardando nova execução CI. Ainda não há validação do pipeline real no Streamlit.
