@@ -240,14 +240,16 @@ if st.button("Planejar vídeo", type="primary", use_container_width=True):
 
 if "nexus_plan" in st.session_state:
     plan = st.session_state["nexus_plan"]
-    st.subheader("Direção audiovisual")
-    st.write(plan.get("topic_interpretation", ""))
-    st.write(plan.get("creative_thesis", ""))
-    if plan.get("director_model"):
-        st.caption("Modelo Gemini selecionado automaticamente: " + plan["director_model"])
-    st.caption("Estilo visual solicitado: " + plan.get("style_lock", style))
+    st.subheader("Planejamento do vídeo")
+    with st.expander("Direção audiovisual · interpretação do roteiro", expanded=False):
+        st.write(plan.get("topic_interpretation", ""))
+        st.write(plan.get("creative_thesis", ""))
+        if plan.get("director_model"):
+            st.caption("Modelo Gemini selecionado automaticamente: " + plan["director_model"])
+        st.caption("Estilo visual solicitado: " + plan.get("style_lock", style))
+    st.markdown("**Cenas planejadas**")
     for i, scene in enumerate(plan.get("scenes", []), 1):
-        with st.expander(f"Cena {i} · {scene.get('duration_seconds', 0)}s · {scene.get('purpose', '')}", expanded=True):
+        with st.expander(f"Cena {i} · {scene.get('duration_seconds', 0)}s · {scene.get('purpose', '')}", expanded=False):
             st.markdown("**Narração**")
             st.write(scene.get("voiceover", ""))
             st.markdown("**Ação visual**")
