@@ -82,6 +82,8 @@ if st.button("Planejar vídeo", type="primary", use_container_width=True):
                 errors = validate_storyboard(plan)
                 st.session_state["nexus_plan"] = plan
                 st.session_state["nexus_errors"] = errors
+                st.session_state.pop("nexus_rendered_video", None)
+                st.session_state.pop("nexus_rendered_info", None)
                 if errors:
                     st.warning("O planejamento precisa de revisão: " + " ".join(errors))
                 else:
@@ -118,6 +120,8 @@ if "nexus_plan" in st.session_state:
         elif not coverr_key and not pixabay_key:
             st.error("Conecte uma fonte de vídeos: COVERR_API_KEY ou PIXABAY_API_KEY.")
         else:
+            st.session_state.pop("nexus_rendered_video", None)
+            st.session_state.pop("nexus_rendered_info", None)
             work = Path(tempfile.mkdtemp(prefix="nexus_"))
             try:
                 media, missing = [], []
