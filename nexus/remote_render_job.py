@@ -1,6 +1,7 @@
 """Build a full generated-image video on an isolated GitHub Actions worker."""
 import json
 import os
+import re
 import subprocess
 from pathlib import Path
 
@@ -8,6 +9,65 @@ from nexus.audio import make_voice
 from nexus.cloudflare_images import generate_scene_images
 from nexus.remotion_renderer import render_video_remotion
 from nexus.render_crypto import decrypt_text, encrypt_bytes, encrypt_text
+
+
+def _retime_srt(source: Path, destination: Path, factor: float) -> None:
+    """Scale SRT timestamps by the same factor used for audio time-stretching."""
+    timestamp = re.compile(r"(\\d{2}):(\\d{2}):(\\d{2}),(\\d{3})")
+
+    def scale(match):
+        hours, minutes, seconds, millis = map(int, match.groups())
+        total_ms = ((hours * 3600 + minutes * 60 + seconds) * 1000) + millis
+        total_ms = int(round(total_ms / factor))
+        h, remainder = divmod(total_ms, 3_600_000)
+        m, remainder = divmod(remainder, 60_000)
+        s, ms = divmod(remainder, 1000)
+        return f"{h:02d}:{m:02d}:{s:02d},{ms:03d}"
+
+    text = source.read_text(encoding="utf-8")
+    destination.write_text(timestamp.sub(scale, text), encoding="utf-8")
+
+
+def _fit_narration_to_timeline(audio_path: Path, subtitles_path: Path, target: float) -> float:
+    """Gently time-stretch small TTS duration drift and keep subtitles synchronized."""
+    probe = subprocess.run(
+        ["ffprobe", "-v", "error", "-show_entries", "format=duration",
+         "-of", "default=noprint_wrappers=1:nokey=1", str(audio_path)],
+        capture_output=True, text=True, timeout=60,
+    )
+    if probe.returncode:
+        raise RuntimeError("Não foi possível medir a duração da narração no worker.")
+    actual = float(probe.stdout.strip())
+    if target <= 0 or actual <= 0:
+        raise RuntimeError("Duração inválida para sincronização da narração.")
+    ratio = actual / target
+    if abs(ratio - 1.0) <= 0.02:
+        return actual
+    if not 0.85 <= ratio <= 1.15:
+        raise RuntimeError(
+            f"A narração ficou com {actual:.1f}s para uma meta de {target:.1f}s "
+            "e excede a faixa segura de ajuste de 15%. Revise o texto narrado."
+        )
+    adjusted_audio = audio_path.with_name(f"{audio_path.stem}_synced{audio_path.suffix}")
+    tempo = ratio
+    command = ["ffmpeg", "-y", "-i", str(audio_path), "-filter:a", f"atempo={tempo:.6f}",
+               "-vn", str(adjusted_audio)]
+    result = subprocess.run(command, capture_output=True, text=True, timeout=120)
+    if result.returncode or not adjusted_audio.exists():
+        raise RuntimeError("Falha ao sincronizar a duração da narração: " + result.stderr[-1200:])
+    audio_path.unlink(missing_ok=True)
+    adjusted_audio.replace(audio_path)
+    if subtitles_path.exists():
+        _retime_srt(subtitles_path, subtitles_path.with_name(f"{subtitles_path.stem}_synced.srt"), ratio)
+        subtitles_path.with_name(f"{subtitles_path.stem}_synced.srt").replace(subtitles_path)
+    final_probe = subprocess.run(
+        ["ffprobe", "-v", "error", "-show_entries", "format=duration",
+         "-of", "default=noprint_wrappers=1:nokey=1", str(audio_path)],
+        capture_output=True, text=True, timeout=60,
+    )
+    if final_probe.returncode:
+        raise RuntimeError("Não foi possível validar a narração sincronizada.")
+    return float(final_probe.stdout.strip())
 
 
 def main():
@@ -72,19 +132,9 @@ def main():
         raise RuntimeError("Narração vazia.")
     audio_path, subtitles_path = make_voice(narration, voice, work / "narration.mp3")
     expected_duration = sum(float(scene.get("duration_seconds") or scene.get("duration") or 0) for scene in scenes)
-    audio_probe = subprocess.run(
-        ["ffprobe", "-v", "error", "-show_entries", "format=duration",
-         "-of", "default=noprint_wrappers=1:nokey=1", str(audio_path)],
-        capture_output=True, text=True, timeout=60,
+    narration_duration = _fit_narration_to_timeline(
+        Path(audio_path), Path(subtitles_path), expected_duration
     )
-    if audio_probe.returncode:
-        raise RuntimeError("Não foi possível medir a duração da narração no worker.")
-    narration_duration = float(audio_probe.stdout.strip())
-    if expected_duration <= 0 or abs(narration_duration - expected_duration) / expected_duration > 0.10:
-        raise RuntimeError(
-            f"A narração no worker ficou com {narration_duration:.1f}s para uma meta de "
-            f"{expected_duration:.1f}s. O vídeo não será renderizado com áudio cortado ou silêncio excessivo."
-        )
 
     output = work / "nexus_video.mp4"
     render_video_remotion(
