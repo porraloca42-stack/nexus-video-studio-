@@ -38,6 +38,11 @@ jobs:
         working-directory: remotion
         run: npm run render:demo
 
+      - name: Install FFmpeg for media integration test
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
       - name: Create synthetic video, narration and subtitles for integration test
         run: |
           mkdir -p remotion/public/ci-input
