@@ -58,16 +58,16 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ffmpeg
 
-      - name: Create synthetic video and narration for integration test
+      - name: Create synthetic still image and narration for motion integration test
         run: |
           mkdir -p remotion/public/ci-input
-          ffmpeg -y -f lavfi -i "testsrc2=size=720x1280:rate=30" -t 4 -an -c:v libx264 -pix_fmt yuv420p remotion/public/ci-input/sample.mp4
+          ffmpeg -y -f lavfi -i "testsrc2=size=512x910:rate=30" -frames:v 1 remotion/public/ci-input/sample.png
           ffmpeg -y -f lavfi -i "sine=frequency=440:duration=4" -c:a pcm_s16le remotion/public/ci-input/narration.wav
 
       - name: Build manifest through the real Python adapter
         run: python scripts/build_remotion_ci_manifest.py
 
-      - name: Render Python-adapter manifest with Remotion
+      - name: Render Python-adapter still-image motion manifest with Remotion
         working-directory: remotion
         run: npx remotion render src/index.ts NexusFromManifest out/nexus-adapter-integration.mp4 --props=public/jobs/ci/manifest.json --codec=h264 --pixel-format=yuv420p
 
