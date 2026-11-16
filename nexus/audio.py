@@ -81,7 +81,7 @@ def _subtitle_cues(events, narration):
                 len(candidate) > 52
                 or len(group) >= 7
                 or elapsed >= 3_200
-                or (sentence_end and len(candidate) >= 14)
+                or (sentence_end and len(candidate) >= 14 and not timed_sentences)
             ):
                 flush()
             if group_start is None:
