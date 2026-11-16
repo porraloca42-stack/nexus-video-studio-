@@ -6,6 +6,7 @@ from pathlib import Path
 
 from nexus.audio import make_voice
 from nexus.cloudflare_images import generate_scene_images
+from nexus.modal_i2v import animate_scene_images
 from nexus.remotion_renderer import render_video_remotion
 from nexus.render_crypto import decrypt_text, encrypt_bytes, encrypt_text
 
@@ -119,6 +120,35 @@ def main(project_root=None):
             image_path = normalized_path
         media.append({"path": str(image_path)})
 
+    # Every approved keyframe is animated into a native MP4 clip on Modal.
+    # A Modal failure is fatal here: never silently ship a static-image slideshow.
+    motion_clips = animate_scene_images(generated, scenes, work / "motion")
+    animated_media = []
+    for index, clip in enumerate(motion_clips, start=1):
+        clip_path = Path(clip["path"])
+        clip_probe = subprocess.run(
+            ["ffprobe", "-v", "error", "-show_entries",
+             "format=duration:stream=codec_type,width,height", "-of", "json", str(clip_path)],
+            capture_output=True, text=True, timeout=60,
+        )
+        if clip_probe.returncode:
+            raise RuntimeError(f"Clipe I2V da cena {index} não passou no FFprobe.")
+        clip_meta = json.loads(clip_probe.stdout)
+        clip_stream = next(
+            (item for item in clip_meta.get("streams", []) if item.get("codec_type") == "video"),
+            None,
+        )
+        clip_duration = float(clip_meta.get("format", {}).get("duration") or 0)
+        if not clip_stream or clip_duration <= 0 or clip_path.stat().st_size < 10_000:
+            raise RuntimeError(f"Clipe I2V da cena {index} está vazio ou sem vídeo válido.")
+        if clip_stream.get("width") != 512 or clip_stream.get("height") != 896:
+            raise RuntimeError(
+                f"Clipe I2V da cena {index} tem resolução inesperada "
+                f"{clip_stream.get('width')}x{clip_stream.get('height')}."
+            )
+        animated_media.append({"path": str(clip_path)})
+
+    media = animated_media
     narration = " ".join(str(scene.get("voiceover", "")).strip() for scene in scenes).strip()
     if not narration:
         raise RuntimeError("Narração vazia.")
