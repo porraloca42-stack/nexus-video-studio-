@@ -511,7 +511,7 @@ if "nexus_plan" in st.session_state:
                             "errors": source_errors,
                         })
                         continue
-                    shortlist = diverse_candidate_shortlist(candidates, limit=6)
+                    shortlist = diverse_candidate_shortlist(candidates, limit=12)
                     reviewed_candidates = []
                     candidate_errors = []
                     for candidate_index, candidate in enumerate(shortlist, 1):
