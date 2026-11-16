@@ -326,3 +326,13 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Commit caea92d: testes cobrem as regras de pontuação e cadência vocal.
 - Commit 5d5f5c0: build identificada como NEXUS-2026.11.16-human-voice-punctuation-1.
 - CI dos commits de pontuação ainda em execução no momento do registro. Deploy Streamlit e qualidade perceptiva da voz ainda dependem de teste real; pontuação orienta a prosódia do TTS, mas não garante interpretação humana perfeita por si só.
+
+
+### CI aprovado: pontuação expressiva e cadência vocal — 16/11/2026
+- GitHub Actions run #113 (43821464546), commit 5d5f5c0: concluído com sucesso.
+- Job unit-tests: sucesso; 23 testes executados em 2,582s, incluindo os testes de pontuação/entonação e requisitos editoriais.
+- Run #112 (43821459374), commit caea92d: sucesso; 23 testes executados.
+- Run #111 (43821455227), commit 56f444c: sucesso; 23 testes executados.
+- Código e testes da orientação de pontuação expressiva validados pelo CI.
+- Build esperado na interface: NEXUS-2026.11.16-human-voice-punctuation-1.
+- Ainda não foi feita avaliação auditiva da voz TTS nem confirmado um MP4 real renderizado com a nova versão. CI verde não equivale a validação perceptiva ou validação de produção.
