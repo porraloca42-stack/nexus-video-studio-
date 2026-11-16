@@ -278,72 +278,83 @@ if "nexus_fish_voice_id" not in st.session_state:
 if "nexus_fish_voice_name" not in st.session_state:
     st.session_state["nexus_fish_voice_name"] = ""
 
+if "nexus_fish_voice_name" not in st.session_state:
+    st.session_state["nexus_fish_voice_name"] = ""
+
+voice_catalog = []
 if not fish_api_key:
-    st.error("Configure FISH_API_KEY nos Secrets do Streamlit.")
+    st.warning("Configure FISH_API_KEY nos Secrets do Streamlit para carregar a biblioteca de vozes.")
 else:
-    try:
-        # Fixed, reviewed Fish Official voices: no community character models.
-        curated_voice_catalog = (
-            ("Ricardo", "add7bcb8d3c8423bbfa152ca232aad6e"),
-            ("Rafael (Brasil)", "0ffee1af32254090b3630823baade12b"),
-            ("Letícia", "b3c060cc41544a7da94a2c487647c902"),
-            ("Beatriz (Brasil)", "0e26d2df0d0848e3b34099bfb55fd6ea"),
+    selected_name = st.session_state.get("nexus_fish_voice_name") or "Nenhuma voz selecionada"
+    st.markdown(
+        f'<div class="nexus-preview"><div style="flex:1"><div style="font-size:.75rem;color:#d7bb87">NARRAÇÃO</div>'
+        f'<div style="font-size:1.02rem;font-weight:700">{selected_name}</div>'
+        f'<div style="font-size:.78rem;color:#aeb5c2">Fish Audio · voz selecionada</div></div></div>',
+        unsafe_allow_html=True,
+    )
+    with st.expander("🎙️ Abrir biblioteca de vozes", expanded=False):
+        st.caption("Explore vozes em português, ou carregue as vozes privadas que você já criou na sua conta Fish Audio.")
+        catalog_scope = st.selectbox(
+            "Catálogo",
+            ["Licenciadas pela Fish Audio", "Biblioteca pública", "Minhas vozes"],
+            key="fish_catalog_scope",
         )
-        if not st.session_state.get("nexus_fish_curated_voice_catalog"):
-            loaded_voices = []
-            voice_load_errors = []
-            for voice_name, voice_id in curated_voice_catalog:
-                try:
-                    model = fish_audio.get_fish_voice(fish_api_key, voice_id)
-                    # Do not silently substitute a model with a different ID/name.
-                    if model["id"] == voice_id:
-                        model["title"] = voice_name
-                        loaded_voices.append(model)
-                    else:
-                        voice_load_errors.append(f"{voice_name}: ID retornado diferente")
-                except Exception as exc:
-                    voice_load_errors.append(f"{voice_name}: {str(exc)[:140]}")
-            st.session_state["nexus_fish_curated_voice_catalog"] = loaded_voices
-
-        voices = st.session_state["nexus_fish_curated_voice_catalog"]
-        if not voices:
-            st.error("Não foi possível carregar as vozes oficiais brasileiras da Fish Audio.")
-            if voice_load_errors:
-                st.caption("Diagnóstico: " + " | ".join(voice_load_errors))
+        search_voice = st.text_input("Buscar por nome", placeholder="Ex.: narrador, grave, feminina, storytelling")
+        voice_page = st.number_input("Página", min_value=1, max_value=100, value=1, step=1, key="fish_voice_page")
+        if st.button("Buscar vozes", key="fish_search_voices", use_container_width=True):
+            st.session_state["fish_voice_search_nonce"] = st.session_state.get("fish_voice_search_nonce", 0) + 1
+        cache_key = (
+            catalog_scope, search_voice.strip().casefold(), int(voice_page),
+            st.session_state.get("fish_voice_search_nonce", 0),
+        )
+        if st.session_state.get("fish_voice_catalog_cache_key") != cache_key:
+            try:
+                voice_catalog_result = fish_audio.list_fish_voices(
+                    fish_api_key,
+                    page=int(voice_page),
+                    page_size=100,
+                    title=search_voice.strip(),
+                    language="pt",
+                    self_only=(catalog_scope == "Minhas vozes"),
+                    licensed_only=(catalog_scope == "Licenciadas pela Fish Audio"),
+                    sort_by="task_count",
+                )
+                st.session_state["fish_voice_catalog_cache"] = voice_catalog_result
+                st.session_state["fish_voice_catalog_cache_key"] = cache_key
+            except Exception as exc:
+                st.session_state["fish_voice_catalog_cache"] = {"total": 0, "items": [], "error": str(exc)}
+                st.session_state["fish_voice_catalog_cache_key"] = cache_key
+        catalog = st.session_state.get("fish_voice_catalog_cache", {})
+        if catalog.get("error"):
+            st.error(f"Falha ao consultar a biblioteca Fish Audio: {catalog['error']}")
         else:
-            valid_voice_ids = {item["id"] for item in voices}
-            current_voice_id = st.session_state.get("nexus_fish_voice_id", "")
-            if current_voice_id not in valid_voice_ids:
-                current_voice_id = voices[0]["id"]
-                st.session_state["nexus_fish_voice_id"] = current_voice_id
-            st.session_state["nexus_fish_voice_name"] = next(
-                item["title"] for item in voices if item["id"] == current_voice_id
-            )
-
-            # Buttons are deliberate choices, not a searchable text input.
-            # Each row pairs a voice choice with its published sample player.
-            for voice_option in voices:
-                choice_col, sample_col = st.columns([1, 2], vertical_alignment="center")
-                with choice_col:
-                    is_selected = voice_option["id"] == st.session_state["nexus_fish_voice_id"]
-                    if st.button(
-                        voice_option["title"],
-                        key=f"fish_voice_choice_{voice_option['id']}",
-                        type="primary" if is_selected else "secondary",
-                        use_container_width=True,
-                    ):
+            voice_catalog = catalog.get("items", [])
+            st.caption(f"{catalog.get('total', len(voice_catalog)):,} resultado(s) disponíveis · até 100 por página")
+            if not voice_catalog:
+                st.info("Nenhuma voz encontrada com esses filtros. Tente outro termo ou página.")
+            for voice_option in voice_catalog:
+                title_col, preview_col = st.columns([1.15, 1.6], vertical_alignment="center")
+                with title_col:
+                    is_selected = voice_option["id"] == st.session_state.get("nexus_fish_voice_id", "")
+                    st.markdown(f"**{voice_option['title']}**")
+                    tags = ", ".join(voice_option.get("tags", [])[:3])
+                    if tags:
+                        st.caption(tags)
+                    if catalog_scope == "Licenciadas pela Fish Audio":
+                        st.caption("Licença de voz indicada pela Fish Audio")
+                    elif catalog_scope == "Biblioteca pública":
+                        st.caption("Licença individual não confirmada" if not voice_option.get("licensed") else "Licenciada pela Fish Audio")
+                    else:
+                        st.caption("Voz da sua conta")
+                    if st.button("Selecionada" if is_selected else "Usar esta voz", key=f"fish_pick_{voice_option['id']}", use_container_width=True, type="primary" if is_selected else "secondary"):
                         st.session_state["nexus_fish_voice_id"] = voice_option["id"]
                         st.session_state["nexus_fish_voice_name"] = voice_option["title"]
                         st.rerun()
-                with sample_col:
+                with preview_col:
                     if voice_option.get("sample_audio"):
                         st.audio(voice_option["sample_audio"], format="audio/mp3")
                     else:
-                        st.caption("Amostra indisponível")
-
-    except Exception as voice_error:
-        st.error(f"Não foi possível carregar as vozes: {voice_error}")
-        st.caption("A produção ficará bloqueada até que as vozes sejam carregadas corretamente.")
+                        st.caption("Amostra publicada indisponível")
 
 voice = st.session_state.get("nexus_fish_voice_id", "")
 
