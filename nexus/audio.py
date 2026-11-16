@@ -170,6 +170,7 @@ def list_curated_voice_catalog(api_key, *, session=None, max_workers=8):
         try:
             metadata = get_fish_voice(api_key, entry["id"], session=session)
             base.update(metadata)
+            base["id"] = entry["id"]
             base["category"] = entry["category"]
             base["gender"] = infer_voice_gender(metadata)
             base["metadata_available"] = True
