@@ -7,9 +7,16 @@ on:
     paths:
       - "remotion/**"
       - "nexus/remotion_renderer.py"
+      - "nexus/cloudflare_images.py"
+      - "nexus/remote_render_job.py"
+      - "nexus/github_renderer.py"
+      - "nexus/render_crypto.py"
       - "scripts/**"
       - "tests/test_remotion_renderer.py"
       - "tests/test_cloudflare_images.py"
+      - "tests/test_github_renderer.py"
+      - "tests/test_render_crypto.py"
+      - ".github/workflows/nexus-render-worker.yml"
       - ".github/workflows/remotion-demo.yml"
 
 jobs:
