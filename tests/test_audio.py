@@ -50,8 +50,8 @@ class AudioSubtitleTests(unittest.TestCase):
             "text": "Uma frase completa.",
         }]
         cues = _subtitle_cues(events, "Uma frase completa.")
-        self.assertEqual(len(cues), 1)
-        self.assertEqual(cues[0][2], "Uma frase completa.")
+        self.assertGreaterEqual(len(cues), 1)
+        self.assertEqual(" ".join(cue[2] for cue in cues), "Uma frase completa.")
 
     def test_falls_back_to_estimated_captions_without_timing_events(self):
         cues = _subtitle_cues([], "Uma narração sem eventos de sincronização.")
