@@ -422,3 +422,12 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - App: Coverr removido das fontes ativas e do diagnóstico; Wikimedia Commons fica disponível sem chave; Pixabay e Pexels continuam usando as chaves já configuradas. O diagnóstico inclui busca, download e leitura do vídeo. Build: `NEXUS-2026.11.16-wikimedia-provider-1`.
 - Limitação conhecida: Commons não é um stock cinematográfico tradicional; variedade/verticalidade pode ser menor. É fonte complementar e os candidatos continuam sujeitos à inspeção visual do Gemini. A validação de API real e compatibilidade de arquivos depende do deploy e teste de produção.
 - Estado: código e testes gravados no GitHub; CI pendente; não afirmar implantação nem validação audiovisual.
+
+
+### Ajustes de integração Wikimedia Commons — 16/11/2026
+- Corrigido o fluxo de produção para ativar explicitamente a busca no Wikimedia Commons tanto na consulta principal quanto na consulta alternativa.
+- Removida a condição que bloqueava a produção quando Pixabay e Pexels não tinham chave; Commons é fonte sem chave e deve poder ser testada isoladamente, com aviso de que seu catálogo é complementar.
+- Créditos por clipe agora preservam licença, URL da licença, autor e indicação de atribuição; interface apresenta licença e link ao lado da fonte. Isso é necessário para arquivos CC BY e domínio público.
+- Testes de diversidade atualizados para tratar Wikimedia Commons como biblioteca ativa.
+- Build atualizado para `NEXUS-2026.11.16-wikimedia-provider-2`.
+- Estado: CI pendente; ainda não implantado nem validado com chamadas reais ao Commons.
