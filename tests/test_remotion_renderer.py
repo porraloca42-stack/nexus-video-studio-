@@ -40,6 +40,27 @@ class RemotionManifestTests(unittest.TestCase):
             self.assertTrue((public / "jobs/test/narration.mp3").is_file())
             self.assertEqual(json.loads(manifest_path.read_text())["title"], "Teste NEXUS")
 
+    def test_manifest_keeps_director_metadata_off_screen_and_passes_motion_events(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            image = root / "scene.png"
+            image.write_bytes(b"fake-image")
+            plan = {"scenes": [{
+                "duration_seconds": 4,
+                "voiceover": "A pessoa abre a janela.",
+                "visual_action": "Pessoa abre uma janela ao amanhecer.",
+                "image_prompt": "A person opening a window at sunrise.",
+                "motion_events": ["A mão alcança a maçaneta", "A janela se abre"],
+                "camera_motion": "push_in",
+            }]}
+            _, manifest = build_remotion_manifest(
+                plan, [{"path": str(image)}], None, None, root / "public", job_id="motion"
+            )
+            scene = manifest["scenes"][0]
+            self.assertEqual(scene["motionEvents"], ["A mão alcança a maçaneta", "A janela se abre"])
+            self.assertNotIn("visualDescription", scene)
+            self.assertNotIn("headline", scene)
+
     def test_preserves_wav_extension_for_generated_narration(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
