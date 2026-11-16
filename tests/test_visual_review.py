@@ -18,7 +18,7 @@ class FakeResponse:
             "candidates": [{
                 "content": {
                     "parts": [{
-                        "text": '{"selected_candidate": 2, "confidence": 91, "reason": "Mostra exatamente a pessoa escrevendo no caderno."}'
+                        "text": '{"selected_candidate": 2, "semantic_match": 91, "style_match": 64, "confidence": 91, "reason": "Mostra exatamente a pessoa escrevendo no caderno."}'
                     }]
                 }
             }]
@@ -49,7 +49,12 @@ class VisualReviewTests(unittest.TestCase):
 
             self.assertEqual(result["selected_candidate"], 2)
             self.assertEqual(result["confidence"], 91)
+            self.assertEqual(result["semantic_match"], 91)
+            self.assertEqual(result["style_match"], 64)
             payload = post.call_args.kwargs["json"]
+            prompt_text = payload["contents"][0]["parts"][0]["text"]
+            self.assertIn("maior prioridade", prompt_text)
+            self.assertIn("Estilo visual é critério secundário", prompt_text)
             self.assertTrue(any("inlineData" in part for part in payload["contents"][0]["parts"]))
 
     def test_rejects_candidate_below_visual_confidence_threshold(self):
