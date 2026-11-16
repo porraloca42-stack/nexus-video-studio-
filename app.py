@@ -65,7 +65,17 @@ if st.button("Testar Coverr: buscar e baixar clipe", type="secondary"):
 
 with st.sidebar:
     st.subheader("Produção")
-    style = st.selectbox("Estilo visual", ["Cinematográfico realista", "Dark cinematográfico", "Documental realista", "Surrealista fotográfico", "Anime cinematográfico", "Graphic novel", "3D conceitual", "Vintage cinematográfico", "Cyberpunk"])
+    style = st.selectbox("Estilo visual das cenas", [
+        "Cinematográfico realista", "Documentário cinematográfico",
+        "Dark cinematográfico", "Filme noir", "Publicidade premium",
+        "Lifestyle realista", "Natureza documental", "Minimalista clean",
+        "Vintage filme 35mm", "VHS retrô", "Cyberpunk neon",
+        "Ficção científica futurista", "Fantasia cinematográfica",
+        "Surrealismo fotográfico", "Anime 2D", "Anime 3D",
+        "Ilustração editorial", "Aquarela artística", "Graphic novel",
+        "3D realista", "3D estilizado", "Stop motion",
+        "Macro e detalhes", "Drone e paisagens aéreas"
+    ], help="O estilo escolhido é enviado ao diretor de IA e influencia a descrição visual e as buscas de clipes de todas as cenas.")
     voice = st.selectbox("Voz", ["pt-BR-AntonioNeural", "pt-BR-FranciscaNeural", "pt-BR-ThalitaNeural"])
     duration = st.selectbox("Duração", [40, 50, 60], index=1)
 
@@ -98,13 +108,17 @@ if "nexus_plan" in st.session_state:
     st.write(plan.get("creative_thesis", ""))
     if plan.get("director_model"):
         st.caption("Modelo Gemini selecionado automaticamente: " + plan["director_model"])
-    st.caption("Estilo bloqueado: " + plan.get("style_lock", style))
+    st.caption("Estilo visual solicitado: " + plan.get("style_lock", style))
     for i, scene in enumerate(plan.get("scenes", []), 1):
         with st.expander(f"Cena {i} · {scene.get('duration_seconds', 0)}s · {scene.get('purpose', '')}", expanded=True):
             st.markdown("**Narração**")
             st.write(scene.get("voiceover", ""))
             st.markdown("**Ação visual**")
             st.write(scene.get("visual_action", ""))
+            st.markdown("**Estilo visual aplicado**")
+            st.write(scene.get("visual_style", plan.get("style_lock", style)))
+            if scene.get("style_search_terms"):
+                st.caption("Termos de estilo para busca: " + scene.get("style_search_terms", ""))
             st.markdown("**Correspondência semântica**")
             st.write(scene.get("semantic_reason", ""))
             st.markdown("**Movimento e microeventos**")
@@ -128,15 +142,18 @@ if "nexus_plan" in st.session_state:
                 progress = st.progress(0, text="Preparando cenas...")
                 for i, scene in enumerate(plan["scenes"]):
                     progress.progress((i + 1) / (len(plan["scenes"]) + 2), text=f"Buscando clipe para a cena {i + 1}/{len(plan['scenes'])}...")
-                    candidates, source_errors = search_video_sources(scene["asset_search_query"], coverr_key, pixabay_key)
-                    if not candidates and scene.get("fallback_search_query"):
-                        candidates, retry_errors = search_video_sources(scene["fallback_search_query"], coverr_key, pixabay_key)
+                    style_terms = scene.get("style_search_terms", "")
+                    primary_query = " ".join(part for part in [scene["asset_search_query"], style_terms] if part).strip()
+                    fallback_query = " ".join(part for part in [scene.get("fallback_search_query", ""), style_terms] if part).strip()
+                    candidates, source_errors = search_video_sources(primary_query, coverr_key, pixabay_key)
+                    if not candidates and fallback_query:
+                        candidates, retry_errors = search_video_sources(fallback_query, coverr_key, pixabay_key)
                         source_errors.extend(retry_errors)
                     if not candidates:
                         missing.append({
                             "scene": i + 1,
-                            "query": scene.get("asset_search_query", ""),
-                            "fallback": scene.get("fallback_search_query", ""),
+                            "query": primary_query,
+                            "fallback": fallback_query,
                             "errors": source_errors,
                         })
                         continue
