@@ -4,7 +4,7 @@ import requests
 import streamlit as st
 from nexus.director import create_storyboard, validate_storyboard
 from nexus.assets import search_video_sources, download_file, diverse_candidate_shortlist
-from nexus.audio import generate_fish_preview, list_fish_natural_brazilian_voices, make_voice
+from nexus.audio import generate_fish_preview, list_fish_voices, make_voice
 from nexus.render import render_video
 
 
@@ -273,7 +273,37 @@ if not fish_api_key:
     st.error("Configure FISH_API_KEY nos Secrets do Streamlit.")
 else:
     try:
-        voice_page_data = list_fish_natural_brazilian_voices(fish_api_key)
+        voice_page_data = list_fish_voices(
+                fish_api_key, page=1, page_size=100, language="pt",
+            )
+            excluded_voice_terms = (
+                "meme", "anime", "personagem", "character", "lula", "bolsonaro",
+                "celebrity", "celebridade", "ator", "actress", "movie", "filme",
+                "game", "gaming", "jogo", "cartoon", "parody", "paródia",
+            )
+            natural_voice_terms = (
+                "narration", "narrador", "narradora", "conversational", "conversacional",
+                "documentary", "documentário", "documentario", "professional", "profissional",
+                "neutral", "neutro", "natural", "calm", "calmo", "calma", "warm", "acolhedor",
+                "soft", "suave", "deep", "grave", "storytelling", "locução", "locucao",
+                "brazilian", "brasileir", "pt-br", "brasil",
+            )
+            curated_voices = []
+            for candidate in voice_page_data["items"]:
+                metadata = " ".join([
+                    candidate.get("title", ""),
+                    candidate.get("description", ""),
+                    " ".join(candidate.get("tags") or []),
+                ]).casefold()
+                language_data = " ".join(candidate.get("languages") or []).casefold()
+                if any(term in metadata for term in excluded_voice_terms):
+                    continue
+                if not any(term in language_data for term in ("pt", "portugu")):
+                    continue
+                if not any(term in metadata for term in natural_voice_terms):
+                    continue
+                curated_voices.append(candidate)
+            voice_page_data["items"] = curated_voices
         voices = [
             item for item in voice_page_data["items"]
             if item.get("id") and item.get("visibility", "public") == "public"
