@@ -368,3 +368,13 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Run #140 (842939c, atualização do estado mestre): também concluído com sucesso.
 - Build atual indicado no app: `NEXUS-2026.11.16-visual-review-subtitles-4`.
 - Código e testes validados pelo CI. Ainda falta deploy/refresh real do Streamlit e um segundo MP4 para validação audiovisual da nova seleção de clipes e do layout das legendas.
+
+
+### Seleção de mídia orientada primeiro pela narração — 16/11/2026
+- Requisito confirmado pelo usuário: escolher sempre o clipe com maior conexão real com o trecho narrado; estilo visual e qualidade técnica nunca podem superar a correspondência narrativa.
+- Alteração implementada no código: consultas de conteúdo da cena e de estilo visual são separadas. Cada biblioteca habilitada recebe a busca semântica da cena e uma busca adicional pelo estilo; resultados que só correspondem ao estilo não passam pelo filtro semântico.
+- Ranking textual passa a ordenar por relevância da narração/ação primeiro, aderência ao estilo como critério secundário e qualidade técnica como terceiro critério. A shortlist compara até seis candidatos, priorizando diversidade entre bibliotecas antes de repetir uma fonte.
+- Avaliação Gemini recebe todos os candidatos da shortlist e os quadros reais; instrução explícita determina pontuação separada para conexão narrativa e aderência estética, escolhendo primeiro a maior conexão com a narração. Confiança mínima continua impedindo clipes sem relação direta.
+- Interface de revisão registra e exibe conexão semântica e aderência ao estilo por cena. Build: `NEXUS-2026.11.16-narration-first-selection-1`.
+- Testes adicionados: relevância semântica vence correspondência apenas estética; busca de estilo é independente e não aceita resultados sem conexão com a cena; avaliação visual expõe a prioridade semântica.
+- Estado: alterações gravadas no GitHub; aguardando CI. Não confundir implementação com deploy no Streamlit nem validação audiovisual com MP4 real.
