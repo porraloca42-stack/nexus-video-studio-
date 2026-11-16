@@ -65,7 +65,7 @@ def _subtitle_cues(events, narration):
             " ".join(words[:split_at]).strip(),
             " ".join(words[split_at:]).strip(),
         ]
-        caption = "\\n".join(line for line in lines if line)
+        caption = "\n".join(line for line in lines if line)
         cues.append((group_start, group_end, caption))
         group = []
         group_start = None
