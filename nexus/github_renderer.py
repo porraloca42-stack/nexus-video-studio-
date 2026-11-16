@@ -38,7 +38,7 @@ def render_on_github(
     if not isinstance(plan, dict) or not plan.get("scenes"):
         raise ValueError("O storyboard não contém cenas.")
     manifest_json = json.dumps(plan, ensure_ascii=False, separators=(",", ":"))
-    if len(manifest_json) > 45000:
+    if len(manifest_json) > 42000:
         raise GitHubRenderError("O storyboard excede o limite seguro de envio ao GitHub Actions.")
 
     client = session or requests
