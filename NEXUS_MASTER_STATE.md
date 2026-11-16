@@ -765,3 +765,14 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
   - `7763634`: teste para impedir texto editorial no manifesto e garantir propagação de motionEvents.
 - Limitação explícita: o pipeline atual gera imagens estáticas via Cloudflare FLUX e anima movimento de câmera via Remotion; ainda não integra um modelo de geração de vídeo com movimento orgânico de pessoas/objetos. motion_events agora seguem no manifesto, mas não são ainda animação semântica de personagens.
 - CI para esses commits iniciado; MP4 de usuário permanece reprovado. Não marcar produção audiovisual como validada até novo render real e revisão quadro a quadro.
+
+
+### Continuação da correção audiovisual — 16/11/2026
+- Commit `f829a7f`: legendas agora priorizam eventos SentenceBoundary do Edge TTS; na ausência, agrupam WordBoundary em frases maiores (até 7 palavras/52 caracteres e até 3,2s) para evitar flashes de palavras isoladas.
+- Commit `f287146`: teste para priorização de frases.
+- Commit `7763634`: teste para garantir que o manifesto transporte motion_events, sem expor headline/visualDescription como texto.
+- Commit `09712bf`: removidos campos de headline do manifesto de demonstração para compatibilidade com os novos tipos.
+- Commit `90e39c2`: teste de legendas ajustado ao novo limite de agrupamento.
+- Commit `4077bfd`: removidas as headlines remanescentes do manifesto de demonstração após o typecheck identificar incompatibilidade.
+- CI ainda em andamento para commits `90e39c2` e `4077bfd`; aguardar aprovação.
+- Auditoria visual detalhada do MP4: imagens estáticas distintas, mas zoom anterior era discreto; texto inglês de visualDescription era impresso; transições tinham opacidade zero no primeiro/último frame de cada cena. Correções aplicadas em `d330197` e `3ba6da1`.
