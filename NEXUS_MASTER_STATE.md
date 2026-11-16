@@ -852,3 +852,12 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - A alteração é somente de teste; não altera a integração de produção nem contém credenciais.
 - CI disparado pela atualização do repositório; aprovação ainda pendente.
 - A integração Fish permanece implementada, mas sem validação real de provedor/MP3 até haver credencial configurada no ambiente seguro. Não usar a chave que foi exposta na conversa.
+
+
+## Observabilidade do provedor TTS — 16/11/2026
+- Commit `044c4eb`: `make_voice` ganhou opção retrocompatível `return_provider=True`, que informa se o áudio veio do Fish Audio ou do Edge TTS e, em caso de fallback, registra o motivo resumido.
+- Commit `a6241d4`: a interface Streamlit passa a exibir o provedor efetivamente usado, em vez de inferir Fish apenas pela existência da chave.
+- Commit `0c30ffa`: teste para confirmar que a rota Fish reporta Fish Audio.
+- Commit `f71e29d`: teste para confirmar que falha do Fish reporta Edge TTS como fallback.
+- As chamadas antigas de `make_voice` continuam recebendo o par `(audio, subtitles)`; a nova tripla é ativada apenas pelo app com `return_provider=True`.
+- CI e validação com provedor real ainda pendentes. A integração lê `FISH_API_KEY` e `FISH_VOICE_ID` de Streamlit Secrets/ambiente; este registro não contém valores de credenciais.
