@@ -4,7 +4,7 @@ import requests
 import streamlit as st
 from nexus.director import create_storyboard, validate_storyboard
 from nexus.assets import search_video_sources, download_file, diverse_candidate_shortlist
-from nexus.audio import get_fish_voice, make_voice
+import nexus.audio as fish_audio
 from nexus.render import render_video
 
 
@@ -284,7 +284,7 @@ else:
             loaded_voices = []
             for voice_name, voice_id in curated_voice_catalog:
                 try:
-                    model = get_fish_voice(fish_api_key, voice_id)
+                    model = fish_audio.get_fish_voice(fish_api_key, voice_id)
                     # Do not silently substitute a model with a different ID/name.
                     if model["id"] == voice_id:
                         model["title"] = voice_name
@@ -786,7 +786,7 @@ if "nexus_plan" in st.session_state:
                     target_duration = sum(float(scene["duration_seconds"]) for scene in plan["scenes"])
                     for calibration_attempt in range(3):
                         narration = " ".join(scene["voiceover"] for scene in plan["scenes"])
-                        audio, actual_tts_provider = make_voice(
+                        audio, actual_tts_provider = fish_audio.make_voice(
                             narration, voice, audio,
                             fish_api_key=fish_api_key,
                             fish_voice_id=voice,
