@@ -3,9 +3,35 @@ from pathlib import Path
 import requests
 import streamlit as st
 from nexus.director import create_storyboard, validate_storyboard
-from nexus.assets import search_video_sources, search_coverr_videos, download_file
+from nexus.assets import search_video_sources, search_coverr_videos, download_file, diverse_candidate_shortlist
 from nexus.audio import make_voice
 from nexus.render import render_video
+
+
+def _extract_visual_review_frames(video_path, output_dir, prefix):
+    """Extract representative frames from a candidate clip for semantic review."""
+    probe = subprocess.run(
+        ["ffprobe", "-v", "error", "-show_entries", "format=duration",
+         "-of", "default=noprint_wrappers=1:nokey=1", str(video_path)],
+        capture_output=True, text=True, timeout=45,
+    )
+    if probe.returncode != 0:
+        raise RuntimeError("Não foi possível medir a duração do clipe candidato.")
+    duration = max(0.5, float(probe.stdout.strip()))
+    frames = []
+    for index, fraction in enumerate((0.25, 0.65), 1):
+        frame_path = Path(output_dir) / f"{prefix}_frame_{index}.jpg"
+        timestamp = min(max(0.1, duration * fraction), max(0.1, duration - 0.1))
+        result = subprocess.run(
+            ["ffmpeg", "-y", "-ss", f"{timestamp:.3f}", "-i", str(video_path),
+             "-frames:v", "1", "-vf", "scale=640:-2", "-q:v", "5", str(frame_path)],
+            capture_output=True, text=True, timeout=45,
+        )
+        if result.returncode == 0 and frame_path.exists() and frame_path.stat().st_size:
+            frames.append(str(frame_path))
+    if not frames:
+        raise RuntimeError("Não foi possível extrair quadros do clipe candidato.")
+    return frames
 
 def _search_stock_compatible(query, coverr_key="", pixabay_key="", pexels_key="", per_page=20, exclude_urls=None, relevance_query=None, min_relevance=1.5):
     """Search all configured libraries while tolerating an older deployed assets module."""
@@ -192,7 +218,7 @@ div[data-testid="stTextArea"] textarea,div[data-testid="stSelectbox"] div[data-b
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="nexus-hero"><div class="nexus-brand">NEXUS VIDEO STUDIO</div><div class="nexus-tagline">Transforme seu roteiro em vídeo</div></div>', unsafe_allow_html=True)
-st.caption("Versão: NEXUS-2026.11.16-import-guard-1")
+st.caption("Versão: NEXUS-2026.11.16-visual-review-subtitles-1")
 
 if "nexus_style" not in st.session_state or st.session_state["nexus_style"] not in STYLE_OPTIONS:
     st.session_state["nexus_style"] = "Cinematográfico realista"
@@ -449,9 +475,49 @@ if "nexus_plan" in st.session_state:
                             "errors": source_errors,
                         })
                         continue
-                    chosen = candidates[0]
+                    shortlist = diverse_candidate_shortlist(candidates, limit=3)
+                    reviewed_candidates = []
+                    for candidate_index, candidate in enumerate(shortlist, 1):
+                        candidate_path = download_file(
+                            candidate["url"],
+                            work / f"review_scene_{i:02d}_candidate_{candidate_index:02d}.mp4",
+                        )
+                        frame_paths = _extract_visual_review_frames(
+                            candidate_path, work, f"scene_{i:02d}_candidate_{candidate_index:02d}"
+                        )
+                        reviewed_candidates.append({
+                            "candidate": candidate,
+                            "path": candidate_path,
+                            "frame_paths": frame_paths,
+                        })
+                    try:
+                        from nexus.director import review_visual_candidates
+                        visual_review = review_visual_candidates(scene, reviewed_candidates, secret)
+                    except Exception as review_error:
+                        missing.append({
+                            "scene": i + 1,
+                            "query": primary_query,
+                            "fallback": fallback_query,
+                            "errors": source_errors + [f"Revisão visual: {review_error}"],
+                        })
+                        continue
+                    selected_index = int(visual_review.get("selected_candidate", 0)) - 1
+                    if selected_index < 0 or selected_index >= len(reviewed_candidates):
+                        missing.append({
+                            "scene": i + 1,
+                            "query": primary_query,
+                            "fallback": fallback_query,
+                            "errors": source_errors + [
+                                "Nenhum clipe atingiu a confiança mínima da avaliação visual. "
+                                + str(visual_review.get("reason", ""))
+                            ],
+                        })
+                        continue
+                    chosen_record = reviewed_candidates[selected_index]
+                    chosen = chosen_record["candidate"]
                     used_asset_urls.add(chosen["url"])
-                    path = download_file(chosen["url"], work / f"scene_{i:02d}.mp4")
+                    path = work / f"scene_{i:02d}.mp4"
+                    shutil.copy2(chosen_record["path"], path)
                     probe = subprocess.run(
                         ["ffprobe", "-v", "error", "-show_entries",
                          "format=duration,size:stream=codec_name,codec_type,width,height",
@@ -473,6 +539,8 @@ if "nexus_plan" in st.session_state:
                         "source": chosen.get("source", "Stock"),
                         "author": chosen.get("author", ""),
                         "author_url": chosen.get("author_url", ""),
+                        "visual_review_confidence": visual_review.get("confidence", 0),
+                        "visual_review_reason": visual_review.get("reason", ""),
                         "source_width": video_stream.get("width"),
                         "source_height": video_stream.get("height"),
                     })
