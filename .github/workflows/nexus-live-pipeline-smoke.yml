@@ -1,0 +1,56 @@
+name: NEXUS live visual pipeline smoke test
+run-name: NEXUS live pipeline validation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: remotion/package.json
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+      - name: Install Python dependencies
+        run: python -m pip install requests cryptography modal
+      - name: Install Remotion dependencies
+        working-directory: remotion
+        run: npm install --no-audit --no-fund
+      - name: Type-check Remotion
+        working-directory: remotion
+        run: npm run typecheck
+      - name: Run Cloudflare to LTX to Remotion live test
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_IMAGE_MODEL: "@cf/black-forest-labs/flux-2-klein-4b"
+          MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+          MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+        run: python scripts/live_pipeline_smoke_test.py
+      - name: Upload live pipeline MP4, image and report
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexus-live-pipeline-validation
+          path: |
+            nexus-live-pipeline-output/nexus-live-pipeline.mp4
+            nexus-live-pipeline-output/cloudflare-scene.png
+            nexus-live-pipeline-output/pipeline-report.json
+          if-no-files-found: error
+          retention-days: 3
