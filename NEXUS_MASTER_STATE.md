@@ -726,3 +726,10 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Commit `284f56a`: mínimo rígido agora é `max(10, ceil(duração/5))` tanto na geração quanto na validação. Para 40s exige 10; 50s exige 10; 60s exige 12. Prompt inicial e correções instruem explicitamente que 6–9 cenas são proibidas. O diretor tem até 3 tentativas automáticas de reparo e só aceita resposta que alcance o mínimo.
 - Commit `a7de9de`: testes adicionados para reparar 7→10 cenas em 40s e para rejeitar 7 cenas no validador.
 - CI dos commits em execução; ainda não aprovado. Após CI verde, precisa recarregar o Streamlit e confirmar o comportamento real.
+
+
+### Ajuste de teste do protocolo mínimo de cenas — 16/11/2026
+- A implementação `284f56a` já aplicava o mínimo rígido `max(10, ceil(duração/5))` na geração e validação, com até 3 reparos automáticos.
+- A primeira regressão do commit `a7de9de` identificou apenas uma expectativa antiga no teste de 50s: ele ainda procurava o texto anterior do prompt ("NO MÍNIMO 10 cenas"), enquanto a nova instrução usa "NO MÍNIMO ABSOLUTO 10 CENAS". Não foi falha da regra de produção.
+- Commit `6bc0963`: expectativa do teste atualizada para o protocolo novo.
+- Run #43862094799 está na fila para validar o commit com a correção do teste; aprovação ainda pendente. Não pedir ao usuário para retestar antes de CI verde.
