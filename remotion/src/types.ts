@@ -1,29 +1,19 @@
+export type CameraMove = "push_in" | "pull_out" | "pan_left" | "pan_right" | "tilt_up" | "tilt_down" | "static";
+export type SceneDirection = {
+  camera: { move: CameraMove; intensity: number; startScale: number; endScale: number; focus: "subject" | "foreground" | "background" };
+  depthLayers: { foreground: string; subject: string; background: string; parallaxStrength: number };
+  lighting: { mood: string; keyDirection: string; change: "none" | "subtle_flicker" | "light_sweep" | "exposure_ramp" };
+  atmosphere: { effect: "none" | "dust" | "rain" | "fog" | "embers" | "particles"; intensity: number };
+  transition: { in: "cut" | "crossfade" | "match_cut" | "fade"; out: "cut" | "crossfade" | "match_cut" | "fade"; durationFrames: number };
+  beats: Array<{ at: number; event: string; visualTarget: string }>;
+};
 export type NexusScene = {
-  id: string;
-  durationSeconds: number;
-  narration: string;
-  visualMode: "graphic" | "image" | "video";
-  asset?: string;
-  imagePrompt?: string;
-  cameraMotion?: "push_in" | "pull_out" | "pan_left" | "pan_right";
-  motionEvents?: string[];
-  accent?: string;
+  id: string; durationSeconds: number; narration: string; visualMode: "graphic" | "image" | "video";
+  asset?: string; imagePrompt?: string; cameraMotion?: CameraMove; motionEvents?: string[];
+  sceneDirection?: SceneDirection; accent?: string;
 };
-
-export type NexusCaption = {
-  text: string;
-  startFrame: number;
-  endFrame: number;
-};
-
+export type NexusCaption = { text: string; startFrame: number; endFrame: number };
 export type NexusVideoProps = {
-  width: number;
-  height: number;
-  fps: number;
-  durationInFrames: number;
-  title: string;
-  narrationAudio?: string;
-  musicAudio?: string;
-  scenes: NexusScene[];
-  captions: NexusCaption[];
+  width: number; height: number; fps: number; durationInFrames: number; title: string;
+  narrationAudio?: string; musicAudio?: string; scenes: NexusScene[]; captions: NexusCaption[];
 };
