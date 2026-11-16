@@ -252,8 +252,8 @@ def list_fish_professional_narrators(api_key, *, per_gender=25, session=None):
     """Return up to 25 natural Portuguese male and female professional narrators.
 
     Queries the same male/female + narration tag combinations used by Fish
-    Discovery, keeps PVC/indicated-licensed sources when source metadata exists,
-    and removes obvious character, anime, celebrity and meme models.
+    Discovery, keeps only voices marked PVC or Fish-licensed, and removes
+    non-Brazilian Portuguese, character, anime, celebrity and meme models.
     """
     client = session or requests
     result = {}
