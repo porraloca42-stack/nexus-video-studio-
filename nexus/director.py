@@ -61,12 +61,19 @@ def discover_model(api_key, requested="auto"):
         match = next((m for m in supported if m.get("name", "").split("/")[-1] == requested.replace("models/", "")), None)
         if match:
             return match["name"].split("/")[-1]
-    # Prefer the newest Pro reasoning model actually exposed to THIS key.
+    # Use the model the user confirmed has available quota in their AI Studio project.
+    preferred = next(
+        (m for m in supported if m.get("name", "").split("/")[-1] == "gemini-3.5-flash-lite"),
+        None,
+    )
+    if preferred:
+        return preferred["name"].split("/")[-1]
+    # Fallback: prefer stable Flash-Lite before higher tiers that may be quota-blocked.
     def rank(m):
         name = m.get("name", "").split("/")[-1].lower()
-        family = 3 if "pro" in name else 2 if "flash" in name else 1
+        lite = 1 if "flash-lite" in name else 0
         stable = 1 if "preview" not in name and "exp" not in name else 0
-        return (family, stable, _model_version(name))
+        return (lite, stable, _model_version(name))
     supported.sort(key=rank, reverse=True)
     return supported[0]["name"].split("/")[-1]
 
