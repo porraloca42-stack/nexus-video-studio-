@@ -182,7 +182,9 @@ def search_video_sources(
     # Search the requested style independently so it cannot dilute the
     # narration query. The style query never qualifies an unrelated clip alone.
     style_variants = build_query_variants(style_query, max_variants=1)
-    search_variants = list(dict.fromkeys(variants + style_variants))
+    search_variants = [(value, True) for value in variants] + [
+        (value, False) for value in style_variants if value.casefold() not in {v.casefold() for v in variants}
+    ]
     query_terms = list(dict.fromkeys(_query_tokens(semantic_query)))
     all_candidates = []
 
@@ -197,7 +199,7 @@ def search_video_sources(
     # Query every enabled provider. Do not return early when the first
     # provider finds a match: the final choice must compare the whole pool.
     for source_name, search_fn, api_key in sources:
-        for search_query in search_variants:
+        for search_query, is_scene_query in search_variants:
             try:
                 results = search_fn(search_query, api_key, per_page)
                 for item in results:
@@ -205,12 +207,14 @@ def search_video_sources(
                     if not url or url in excluded:
                         continue
                     item["matched_query"] = search_query
+                    item["matched_scene_query"] = bool(is_scene_query)
                     item["source"] = item.get("source") or source_name
                     all_candidates.append(item)
             except requests.RequestException as exc:
                 errors.append(f"{source_name} ({search_query}): {exc}")
 
-    # Deduplicate identical downloads while preserving provider provenance.
+    # Deduplicate identical downloads while preserving provider provenance
+    # and whether the asset came from a scene query or a style-only query.
     deduplicated = {}
     for item in all_candidates:
         url = item["url"]
@@ -221,26 +225,26 @@ def search_video_sources(
             providers = set(existing.get("also_found_by", []))
             providers.add(item.get("source", ""))
             existing["also_found_by"] = sorted(name for name in providers if name)
+            existing["matched_scene_query"] = (
+                existing.get("matched_scene_query", False)
+                or item.get("matched_scene_query", False)
+            )
 
-    ranked = rank_video_candidates(list(deduplicated.values()), semantic_query, style_query=style_query)
-    required_matches = min(2, len(query_terms))
-    strict = [
-        item for item in ranked
-        if item.get("_nexus_relevance", 0.0) >= float(min_relevance)
-        and item.get("_nexus_match_count", 0) >= required_matches
+    # A result returned by a scene-specific query is a retrieval candidate,
+    # even when its stock-library title/tags use different wording or language.
+    # The visual reviewer inspects actual frames and rejects unrelated clips.
+    # Style-only search results are admitted only if their metadata also has
+    # a meaningful overlap with the scene brief.
+    scene_candidates = [
+        item for item in deduplicated.values()
+        if item.get("matched_scene_query")
+        or (
+            len(query_terms) >= 2
+            and item.get("_nexus_match_count", 0) >= 1
+        )
     ]
-    if strict:
-        return strict, errors
-
-    # Last-resort recovery: accept a real scene-term match only after all
-    # enabled providers and concise query variants have been exhausted.
-    partial = [
-        item for item in ranked
-        if len(query_terms) >= 2
-        and item.get("_nexus_match_count", 0) >= 1
-        and item.get("_nexus_relevance", 0.0) >= 2.0
-    ]
-    return partial, errors
+    ranked = rank_video_candidates(scene_candidates, semantic_query, style_query=style_query)
+    return ranked, errors
 
 def download_file(url, destination):
     destination = Path(destination)
