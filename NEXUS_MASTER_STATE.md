@@ -24,7 +24,7 @@ Aplicativo pessoal em nuvem para transformar tema ou roteiro em vídeo vertical 
 ## Arquitetura atual — estado do repositório em 16/11/2026
 - Interface: Streamlit (app.py).
 - Diretor: Gemini API (nexus/director.py), com failover entre modelos textuais compatíveis; produz roteiro, storyboard semântico e contrato `scene_direction` por cena.
-- Narração: Fish Audio S2.1 Pro Free como primário quando configurado; Edge TTS como fallback (nexus/audio.py). Não há trilha de legendas no pipeline.
+- Narração: Fish Audio S2.1 Pro Free como provedor obrigatório (nexus/audio.py); Edge TTS foi removido do pipeline e das dependências. A interface consulta a biblioteca Fish Audio, mostra amostras e permite selecionar voz pública ou voz própria. Não há trilha de legendas no pipeline.
 - Motor padrão selecionado na interface: Cloudflare Workers AI FLUX.2 Klein gera imagens originais por cena e o worker GitHub Actions usa Remotion (`nexus/remote_render_job.py`, `nexus/remotion_renderer.py`, `remotion/`) para compor o MP4 vertical. As imagens geradas são estáticas, não vídeo.
 - Modo alternativo: bibliotecas de vídeo com busca multi-fonte e renderização FFmpeg (`nexus/assets.py`, `nexus/render.py`); preservar o movimento nativo dos clipes.
 - O worker padrão depende dos secrets do Streamlit e do repositório GitHub; implantação do Streamlit e credenciais externas precisam ser verificadas separadamente.
@@ -993,3 +993,42 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Não foi possível confirmar a implantação pública do Streamlit nesta sessão: a URL não ficou acessível pela verificação externa disponível. Não houve execução real do worker com Cloudflare Workers AI ou Fish Audio, nem MP4 de 40–50 segundos do usuário. A validação audiovisual final permanece pendente.
 - GitHub Actions run #418 (`43884423159`), disparado pelo commit de atualização deste registro, estava em execução no momento desta anotação; consultar resultado final.
 - Próximo passo: confirmar no Streamlit o marcador/versão carregada e executar o botão de produção no modo padrão; depois inspecionar o MP4 real e confirmar no relatório se a narração veio de Fish Audio ou Edge TTS.
+
+
+## Revisão do MP4 de teste, animação e biblioteca Fish Audio — 16/11/2026
+
+### Revisão audiovisual do arquivo enviado pelo usuário
+- Arquivo recebido: MP4 de 40,0s, 720×1280 (9:16), 30fps, H.264 + AAC estéreo 48kHz, aproximadamente 8,53MB. Integridade técnica básica aprovada.
+- Inspeção visual por quadros em vários tempos: cenas em anime usam imagens estáticas como fonte; há algum movimento de câmera, mas os sujeitos/objetos não executam movimento orgânico. Algumas imagens permanecem visualmente iguais por vários segundos.
+- Causa identificada no código: o Remotion limitava a câmera a escala máxima 1.15; `motion_events` eram enviados no manifesto, mas não eram consumidos na composição; metadados `depthLayers` ainda não geram camadas reais de parallax.
+
+### Estratégia editorial pesquisada
+- Referências oficiais do TikTok: hook nos primeiros segundos, estrutura hook/desenvolvimento/fechamento, movimento, cortes/transições, som e mudanças visuais para estimular atenção; manter vertical 9:16 e respeitar áreas da interface.
+- Referências práticas de produção faceless: aprovar keyframes primeiro, animar somente imagens aprovadas com image-to-video, editar em ritmo variável e usar zoom/reframe, sound design e pattern interrupts. O intervalo de 1,5–2,5s é uma referência de edição, não regra universal nem garantia de retenção.
+- O diretor foi atualizado para shots de 2–3,5s, mudança visual a cada 2–3s, pattern interrupt a cada 7–9s, hook imediato, progressão narrativa e final que pode conectar ao hook. A meta de cenas para 50s passa a 15–18 (40s: 12–15; 60s: 18–22).
+
+### Melhorias Remotion implementadas
+- `remotion/src/NexusVideo.tsx`: agora executa beats do Gemini e, quando não existem, deriva beats dos `motion_events`; cada beat aciona punch-in, micro-shake e acento gráfico. Movimento de câmera mais forte e variado, light sweep/atmosfera e transições crossfade/fade respeitando entrada/saída.
+- `nexus/remotion_renderer.py`: escala de câmera validada ampliada para 1.02–1.28, com defaults 1.04→1.22.
+- `nexus/director.py`: direção de câmera mais intensa, movimentos variados entre cenas e microeventos observáveis.
+- GitHub Actions Remotion demo run #67 (`43888656099`), commit `a66be40`: sucesso. O manifesto foi criado pelo adaptador Python com uma imagem estática PNG e dois microeventos; Remotion renderizou 120 frames e FFprobe validou MP4 H.264 720×1280 + áudio AAC, 4,011s. Artefato `nexus-remotion-demos` publicado. Isso valida o novo caminho de movimento de câmera/beat na imagem estática, mas não movimento orgânico de personagens.
+- Importante: `motion_events` agora acionam câmera/acentos gráficos; isso não é parallax real nem image-to-video. Não afirmar que braços, rosto ou objetos se movem naturalmente sem gerar vídeo a partir da imagem.
+
+### Fish Audio — mudanças implementadas
+- `nexus/audio.py`: Fish Audio S2.1 Pro Free tornou-se obrigatório; se faltar chave, voz ou a API falhar, a produção interrompe com erro claro. Não há fallback silencioso para voz robótica.
+- Biblioteca: endpoint `GET https://api.fish.audio/model` com paginação, busca por nome, filtro de idioma, modelos públicos e modelos próprios; amostras publicadas são exibidas e, quando ausentes, a interface permite gerar uma prévia curta usando `POST /v1/tts` com `reference_id`.
+- `app.py`: navegador de vozes Fish Audio, seis vozes por página, áudio de amostra antes do nome, seleção persistente na sessão, fonte pública ou Minhas vozes, idioma Português ou Todos. A voz selecionada é encaminhada ao worker e ao modo alternativo.
+- `requirements.txt` e workflow `.github/workflows/nexus-render-worker.yml`: dependência `edge-tts` removida.
+- Não é possível ler o valor de `FISH_API_KEY` do Secret pelo assistente. O usuário confirmou que adicionou a chave; validação real da consulta de vozes e TTS depende da aplicação publicada. Vozes públicas de terceiros podem ter restrições de direitos; verificar licença antes de uso comercial.
+
+### Image-to-video: pesquisa e decisão pendente
+- O catálogo oficial Cloudflare AI lista modelos image-to-video, incluindo `alibaba/wan-2.7-i2v` (720p: US$0,10 por segundo) e `alibaba/hh1-i2v` (720p: US$0,14 por segundo), com entrada de imagem por URI e prompt de movimento.
+- Exemplo estimado para 40s de vídeo gerado: aproximadamente US$4,00 usando Wan 2.7 I2V a 720p, antes de eventuais custos adicionais, caso todo o tempo seja gerado por esse modelo. A estimativa não inclui geração de imagens, áudio, retries ou outras tarifas.
+- Não foi integrado nem acionado: o modelo exige uma URI acessível da imagem de referência e o projeto ainda não tem um fluxo R2/URL temporária validado; além disso, gera custo por segundo. A ativação deve aguardar autorização explícita do usuário para o gasto e decisão de armazenamento/entrega de imagens.
+
+### Estado e próximos passos
+- Implementado no GitHub: Fish-only, seletor de vozes com prévias, Remotion executando motion beats e câmera mais expressiva, direção de retenção atualizada.
+- Testado: integração Remotion com imagem estática e dois beats aprovada no run #67. Typecheck Remotion e regressão Python já passaram em commits intermediários; regressão completa do commit mais recente ainda em execução no momento deste registro.
+- Não validado: consulta real à biblioteca Fish, prévias reais, TTS real Fish, deploy Streamlit, produção editorial real com o novo motion pipeline.
+- Limitação conhecida: movimento de câmera e beats gráficos melhoram a percepção de dinamismo, mas para personagens/objetos com movimento natural será necessário image-to-video por cena. O usuário ainda precisa autorizar o custo e a infraestrutura temporária.
+- Próximo passo: aguardar CI mais recente; confirmar que o Streamlit carregou a nova versão; testar a biblioteca Fish e selecionar uma voz; executar um MP4 real; inspecionar qualidade. Depois, decidir se habilita Wan 2.7 I2V (ou outro modelo) com custo explícito.
