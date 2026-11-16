@@ -112,11 +112,10 @@ class AudioOutputTests(unittest.TestCase):
         self.assertEqual([voice["id"] for voice in voices["male"]], ["male-pvc"])
         self.assertEqual([voice["id"] for voice in voices["female"]], ["female-licensed"])
         self.assertTrue(voices["female"][0]["licensed"])
-        self.assertEqual(len(session.calls), 4)
+        self.assertEqual(len(session.calls), 2)
         queried_tags = {tuple(kwargs["params"]["tag"]) for _, _, kwargs in session.calls}
         self.assertEqual(queried_tags, {("male", "narration"), ("female", "narration")})
-        licensed_queries = [kwargs for _, _, kwargs in session.calls if kwargs["params"].get("licensed") == "true"]
-        self.assertEqual(len(licensed_queries), 2)
+        self.assertTrue(all("licensed" not in kwargs["params"] for _, _, kwargs in session.calls))
 
     def test_lists_portuguese_fish_voices_with_preview_sample(self):
         session = FakeFishSession()
