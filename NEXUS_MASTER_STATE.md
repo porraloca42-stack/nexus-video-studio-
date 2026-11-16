@@ -284,3 +284,12 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Primeiro MP4 real do usuário ainda pendente; não declarar pipeline de produção concluído.
 
 - Commit 221038e: identificador de build movido para logo abaixo do cabeçalho principal, visível sem abrir ferramentas avançadas. Isso simplifica a confirmação do deploy no celular.
+
+
+### Ajuste de duração da narração — 16/11/2026
+- Evidência do usuário: storyboard de 50s/12 cenas gerou MP3 com 36,1s; o renderizador bloqueou corretamente porque a diferença ultrapassava 15% (áudio 27,8% mais curto que a timeline).
+- Causa operacional: a velocidade padrão do Edge TTS resultou em leitura rápida demais para a duração alocada pelo storyboard, apesar do prompt orientar 110–125 palavras para 50s.
+- Commit 757025b: Edge TTS passa a sintetizar com rate=-25%, buscando aproximar a narração da duração planejada sem remover a proteção de sincronização do FFmpeg.
+- Commit af3230f: teste unitário verifica que a taxa -25% é aplicada ao sintetizador.
+- Commit a89c0cc: build identificada como NEXUS-2026.11.16-voice-paced-25, visível abaixo do cabeçalho.
+- CI da nova alteração ainda em execução no momento do registro. A taxa precisa ser confirmada com uma nova produção real; não afirmar MP4 final concluído.
