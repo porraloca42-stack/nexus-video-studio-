@@ -1304,3 +1304,13 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - O step de integração falhou antes de chamar qualquer provedor, com `ModuleNotFoundError: No module named 'nexus'` ao importar `nexus.cloudflare_images`. Portanto, nesta execução NÃO houve geração Cloudflare, inferência Modal/LTX, render Remotion, nem artifact. Não houve evidência de falha dos motores.
 - Correção aplicada em `.github/workflows/nexus-live-pipeline-smoke.yml`, commit `e77458e650868bb367d47b0ba5bbaa68550d0dad`: definido `PYTHONPATH: ${{ github.workspace }}` no ambiente do step de integração, para disponibilizar a raiz do checkout ao importador Python.
 - Estado da correção: commit gravado no `main`; aguardando CI pós-commit e nova execução manual do workflow integrado. Não considerar integração validada.
+
+
+## Retomada da finalização e orçamento — 16/11/2026
+- O usuário definiu orçamento operacional de até US$ 30/mês para uma meta de 22 vídeos mensais de 40–50s. Tratar como teto de projeto, não como custo validado; acompanhar custo real por execução antes de estimar custo unitário.
+- Branch main confirmada no commit d18635ad27dfa93ace2c06770f10a6010e892ede.
+- CI regression #540 (run ID 43955175273), commit e77458e650868bb367d47b0ba5bbaa68550d0dad: completed/success. CI regression #541 (run ID 43955194251), commit d18635ad27dfa93ace2c06770f10a6010e892ede: completed/success.
+- A correção PYTHONPATH do workflow integrado está no main e as regressões pós-correção passaram. A execução integrada Cloudflare → Modal/LTX → Remotion ainda NÃO foi repetida após a correção; requer disparo manual de workflow_dispatch e pode consumir créditos Cloudflare/Modal.
+- O fluxo principal selecionado no app é Cloudflare FLUX.2 Klein → Modal LTX I2V → Remotion, com narração Fish Audio. O worker remoto atualmente anima cada cena do storyboard com LTX; não há seleção automática de cenas com/sem I2V implementada. Não alterar essa decisão silenciosamente; qualquer otimização editorial do uso de LTX precisa ser validada contra qualidade e orçamento.
+- Próximo marco: repetir o workflow manual nexus-live-pipeline-smoke.yml após a correção de PYTHONPATH, inspecionar o MP4/artifact e, se aprovado, validar um manifesto de produção com Fish Audio e duração real de 40–50s. Não executar geração paga completa antes de revisar o resultado e o custo do smoke test.
+- Estado: CI automatizado #540/#541 aprovado; worker LTX já implantado e smoke técnico isolado H100 aprovado anteriormente; integração Cloudflare→LTX→Remotion ainda pendente; produção MP4 de 40–50s ainda NÃO validada.
