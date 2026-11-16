@@ -7,6 +7,7 @@ from nexus.audio import (
     generate_fish_preview,
     get_fish_voice,
     list_fish_voices,
+    list_fish_professional_narrators,
     _is_natural_brazilian_voice,
     make_voice,
 )
@@ -77,6 +78,43 @@ class AudioOutputTests(unittest.TestCase):
         self.assertTrue(voice["licensed"])
         self.assertEqual(voice["source"], "Fish Audio Marketplace")
         self.assertNotIn("licensed", session.calls[0][2]["params"])
+
+    def test_professional_narrators_are_split_by_gender_and_exclude_characters(self):
+        session = FakeFishSession(payload={
+            "total": 3,
+            "items": [
+                {
+                    "_id": "male-pvc", "type": "tts", "state": "trained",
+                    "visibility": "public", "title": "Brazilian Male Narrator",
+                    "description": "Natural Brazilian Portuguese narration",
+                    "languages": ["pt"], "tags": ["male", "narration"],
+                    "source": "pvc", "task_count": 900,
+                    "samples": [{"audio": "https://cdn.example.test/male.mp3"}],
+                },
+                {
+                    "_id": "female-licensed", "type": "tts", "state": "trained",
+                    "visibility": "public", "title": "Brazilian Female Narrator",
+                    "description": "Warm Brazilian Portuguese narration",
+                    "languages": ["pt"], "tags": ["female", "narration"],
+                    "source": "licensed", "licensed": True, "task_count": 800,
+                    "samples": [{"audio": "https://cdn.example.test/female.mp3"}],
+                },
+                {
+                    "_id": "anime-male", "type": "tts", "state": "trained",
+                    "visibility": "public", "title": "Anime Male Character",
+                    "description": "Brazilian Portuguese anime character voice",
+                    "languages": ["pt"], "tags": ["male", "narration", "anime"],
+                    "source": "pvc", "task_count": 1200,
+                },
+            ],
+        })
+        voices = list_fish_professional_narrators("test-key", session=session)
+        self.assertEqual([voice["id"] for voice in voices["male"]], ["male-pvc"])
+        self.assertEqual([voice["id"] for voice in voices["female"]], ["female-licensed"])
+        self.assertTrue(voices["female"][0]["licensed"])
+        self.assertEqual(len(session.calls), 4)
+        for _, _, kwargs in session.calls:
+            self.assertEqual(kwargs["params"]["tag"], ["male", "narration"]) if kwargs["params"]["page_number"] == 1 and kwargs["params"].get("licensed") is None and kwargs["params"].get("language") == "pt" and "male" in kwargs["params"]["tag"] else None
 
     def test_lists_portuguese_fish_voices_with_preview_sample(self):
         session = FakeFishSession()
