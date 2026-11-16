@@ -531,7 +531,7 @@ def apply_visual_style_lock(plan, style):
 
 def create_storyboard(topic, style, duration, secret_reader):
     target = int(round(float(duration)))
-    minimum_scenes = max(1, (target + 4) // 5)
+    minimum_scenes = max(10, (target + 4) // 5)
     preferred_scenes = max(minimum_scenes, (target + 3) // 4)
     min_words = int(round(target * 2.2))
     max_words = int(round(target * 2.5))
@@ -559,14 +559,21 @@ Cada cena deve mostrar ação concreta diretamente ligada à fala, com duas busc
         return [i for i, scene in enumerate(items, 1)
                 if not str(scene.get("voiceover", "") or "").strip()]
 
-    # Gemini occasionally under-segments a valid narration (e.g. 8 scenes for
-    # a 50s video), even when the requested scene range is explicit. Repair
-    # this once automatically instead of making the user press Plan again.
-    if len(scenes) < minimum_scenes:
-        repair_prompt = f"""O storyboard abaixo está incompleto: contém {len(scenes)} cenas, mas a duração de {target}s exige NO MÍNIMO {minimum_scenes} cenas (máximo desejado {preferred_scenes + 3}).
-Não reduza a quantidade. Refaça a divisão visual mantendo integralmente a narração, a ordem narrativa e a ideia de cada trecho. Divida trechos longos em unidades visuais menores e específicas, cada uma com voiceover não vazio, ação filmável própria, image_prompt, semantic_reason com pelo menos 80 caracteres, camera_motion, asset_search_query, fallback_search_query e pelo menos dois motion_events.
-A concatenação de todas as falas deve preservar o roteiro completo sem omissões ou repetições. Retorne no mínimo {minimum_scenes} e no máximo {preferred_scenes + 3} cenas. Tema: {topic}. Duração: {target}s. Estilo: {style}.
-Storyboard a expandir:
+    # Hard protocol: never accept fewer than 10 scenes, even for 40 seconds.
+    # Longer videos may require more to keep every clip at <=5 seconds.
+    # Retry the director up to three times automatically, retaining the best
+    # complete response and explicitly rejecting under-segmented output.
+    repair_attempt = 0
+    while len(scenes) < minimum_scenes and repair_attempt < 3:
+        repair_attempt += 1
+        repair_prompt = f"""PROTOCOLO OBRIGATÓRIO DO NEXUS — NÃO IGNORE:
+O storyboard está REPROVADO: contém {len(scenes)} cenas. É proibido entregar 6, 7, 8 ou 9 cenas.
+A duração de {target}s exige NO MÍNIMO ABSOLUTO {minimum_scenes} CENAS. A quantidade mínima é uma regra rígida, não uma sugestão.
+Reestruture o storyboard em pelo menos {minimum_scenes} cenas distintas e filmáveis, sem criar cenas artificiais ou repetidas. Para 40s, use no mínimo 10 cenas; para durações maiores, respeite também o limite de no máximo 5s por cena.
+Preserve integralmente a narração, a ordem narrativa, a ideia e a progressão. Divida trechos longos em beats visuais menores; cada cena precisa ter voiceover não vazio, ação filmável própria, image_prompt, semantic_reason com pelo menos 80 caracteres, camera_motion, asset_search_query, fallback_search_query e pelo menos dois motion_events.
+Não apague nem resuma falas. A concatenação das falas deve preservar o roteiro completo sem omissões ou repetições. Retorne o JSON COMPLETO com pelo menos {minimum_scenes} cenas. Tema: {topic}. Duração: {target}s. Estilo: {style}.
+Esta é a tentativa automática de correção {repair_attempt} de 3.
+Storyboard reprovado:
 {json.dumps(plan, ensure_ascii=False)}
 Retorne somente o JSON completo no formato do sistema."""
         repaired = _request(repair_prompt, secret_reader)
@@ -575,12 +582,13 @@ Retorne somente o JSON completo no formato do sistema."""
         if len(repaired_scenes) > len(scenes):
             plan = repaired
             scenes = repaired_scenes
-        if len(scenes) < minimum_scenes:
-            raise RuntimeError(
-                f"O diretor retornou {len(scenes)} cenas para {target}s, abaixo do mínimo de "
-                f"{minimum_scenes}. A correção automática tentou reorganizar o storyboard, "
-                "mas a resposta continuou incompleta. Tente novamente em instantes."
-            )
+
+    if len(scenes) < minimum_scenes:
+        raise RuntimeError(
+            f"Planejamento recusado: o diretor retornou {len(scenes)} cenas, mas o protocolo "
+            f"NEXUS exige no mínimo {minimum_scenes} para {target}s. Foram feitas 3 tentativas "
+            "automáticas de correção; nenhuma resposta abaixo do mínimo será aceita. Tente planejar novamente."
+        )
 
     # Ask the model to rewrite the missing narration, rather than accepting a
     # storyboard with silent scenes. Retry twice; duration itself is handled
@@ -808,7 +816,7 @@ def validate_storyboard(plan, requested_duration=None):
     if not scenes:
         return ["O diretor não criou cenas."]
     total = 0
-    minimum_scenes = max(1, int((float(requested_duration) + 4) // 5)) if requested_duration else 1
+    minimum_scenes = max(10, int((float(requested_duration) + 4) // 5)) if requested_duration else 10
     if len(scenes) < minimum_scenes:
         errors.append(f"O diretor criou {len(scenes)} cenas, mas são necessárias pelo menos {minimum_scenes} para cobrir {requested_duration}s sem segmentos longos.")
     for index, scene in enumerate(scenes, 1):
