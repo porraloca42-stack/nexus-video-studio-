@@ -279,11 +279,13 @@ with st.expander("Voz da narração · Biblioteca Fish Audio", expanded=True):
         with voice_language_col:
             voice_language_label = st.selectbox("Idioma da voz", ["Português", "Todos"], index=0, key="nexus_fish_voice_language")
         voice_language = "pt" if voice_language_label == "Português" else None
+        voice_source = st.selectbox("Origem", ["Biblioteca pública", "Minhas vozes"], key="nexus_fish_voice_source")
+        voice_self_only = voice_source == "Minhas vozes"
         voices_per_page = 6
         try:
             first_voice_page = list_fish_voices(
                 fish_api_key, page=1, page_size=voices_per_page,
-                title=voice_search, language=voice_language,
+                title=voice_search, language=voice_language, self_only=voice_self_only,
             )
             total_voice_pages = max(1, (first_voice_page["total"] + voices_per_page - 1) // voices_per_page)
             voice_page = st.selectbox(
@@ -294,9 +296,12 @@ with st.expander("Voz da narração · Biblioteca Fish Audio", expanded=True):
             )
             voice_page_data = first_voice_page if voice_page == 1 else list_fish_voices(
                 fish_api_key, page=voice_page, page_size=voices_per_page,
-                title=voice_search, language=voice_language,
+                title=voice_search, language=voice_language, self_only=voice_self_only,
             )
             voices = voice_page_data["items"]
+            if not st.session_state.get("nexus_fish_voice_id") and voices:
+                st.session_state["nexus_fish_voice_id"] = voices[0]["id"]
+                st.session_state["nexus_fish_voice_name"] = voices[0]["title"]
             if not voices:
                 st.info("Nenhuma voz encontrada com esse filtro. Experimente buscar outro nome ou selecionar Todos.")
             for fish_voice in voices:
@@ -339,13 +344,10 @@ with st.expander("Voz da narração · Biblioteca Fish Audio", expanded=True):
                         st.session_state["nexus_fish_voice_id"] = voice_id
                         st.session_state["nexus_fish_voice_name"] = fish_voice["title"]
                         st.rerun()
-            if not st.session_state.get("nexus_fish_voice_id") and voices:
-                st.session_state["nexus_fish_voice_id"] = voices[0]["id"]
-                st.session_state["nexus_fish_voice_name"] = voices[0]["title"]
             if st.session_state.get("nexus_fish_voice_id"):
                 selected_voice_name = st.session_state.get("nexus_fish_voice_name") or st.session_state["nexus_fish_voice_id"]
                 st.caption(f"Voz selecionada para os próximos vídeos: {selected_voice_name}")
-                st.caption("A lista é consultada diretamente na biblioteca Fish Audio. As amostras publicadas são reproduzidas aqui; quando não há amostra, você pode gerar uma prévia curta.")
+                st.caption("A lista vem diretamente da Fish Audio. Cada voz mostra sua amostra publicada ou permite gerar uma prévia curta. Para conteúdo monetizado, confirme os direitos de uso das vozes públicas de terceiros.")
             else:
                 st.warning("Escolha uma voz antes de produzir o vídeo.")
         except Exception as voice_error:
