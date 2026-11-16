@@ -249,3 +249,9 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Correção commit pendente: remover totalmente a dependência de `SubMaker`. `nexus/audio.py` passa a coletar eventos WordBoundary/SentenceBoundary do stream e gerar SRT diretamente, convertendo ticks de 100 ns para timestamps SRT, agrupando palavras em legendas curtas. Se o serviço não emitir eventos de tempo, gera legendas aproximadas para que a produção não pare apenas por falta de metadados de sincronização.
 - Testes adicionados: geração de MP3/SRT sem SubMaker, fallback por SentenceBoundary e fallback sem eventos de tempo.
 - Validação pendente: CI e produção real no Streamlit. A sincronização de fallback sem eventos é estimada, não word-level; a sincronização precisa usa eventos do Edge TTS.
+
+
+### Ajuste de testes da correção SRT — 16/11/2026
+- O primeiro CI da correção de legendas falhou porque o arquivo de testes antigo ainda esperava a implementação anterior baseada em `SubMaker`. A implementação já havia removido essa dependência, mas os testes não foram atualizados de forma consistente devido a commits concorrentes.
+- Commit subsequente substitui os testes antigos por testes da implementação efetiva: eventos WordBoundary, fallback SentenceBoundary e fallback sem metadados temporais.
+- Até novo CI verde, a correção permanece não validada e não deve ser considerada implantada.
