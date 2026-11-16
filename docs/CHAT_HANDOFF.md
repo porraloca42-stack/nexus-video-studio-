@@ -170,3 +170,12 @@ O usuário ficou frustrado com orientações longas/repetitivas e com uma previs
 - Hipótese principal: incompatibilidade momentânea entre versão do app.py e do módulo nexus/audio.py durante sincronização/deploy do Streamlit. Não foi possível confirmar a causa exata porque o traceback foi redigido/cortado.
 - Próximo passo: aguardar Streamlit sincronizar main e confirmar que a aplicação abre. Se ainda falhar, obter o erro exato dos logs e corrigir com base nele.
 - Não declarar validado ainda: somente commit confirmado, sem teste de execução do Streamlit Cloud.
+
+## Ponto mais recente — IndentationError corrigido (16/11/2026 16:30 BRT)
+- Usuário enviou captura com `IndentationError: unexpected indent` na variável `excluded_voice_terms` dentro do bloco de curadoria de vozes em `app.py`.
+- Causa confirmada: indentação excessiva no bloco dentro de `try:`.
+- Correção em main: commit `60693ba`, reindentado bloco de curadoria desde a chamada `list_fish_voices` até a atribuição `voice_page_data["items"]`.
+- Pós-commit: arquivo `app.py` relido do GitHub main e bloco visualmente conferido.
+- Validação ainda pendente: compilação Python/CI e reinício/reload do Streamlit Cloud. Não declarar app funcionando até confirmação visual.
+- Próximo passo: aguardar Streamlit atualizar e testar carregamento; se persistir erro, capturar traceback novo e corrigir causa exata.
+- Assumir claramente que o erro de indentação foi introduzido pela alteração anterior; não pedir ao usuário para fazer debugging.
