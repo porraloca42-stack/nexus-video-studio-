@@ -280,3 +280,15 @@ O usuário ficou frustrado com orientações longas/repetitivas e com uma previs
 - Estado: worker implantado e inferência H100 validada; MP4 exportado e validado tecnicamente. Qualidade editorial/movimento ainda precisa inspeção visual do MP4. Smoke test usou paisagem sintética, não imagem real do NEXUS.
 - Próximo passo: baixar artefato e assistir ao MP4; depois executar render de uma cena real via pipeline NEXUS (Cloudflare base image -> Modal I2V -> Remotion) e validar compatibilidade/duração/qualidade; somente então render de 40–50s.
 - Tempo de inferência 7.863s refere-se ao campo retornado pelo worker para 2s de vídeo; não equivale ao tempo total do job nem a custo faturado. Verificar Modal usage/billing para custo real.
+
+## Preparação do teste integrado Cloudflare → LTX → Remotion — 16/11/2026 17:40 BRT
+- Usuário autorizou prosseguir até concluir a validação do pipeline.
+- Adicionado `scripts/live_pipeline_smoke_test.py` (commit `c7b6224`): gera uma imagem editorial real no Cloudflare FLUX.2 Klein, anima com o worker Modal LTX, cria faixa de áudio sintética de validação, compõe o clipe no Remotion e valida MP4 vertical 720×1280 com H.264/AAC, duração e tamanho.
+- Adicionado workflow manual `.github/workflows/nexus-live-pipeline-smoke.yml` (commit `75417b1`): instala FFmpeg/Python/Node/Remotion, usa secrets Cloudflare + Modal, executa a integração real e publica MP4, imagem-base e relatório como artifact por 3 dias.
+- O teste usa áudio sintético de 440Hz somente para validar muxagem do Remotion; NÃO é narração de produção e NÃO testa Fish Audio. Não exige credenciais Fish.
+- CI regression #534, run ID `43952157568`, commit `c7b6224`: todos os jobs concluídos com sucesso; compilação Python (inclui scripts), testes unitários, typecheck Remotion e smoke Commons.
+- CI #535, run ID `43952202569`, commit `75417b1`, foi disparado após adicionar workflow; estava em andamento na última consulta.
+- Remotion demo render #75, run ID `43952157522`, commit `c7b6224`: typecheck e testes de adapters passaram; job ainda executava etapas de integração de mídia/Remotion.
+- Limitação operacional: conector GitHub disponível não expõe ação para disparar workflow_dispatch. O workflow integrado precisa de um clique manual do usuário. Link: https://github.com/porraloca42-stack/nexus-video-studio-/actions/workflows/nexus-live-pipeline-smoke.yml
+- Após workflow #535 aprovar, usuário precisa executar o workflow acima uma vez. A execução chama Cloudflare Workers AI e Modal H100 e pode gerar custos; confirmar spend limit/créditos antes. O output artifact contém MP4 final e report.
+- Critério de conclusão desta fase: workflow integrado success, MP4 720×1280 H.264 + AAC validado, duração ~2s, e inspeção visual do movimento. Em seguida, rodar vídeo completo de 40–50s somente após verificar custos e qualidade; produção integral requer Fish Audio credentials e manifesto editorial real.
