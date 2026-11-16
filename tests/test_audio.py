@@ -81,6 +81,23 @@ class AudioSubtitleTests(unittest.TestCase):
             self.assertLessEqual(len(caption.splitlines()), 2)
             self.assertLessEqual(len(caption.split()), 4)
 
+    def test_captions_are_short_phrases_with_at_most_two_lines(self):
+        words = ["A", "mudança", "começa", "quando", "você", "decide", "agir", "mesmo", "com", "medo", "e", "continua"]
+        events = [
+            {
+                "type": "WordBoundary",
+                "offset": index * 450 * 10_000,
+                "duration": 400 * 10_000,
+                "text": word,
+            }
+            for index, word in enumerate(words)
+        ]
+        cues = _subtitle_cues(events, " ".join(words))
+        self.assertGreater(len(cues), 1)
+        for _, _, caption in cues:
+            self.assertLessEqual(len(caption.splitlines()), 2)
+            self.assertLessEqual(len(caption.split()), 4)
+
 
 if __name__ == "__main__":
     unittest.main()
