@@ -308,42 +308,43 @@ with st.expander("Voz da narração · Biblioteca Fish Audio", expanded=True):
                 voice_id = fish_voice["id"]
                 if not voice_id:
                     continue
-                audio_col, details_col, select_col = st.columns([1.45, 4.8, 1.2])
-                with audio_col:
+                with st.container():
                     preview_key = f"nexus_fish_preview_{voice_id}"
                     cached_preview = st.session_state.get(preview_key)
                     if fish_voice.get("sample_audio"):
                         st.audio(fish_voice["sample_audio"], format="audio/mp3")
                     elif cached_preview:
                         st.audio(cached_preview, format="audio/mp3")
-                    elif st.button("Gerar áudio", key=f"fish_preview_button_{voice_id}", use_container_width=True):
+                    elif st.button("Gerar amostra de áudio", key=f"fish_preview_button_{voice_id}", use_container_width=True):
                         try:
                             st.session_state[preview_key] = generate_fish_preview(fish_api_key, voice_id)
                             st.rerun()
                         except Exception as preview_error:
                             st.error(f"Não foi possível gerar a amostra: {preview_error}")
-                with details_col:
-                    st.markdown(f"**{fish_voice['title']}**")
-                    metadata = []
-                    if fish_voice.get("author"):
-                        metadata.append(f"por {fish_voice['author']}")
-                    if fish_voice.get("languages"):
-                        metadata.append(", ".join(fish_voice["languages"][:4]))
-                    if fish_voice.get("tags"):
-                        metadata.append(", ".join(fish_voice["tags"][:4]))
-                    if metadata:
-                        st.caption(" · ".join(metadata))
-                    if fish_voice.get("description"):
-                        st.caption(fish_voice["description"][:180])
-                    if fish_voice.get("sample_text"):
-                        st.caption(f"Amostra original: {fish_voice['sample_text'][:120]}")
-                with select_col:
-                    if voice_id == st.session_state.get("nexus_fish_voice_id"):
-                        st.success("Em uso")
-                    elif st.button("Escolher", key=f"fish_select_{voice_id}", use_container_width=True):
-                        st.session_state["nexus_fish_voice_id"] = voice_id
-                        st.session_state["nexus_fish_voice_name"] = fish_voice["title"]
-                        st.rerun()
+                    details_col, select_col = st.columns([5, 1])
+                    with details_col:
+                        st.markdown(f"**{fish_voice['title']}**")
+                        metadata = []
+                        if fish_voice.get("author"):
+                            metadata.append(f"por {fish_voice['author']}")
+                        if fish_voice.get("languages"):
+                            metadata.append(", ".join(fish_voice["languages"][:4]))
+                        if fish_voice.get("tags"):
+                            metadata.append(", ".join(fish_voice["tags"][:4]))
+                        if metadata:
+                            st.caption(" · ".join(metadata))
+                        if fish_voice.get("description"):
+                            st.caption(fish_voice["description"][:180])
+                        if fish_voice.get("sample_text"):
+                            st.caption(f"Amostra original: {fish_voice['sample_text'][:120]}")
+                    with select_col:
+                        if voice_id == st.session_state.get("nexus_fish_voice_id"):
+                            st.success("Em uso")
+                        elif st.button("Escolher", key=f"fish_select_{voice_id}", use_container_width=True):
+                            st.session_state["nexus_fish_voice_id"] = voice_id
+                            st.session_state["nexus_fish_voice_name"] = fish_voice["title"]
+                            st.rerun()
+                    st.divider()
             if st.session_state.get("nexus_fish_voice_id"):
                 selected_voice_name = st.session_state.get("nexus_fish_voice_name") or st.session_state["nexus_fish_voice_id"]
                 st.caption(f"Voz selecionada para os próximos vídeos: {selected_voice_name}")
