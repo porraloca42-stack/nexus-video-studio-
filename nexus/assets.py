@@ -70,27 +70,75 @@ def search_pixabay_videos(query, api_key, per_page=20):
     results.sort(key=lambda x: (x['vertical'], x['width'] * x['height']), reverse=True)
     return results
 
-def search_video_sources(query, coverr_key='', pixabay_key='', per_page=20):
+def _query_tokens(value):
+    words = re.findall(r"[a-zA-Z0-9]+", str(value or "").lower())
+    return [word for word in words if word not in _STOPWORDS and len(word) > 2]
+
+
+def rank_video_candidates(candidates, query):
+    """Rank stock results by scene-query relevance before technical quality."""
+    query_terms = list(dict.fromkeys(_query_tokens(query)))
+    if not query_terms:
+        query_terms = []
+    for item in candidates:
+        title_terms = set(_query_tokens(item.get("title", "")))
+        description_terms = set(_query_tokens(item.get("description", "")))
+        matched_title = len(set(query_terms) & title_terms)
+        matched_description = len(set(query_terms) & description_terms)
+        coverage = (matched_title + matched_description) / max(1, len(query_terms))
+        # Semantic text relevance outranks orientation/resolution; technical
+        # quality is only a tie-breaker and must not promote unrelated stock.
+        item["_nexus_relevance"] = (
+            matched_title * 4.0
+            + matched_description * 1.5
+            + coverage * 3.0
+        )
+        item["_nexus_quality"] = (
+            1 if item.get("vertical") else 0,
+            min(int(item.get("height") or 0), 2160),
+            min(int(item.get("width") or 0), 2160),
+        )
+    return sorted(
+        candidates,
+        key=lambda item: (item["_nexus_relevance"], *item["_nexus_quality"]),
+        reverse=True,
+    )
+
+
+def search_video_sources(query, coverr_key='', pixabay_key='', per_page=20, exclude_urls=None):
     errors = []
-    variants = build_query_variants(query)
+    excluded = set(exclude_urls or [])
+    variants = build_query_variants(query, max_variants=4)
+
+    def usable(results, source, search_query):
+        unique = []
+        seen = set(excluded)
+        for item in results:
+            url = item.get("url")
+            if not url or url in seen:
+                continue
+            seen.add(url)
+            item["matched_query"] = search_query
+            item["source"] = item.get("source") or source
+            unique.append(item)
+        return rank_video_candidates(unique, query)
+
     if coverr_key:
         for search_query in variants:
             try:
                 results = search_coverr_videos(search_query, coverr_key, per_page)
-                if results:
-                    for item in results:
-                        item['matched_query'] = search_query
-                    return results, errors
+                ranked = usable(results, "Coverr", search_query)
+                if ranked:
+                    return ranked, errors
             except requests.RequestException as exc:
                 errors.append(f'Coverr ({search_query}): {exc}')
     if pixabay_key:
         for search_query in variants:
             try:
                 results = search_pixabay_videos(search_query, pixabay_key, per_page)
-                if results:
-                    for item in results:
-                        item['matched_query'] = search_query
-                    return results, errors
+                ranked = usable(results, "Pixabay", search_query)
+                if ranked:
+                    return ranked, errors
             except requests.RequestException as exc:
                 errors.append(f'Pixabay ({search_query}): {exc}')
     return [], errors
