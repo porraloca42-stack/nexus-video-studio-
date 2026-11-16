@@ -53,7 +53,7 @@ def normalize_review(payload, scenes):
     return result
 
 
-def review_scene_frames(frame_paths, scenes, api_key, model="gemini-2.5-flash", timeout=180, session=None):
+def review_scene_frames(frame_paths, scenes, api_key, model=None, timeout=180, session=None):
     """Review one representative rendered frame per scene against its narration."""
     if not api_key:
         raise RuntimeError("GEMINI_API_KEY ausente para auditoria visual.")
@@ -80,26 +80,41 @@ def review_scene_frames(frame_paths, scenes, api_key, model="gemini-2.5-flash", 
     }]
     for path in frame_paths:
         image_bytes = Path(path).read_bytes()
-        parts.append({"inline_data": {
-            "mime_type": "image/jpeg",
+        parts.append({"inlineData": {
+            "mimeType": "image/jpeg",
             "data": base64.b64encode(image_bytes).decode("ascii"),
         }})
     client = session or requests
-    response = client.post(
-        f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
-        params={"key": api_key},
-        json={
-            "contents": [{"role": "user", "parts": parts}],
-            "generationConfig": {"temperature": 0.1, "responseMimeType": "application/json", "maxOutputTokens": 4096},
-        },
-        timeout=timeout,
-    )
-    response.raise_for_status()
-    candidates = response.json().get("candidates") or []
-    text = "\\n".join(
-        p.get("text", "") for p in candidates[0].get("content", {}).get("parts", [])
-        if isinstance(p, dict) and p.get("text")
-    ) if candidates else ""
+    if model is None:
+        from nexus.director import discover_models
+        models = discover_models(api_key, "auto")[:5]
+    else:
+        models = [model]
+    last_error = None
+    text = ""
+    for candidate_model in models:
+        try:
+            response = client.post(
+                f"https://generativelanguage.googleapis.com/v1beta/models/{candidate_model}:generateContent",
+                params={"key": api_key},
+                json={
+                    "contents": [{"role": "user", "parts": parts}],
+                    "generationConfig": {"temperature": 0.1, "responseMimeType": "application/json", "maxOutputTokens": 4096},
+                },
+                timeout=timeout,
+            )
+            response.raise_for_status()
+            candidates = response.json().get("candidates") or []
+            text = "\n".join(
+                p.get("text", "") for p in candidates[0].get("content", {}).get("parts", [])
+                if isinstance(p, dict) and p.get("text")
+            ) if candidates else ""
+            if text.strip():
+                break
+        except requests.RequestException as exc:
+            last_error = exc
+    if not text.strip() and last_error:
+        raise RuntimeError("Gemini não conseguiu concluir a auditoria visual.") from last_error
     if not text.strip():
         raise RuntimeError("Gemini não retornou conteúdo para a auditoria visual.")
     try:
