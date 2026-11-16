@@ -359,3 +359,12 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Commit 1777448: shortlist diversificada testada. Commit 8640d6e: testes da avaliação visual Gemini. Commit d7e3eb4: testes de legendas curtas.
 - Commit 0579667: painel passa a mostrar confiança média e justificativa da revisão visual por cena; build `NEXUS-2026.11.16-visual-review-subtitles-4`.
 - CI das alterações finais ainda em execução; primeiras execuções identificaram falhas nos testes de legenda e importação Path, que foram corrigidas nos commits seguintes. Não declarar a nova versão validada até CI verde e nova produção real.
+
+
+### CI verde: revisão visual Gemini e novo layout de legendas — 16/11/2026
+- GitHub Actions run #139 (43823404090), commit d7e3eb4: sucesso.
+- Job unit-tests: 29 testes executados em 2,285s; resultado OK.
+- Inclui teste de shortlist diversificada entre bibliotecas, teste de legendas curtas em até duas linhas e testes de seleção/rejeição de candidatos pela avaliação visual Gemini.
+- Run #140 (842939c, atualização do estado mestre): também concluído com sucesso.
+- Build atual indicado no app: `NEXUS-2026.11.16-visual-review-subtitles-4`.
+- Código e testes validados pelo CI. Ainda falta deploy/refresh real do Streamlit e um segundo MP4 para validação audiovisual da nova seleção de clipes e do layout das legendas.
