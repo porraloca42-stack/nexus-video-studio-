@@ -569,3 +569,13 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - CI Remotion anterior no commit `82c7535`: typecheck, render da composição de demonstração e render da composição por manifesto concluídos com sucesso; artefato `nexus-remotion-demos` publicado (4.643.759 bytes). MP4s ainda não foram inspecionados visualmente.
 - CI Remotion mais recente no commit `2ef3b18`: typecheck passou; render da demo está em execução, depois seguirá para o render do manifesto e upload. Verificar conclusão antes de considerar a versão com `staticFile()` validada.
 - O adaptador Python ainda NÃO foi ligado ao botão de renderização do Streamlit. O ambiente Streamlit Community Cloud precisa de uma estratégia Node/Chromium compatível; `packages.txt` instala dependências apt, mas não se deve presumir que o Node disponível tenha versão suficiente. Não alterar o renderer padrão antes de testar o ambiente de execução.
+
+
+## Validação de mídia real via adaptador Remotion — 16/11/2026
+- Os artefatos da execução #43841148965 foram baixados e inspecionados localmente com FFprobe e extração de quadro.
+- `nexus-demo.mp4`: H.264, 720×1280, 30 fps, 50,0 s; render de composição gráfica concluído.
+- `nexus-manifest.mp4`: H.264, 720×1280, 30 fps, 50,0 s; composição JSON concluída. Um quadro extraído confirmou render visual, mas esse exemplo usa gráficos e ainda não prova integração de clipes reais/áudio.
+- Criado `scripts/build_remotion_ci_manifest.py` para gerar manifesto com o adaptador Python real a partir de mídia de teste.
+- Workflow ampliado para gerar clipe sintético e áudio, converter SRT, chamar `nexus/remotion_renderer.py`, renderizar a composição resultante e verificar com FFprobe vídeo H.264 720×1280, faixa de áudio e duração de 4 s. O artefato agora também inclui esse MP4 de integração.
+- Execução #43841744780 (commit 447ca5e) está em andamento; typecheck já passou, render gráfico de 50 s em execução, etapa de integração áudio/vídeo ainda pendente. A execução seguinte #43841779142 (commit dbbd961) também foi disparada pelo ajuste de workflow.
+- O adaptador Python e o workflow estão implementados no GitHub. Não conectar ainda ao Streamlit: primeiro aguardar o teste ponta a ponta com áudio e vídeo e decidir a infraestrutura Node/Chromium para o app publicado.
