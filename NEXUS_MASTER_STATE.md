@@ -776,3 +776,13 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Commit `4077bfd`: removidas as headlines remanescentes do manifesto de demonstração após o typecheck identificar incompatibilidade.
 - CI ainda em andamento para commits `90e39c2` e `4077bfd`; aguardar aprovação.
 - Auditoria visual detalhada do MP4: imagens estáticas distintas, mas zoom anterior era discreto; texto inglês de visualDescription era impresso; transições tinham opacidade zero no primeiro/último frame de cada cena. Correções aplicadas em `d330197` e `3ba6da1`.
+
+
+## Contrato de direção cinematográfica — 16/11/2026
+- Commit `47b2b51`: ampliado o prompt do Gemini com um contrato estruturado `scene_direction` por cena: câmera parametrizada, camadas de profundidade, iluminação, atmosfera, transições e beats visuais.
+- O contrato limita intensidade e parallax a valores normalizados, escala de câmera a 1.0–1.15, no máximo três beats por cena e enumera opções de fallback seguras. Também instrui o diretor a não prometer animação orgânica de pessoas/objetos quando a fonte for uma imagem única sem camadas.
+- Commit `d6d2942`: testes de contrato verificam que o prompt exige direção estruturada, camadas e beats.
+- Commit `094dfce`: corrigido o teste de legendas para comparar texto normalizado sem confundir quebra de linha real com os dois caracteres `\\n`. A falha anterior era do teste, não de geração de legenda.
+- Run #43874109675 foi iniciado para validar os três commits; no momento deste registro ainda estava em execução. Não declarar CI aprovado até consultar o resultado final.
+- Escopo desta etapa: contrato e instruções do diretor Gemini. O motor de render ainda não consome todos esses parâmetros; efeitos de profundidade, luz, atmosfera, transições e beats permanecem pendentes de implementação e teste no renderizador.
+- Estado de produto: contrato implementado no prompt; validação automatizada pendente; deploy Streamlit e MP4 real não validados.
