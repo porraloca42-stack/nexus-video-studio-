@@ -133,6 +133,8 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Commit `04c1cac3` adiciona `tests/test_render.py`, com dois testes de integração reais usando FFmpeg/FFprobe: MP4 vertical com H.264/AAC, legendas e duração correta; e bloqueio de desvio excessivo entre narração e timeline. Commit `c4ec0f00` atualiza CI para instalar FFmpeg antes dos testes.
 - Reteste local completo da suíte de verificação (assets + render): 9 testes passaram em 2,35s; `compileall` dos módulos de busca/render e testes também passou. Os testes foram executados em ambiente local com cópia dos arquivos relevantes do repositório; CI remoto continua aguardando confirmação.
 
+- Commit `56bfb729` em `app.py`: a validação final agora exige 720×1280 e duração dentro de 0,75s da timeline solicitada. O diretório temporário da produção é removido ao final, inclusive em caso de erro; o MP4 permanece disponível porque seus bytes são guardados em `session_state`. Mensagens de falha foram simplificadas para o usuário.
+
 ## Regras para o assistente em novos chats
 - Começar lendo este arquivo e o código relevante no GitHub antes de propor mudanças.
 - Tratar este documento como registro de continuidade, mas conferir o estado atual do repositório e deployment; pode ficar desatualizado.
