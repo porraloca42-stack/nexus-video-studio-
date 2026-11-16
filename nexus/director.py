@@ -228,7 +228,7 @@ def _request(prompt, secret_reader):
             candidate = candidates[0]
             finish_reason = candidate.get("finishReason", "desconhecido")
             parts = candidate.get("content", {}).get("parts", [])
-            result = "\\n".join(
+            result = "\n".join(
                 part.get("text", "")
                 for part in parts
                 if isinstance(part, dict) and part.get("text")
@@ -240,7 +240,7 @@ def _request(prompt, secret_reader):
                 )
 
             cleaned = re.sub(
-                r"^\\s*```(?:json)?\\s*|\\s*```\\s*$",
+                r"^\s*```(?:json)?\s*|\s*```\s*$",
                 "",
                 result.strip(),
                 flags=re.IGNORECASE,
@@ -263,7 +263,7 @@ def _request(prompt, secret_reader):
                         "O Gemini interrompeu a resposta por limite de saída antes "
                         "de concluir o storyboard. Tente novamente."
                     )
-                preview = re.sub(r"\\s+", " ", result)[:350]
+                preview = re.sub(r"\s+", " ", result)[:350]
                 raise RuntimeError(
                     "O Gemini não retornou JSON completo e válido (motivo: "
                     + str(finish_reason) + "). Trecho recebido: " + preview
