@@ -25,3 +25,6 @@ A seleção visual multimodal dos clipes ainda não foi implementada. Não consi
 
 
 A seleção multi-fonte preserva os metadados de origem dos clipes e apresenta créditos na interface de prévia quando a produção termina. A seleção visual por modelo multimodal continua sendo uma etapa futura; o ranking atual usa metadados textuais e qualidade técnica.
+
+
+O painel de diagnóstico permite testar cada biblioteca configurada, incluindo busca, download de um clipe e validação por FFprobe. Cadastre as credenciais somente em Streamlit Secrets; nunca no repositório.
