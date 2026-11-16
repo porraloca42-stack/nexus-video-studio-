@@ -647,10 +647,16 @@ Ação visual planejada: {scene.get('visual_action', '')}
 Sujeitos: {scene.get('subjects', '')}
 Ambiente: {scene.get('setting', '')}
 Justificativa semântica: {scene.get('semantic_reason', '')}
+Estilo visual obrigatório do vídeo: {scene.get('visual_style', scene.get('style_search_terms', ''))}
 Busca visual solicitada: {scene.get('asset_search_query', '')}
 
-Compare o que realmente aparece nos quadros com a fala e a ação planejada. Priorize correspondência concreta de pessoas, objetos, gestos, ambiente e processo. Não aceite apenas semelhança de cor, clima, emoção ou estética. Natureza genérica, água, paisagem, copos, prédios ou pessoas aleatórias NÃO representam automaticamente conceitos abstratos. Um clipe pode ser bonito, mas deve ser rejeitado se não materializar a fala. Considere todos os quadros de cada candidato. Se nenhum tiver relação visual direta, selecione 0. Não invente correspondência. Dê confiança de 0 a 100 e aprove somente com confiança mínima de {int(minimum_confidence)}.
-Retorne somente JSON: {{"selected_candidate":1,"confidence":85,"reason":"..."}}.
+REGRA DE DECISÃO, SEM EXCEÇÕES:
+1. A maior prioridade é a correspondência REAL com a narração e a ação desta cena. Escolha o vídeo que melhor mostra o que está sendo dito, mesmo que outro seja mais bonito ou tenha estética mais atraente.
+2. Estilo visual é critério secundário: entre candidatos com conexão narrativa semelhante, prefira o que respeita melhor o estilo bloqueado. Nunca escolha um vídeo de baixa conexão narrativa apenas por combinar com o estilo.
+3. Qualidade técnica (resolução, enquadramento e nitidez) é critério terciário, usado para desempate entre candidatos semanticamente equivalentes.
+4. Avalie TODOS os candidatos juntos e compare os quadros reais, não apenas títulos, tags ou descrições. Pontue separadamente a conexão com narração/ação (semantic_match, 0–100) e a aderência ao estilo (style_match, 0–100). Escolha o maior semantic_match; use style_match apenas como desempate. confidence deve refletir a conexão semântica, não a beleza geral.
+Não aceite apenas semelhança de cor, clima, emoção ou estética. Natureza genérica, água, paisagem, copos, prédios ou pessoas aleatórias NÃO representam automaticamente conceitos abstratos. Se nenhum candidato tiver relação visual direta e suficiente com a fala, selecione 0. Não invente correspondência. Aprove somente com confidence mínima de {int(minimum_confidence)}.
+Retorne somente JSON: {{"selected_candidate":1,"semantic_match":88,"style_match":72,"confidence":88,"reason":"..."}}.
 Os números dos candidatos aparecem imediatamente antes de seus quadros."""
 
     parts = [{"text": prompt}]
@@ -703,15 +709,25 @@ Os números dos candidatos aparecem imediatamente antes de seus quadros."""
             cleaned = re.sub(r"^\s*```(?:json)?\s*|\s*```\s*$", "", response_text.strip(), flags=re.I)
             result = json.loads(cleaned)
             selected = int(result.get("selected_candidate", 0))
-            confidence = max(0, min(100, int(result.get("confidence", 0))))
+            confidence = max(0, min(100, int(result.get("confidence", result.get("semantic_match", 0)))))
+            semantic_match = max(0, min(100, int(result.get("semantic_match", confidence))))
+            style_match = max(0, min(100, int(result.get("style_match", 0))))
             reason = str(result.get("reason", "")).strip()
             if selected < 1 or selected > len(candidates_with_frames) or confidence < int(minimum_confidence):
                 return {
                     "selected_candidate": 0,
                     "confidence": confidence,
+                    "semantic_match": semantic_match,
+                    "style_match": style_match,
                     "reason": reason or "Nenhum clipe atingiu a confiança visual mínima.",
                 }
-            return {"selected_candidate": selected, "confidence": confidence, "reason": reason}
+            return {
+                "selected_candidate": selected,
+                "confidence": confidence,
+                "semantic_match": semantic_match,
+                "style_match": style_match,
+                "reason": reason,
+            }
         except (requests.RequestException, ValueError, TypeError, KeyError, IndexError) as exc:
             last_error = str(exc)[:400]
             continue
