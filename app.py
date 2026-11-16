@@ -4,7 +4,7 @@ import requests
 import streamlit as st
 from nexus.director import create_storyboard, validate_storyboard
 from nexus.assets import search_video_sources, download_file, diverse_candidate_shortlist
-from nexus.audio import generate_fish_preview, list_fish_voices, make_voice
+from nexus.audio import generate_fish_preview, get_fish_voice, make_voice
 from nexus.render import render_video
 
 
@@ -273,100 +273,60 @@ if not fish_api_key:
     st.error("Configure FISH_API_KEY nos Secrets do Streamlit.")
 else:
     try:
-        # Search several pages so the selector is not limited to the first
-        # 100 popular models (which often over-represents meme/character voices).
-        voice_by_id = {}
-        for voice_page in range(1, 4):
-            page_data = list_fish_voices(
-                fish_api_key, page=voice_page, page_size=100, language="pt",
-            )
-            for candidate in page_data["items"]:
-                if candidate.get("id"):
-                    voice_by_id[candidate["id"]] = candidate
+        # Fixed, reviewed Fish Official voices: no community character models.
+        curated_voice_catalog = (
+            ("Ricardo", "add7bcb8d3c8423bbfa152ca232aad6e"),
+            ("Rafael (Brasil)", "0ffee1af32254090b3630823baade12b"),
+            ("Letícia", "b3c060cc41544a7da94a2c487647c902"),
+            ("Beatriz (Brasil)", "0e26d2df0d0848e3b34099bfb55fd6ea"),
+        )
+        if "nexus_fish_curated_voice_catalog" not in st.session_state:
+            loaded_voices = []
+            for voice_name, voice_id in curated_voice_catalog:
+                try:
+                    model = get_fish_voice(fish_api_key, voice_id)
+                    # Do not silently substitute a model with a different ID/name.
+                    if model["id"] == voice_id:
+                        model["title"] = voice_name
+                        loaded_voices.append(model)
+                except Exception:
+                    continue
+            st.session_state["nexus_fish_curated_voice_catalog"] = loaded_voices
 
-        excluded_voice_terms = (
-            "meme", "anime", "personagem", "character", "lula", "bolsonaro",
-            "celebrity", "celebridade", "impersonation", "imitação", "imitacao",
-            "cartoon", "parody", "paródia", "parodia", "fictional character",
-            "video game", "game character", "politician", "político", "politico",
-        )
-        natural_voice_terms = (
-            "narration", "narrador", "narradora", "conversational", "conversacional",
-            "documentary", "documentário", "documentario", "professional", "profissional",
-            "neutral", "neutro", "natural", "calm", "calmo", "calma", "warm", "acolhedor",
-            "soft", "suave", "deep", "grave", "storytelling", "locução", "locucao",
-            "voice over", "voiceover", "podcast", "interview", "entrevista",
-        )
-        brazilian_voice_terms = (
-            "brazilian", "brasileir", "português do brasil", "portugues do brasil",
-            "portuguese (brazil)", "pt-br", "brasil",
-        )
-        curated_voices = []
-        for candidate in voice_by_id.values():
-            metadata = " ".join([
-                candidate.get("title", ""),
-                candidate.get("description", ""),
-                " ".join(candidate.get("tags") or []),
-            ]).casefold()
-            language_data = " ".join(candidate.get("languages") or []).casefold()
-            if any(term in metadata for term in excluded_voice_terms):
-                continue
-            if language_data and not any(term in language_data for term in ("pt", "portugu")):
-                continue
-            if any(term in metadata for term in ("portugal", "european portuguese", "pt-pt")):
-                continue
-            # Only show models whose public metadata identifies Brazilian Portuguese.
-            if not any(term in metadata for term in brazilian_voice_terms):
-                continue
-            candidate["_nexus_voice_rank"] = (
-                1 if any(term in metadata for term in natural_voice_terms) else 0,
-                int(candidate.get("task_count") or 0),
-            )
-            curated_voices.append(candidate)
-
-        # Keep ordinary, unlabelled voices as fallback; prioritize voices whose
-        # public metadata explicitly describes Brazilian and natural narration.
-        curated_voices.sort(
-            key=lambda item: item["_nexus_voice_rank"], reverse=True,
-        )
-        voice_page_data = {"items": curated_voices, "total": len(curated_voices)}
-        voices = [
-            item for item in voice_page_data["items"]
-            if item.get("id") and item.get("visibility", "public") == "public"
-        ]
+        voices = st.session_state["nexus_fish_curated_voice_catalog"]
         if not voices:
-            st.warning("Nenhuma voz em português disponível na biblioteca Fish Audio.")
+            st.error("Não foi possível carregar as vozes oficiais brasileiras da Fish Audio.")
         else:
-            voice_by_id = {item["id"]: item for item in voices}
-            voice_ids = list(voice_by_id)
+            valid_voice_ids = {item["id"] for item in voices}
             current_voice_id = st.session_state.get("nexus_fish_voice_id", "")
-            selected_index = voice_ids.index(current_voice_id) if current_voice_id in voice_ids else 0
-            select_col, preview_col = st.columns([4, 1], vertical_alignment="bottom")
-            with select_col:
-                selected_voice_id = st.selectbox(
-                    "Voz da narração",
-                    options=voice_ids,
-                    index=selected_index,
-                    format_func=lambda voice_id: voice_by_id[voice_id]["title"],
-                    key="nexus_fish_voice_select",
-                )
-            selected_voice = voice_by_id[selected_voice_id]
-            st.session_state["nexus_fish_voice_id"] = selected_voice_id
-            st.session_state["nexus_fish_voice_name"] = selected_voice["title"]
-            with preview_col:
-                preview_key = f"nexus_fish_preview_{selected_voice_id}"
-                preview_audio = st.session_state.get(preview_key)
-                sample_audio = selected_voice.get("sample_audio")
-                if sample_audio:
-                    st.audio(sample_audio, format="audio/mp3")
-                elif preview_audio:
-                    st.audio(preview_audio, format="audio/mp3")
-                elif st.button("▶ Ouvir", key=f"fish_preview_button_{selected_voice_id}", use_container_width=True):
-                    try:
-                        st.session_state[preview_key] = generate_fish_preview(fish_api_key, selected_voice_id)
+            if current_voice_id not in valid_voice_ids:
+                current_voice_id = voices[0]["id"]
+                st.session_state["nexus_fish_voice_id"] = current_voice_id
+            st.session_state["nexus_fish_voice_name"] = next(
+                item["title"] for item in voices if item["id"] == current_voice_id
+            )
+
+            # Buttons are deliberate choices, not a searchable text input.
+            # Each row pairs a voice choice with its published sample player.
+            for voice_option in voices:
+                choice_col, sample_col = st.columns([1, 2], vertical_alignment="center")
+                with choice_col:
+                    is_selected = voice_option["id"] == st.session_state["nexus_fish_voice_id"]
+                    if st.button(
+                        voice_option["title"],
+                        key=f"fish_voice_choice_{voice_option['id']}",
+                        type="primary" if is_selected else "secondary",
+                        use_container_width=True,
+                    ):
+                        st.session_state["nexus_fish_voice_id"] = voice_option["id"]
+                        st.session_state["nexus_fish_voice_name"] = voice_option["title"]
                         st.rerun()
-                    except Exception as preview_error:
-                        st.error(f"Prévia indisponível: {preview_error}")
+                with sample_col:
+                    if voice_option.get("sample_audio"):
+                        st.audio(voice_option["sample_audio"], format="audio/mp3")
+                    else:
+                        st.caption("Amostra indisponível")
+
     except Exception as voice_error:
         st.error(f"Não foi possível carregar as vozes: {voice_error}")
         st.caption("A produção ficará bloqueada até que as vozes sejam carregadas corretamente.")
