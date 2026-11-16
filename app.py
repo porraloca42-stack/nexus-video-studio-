@@ -450,7 +450,7 @@ if "nexus_plan" in st.session_state:
                 ("Wikimedia Commons", True), ("Pixabay", pixabay_key), ("Pexels", pexels_key)
             ) if key
         ]
-        if len(configured_libraries) == 1:
+        if render_mode == "Bibliotecas de vídeo (atual)" and len(configured_libraries) == 1:
             st.warning(
                 f"Somente {configured_libraries[0]} está configurada. "
                 "O NEXUS fará revisão visual dos clipes, mas a variedade de bibliotecas "
