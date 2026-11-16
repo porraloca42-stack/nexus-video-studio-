@@ -233,7 +233,7 @@ div[data-testid="stButton"] button[kind="primary"]:hover{box-shadow:0 8px 25px r
 [data-testid="stAlert"]{border-radius:13px!important}
 [data-testid="stProgress"]>div>div{background:linear-gradient(90deg,#6366F1,#8B5CF6)!important}
 hr{border-color:#27272A!important}
-@media(max-width:850px){.block-container{padding:1rem .8rem 2.5rem!important}.nexus-hero{padding:1.1rem;border-radius:17px}[data-testid="stHorizontalBlock"]{flex-wrap:wrap!important}[data-testid="stHorizontalBlock"]>[data-testid="column"]{min-width:100%!important;flex:1 1 100%!important}.nexus-preview img{width:112px}}
+@media(max-width:850px){.block-container{padding:1rem .8rem 2.5rem!important}.nexus-hero{padding:1.1rem;border-radius:17px}.nexus-preview img{width:112px}}
 </style>
 """, unsafe_allow_html=True)
 
@@ -327,7 +327,6 @@ with col_editor:
 
 with col_preview:
     with st.container(border=True):
-        st.markdown('<div class="nexus-kicker">Direção visual</div>', unsafe_allow_html=True)
         st.markdown('<div class="nexus-kicker">02 · Direção visual</div>', unsafe_allow_html=True)
         style = st.session_state["nexus_style"]
         preview_svg = style_preview_svg(style)
