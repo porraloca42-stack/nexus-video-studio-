@@ -127,7 +127,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 with st.expander("Escolher estilo visual · 24 referências", expanded=False):
-    st.caption("Toque em uma imagem para selecionar a linguagem visual do vídeo.")
+    st.caption("Miniaturas compactas · toque no nome para selecionar.")
     for row_start in range(0, len(STYLE_OPTIONS), 2):
         cols = st.columns(2)
         for offset, col in enumerate(cols):
@@ -136,8 +136,8 @@ with st.expander("Escolher estilo visual · 24 referências", expanded=False):
                 continue
             option = STYLE_OPTIONS[index]
             with col:
-                st.image(style_preview_svg(option), use_container_width=True)
                 is_selected = option == st.session_state["nexus_style"]
+                st.image(style_preview_svg(option), width=220)
                 if st.button(("✓ " if is_selected else "") + option, key="style_" + str(index), type="primary" if is_selected else "secondary", use_container_width=True):
                     st.session_state["nexus_style"] = option
                     st.rerun()
