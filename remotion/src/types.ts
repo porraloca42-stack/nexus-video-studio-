@@ -4,10 +4,9 @@ export type NexusScene = {
   narration: string;
   visualMode: "graphic" | "image" | "video";
   asset?: string;
-  headline?: string;
-  visualDescription?: string;
   imagePrompt?: string;
   cameraMotion?: "push_in" | "pull_out" | "pan_left" | "pan_right";
+  motionEvents?: string[];
   accent?: string;
 };
 
