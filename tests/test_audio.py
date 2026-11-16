@@ -8,6 +8,7 @@ from nexus.audio import (
     get_fish_voice,
     list_fish_voices,
     list_fish_professional_narrators,
+    list_curated_voice_catalog,
     _is_natural_brazilian_voice,
     _is_human_narrator_voice,
     make_voice,
@@ -64,6 +65,48 @@ class FakeFishSession:
 
 
 class AudioOutputTests(unittest.TestCase):
+    def test_curated_catalog_contains_all_user_supplied_ids_in_their_categories(self):
+        from nexus.voice_catalog import CURATED_VOICE_GROUPS, curated_voice_entries
+
+        entries = curated_voice_entries()
+        self.assertEqual(len(entries), 40)
+        self.assertEqual({key: len(value) for key, value in CURATED_VOICE_GROUPS.items()}, {
+            "CapCut": 14, "ElevenLabs": 4, "Licenciadas Fish": 22,
+        })
+        self.assertEqual(
+            [entry["id"] for entry in entries if entry["category"] == "CapCut"][0],
+            "288c050d6afc4a088d085847f941c819",
+        )
+        self.assertEqual(
+            [entry["id"] for entry in entries if entry["category"] == "ElevenLabs"][-1],
+            "95204385531e4768b5ea6e2b4c6e8dda",
+        )
+        self.assertEqual(
+            [entry["id"] for entry in entries if entry["category"] == "Licenciadas Fish"][-1],
+            "a0a26a57cac94ea4918f05a2393b4259",
+        )
+
+    def test_gender_inference_is_conservative_and_does_not_confuse_female_with_male(self):
+        from nexus.voice_catalog import infer_voice_gender
+
+        self.assertEqual(infer_voice_gender({"title": "Brazilian female narrator"}), "female")
+        self.assertEqual(infer_voice_gender({"tags": ["male", "narration"]}), "male")
+        self.assertEqual(infer_voice_gender({"title": "Brazilian narrator"}), "unknown")
+        self.assertEqual(infer_voice_gender({"tags": ["male", "female"]}), "unknown")
+
+    def test_curated_catalog_enriches_metadata_but_preserves_exact_supplied_ids(self):
+        session = FakeFishSession()
+        catalog = list_curated_voice_catalog("test-key", session=session, max_workers=4)
+        self.assertEqual({key: len(value) for key, value in catalog.items()}, {
+            "CapCut": 14, "ElevenLabs": 4, "Licenciadas Fish": 22,
+        })
+        first_voice = catalog["CapCut"][0]
+        self.assertEqual(first_voice["id"], "288c050d6afc4a088d085847f941c819")
+        self.assertEqual(first_voice["title"], "Narradora PT")
+        self.assertEqual(first_voice["gender"], "female")
+        self.assertTrue(first_voice["metadata_available"])
+        self.assertEqual(len(session.calls), 40)
+
     def test_list_voices_preserves_license_and_source_metadata(self):
         session = FakeFishSession(payload={
             "total": 1,
