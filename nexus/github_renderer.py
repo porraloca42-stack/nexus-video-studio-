@@ -6,6 +6,8 @@ import zipfile
 
 import requests
 
+from nexus.render_crypto import decrypt_bytes, decrypt_text, encrypt_text
+
 
 API = "https://api.github.com"
 DEFAULT_REPOSITORY = "porraloca42-stack/nexus-video-studio-"
@@ -21,6 +23,7 @@ def render_on_github(
     voice,
     token,
     *,
+    encryption_secret=None,
     repository=DEFAULT_REPOSITORY,
     timeout=2400,
     poll_interval=8,
@@ -29,6 +32,8 @@ def render_on_github(
 ):
     if not token:
         raise GitHubRenderError("Configure GITHUB_ACTIONS_TOKEN nos Secrets do Streamlit.")
+    if not encryption_secret:
+        raise GitHubRenderError("Configure CLOUDFLARE_API_TOKEN nos Secrets do Streamlit para proteger o conteúdo do render.")
     if not isinstance(plan, dict) or not plan.get("scenes"):
         raise ValueError("O storyboard não contém cenas.")
     manifest_json = json.dumps(plan, ensure_ascii=False, separators=(",", ":"))
@@ -50,7 +55,7 @@ def render_on_github(
             "ref": "main",
             "inputs": {
                 "job_id": job_id,
-                "manifest_json": manifest_json,
+                "manifest_encrypted": encrypt_text(manifest_json, encryption_secret),
                 "voice": voice,
             },
         },
@@ -145,12 +150,12 @@ def render_on_github(
         raise GitHubRenderError(f"Não foi possível baixar o MP4 (HTTP {archive.status_code}).")
 
     with zipfile.ZipFile(io.BytesIO(archive.content)) as bundle:
-        mp4_name = next((name for name in bundle.namelist() if name.endswith("nexus_video.mp4")), None)
-        report_name = next((name for name in bundle.namelist() if name.endswith("render-report.json")), None)
+        mp4_name = next((name for name in bundle.namelist() if name.endswith("nexus_video.mp4.enc")), None)
+        report_name = next((name for name in bundle.namelist() if name.endswith("render-report.json.enc")), None)
         if not mp4_name:
-            raise GitHubRenderError("O artefato não contém o MP4 esperado.")
-        video_bytes = bundle.read(mp4_name)
-        report = json.loads(bundle.read(report_name).decode("utf-8")) if report_name else {}
+            raise GitHubRenderError("O artefato não contém o MP4 criptografado esperado.")
+        video_bytes = decrypt_bytes(bundle.read(mp4_name), encryption_secret)
+        report = json.loads(decrypt_text(bundle.read(report_name).decode("ascii"), encryption_secret)) if report_name else {}
     if not video_bytes:
         raise GitHubRenderError("O MP4 recuperado está vazio.")
     return {"video": video_bytes, "report": report, "run_id": run_id, "job_id": job_id}
