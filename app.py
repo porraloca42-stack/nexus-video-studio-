@@ -4,7 +4,7 @@ import requests
 import streamlit as st
 from nexus.director import create_storyboard, validate_storyboard
 from nexus.assets import search_video_sources, download_file, diverse_candidate_shortlist
-from nexus.audio import generate_fish_preview, get_fish_voice, make_voice
+from nexus.audio import get_fish_voice, make_voice
 from nexus.render import render_video
 
 
