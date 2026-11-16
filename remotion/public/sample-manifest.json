@@ -1,0 +1,31 @@
+{
+  "width": 720,
+  "height": 1280,
+  "fps": 30,
+  "durationInFrames": 1500,
+  "title": "NEXUS — Manifesto",
+  "scenes": [
+    {
+      "id": "scene-01",
+      "durationSeconds": 25,
+      "narration": "Toda mudança começa com uma escolha.",
+      "visualMode": "graphic",
+      "headline": "Toda mudança\ncomeça por uma escolha.",
+      "visualDescription": "O primeiro passo é enxergar além do cenário atual.",
+      "accent": "#e8b66b"
+    },
+    {
+      "id": "scene-02",
+      "durationSeconds": 25,
+      "narration": "Transforme intenção em atitude.",
+      "visualMode": "graphic",
+      "headline": "Transforme intenção\nem atitude.",
+      "visualDescription": "Pequenas decisões constroem novos caminhos.",
+      "accent": "#7cc9d4"
+    }
+  ],
+  "captions": [
+    { "text": "Toda mudança começa com uma escolha.", "startFrame": 0, "endFrame": 375 },
+    { "text": "Transforme intenção em atitude.", "startFrame": 750, "endFrame": 1125 }
+  ]
+}
