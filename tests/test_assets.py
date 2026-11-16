@@ -245,7 +245,7 @@ class AssetRankingTests(unittest.TestCase):
     @patch("nexus.assets.search_coverr_videos")
     def test_searches_every_enabled_provider_and_combines_candidates(self, coverr, pixabay, pexels):
         coverr.return_value = [
-            clip("https://example.test/coverr.mp4", "Person walking through a city", "Urban street")
+            clip("https://example.test/commons.webm", "Person walking through a city", "Urban street")
         ]
         pixabay.return_value = [
             clip("https://example.test/pixabay.mp4", "Person walking through city street", "Urban walk")
@@ -390,17 +390,17 @@ class AssetRankingTests(unittest.TestCase):
             {**clip("https://example.test/pixabay1.mp4", "Person writing goals in notebook"), "source": "Pixabay", "_nexus_relevance": 9},
             {**clip("https://example.test/pixabay2.mp4", "Person writing journal at desk"), "source": "Pixabay", "_nexus_relevance": 8},
             {**clip("https://example.test/pexels.mp4", "Person writing goals in notebook"), "source": "Pexels", "_nexus_relevance": 7},
-            {**clip("https://example.test/coverr.mp4", "Person writing goals in notebook"), "source": "Coverr", "_nexus_relevance": 6},
+            {**clip("https://example.test/coverr.mp4", "Person writing goals in notebook"), "source": "Wikimedia Commons", "_nexus_relevance": 6},
         ]
         shortlist = diverse_candidate_shortlist(candidates, limit=3)
-        self.assertEqual([item["source"] for item in shortlist], ["Pixabay", "Pexels", "Coverr"])
+        self.assertEqual([item["source"] for item in shortlist], ["Pixabay", "Pexels", "Wikimedia Commons"])
 
     def test_shortlist_compares_distinct_libraries_before_repeating_one(self):
         candidates = [
             {**clip("https://example.test/pixabay1.mp4", "Person writing goals in notebook"), "source": "Pixabay", "_nexus_relevance": 9},
             {**clip("https://example.test/pixabay2.mp4", "Person writing journal at desk"), "source": "Pixabay", "_nexus_relevance": 8},
             {**clip("https://example.test/pexels.mp4", "Person writing goals in notebook"), "source": "Pexels", "_nexus_relevance": 7},
-            {**clip("https://example.test/coverr.mp4", "Person writing goals in notebook"), "source": "Coverr", "_nexus_relevance": 6},
+            {**clip("https://example.test/coverr.mp4", "Person writing goals in notebook"), "source": "Wikimedia Commons", "_nexus_relevance": 6},
         ]
         shortlist = diverse_candidate_shortlist(candidates, limit=3)
         self.assertEqual([item["source"] for item in shortlist], ["Pixabay", "Pexels", "Coverr"])
