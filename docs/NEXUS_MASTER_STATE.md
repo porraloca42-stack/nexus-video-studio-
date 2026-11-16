@@ -100,6 +100,8 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 
 - Ajuste de espaçamento da galeria (commit `f8afaad4`): grid responsivo mantém duas colunas, com `column-gap` de 0,55 rem, `row-gap` de 0,7 rem e margem inferior de 0,7 rem em cada linha de cartões para separar visualmente imagem/botão do próximo estilo. Publicado no GitHub; aguarda reboot e conferência visual em dispositivo móvel.
 
+- Alinhamento das miniaturas (commit `7c9e4583`): o contêiner de cada imagem agora usa a mesma largura relativa/máxima do botão (78%, máx. 155 px), com flex centralizado também no contêiner interno e na própria imagem. Objetivo: centralizar cada prévia exatamente sobre seu botão correspondente nas duas colunas. Publicado no GitHub; aguarda reboot e validação visual móvel.
+
 ## Regras para o assistente em novos chats
 - Começar lendo este arquivo e o código relevante no GitHub antes de propor mudanças.
 - Tratar este documento como registro de continuidade, mas conferir o estado atual do repositório e deployment; pode ficar desatualizado.
