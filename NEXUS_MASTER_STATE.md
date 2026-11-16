@@ -466,3 +466,12 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Primeira execução do smoke test detectou erro de importação por execução direta do script dentro de `tests/`; corrigido `sys.path` no commit `3a0d728`.
 - CI do commit `3a0d728` (run #183, ID `43828898694`) está em execução no momento deste registro; o job Commons ainda não terminou. Não declarar API/download reais aprovados até ler o log final.
 - Limite: workflow atual não tem as chaves privadas do Streamlit Cloud para Pixabay/Pexels/Gemini. Portanto, APIs que exigem essas chaves, Gemini Vision ao vivo, deploy e geração MP4 ponta a ponta no app publicado ainda dependem do diagnóstico avançado no ambiente Streamlit.
+
+
+
+### Resultado parcial do smoke test real do Commons — 16/11/2026
+- Run #183: busca real na API do Commons funcionou e retornou 2 arquivos com licenças aceitas (CC BY 3.0 e CC0). A tentativa de download do primeiro candidato recebeu HTTP 403 do upload.wikimedia.org; portanto busca foi validada, download ainda não.
+- Correção aplicada: `download_file` agora envia User-Agent descritivo do NEXUS; smoke test tenta candidatos alternativos quando um arquivo específico falha.
+- Commits: `5bf3df5` (User-Agent em downloads), `ea08012` (fallback entre candidatos). Run #186 (commit `ea08012`) ainda está executando o smoke test real no momento deste registro.
+- Os testes unitários/compilação do commit `3a0d728` passaram; não declarar download Commons validado até concluir run #186.
+- Pixabay/Pexels/Gemini não puderam ser testados ao vivo pelo GitHub Actions porque as chaves estão guardadas no Streamlit Secrets e não foram disponibilizadas ao workflow. Deploy/diagnóstico do app publicado também não foram confirmados.
