@@ -1360,4 +1360,6 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Primeira camada implementada em `app.py`: identidade escura grafite/preto com dourado discreto, fundo com gradiente sutil, hero NEXUS, tipografia e espaçamentos refinados, campos de texto e seletores personalizados, botões primários/secundários, expanders, players, alertas e barras de progresso redesenhados.
 - Responsividade mobile-first: largura fluida, margens compactas, alvos de toque maiores, controles com cantos arredondados e galeria de estilos em grade de duas colunas.
 - Ocultados rodapé e elementos técnicos de toolbar do Streamlit; o cabeçalho de navegação permanece para não remover controles de aplicativo do host.
-- Ainda não executado/validado no navegador ou celular. Requer CI e inspeção visual no Streamlit publicado antes de integrar em `main`.
+- CI #590 executou com sucesso os jobs `unit-tests` (incluindo compilação dos módulos Python), `remotion-typecheck` e `commons-live-smoke`.
+- Revisão do diff confirmou que a mudança está restrita ao CSS/hero em `app.py` e ao registro técnico; não altera provedores, contratos de dados ou pipeline.
+- Ainda não há inspeção visual em navegador/celular nem confirmação de implantação na Streamlit Cloud. O PR #1 permanece draft e não foi integrado à `main`; manter assim até a validação visual mobile.
