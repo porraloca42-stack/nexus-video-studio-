@@ -199,5 +199,69 @@ class AssetRankingTests(unittest.TestCase):
         self.assertEqual(ranked[0]["source"], "Pixabay")
 
 
+    @patch("nexus.assets.requests.get")
+    def test_pexels_adapter_parses_portrait_mp4_and_attribution(self, get):
+        class FakeResponse:
+            def raise_for_status(self):
+                return None
+
+            def json(self):
+                return {
+                    "videos": [{
+                        "url": "https://www.pexels.com/video/123/",
+                        "alt": "A person writing in a notebook",
+                        "user": {
+                            "name": "Creator",
+                            "url": "https://www.pexels.com/@creator/",
+                        },
+                        "video_files": [
+                            {
+                                "link": "https://videos.pexels.com/example.mp4",
+                                "file_type": "video/mp4",
+                                "quality": "hd",
+                                "width": 1080,
+                                "height": 1920,
+                            }
+                        ],
+                    }]
+                }
+
+        get.return_value = FakeResponse()
+        from nexus.assets import search_pexels_videos
+
+        results = search_pexels_videos("person writing notebook", "secret", per_page=12)
+
+        self.assertEqual(len(results), 1)
+        self.assertTrue(results[0]["vertical"])
+        self.assertEqual(results[0]["source"], "Pexels")
+        self.assertEqual(results[0]["author"], "Creator")
+        self.assertEqual(results[0]["source_url"], "https://www.pexels.com/video/123/")
+        self.assertEqual(get.call_args.args[0], "https://api.pexels.com/v1/videos/search")
+        self.assertEqual(get.call_args.kwargs["params"]["orientation"], "portrait")
+        self.assertEqual(get.call_args.kwargs["headers"]["Authorization"], "secret")
+
+    @patch("nexus.assets.search_pixabay_videos")
+    @patch("nexus.assets.search_coverr_videos")
+    def test_duplicate_asset_url_is_downloaded_once(self, coverr, pixabay):
+        shared = "https://example.test/shared.mp4"
+        coverr.return_value = [
+            clip(shared, "Person walking through a city", "Urban street")
+        ]
+        pixabay.return_value = [
+            clip(shared, "Person walking through a city", "Urban street")
+        ]
+
+        ranked, errors = search_video_sources(
+            "person walking through a city",
+            coverr_key="coverr-key",
+            pixabay_key="pixabay-key",
+        )
+
+        self.assertFalse(errors)
+        self.assertEqual(len(ranked), 1)
+        self.assertEqual(ranked[0]["url"], shared)
+        self.assertEqual(set(ranked[0]["also_found_by"]), {"Coverr", "Pixabay"})
+
+
 if __name__ == "__main__":
     unittest.main()
