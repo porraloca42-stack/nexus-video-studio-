@@ -3,24 +3,38 @@ import re
 import requests
 
 SYSTEM = """
-Você é o DIRETOR AUDIOVISUAL do NEXUS VIDEO STUDIO, não um gerador de palavras-chave.
-Leia e compreenda o roteiro inteiro antes de planejar qualquer cena. Identifique a ideia central, a progressão lógica, as afirmações, os exemplos e a emoção de cada trecho.
-A fala define exatamente o que o público deve ver. Cada cena deve mostrar uma ação, objeto, pessoa, ambiente ou processo diretamente relacionado à fala. Não use cenas genéricas só porque combinam com a emoção.
-Respeite rigorosamente o estilo visual selecionado pelo usuário. Traduza esse estilo em fotografia, paleta, luz, textura, lente, movimento e atmosfera em TODAS as cenas. Inclua em cada cena visual_style e style_search_terms; as buscas em inglês devem incorporar termos visuais compatíveis com o estilo escolhido, sem sacrificar assunto e ação.
-Priorize ações filmáveis e específicas. Evite slideshows, colagens, infográficos escolares, imagens abstratas sem função e repetição de enquadramentos.
-Não invente fatos, capas, páginas, citações, nomes ou características de produtos/livros. Diferencie fatos verificados, crenças e alegações.
-A QUANTIDADE DE CENAS É DECIDIDA A PARTIR DA DURAÇÃO E DA DENSIDADE DO ROTEIRO, nunca por uma lista fixa de temas. Para vídeos de 40–60 segundos, crie no mínimo ceil(duração/5) cenas e prefira ceil(duração/4) ou mais: 50s deve gerar pelo menos 10 cenas, com meta de 12–15; 40s pelo menos 8, meta 10–12; 60s pelo menos 12, meta 15–18. Em geral, cada clipe cobre 3–4 segundos; varie conforme a fala e a ação, sem esticar artificialmente cenas. A soma das durações deve corresponder à duração solicitada. Cada cena precisa de busca visual própria, derivada da ação, objeto, ambiente e significado EXATOS daquele trecho. Nunca reutilize um conjunto fixo de palavras-chave nem force objetos que não estejam no roteiro. As buscas principal e alternativa devem ser distintas, concretas, em inglês e específicas daquela cena. Toda cena deve ter pelo menos dois microeventos visuais.
-Para cada cena, descreva: o que aparece, o que acontece em ordem, onde, quem/que objeto, enquadramento, movimento de câmera e duas buscas alternativas de clipes em inglês.
+Você é o DIRETOR E ROTEIRISTA AUDIOVISUAL do NEXUS VIDEO STUDIO.
+Sua primeira obrigação é entregar um ROTEIRO NARRADO COMPLETO, dimensionado para a duração escolhida pelo usuário. Em seguida, transforme esse roteiro em cenas filmáveis. Não trate duração como sugestão.
+
+DURAÇÃO E TEXTO:
+- O usuário escolhe a duração final. Ela é um requisito obrigatório.
+- Para narração natural em português brasileiro, escreva aproximadamente 2,2 a 2,5 palavras por segundo: 40s ≈ 88–100 palavras; 50s ≈ 110–125 palavras; 60s ≈ 132–150 palavras.
+- Se o usuário fornecer apenas um tema/ideia, desenvolva o roteiro completo com essa extensão, começo forte, progressão lógica e fechamento.
+- Se fornecer um roteiro completo, preserve sua mensagem e os pontos essenciais; ajuste a redação para caber no tempo, sem simplesmente copiar um texto curto ou ignorar a duração.
+- Distribua TODO o texto narrado entre as cenas. Cada cena precisa ter voiceover não vazio, em português brasileiro natural. A soma das falas deve formar o roteiro completo, sem lacunas, repetições ou frases soltas.
+- Não tente resolver duração escrevendo menos cenas ou deixando cenas sem fala.
+
+CENAS:
+- Decida a quantidade a partir da duração e da progressão narrativa. Use pelo menos ceil(duração/5) cenas e prefira ceil(duração/4) ou mais: 50s normalmente 12–15 cenas; 40s 10–12; 60s 15–18.
+- Cada cena representa uma unidade narrativa e uma ação concreta. As durações são apenas estimativas: o sistema atribuirá a duração final exata depois. Não sacrifique a narrativa para tentar fazer a soma matemática.
+- Cada cena deve representar exatamente o trecho narrado com ação, objeto, pessoa, ambiente ou processo diretamente relacionado. Não use cenas genéricas só porque combinam com a emoção.
+- Leia e compreenda o roteiro inteiro antes de planejar cenas. Identifique ideia central, progressão, afirmações, exemplos e emoção de cada trecho.
+- Priorize ações filmáveis e específicas. Evite slideshows, colagens, infográficos escolares, imagens abstratas sem função e repetição de enquadramentos.
+- Cada cena precisa de busca visual própria, derivada da ação, objeto, ambiente e significado EXATOS daquele trecho. Nunca reutilize conjunto fixo de palavras-chave nem force objetos que não estejam no roteiro. Buscas principal e alternativa devem ser distintas, concretas, em inglês.
+- Respeite rigorosamente o estilo visual selecionado. Traduza-o em fotografia, paleta, luz, textura, lente, movimento e atmosfera em TODAS as cenas. Inclua visual_style e style_search_terms.
+- Toda cena deve ter pelo menos dois microeventos visuais.
+
 Retorne somente JSON válido:
 {
  "topic_interpretation":"...",
  "creative_thesis":"...",
  "style_lock":"...",
+ "full_narration":"roteiro narrado integral em português brasileiro",
  "scenes":[
   {
-   "duration_seconds":5,
+   "duration_seconds":4,
    "purpose":"...",
-   "voiceover":"fala exata desta parte",
+   "voiceover":"trecho contínuo do roteiro integral",
    "visual_action":"ação específica e observável, em sequência",
    "visual_style":"estilo visual aplicado nesta cena",
    "style_search_terms":"English visual-style terms to append to the scene search",
@@ -141,27 +155,31 @@ def _request(prompt, secret_reader):
     return plan
 
 def _fit_scene_durations(scenes, requested_duration):
-    """Distribute the requested runtime across existing scenes, keeping clips 2–5s."""
+    """Assign the exact requested runtime using each scene's narration length."""
     target = int(round(float(requested_duration)))
     count = len(scenes)
     if not count or target < 2 * count or target > 5 * count:
         raise ValueError(
-            f"Não é possível distribuir {target}s em {count} cenas mantendo cada clipe entre 2 e 5 segundos."
+            f"O diretor criou {count} cenas, mas {target}s exige entre "
+            f"{(target + 4) // 5} e {target // 2} cenas para clipes de 2–5s. "
+            "Peça um novo planejamento."
         )
 
-    original = [max(0.1, float(scene.get("duration_seconds", 0) or 0)) for scene in scenes]
+    # Narration length is a better pacing signal than Gemini's rough duration guess.
+    weights = []
+    for scene in scenes:
+        words = len(str(scene.get("voiceover", "")).split())
+        weights.append(float(max(words, 1)))
     durations = [2] * count
-    remaining = target - sum(durations)
+    remaining = target - 2 * count
     capacities = [3] * count
 
-    # Weighted water-filling: preserve the director's relative pacing while
-    # respecting the 2–5 second range for every stock-video clip.
     while remaining > 0:
         active = [i for i, capacity in enumerate(capacities) if capacity > 0]
         if not active:
             raise ValueError("As cenas não comportam a duração solicitada.")
-        weight_sum = sum(original[i] for i in active)
-        shares = {i: remaining * original[i] / weight_sum for i in active}
+        weight_sum = sum(weights[i] for i in active)
+        shares = {i: remaining * weights[i] / weight_sum for i in active}
         allocated = 0
         for i in active:
             whole = min(capacities[i], int(shares[i]))
@@ -174,11 +192,9 @@ def _fit_scene_durations(scenes, requested_duration):
             break
         ranked = sorted(
             (i for i in active if capacities[i] > 0),
-            key=lambda i: (shares[i] - int(shares[i]), original[i]),
+            key=lambda i: (shares[i] - int(shares[i]), weights[i]),
             reverse=True,
         )
-        if not ranked:
-            continue
         for i in ranked:
             if remaining <= 0:
                 break
@@ -193,17 +209,21 @@ def _fit_scene_durations(scenes, requested_duration):
 
 def create_storyboard(topic, style, duration, secret_reader):
     target = int(round(float(duration)))
-    minimum_acceptable = max(1, target - 5)
-    maximum_acceptable = target + 5
-    prompt = f"""ASSUNTO OU ROTEIRO COMPLETO:
+    minimum_scenes = max(1, (target + 4) // 5)
+    preferred_scenes = max(minimum_scenes, (target + 3) // 4)
+    min_words = int(round(target * 2.2))
+    max_words = int(round(target * 2.5))
+    prompt = f"""PEDIDO/ROTEIRO DO USUÁRIO:
 {topic}
 
-ESTILO VISUAL ESCOLHIDO PELO USUÁRIO (OBRIGATÓRIO EM TODAS AS CENAS): {style}
-DURAÇÃO ESCOLHIDA PELO USUÁRIO: {target} segundos.
-REGRA DE PLANEJAMENTO: a primeira versão do storyboard pode somar entre {minimum_acceptable} e {maximum_acceptable} segundos. Trabalhe dentro dessa margem de cinco segundos para menos ou para mais. Nunca ignore a duração escolhida. Depois o sistema ajustará proporcionalmente a linha do tempo para a duração final exata de {target} segundos.
-Use no mínimo ceil(duração/5) cenas e prefira ceil(duração/4) ou mais. Para 50 segundos, planeje 12–15 cenas. Cada cena deve durar entre 2 e 5 segundos. A soma deve ficar dentro da margem informada.
-Cada cena PRECISA conter uma fala real em português brasileiro no campo voiceover. Não deixe voiceover vazio, nulo ou apenas espaços. Distribua todo o conteúdo narrado do roteiro entre as cenas, sem perder trechos nem repetir frases. Se o assunto for curto, desenvolva a explicação com conteúdo coerente, sem inventar fatos.
-Planeje primeiro a narrativa completa. Cada cena precisa de ação filmável específica, relacionada diretamente à fala. Para cada trecho, gere buscas principal e alternativa próprias, específicas e diferentes, em inglês. Preserve estilo visual, coerência semântica e continuidade narrativa. Retorne somente JSON válido no formato solicitado pelo sistema."""
+DURAÇÃO FINAL ESCOLHIDA: {target} segundos (OBRIGATÓRIA).
+ESTILO VISUAL: {style}
+
+Primeiro escreva um roteiro narrado completo de aproximadamente {min_words} a {max_words} palavras, adequado a {target} segundos de fala natural em português brasileiro.
+Se o usuário forneceu apenas um tema, crie o roteiro completo. Se forneceu um texto, preserve as ideias essenciais e adapte a extensão ao tempo, sem ignorar o pedido.
+Depois divida esse roteiro em {minimum_scenes} a {preferred_scenes + 3} cenas narrativas. Meta: cerca de {preferred_scenes} cenas. Cada cena deve ter voiceover preenchido e conter um trecho contínuo do roteiro. O campo full_narration deve ser exatamente a concatenação das falas das cenas, com pontuação natural.
+As durações de cena são estimativas; NÃO tente fechar a soma matemática. O sistema atribuirá a duração exata depois. Não encurte a narração para fazer a soma bater.
+Cada cena deve mostrar ação concreta diretamente ligada à fala, com duas buscas visuais diferentes e específicas em inglês, estilo aplicado e pelo menos dois microeventos. Retorne o JSON completo conforme o esquema do sistema."""
 
     plan = _request(prompt, secret_reader)
     plan["style_lock"] = style
@@ -212,75 +232,50 @@ Planeje primeiro a narrativa completa. Cada cena precisa de ação filmável esp
         raise RuntimeError("O diretor não criou nenhuma cena. Tente planejar novamente.")
 
     def missing_voiceovers(items):
-        return [
-            index for index, scene in enumerate(items, 1)
-            if not str(scene.get("voiceover", "") or "").strip()
-        ]
+        return [i for i, scene in enumerate(items, 1)
+                if not str(scene.get("voiceover", "") or "").strip()]
 
-    original_total = sum(float(scene.get("duration_seconds", 0) or 0) for scene in scenes)
-    missing = missing_voiceovers(scenes)
-    outside_margin = not (minimum_acceptable <= original_total <= maximum_acceptable)
-
-    # One targeted correction pass gives the director a chance to fix incomplete
-    # narration or a runtime estimate outside the user's five-second tolerance.
-    if missing or outside_margin:
-        issues = []
-        if missing:
-            issues.append("voiceover vazio nas cenas: " + ", ".join(map(str, missing)))
-        if outside_margin:
-            issues.append(
-                f"a soma atual é {original_total:.1f}s, fora da faixa "
-                f"{minimum_acceptable}–{maximum_acceptable}s"
-            )
-        repair_prompt = f"""O storyboard anterior precisa de correção antes de ser aceito.
-
-ROTEIRO ORIGINAL:
-{topic}
-
-DURAÇÃO ESCOLHIDA: {target}s
-FAIXA ACEITÁVEL PARA ESTA RESPOSTA: {minimum_acceptable}–{maximum_acceptable}s
-ESTILO VISUAL: {style}
-
-PROBLEMAS ENCONTRADOS:
-{'; '.join(issues)}
-
-STORYBOARD A CORRIGIR:
+    # Ask the model to rewrite the missing narration, rather than accepting a
+    # storyboard with silent scenes. Retry twice; duration itself is handled
+    # deterministically and never depends on Gemini's duration estimates.
+    for attempt in range(2):
+        missing = missing_voiceovers(scenes)
+        if not missing:
+            break
+        repair_prompt = f"""Você é roteirista. Corrija o storyboard abaixo.
+Duração final escolhida: {target}s. Tema/roteiro original: {topic}
+As cenas sem narração são: {", ".join(map(str, missing))}.
+Reescreva o storyboard COMPLETO, mantendo a ordem e as cenas, mas preenchendo TODAS as falas voiceover com texto natural em português brasileiro. Distribua a narração de forma contínua, sem falas vazias. Escreva uma narração total de aproximadamente {min_words}–{max_words} palavras adequada a {target}s. Inclua full_narration como concatenação exata das falas. Não use duration_seconds para limitar o roteiro; o sistema atribuirá os tempos.
+Estilo visual: {style}
+Storyboard a corrigir:
 {json.dumps(plan, ensure_ascii=False)}
+Retorne somente JSON válido no formato do sistema."""
+        plan = _request(repair_prompt, secret_reader)
+        plan["style_lock"] = style
+        scenes = plan.get("scenes", [])
+        if not scenes:
+            raise RuntimeError("O diretor não retornou cenas na correção do roteiro.")
 
-Recrie o storyboard completo em JSON válido, preservando a progressão narrativa e as ações visuais que já estão corretas. Corrija todos os problemas listados. TODA cena deve ter voiceover preenchido com uma fala natural em português brasileiro, coerente com o roteiro e com a cena. Não deixe nenhum campo voiceover vazio. A soma de duration_seconds precisa ficar entre {minimum_acceptable} e {maximum_acceptable} segundos. Use cenas entre 2 e 5 segundos. Não omita cenas nem campos obrigatórios. Retorne somente o JSON completo no formato do sistema."""
-        corrected = _request(repair_prompt, secret_reader)
-        corrected["style_lock"] = style
-        corrected_scenes = corrected.get("scenes", [])
-        if not corrected_scenes:
-            raise RuntimeError("O diretor não conseguiu corrigir o storyboard. Gere o planejamento novamente.")
-        still_missing = missing_voiceovers(corrected_scenes)
-        if still_missing:
-            raise RuntimeError(
-                "O diretor ainda deixou a narração vazia nas cenas "
-                + ", ".join(map(str, still_missing))
-                + ". O planejamento foi interrompido para não produzir vídeo sem fala."
-            )
-        corrected_total = sum(
-            float(scene.get("duration_seconds", 0) or 0) for scene in corrected_scenes
+    missing = missing_voiceovers(scenes)
+    if missing:
+        raise RuntimeError(
+            "O diretor deixou narrações vazias nas cenas "
+            + ", ".join(map(str, missing))
+            + " mesmo após duas tentativas de correção. O roteiro não foi aceito."
         )
-        if not (minimum_acceptable <= corrected_total <= maximum_acceptable):
-            raise RuntimeError(
-                f"Após a correção, a IA retornou {corrected_total:.1f}s. "
-                f"A faixa permitida para {target}s é {minimum_acceptable}–{maximum_acceptable}s. "
-                "Tente planejar novamente."
-            )
-        plan = corrected
-        scenes = corrected_scenes
-        original_total = corrected_total
 
-    # The AI may land anywhere inside the requested ±5s tolerance. The final
-    # timeline is then normalized to the exact duration selected by the user.
+    # The AI creates the script and narrative structure; code owns exact timing.
+    original_total = sum(float(scene.get("duration_seconds", 0) or 0) for scene in scenes)
     fitted = _fit_scene_durations(scenes, target)
+    plan["requested_duration_seconds"] = target
+    plan["full_narration"] = " ".join(
+        str(scene["voiceover"]).strip() for scene in scenes
+    )
     plan["duration_adjustment"] = {
-        "ai_seconds": round(original_total, 2),
+        "ai_estimated_seconds": round(original_total, 2),
         "requested_seconds": target,
-        "tolerance_seconds": 5,
         "scene_durations": fitted,
+        "timing_source": "narration_weighted_exact_allocation",
     }
     return plan
 
