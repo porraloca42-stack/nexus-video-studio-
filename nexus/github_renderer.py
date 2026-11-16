@@ -25,6 +25,8 @@ def render_on_github(
     token,
     *,
     encryption_secret=None,
+    fish_api_key=None,
+    fish_voice_id=None,
     repository=DEFAULT_REPOSITORY,
     timeout=2400,
     poll_interval=8,
@@ -57,6 +59,13 @@ def render_on_github(
             "inputs": {
                 "job_id": job_id,
                 "manifest_encrypted": encrypt_text(manifest_json, encryption_secret),
+                "fish_credentials_encrypted": encrypt_text(
+                    json.dumps({
+                        "api_key": fish_api_key or "",
+                        "voice_id": fish_voice_id or "",
+                    }, separators=(",", ":")),
+                    encryption_secret,
+                ),
                 "voice": voice,
             },
         },
