@@ -90,11 +90,22 @@ def discover_models(api_key, requested="auto"):
             + " Tente novamente em alguns minutos."
         )
 
-    supported = [
-        m for m in response.json().get("models", [])
-        if "generateContent" in m.get("supportedGenerationMethods", [])
-        and "embedding" not in m.get("name", "").lower()
-    ]
+    # This director sends systemInstruction and expects text/JSON. Some Gemini
+    # models expose generateContent but are specialized for TTS/audio/image and
+    # reject developer/system instructions. Never rank those for storyboard work.
+    unsupported_modalities = (
+        "-tts", "tts-", "native-audio", "-audio", "audio-",
+        "-image", "image-", "embedding", "veo",
+    )
+    supported = []
+    for model in response.json().get("models", []):
+        name = model.get("name", "").split("/")[-1].lower()
+        methods = model.get("supportedGenerationMethods", [])
+        if "generateContent" not in methods:
+            continue
+        if any(token in name for token in unsupported_modalities):
+            continue
+        supported.append(model)
     if not supported:
         raise RuntimeError("A chave não retornou modelos compatíveis com geração de conteúdo.")
 
@@ -198,6 +209,23 @@ def _request(prompt, secret_reader):
                 raise RuntimeError(
                     "O Gemini recusou a autenticação ou o acesso à API. "
                     "Verifique GEMINI_API_KEY e as permissões do projeto."
+                )
+            if response.status_code == 400:
+                try:
+                    detail = response.json().get("error", {}).get("message", "")
+                except (ValueError, AttributeError):
+                    detail = ""
+                if "developer instruction is not enabled" in str(detail).lower():
+                    last_status = 400
+                    last_detail = (
+                        f"{model}: modelo incompatível com instruções do diretor. "
+                        + str(detail)[:300]
+                    )
+                    attempted.append(f"{model} (incompatível com systemInstruction)")
+                    break
+                raise RuntimeError(
+                    f"Falha no Gemini (HTTP 400) no modelo {model}. "
+                    + (str(detail)[:500] if detail else "Requisição inválida.")
                 )
             if response.status_code == 404:
                 last_status = 404
