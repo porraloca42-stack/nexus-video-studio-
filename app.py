@@ -223,7 +223,7 @@ div[data-testid="stTextArea"] textarea,div[data-testid="stSelectbox"] div[data-b
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="nexus-hero"><div class="nexus-brand">NEXUS VIDEO STUDIO</div><div class="nexus-tagline">Transforme seu roteiro em vídeo</div></div>', unsafe_allow_html=True)
-st.caption("Versão: NEXUS-2026.11.16-narration-first-selection-1")
+st.caption("Versão: NEXUS-2026.11.16-narration-first-selection-2")
 
 if "nexus_style" not in st.session_state or st.session_state["nexus_style"] not in STYLE_OPTIONS:
     st.session_state["nexus_style"] = "Cinematográfico realista"
@@ -491,6 +491,14 @@ if "nexus_plan" in st.session_state:
                             "scene": i + 1,
                             "query": primary_query,
                             "fallback": fallback_query,
+                            "style": style_terms,
+                            "sources": [
+                                name for name, configured in (
+                                    ("Coverr", bool(coverr_key)),
+                                    ("Pixabay", bool(pixabay_key)),
+                                    ("Pexels", bool(pexels_key)),
+                                ) if configured
+                            ],
                             "errors": source_errors,
                         })
                         continue
@@ -592,14 +600,16 @@ if "nexus_plan" in st.session_state:
                     with st.expander("Detalhes das buscas sem resultado"):
                         for item in missing:
                             st.markdown(f"**Cena {item['scene']}**")
-                            st.caption("Busca principal: " + item["query"])
+                            st.caption("Busca de conteúdo: " + item["query"])
+                            st.caption("Estilo solicitado: " + (item.get("style") or "não informado"))
+                            st.caption("Bibliotecas consultadas: " + (", ".join(item.get("sources", [])) or "nenhuma"))
                             if item["fallback"]:
                                 st.caption("Busca alternativa: " + item["fallback"])
                             if item["errors"]:
                                 for error in item["errors"]:
                                     st.caption(error)
                             else:
-                                st.caption("A API respondeu, mas não encontrou resultados para as consultas tentadas.")
+                                st.caption("As bibliotecas responderam, mas não retornaram candidatos para a busca de conteúdo. O estilo visual, sozinho, não é usado para preencher uma cena.")
                 else:
                     progress.progress((len(plan["scenes"]) + 1) / (len(plan["scenes"]) + 2), text="Gerando narração, legendas e montagem...")
                     output = work / "nexus_video.mp4"
