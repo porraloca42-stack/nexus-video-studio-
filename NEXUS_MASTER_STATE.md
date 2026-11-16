@@ -638,3 +638,10 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - CI #291 (`43844936875`): suíte principal passou após corrigir o fixture JPEG para usar bytes reais da assinatura JPEG. A falha anterior no Remotion #30 era somente o fixture de teste com assinatura escapada incorretamente; corrigido no commit `352236c`.
 - Testes de render com manifesto agora passaram em duas execuções consecutivas (#27 e #31); fonte sans-serif validada visualmente no artefato do #29.
 - Estado técnico: Remotion + adaptador Python + render de vídeo/áudio/legendas validados em GitHub Actions com fixtures. Cloudflare Workers AI real, worker de produção com credenciais, deploy Streamlit e MP4 final gerado com imagens Cloudflare ainda aguardam Secrets e validação ao vivo.
+
+
+## Ativação de credenciais Cloudflare — 16/11/2026
+- Usuário concluiu a criação de um token pelo fluxo oficial **Workers AI → API REST → Crie um token de API Workers AI**. A interface exibiu acesso de leitura e edição; a configuração foi conferida visualmente como **Workers AI: Lido + Editar**, restrita à conta NEXUS.
+- O valor do token não deve ser registrado neste arquivo, em commits, issues ou mensagens. O token foi compartilhado na conversa; por prudência, recomenda-se substituí-lo por um novo token antes de uso prolongado, mas a ativação depende do cadastro de Secrets.
+- Próxima etapa: cadastrar `CLOUDFLARE_ACCOUNT_ID` e `CLOUDFLARE_API_TOKEN` em GitHub → Settings → Secrets and variables → Actions. Cadastrar também `CLOUDFLARE_API_TOKEN` em Streamlit Secrets. Ainda não confirmado: nenhum Secret foi gravado por esta sessão e nenhum render real Cloudflare foi executado.
+- A integração do GitHub disponível nesta sessão não expõe operações de escrita/leitura de Actions Secrets; o cadastro precisa ser feito pela interface do GitHub.
