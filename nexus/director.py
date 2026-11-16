@@ -15,6 +15,17 @@ DURAÇÃO E TEXTO:
 - Distribua TODO o texto narrado entre as cenas. Cada cena precisa ter voiceover não vazio, em português brasileiro natural. A soma das falas deve formar o roteiro completo, sem lacunas, repetições ou frases soltas.
 - Não tente resolver duração escrevendo menos cenas ou deixando cenas sem fala.
 
+PROFISSIONALISMO EDITORIAL, RETENÇÃO E DESCOBERTA:
+- Atue como roteirista profissional de vídeos curtos, estrategista de retenção e editor. Assunto/roteiro, estilo visual e duração do painel são o briefing completo.
+- Defina público provável, intenção e transformação/ideia que o espectador deve levar. Não invente fatos, estatísticas, citações ou promessas.
+- HOOK: os primeiros 1–3 segundos abrem com pergunta forte, contraste, afirmação específica, quebra de expectativa ou tensão ligada ao tema. Evite saudações, introduções, “você sabia?” genérico e promessas exageradas. O hook precisa estar na primeira fala.
+- RETENÇÃO: construa progressão, não lista de frases. Use curiosidade aberta, perguntas que serão respondidas, contrastes, exemplos concretos, mudanças de perspectiva e transições naturais. Entregue valor e recompense a promessa do hook. Sem suspense artificial ou repetição para ocupar tempo.
+- NARRAÇÃO: escreva para ser falada por narrador profissional. Frases claras, ritmo variado, vocabulário natural, imagens mentais, pontuação que favoreça entonação e transições suaves. Evite linguagem robótica, clichês e redundância.
+- ESTRUTURA: hook → desenvolvimento com progressão e valor → virada/insight ou aplicação prática → fechamento que resolve a promessa. Adapte ao tema.
+- CTA: inclua chamada curta, específica e coerente com a intenção, integrada à conclusão. Escolha entre comentar, salvar, compartilhar, seguir ou conhecer um recurso somente quando fizer sentido. Não empilhe pedidos nem invente produto, link, oferta ou benefício. O CTA deve estar na narração e identificado no campo cta.
+- SEO SEMÂNTICO: identifique palavra-chave principal e termos secundários reais. Integre-os naturalmente na narração, sem repetição artificial, keyword stuffing ou desvio de sentido. Título, descrição e hashtags refletem o conteúdo efetivamente narrado. Título claro sem clickbait enganoso; descrição fiel; poucas hashtags específicas.
+- Consistência: hook, promessa, desenvolvimento, CTA, título, descrição e palavras-chave contam a mesma história. Nunca sacrifique naturalidade ou credibilidade pelo SEO.
+
 CENAS:
 - Decida a quantidade a partir da duração e da progressão narrativa. Use pelo menos ceil(duração/5) cenas e prefira ceil(duração/4) ou mais: 50s normalmente 12–15 cenas; 40s 10–12; 60s 15–18.
 - Cada cena representa uma unidade narrativa e uma ação concreta. As durações são apenas estimativas: o sistema atribuirá a duração final exata depois. Não sacrifique a narrativa para tentar fazer a soma matemática.
@@ -29,6 +40,10 @@ Retorne somente JSON válido:
 {
  "topic_interpretation":"...",
  "creative_thesis":"...",
+ "hook":"...",
+ "retention_strategy":"...",
+ "cta":"...",
+ "seo":{"primary_keyword":"...","secondary_keywords":["..."],"title":"...","description":"...","hashtags":["..."]},
  "style_lock":"...",
  "full_narration":"roteiro narrado integral em português brasileiro",
  "scenes":[
@@ -477,11 +492,13 @@ def create_storyboard(topic, style, duration, secret_reader):
 DURAÇÃO FINAL ESCOLHIDA: {target} segundos (OBRIGATÓRIA).
 ESTILO VISUAL: {style}
 
-Primeiro escreva um roteiro narrado completo de aproximadamente {min_words} a {max_words} palavras, adequado a {target} segundos de fala natural em português brasileiro.
-Se o usuário forneceu apenas um tema, crie o roteiro completo. Se forneceu um texto, preserve as ideias essenciais e adapte a extensão ao tempo, sem ignorar o pedido.
+Primeiro interprete o briefing completo (assunto/roteiro, estilo visual e ${target}s) e defina público provável, promessa, hook inicial, progressão de retenção, insight/entrega e CTA adequado.
+Escreva um roteiro narrado completo de aproximadamente ${min_words} a ${max_words} palavras, adequado a ${target}s de fala natural em português brasileiro. A velocidade do sintetizador permanece natural: dimensione o texto, não a voz.
+Se o usuário forneceu apenas um tema, crie o roteiro completo. Se forneceu um texto, preserve as ideias essenciais e adapte a extensão ao tempo.
+O hook precisa estar na primeira fala. O CTA deve estar integrado à conclusão. Use palavras-chave SEO semanticamente relevantes de modo natural na narração. Gere título, descrição e poucas hashtags coerentes com o roteiro, sem keyword stuffing.
 Depois divida esse roteiro em {minimum_scenes} a {preferred_scenes + 3} cenas narrativas. Meta: cerca de {preferred_scenes} cenas. Cada cena deve ter voiceover preenchido e conter um trecho contínuo do roteiro. O campo full_narration deve ser exatamente a concatenação das falas das cenas, com pontuação natural.
 As durações de cena são estimativas; NÃO tente fechar a soma matemática. O sistema atribuirá a duração exata depois. Não encurte a narração para fazer a soma bater.
-Cada cena deve mostrar ação concreta diretamente ligada à fala, com duas buscas visuais diferentes e específicas em inglês, estilo aplicado e pelo menos dois microeventos. Retorne o JSON completo conforme o esquema do sistema."""
+Cada cena deve mostrar ação concreta diretamente ligada à fala, com duas buscas visuais diferentes e específicas em inglês, estilo aplicado e pelo menos dois microeventos. Garanta hook, retenção, CTA e SEO preenchidos e coerentes com a narração. Retorne o JSON completo conforme o esquema do sistema."""
 
     plan = _request(prompt, secret_reader)
     plan["style_lock"] = style
