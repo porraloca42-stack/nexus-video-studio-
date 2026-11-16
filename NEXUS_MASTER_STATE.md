@@ -3,7 +3,7 @@
 Última atualização: 16/11/2026
 
 ## Objetivo
-Aplicativo pessoal em nuvem para transformar tema ou roteiro em vídeo vertical 9:16 de aproximadamente 40–60 segundos, com direção contextual por IA, narração, legendas, clipes coerentes, edição e exportação MP4.
+Aplicativo pessoal em nuvem para transformar tema ou roteiro em vídeo vertical 9:16 de aproximadamente 40–60 segundos, com direção contextual por IA, narração, clipes coerentes, edição e exportação MP4. O NEXUS não gera legendas; o usuário as adiciona no editor final.
 
 ## Repositório e publicação
 - GitHub: https://github.com/porraloca42-stack/nexus-video-studio-
@@ -13,24 +13,26 @@ Aplicativo pessoal em nuvem para transformar tema ou roteiro em vídeo vertical 
 - Pacote Python: nexus/
 
 ## Preferências de produto
-- Prioridade: qualidade audiovisual e coerência semântica.
+- Prioridade absoluta: qualidade audiovisual, narração natural e coerência semântica.
 - O diretor deve compreender o roteiro inteiro antes de criar cenas.
-- Cada cena deve representar a fala correspondente com ação concreta; evitar stock genérico, slideshows, colagens e repetição de zoom.
-- Um único estilo visual bloqueado por vídeo.
-- Preferir clipes reais em movimento; geração de vídeo por IA é futura e não deve consumir créditos sem autorização.
-- Pesquisar em várias bibliotecas, comparar candidatos e futuramente avaliar visualmente os clipes.
-- Alvo inicial: uso pessoal, cerca de 2 vídeos/dia, 50 segundos, 720p, 9:16.
+- Cada cena deve representar a fala correspondente com ação concreta; evitar stock genérico, slideshows, colagens e repetição de zoom digital.
+- Manter um estilo visual coerente por vídeo, mas variar sujeitos, ambientes, enquadramentos, ações e bibliotecas de mídia para evitar monotonia.
+- Preferir clipes reais em movimento; preservar o movimento original do vídeo. Geração de vídeo por IA é futura e não deve consumir créditos sem autorização.
+- Pesquisar em várias bibliotecas, comparar candidatos por cena e avaliar quadros reais antes de selecionar.
+- Alvo inicial: uso pessoal, cerca de 2 vídeos/dia, 40–50 segundos, 720p, 9:16.
 
 ## Arquitetura atual — estado do repositório em 16/11/2026
 - Interface: Streamlit (app.py).
 - Diretor: Gemini API (nexus/director.py), com failover entre modelos textuais compatíveis; produz roteiro, storyboard semântico e contrato `scene_direction` por cena.
-- Voz/legendas: Edge TTS (nexus/audio.py), com legendas por eventos de frase e fallback por palavras agrupadas.
-- Renderização disponível: FFmpeg (nexus/render.py) como pipeline legado/auxiliar; adaptador Remotion em `nexus/remotion_renderer.py` e projeto isolado em `remotion/`.
-- Worker remoto: workflow GitHub Actions para render Remotion/Cloudflare; o fluxo real depende dos secrets e do deploy Streamlit.
-- Geração de imagens: Cloudflare Workers AI FLUX.2 Klein no worker remoto; gera imagens estáticas, não vídeo.
-- Busca/baixar mídia: nexus/assets.py; fontes implementadas em diferentes níveis de maturidade, com smoke test Wikimedia Commons aprovado. Coverr/Pixabay ainda exigem validação real de API e licença.
-- Remotion já tem composição, manifesto, movimento de câmera, efeitos atmosféricos/luminosos e crossfade; a auditoria visual Gemini foi integrada ao retorno do MP4 Cloudflare/Remotion. Não presumir parallax real nem animação orgânica de objetos em imagem única.
-- Avaliação visual de candidatos existe no fluxo de seleção de mídia; após o render Cloudflare/Remotion, o app extrai um quadro por cena e solicita revisão multimodal Gemini (aderência à narração, qualidade, artefatos e estilo). A revisão é consultiva e não bloqueia a entrega.
+- Narração: Fish Audio S2.1 Pro Free como primário quando configurado; Edge TTS como fallback (nexus/audio.py). Não há trilha de legendas no pipeline.
+- Renderização principal da opção de bibliotecas: FFmpeg (nexus/render.py). O adaptador Remotion em `nexus/remotion_renderer.py` e o projeto `remotion/` são um fluxo alternativo via worker remoto.
+- Worker remoto: workflow GitHub Actions para render Remotion/Cloudflare; depende dos secrets e do deploy Streamlit.
+- Geração de imagens no fluxo alternativo: Cloudflare Workers AI FLUX.2 Klein; gera imagens estáticas, não vídeo.
+- Busca de mídia: Wikimedia Commons sem chave; Pixabay e Pexels somente quando suas chaves estiverem configuradas. Coverr não é considerado fonte ativa/validada.
+- Busca multi-fonte por cena, ranking semântico, exclusão de URLs já usadas e shortlist que favorece variedade de provedores já existem. A seleção final inspeciona dois quadros dos candidatos com Gemini.
+- Auditoria do MP4 final agora extrai três quadros por cena (início, meio e fim) e os envia agrupados para revisão semântica/temporal. É consultiva; três quadros não equivalem a análise quadro a quadro nem medem optical flow ou lip-sync.
+- O render de clipes de biblioteca preserva o movimento real da filmagem e não aplica zoompan artificial por padrão.
+- Não presumir parallax real nem animação orgânica de objetos em imagem única.
 
 ## Segredos
 Nunca armazenar valores de chaves neste arquivo, no GitHub ou em instruções do projeto.
