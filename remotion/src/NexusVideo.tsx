@@ -1,6 +1,6 @@
 import React from "react";
 import { AbsoluteFill, Audio, Img, OffthreadVideo, Sequence, interpolate, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
-import type { NexusCaption, NexusScene, NexusVideoProps } from "./types";
+import type { NexusScene, NexusVideoProps } from "./types";
 
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
 
@@ -60,15 +60,6 @@ const SceneLayer: React.FC<{ scene: NexusScene; duration: number; overlapFrames:
   </AbsoluteFill>;
 };
 
-const CaptionLayer: React.FC<{ captions: NexusCaption[] }> = ({ captions }) => {
-  const frame = useCurrentFrame();
-  const active = captions.find((caption) => frame >= caption.startFrame && frame < caption.endFrame);
-  if (!active) return null;
-  return <div style={{ position: "absolute", left: 48, right: 48, bottom: 175, display: "flex", justifyContent: "center", textAlign: "center" }}>
-    <div style={{ background: "#05080bcc", border: "1px solid #ffffff24", borderRadius: 12, padding: "13px 20px", color: "#fff", fontSize: 30, lineHeight: 1.2, fontWeight: 800, textShadow: "0 2px 5px #000", maxWidth: 620 }}>{active.text}</div>
-  </div>;
-};
-
 export const NexusVideo: React.FC<NexusVideoProps> = (props) => {
   const { fps } = useVideoConfig();
   let cursor = 0;
@@ -87,6 +78,5 @@ export const NexusVideo: React.FC<NexusVideoProps> = (props) => {
     </Sequence>)}
     {props.narrationAudio ? <Audio src={staticFile(props.narrationAudio)} /> : null}
     {props.musicAudio ? <Audio src={staticFile(props.musicAudio)} volume={0.12} /> : null}
-    <CaptionLayer captions={props.captions} />
   </AbsoluteFill>;
 };
