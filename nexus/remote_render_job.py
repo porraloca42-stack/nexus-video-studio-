@@ -11,7 +11,7 @@ from nexus.render_crypto import decrypt_text, encrypt_bytes, encrypt_text
 
 
 def generate_worker_narration(text, voice, output_path, fish_api_key="", fish_voice_id=""):
-    """Use Fish Audio on the worker when credentials are provided; Edge TTS is fallback."""
+    """Generate narration with the selected Fish Audio voice; never substitute a system TTS voice."""
     return make_voice(
         text,
         voice,
