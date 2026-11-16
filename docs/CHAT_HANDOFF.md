@@ -213,3 +213,10 @@ O usuário ficou frustrado com orientações longas/repetitivas e com uma previs
 - Hipótese de causa: cache/checkout parcial do Streamlit ou símbolo obsoleto indisponível no runtime; não conclusivo devido ao traceback truncado.
 - Pós-commit: arquivos relidos do main e import conferido. CI e reload Streamlit pendentes.
 - Próximo passo: aguardar CI e reload. Se houver novo erro, pedir captura completa/abrir logs Streamlit; não fazer alterações adicionais sem traceback.
+
+## Retomada — segundo ajuste ImportError (16/11/2026 17:05 BRT)
+- Usuário enviou nova captura que ainda mostra ImportError na linha `from nexus.audio import get_fish_voice, make...`, após o commit `bd54f26`. A mensagem original está redigida/truncada.
+- No main, `nexus/audio.py` contém `def get_fish_voice` e `def make_voice`; portanto não foi possível confirmar qual símbolo ou dependência causou o erro. Cache/checkout parcial do Streamlit é hipótese, não fato.
+- Commit `a8b5ac9` altera `app.py`: troca import nomeado por `import nexus.audio as fish_audio`; chamadas passam a `fish_audio.get_fish_voice` e `fish_audio.make_voice`. Evita ImportError apenas por símbolo nomeado ausente em módulo antigo.
+- Pós-commit, leitura confirmou nenhum `from nexus.audio import ...`, módulo importado e chamadas qualificadas.
+- CI/Streamlit ainda pendentes. Se falhar novamente, capturar logs completos do Streamlit Cloud e identificar exceção raiz antes de alterar mais código.
