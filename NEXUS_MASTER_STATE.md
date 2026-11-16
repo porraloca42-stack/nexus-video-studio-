@@ -786,3 +786,16 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Run #43874109675 foi iniciado para validar os três commits; no momento deste registro ainda estava em execução. Não declarar CI aprovado até consultar o resultado final.
 - Escopo desta etapa: contrato e instruções do diretor Gemini. O motor de render ainda não consome todos esses parâmetros; efeitos de profundidade, luz, atmosfera, transições e beats permanecem pendentes de implementação e teste no renderizador.
 - Estado de produto: contrato implementado no prompt; validação automatizada pendente; deploy Streamlit e MP4 real não validados.
+
+
+## Primeiro motor de direção cinematográfica no Remotion — 16/11/2026
+- CI anterior confirmado: runs #43874200887 e #43874127964 concluídas com sucesso após correção do teste de legendas; regressão Python aprovada.
+- Commits desta etapa:
+  - `763e31a`: tipos TypeScript estritos para `sceneDirection`.
+  - `6d60c3f`: sanitização/whitelist no adaptador Python e transporte do plano estruturado ao manifesto.
+  - `cd639c9`: teste de limites, enumerações permitidas, truncamento de beats e fallback seguro.
+  - `4a6c940`: Remotion consome direção de câmera, intensidade, escala, foco, beats de ênfase, efeitos de atmosfera (chuva/poeira/brasas/névoa), efeitos de iluminação (light sweep/flicker/exposure ramp) e crossfade de entrada com sobreposição de sequências.
+- Segurança: strings arbitrárias do Gemini não viram código ou CSS; enums são whitelisted, valores numéricos limitados, texto de metadados truncado e máximo de três beats por cena.
+- Limites conhecidos: camadas de profundidade são transportadas, mas parallax verdadeiro ainda não é executado porque as imagens não vêm segmentadas em planos; não há animação orgânica de pessoas/objetos. Beats atualmente produzem uma ênfase sutil de câmera, não animação semântica do alvo descrito.
+- Run de regressão #43875070412 e demo Remotion #43875070449 iniciados após os commits; status pendente no momento do registro. Não marcar a etapa como aprovada até conclusão de ambos.
+- Estado: código implementado no GitHub; typecheck/render de demonstração e testes Python pendentes; Streamlit deploy e MP4 real ainda não validados.
