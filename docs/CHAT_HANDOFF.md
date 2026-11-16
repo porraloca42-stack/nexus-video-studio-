@@ -162,3 +162,11 @@ O usuário ficou frustrado com orientações longas/repetitivas e com uma previs
 - Hipótese a testar: Streamlit Cloud está com commit/árvore de arquivos diferente do main atual ou outra falha de import no ambiente. Ainda sem prova.
 - Não fiz alteração de código para este incidente; documentação atualizada para preservar diagnóstico. Não dizer que foi corrigido.
 - Próxima ação: pedir ao usuário abrir Manage app → Logs e enviar a mensagem completa da exceção/linha do import. Depois comparar commit implantado e corrigir causa real.
+
+## Correção imediata do ImportError Streamlit — 16/11/2026 — 16:31 BRT
+- Captura do usuário mostrava erro de inicialização com traceback apontando para `from nexus.audio import ...` em `app.py`, mas sem revelar o símbolo exato.
+- Patch gravado em main: commit `ac84bad`.
+- Alteração: removida dependência de import do helper novo `list_fish_natural_brazilian_voices`; app volta a importar somente funções preexistentes `generate_fish_preview`, `list_fish_voices`, `make_voice`. Curadoria passa a ocorrer localmente no bloco UI com a função de listagem existente.
+- Hipótese principal: incompatibilidade momentânea entre versão do app.py e do módulo nexus/audio.py durante sincronização/deploy do Streamlit. Não foi possível confirmar a causa exata porque o traceback foi redigido/cortado.
+- Próximo passo: aguardar Streamlit sincronizar main e confirmar que a aplicação abre. Se ainda falhar, obter o erro exato dos logs e corrigir com base nele.
+- Não declarar validado ainda: somente commit confirmado, sem teste de execução do Streamlit Cloud.
