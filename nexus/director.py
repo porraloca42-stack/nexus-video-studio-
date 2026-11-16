@@ -3,6 +3,7 @@ import json
 import re
 import time
 import requests
+from pathlib import Path
 
 SYSTEM = """
 Você é o DIRETOR E ROTEIRISTA AUDIOVISUAL do NEXUS VIDEO STUDIO.
