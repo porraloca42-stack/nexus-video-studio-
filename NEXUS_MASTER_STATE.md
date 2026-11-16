@@ -1099,3 +1099,24 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - O `timeout=45 * MINUTES` em `modal_worker.py` controla a classe de inferência Modal e é distinto do timeout do job GitHub Actions.
 - Deploy Modal, download do modelo, geração GPU, custo e qualidade ainda não estão confirmados.
 - Ver também `docs/CHAT_HANDOFF.md` para instruções completas e ponto exato de retomada em novo chat.
+
+## Regra permanente — atualização de continuidade entre chats
+**Obrigatória em toda sessão e após cada etapa concluída:**
+1. Sempre que uma atualização, correção, teste, decisão, configuração ou etapa de trabalho for concluída nesta conversa, atualizar imediatamente `docs/CHAT_HANDOFF.md` com o que foi feito, evidências, arquivos/commits envolvidos, resultado e próximo passo exato.
+2. Atualizar também `NEXUS_MASTER_STATE.md` quando a mudança alterar arquitetura, decisões, estado técnico, segurança, custos, implantação, validação ou prioridades do projeto. O master state continua sendo a fonte principal do estado do projeto; o handoff registra a linha do tempo e o ponto exato para retomada.
+3. Registrar data e horário local de Brasília (America/Sao_Paulo, UTC−03:00) sempre que disponíveis. Se o horário não puder ser confirmado, registrar somente a data e não inventar horário.
+4. Separar explicitamente fatos confirmados, evidências observadas, hipóteses e itens pendentes. Nunca transformar uma intenção, instrução ou execução em andamento em tarefa concluída.
+5. Depois de gravar, reler os arquivos no GitHub para confirmar que a atualização realmente ficou na branch `main`. Só então informar ao usuário que foi salva.
+6. Em novo chat, ler integralmente o master state e o handoff, conferir o estado vivo do GitHub e continuar do último ponto registrado sem repetir etapas concluídas.
+7. Não armazenar segredos, tokens, senhas ou valores de credenciais nos documentos; registrar apenas os nomes dos secrets e seu estado de configuração.
+
+
+## Registro de continuidade — regra permanente e confirmação do handoff (16/11/2026 14:12 BRT)
+
+- O usuário solicitou que o documento de continuidade permaneça sempre atualizado para que novos chats recuperem o histórico e o ponto exato da sessão.
+- Regra permanente adicionada: após cada etapa/atualização concluída, atualizar `docs/CHAT_HANDOFF.md`; atualizar também este master state quando houver impacto no estado técnico, arquitetura, decisões, segurança, custos, implantação ou validação.
+- Registrar data e horário de Brasília quando confirmáveis; não inventar horários.
+- Distinguir fatos confirmados, evidências, hipóteses e pendências; nunca registrar tarefa em andamento como concluída.
+- Após cada gravação, reler os documentos na branch main para verificar persistência antes de confirmar ao usuário.
+- Nunca incluir valores de tokens, senhas ou credenciais.
+- Horário desta atualização confirmado: 16/11/2026 14:12:52 UTC−03:00.
