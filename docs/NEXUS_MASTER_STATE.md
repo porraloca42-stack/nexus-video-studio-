@@ -28,7 +28,7 @@ Aplicativo pessoal em nuvem para transformar tema ou roteiro em vídeo vertical 
 - Voz/legendas: Edge TTS (nexus/audio.py).
 - Renderização: FFmpeg (nexus/render.py).
 - Busca/baixar mídia: nexus/assets.py.
-- Fonte principal: Coverr; usuário confirmou que COVERR_API_KEY já está configurada nos Secrets. A autenticação e a busca ainda precisam de teste real dentro do app.
+- Fonte principal: Coverr; COVERR_API_KEY configurada e autenticação/busca genérica testadas pelo usuário. Busca semântica específica por cena falhou no primeiro teste end-to-end e recebeu fallback progressivo de consultas curtas; ainda aguarda reteste.
 - Pixabay: há integração preliminar no código, mas PIXABAY_API_KEY não está configurada; não considerar operacional.
 - Pexels: NÃO integrado. O usuário informou que a emissão de novas chaves API está temporariamente indisponível; não bloquear o desenvolvimento por isso.
 - Análise multimodal de candidatos e geração de cenas originais ainda NÃO implementadas.
@@ -48,7 +48,9 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Após a criação de nexus/__init__.py, o usuário confirmou em 2026-11-16 que a aplicação abre normalmente no Streamlit.
 - Captura dos logs mostra atualização do app concluída (Updated app!). A inicialização está confirmada visualmente pelo usuário; não há confirmação independente de execução do pipeline.
 - app.py importa search_video_sources, search_coverr_videos e download_file de nexus.assets.
-- O usuário executou o diagnóstico Coverr e confirmou em captura que a API respondeu com sucesso e retornou cinco clipes, incluindo um vertical. Autenticação e busca estão TESTADAS no ambiente publicado.
+- O usuário executou o diagnóstico Coverr e confirmou em captura que a API respondeu com sucesso e retornou cinco clipes, incluindo um vertical. Autenticação e busca genérica estão TESTADAS no ambiente publicado.
+- Primeiro teste do botão “Produzir vídeo completo” gerou storyboard de seis cenas, mas não encontrou clipes para nenhuma cena. FFmpeg não foi iniciado; pipeline completo permanece NÃO VALIDADO.
+- Correção publicada: nexus/assets.py agora tenta a consulta original e até três versões mais curtas com termos concretos, registrando a consulta que encontrou resultados. app.py agora mostra, em detalhes expansíveis, consultas e erros por cena quando não encontra mídia.
 - O usuário executou o download interno e confirmou em captura que o servidor recebeu e validou um MP4: H.264, 606×1080, 8 segundos, 4,65 MB. Download servidor→arquivo e leitura FFprobe estão TESTADOS. O arquivo ficou em diretório temporário do servidor e foi descartado ao fim do teste; não houve download para o celular, nem isso era o objetivo do diagnóstico.
 - A interface explica que o diagnóstico Coverr baixa o clipe temporariamente no servidor; o usuário não deve receber arquivos-fonte individuais.
 - Em 2026-11-16 foi publicado um fluxo de produção atualizado: botão “Produzir vídeo completo”; validação FFprobe de cada clipe baixado; geração de narração/legendas; render FFmpeg; validação do MP4 final com faixas de vídeo e áudio; armazenamento dos bytes do MP4 em session_state para manter prévia e botão de download após reruns. O código foi publicado, mas ainda NÃO foi executado pelo usuário nem validado com um MP4 real.
@@ -62,12 +64,13 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 1. CONCLUÍDO: usuário confirmou que a interface Streamlit abre normalmente após o commit que adicionou nexus/__init__.py.
 2. CONCLUÍDO: autenticação e busca Coverr testadas com sucesso pelo usuário; cinco resultados retornados.
 3. CONCLUÍDO: download interno Coverr e validação FFprobe confirmados pelo usuário (H.264, 606×1080, 8 s, 4,65 MB).
-4. IMPLEMENTADO, AGUARDANDO TESTE: fluxo completo de produção com validação dos clipes, render FFmpeg, verificação do MP4 e entrega persistente na interface. Próxima ação: usuário gerar um storyboard e acionar “Produzir vídeo completo”; registrar qualquer erro sem presumir sucesso.
-5. Melhorar busca semântica e ranking por cena; não selecionar automaticamente o primeiro resultado sem avaliar correspondência.
-6. Implementar avaliação multimodal dos candidatos para verificar correspondência com a narração.
-7. Renderizar o primeiro MP4 real de 40–50s, inspecionar qualidade e validar entrega do arquivo final.
-8. Considerar Pixabay como fallback quando a chave estiver disponível; Pexels permanece fora do escopo enquanto a emissão de chaves estiver indisponível.
-9. Avaliar MCP oficial do Coverr somente se trouxer vantagem após validar a integração REST.
+4. IMPLEMENTADO, AGUARDANDO RETESTE: fluxo de produção e entrega MP4 final. Primeiro teste parou antes do FFmpeg porque não houve resultados para as seis buscas específicas.
+5. PRÓXIMO: retestar a busca com fallback progressivo de consultas curtas; verificar que cada cena encontra um clipe relacionado antes de liberar renderização.
+6. Melhorar ranking semântico por cena; não selecionar automaticamente o primeiro resultado sem avaliar correspondência.
+7. Implementar avaliação multimodal dos candidatos para verificar correspondência com a narração.
+8. Renderizar o primeiro MP4 real de 40–50s, inspecionar qualidade e validar entrega do arquivo final.
+9. Considerar Pixabay como fallback quando a chave estiver disponível; Pexels permanece fora do escopo enquanto a emissão de chaves estiver indisponível.
+10. Avaliar MCP oficial do Coverr somente se trouxer vantagem após validar a integração REST.
 
 ## Regras para o assistente em novos chats
 - Começar lendo este arquivo e o código relevante no GitHub antes de propor mudanças.
