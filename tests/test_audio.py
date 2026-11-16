@@ -113,6 +113,31 @@ class AudioSubtitleTests(unittest.TestCase):
             self.assertLessEqual(len(caption.split()), 7)
 
 
+class FishChunkAlignmentTests(unittest.TestCase):
+    def test_applies_global_offset_to_alignment_from_later_chunks(self):
+        from nexus.audio import _fish_timestamp_cues
+
+        events = [
+            {
+                "chunk_audio_offset_sec": 0.0,
+                "alignment": {"segments": [
+                    {"text": "Primeira", "start": 0.0, "end": 0.4},
+                ]},
+            },
+            {
+                "chunk_audio_offset_sec": 1.25,
+                "alignment": {"segments": [
+                    {"text": "segunda.", "start": 0.1, "end": 0.6},
+                ]},
+            },
+        ]
+        cues = _fish_timestamp_cues(events, "Primeira segunda.")
+        self.assertEqual(len(cues), 1)
+        self.assertEqual(cues[0][0], 0)
+        self.assertEqual(cues[0][1], 1850)
+        self.assertEqual(cues[0][2], "Primeira segunda.")
+
+
 if __name__ == "__main__":
     unittest.main()
 
