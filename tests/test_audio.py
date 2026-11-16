@@ -48,8 +48,10 @@ class AudioSubtitleCompatibilityTests(unittest.TestCase):
         maker = maker_class()
         with tempfile.TemporaryDirectory(prefix="nexus_audio_test_") as temp:
             output = Path(temp) / "voice.mp3"
-            with patch("nexus.audio.edge_tts.Communicate", FakeCommunicate), \\
-                 patch("nexus.audio.edge_tts.SubMaker", return_value=maker):
+            with (
+                patch("nexus.audio.edge_tts.Communicate", FakeCommunicate),
+                patch("nexus.audio.edge_tts.SubMaker", return_value=maker),
+            ):
                 audio_path, subtitle_path = make_voice(
                     "Olá", "pt-BR-AntonioNeural", output
                 )
