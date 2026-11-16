@@ -93,6 +93,15 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Commits: `d52db7d` (metadados/licença no catálogo), `2cabd4b` (gaveta e biblioteca), `fa27503` e `f5f9c73` (busca por formulário e rótulos remotos em texto simples), `3b1904c` (filtros por estilo vocal e timbre indicado).
 - Revisão estática no GitHub confirmou os novos parâmetros, as três categorias e a gaveta recolhida. Teste automatizado Python, implantação no Streamlit e teste visual no celular: ainda pendentes.
 
+
+## Biblioteca de narração — curadoria profissional (16/11/2026)
+- Requisito do usuário: remover opção de gravar/criar voz paga da interface; não mostrar personagens, atores, anime, memes ou vozes de entretenimento; apresentar vozes humanizadas para narração em português, separadas por sexo, sem busca.
+- UI substituída por duas listas dentro da gaveta: "Vozes masculinas" e "Vozes femininas", até 25 opções por grupo (alvo máximo de 50 vozes), com amostras e botão de seleção. Removidos busca, filtros, paginação manual, catálogo de vozes privadas e link para criar Professional Voice Clone.
+- Descoberta consulta Fish Audio com tags `male+narration` e `female+narration`, idioma `pt`, ordenação por uso, e busca também a categoria de vozes licenciadas com parâmetro `licensed=true`. Resultados são deduplicados, filtrados por metadados de idioma/gênero/narração e por exclusão de termos associados a personagens, anime, memes, celebridades e jogos.
+- Metadado de origem `source` é preservado. Quando presente, só entram vozes identificadas como PVC/licenciadas; quando ausente, a seleção depende das tags e metadados devolvidos pela API. A lista final pode conter menos de 25 por sexo se a API não retornar candidatos suficientes.
+- Alterações: `3b7cf85` curadoria por sexo e tags; `06e921d` nova UI simples; `272362f`, `552700d`, `b0e0b20` correções no filtro de gênero/origem; `16242fe`, `4787d3f` testes de curadoria.
+- Revisão estática no GitHub confirma duas listas, limite de 25 por sexo, sem busca e sem botão de gravação/criação. Testes automatizados/CI e consulta autenticada à Fish Audio ainda precisam ser executados após os commits. Não declarar o catálogo validado até confirmar quantidade e amostras reais.
+
 ## Regras para o assistente em novos chats
 - Começar lendo este arquivo e o código relevante no GitHub antes de propor mudanças.
 - Tratar este documento como registro de continuidade, mas conferir o estado atual do repositório e deployment; pode ficar desatualizado.
