@@ -1353,3 +1353,15 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Smoke test integrado #2 validou a cadeia visual e muxagem de áudio sintético em 2s. Não confundir esse teste com a validação de uma produção editorial de 40–50s com narração Fish Audio.
 - O app aceita cenas de 2–5s; o adaptador Modal rejeita durações fora dessa faixa e processa todas as cenas num único batch. O worker de produção gera imagens, anima todas as cenas, sintetiza Fish Audio, ajusta áudio dentro de tolerância máxima de 15% e valida o MP4 final via FFprobe.
 - Próximo critério de liberação: um vídeo real de 40–50s, com voz Fish Audio selecionada, todas as cenas animadas e coerência audiovisual revisada. Registrar duração, custo, codecs, resolução e inspeção visual antes de declarar finalizado.
+
+
+## Redesign visual Studio Workspace v2 — 16/11/2026
+- Usuário esclareceu que o objetivo é exclusivamente mudar a aparência visual do aplicativo, mantendo as funcionalidades atuais; a tentativa anterior de CSS roxo não atendia ao pedido.
+- Criada branch limpa `redesign/studio-workspace-v2` diretamente da `main` atual (base `ef7793c`), sem reaproveitar a branch antiga divergente `feat/mobile-premium-ui`.
+- Nova identidade visual aplicada em `app.py`: azul-noite, painéis azul-petróleo, ciano e azul; cabeçalho editorial; indicador de estado; trilha visual de três etapas; novos estilos para cartões, campos, botões, métricas, preview, áudio/vídeo e estados interativos; regras responsivas desktop/mobile.
+- `.streamlit/config.toml` alinhado à paleta azul/ciano.
+- Alterações limitadas a `app.py` e `.streamlit/config.toml`; nenhuma lógica de storyboard, seleção de voz, pesquisa de bibliotecas, renderização ou exportação foi intencionalmente alterada.
+- PR #2 aberto em draft: https://github.com/porraloca42-stack/nexus-video-studio-/pull/2
+- Comparação Git: branch 2 commits à frente e 0 atrás da `main`; a versão oficial permanece intacta.
+- Validação atual: inspeção do diff confirma somente arquivos de apresentação/tema alterados. Checks CI no HEAD `ec4a8d3` ainda não apareceram; validação sintática, deploy Streamlit de teste e inspeção visual real desktop/mobile permanecem pendentes. Não declarar publicado, aprovado ou validado.
+- Não integrar à `main` até obter preview visual verificável e aprovação do usuário.
