@@ -179,3 +179,15 @@ O usuário ficou frustrado com orientações longas/repetitivas e com uma previs
 - Validação ainda pendente: compilação Python/CI e reinício/reload do Streamlit Cloud. Não declarar app funcionando até confirmação visual.
 - Próximo passo: aguardar Streamlit atualizar e testar carregamento; se persistir erro, capturar traceback novo e corrigir causa exata.
 - Assumir claramente que o erro de indentação foi introduzido pela alteração anterior; não pedir ao usuário para fazer debugging.
+
+## Retomada — seleção de vozes humanas brasileiras atualizada (16/11/2026 16:45:45 BRT)
+- Usuário confirmou que o app voltou a abrir e pediu remover vozes de personagens e priorizar vozes comuns/naturais brasileiras.
+- Alterado somente `app.py`, commits `5b9cbc2` e `900f7d3`. Módulo de áudio, geração TTS, prévia e layout compacto não foram alterados.
+- O app agora consulta até 3 páginas de 100 vozes em português na Fish Audio, mescla duplicadas e aplica filtro:
+  - exclui memes, anime, personagens, imitações, celebridades/figuras políticas, cartoon, paródias e personagens de jogos;
+  - exige metadados que identifiquem explicitamente português brasileiro (Brazilian/Brasileiro/pt-BR/Brasil);
+  - exclui referências explícitas a Portugal/pt-PT;
+  - prioriza metadados de narração/conversa/documentário/profissional/neutro/natural/podcast/entrevista; popularidade é critério secundário.
+- Estado: código gravado e relido no main; CI e validação da lista real no Streamlit ainda pendentes. Não afirmar que a lista está visualmente validada até o usuário conferir.
+- Próximo passo: aguardar Actions e reload do Streamlit; confirmar se aparecem vozes brasileiras normais com amostras audíveis. Se a lista ficar vazia ou curta, investigar metadados/API Fish Audio antes de relaxar filtro.
+- Limitação: “natural” é inferido de descrição/tags; audição das amostras é necessária para validar.
