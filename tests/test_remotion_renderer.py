@@ -103,7 +103,7 @@ class RemotionManifestTests(unittest.TestCase):
     def test_graphic_scene_without_stock_asset(self):
         with tempfile.TemporaryDirectory() as temp:
             plan = {"scenes": [{"duration_seconds": 3, "voiceover": "Ideia."}]}
-            path, manifest = build_remotion_manifest(plan, [], None, None, Path(temp), job_id="graphic")
+            path, manifest = build_remotion_manifest(plan, [], None, Path(temp), job_id="graphic")
             self.assertEqual(manifest["scenes"][0]["visualMode"], "graphic")
             self.assertIsNone(manifest["scenes"][0]["asset"])
             self.assertEqual(manifest["durationInFrames"], 90)
