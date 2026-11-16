@@ -35,9 +35,24 @@ jobs:
         working-directory: remotion
         run: npm run render:demo
 
-      - name: Render manifest-driven video
+      - name: Create synthetic video, narration and subtitles for integration test
+        run: |
+          mkdir -p remotion/public/ci-input
+          ffmpeg -y -f lavfi -i "testsrc2=size=720x1280:rate=30" -t 4 -an -c:v libx264 -pix_fmt yuv420p remotion/public/ci-input/sample.mp4
+          ffmpeg -y -f lavfi -i "sine=frequency=440:duration=4" -c:a pcm_s16le remotion/public/ci-input/narration.wav
+          printf "1\\n00:00:00,000 --> 00:00:04,000\\nTeste de legenda integrada.\\n" > remotion/public/ci-input/captions.srt
+
+      - name: Build manifest through the real Python adapter
+        run: python scripts/build_remotion_ci_manifest.py
+
+      - name: Render Python-adapter manifest with Remotion
         working-directory: remotion
-        run: npm run render:manifest
+        run: npx remotion render src/index.ts NexusFromManifest out/nexus-adapter-integration.mp4 --props=public/jobs/ci/manifest.json --codec=h264 --pixel-format=yuv420p
+
+      - name: Validate integration MP4 streams and duration
+        run: |
+          ffprobe -v error -show_entries format=duration:stream=codec_type,codec_name,width,height -of json remotion/out/nexus-adapter-integration.mp4 > /tmp/nexus-remotion-probe.json
+          python -c "import json; d=json.load(open('/tmp/nexus-remotion-probe.json')); v=next((s for s in d['streams'] if s['codec_type']=='video'),None); a=next((s for s in d['streams'] if s['codec_type']=='audio'),None); duration=float(d['format']['duration']); assert v and v['width']==720 and v['height']==1280, d; assert a, d; assert 3.8 <= duration <= 4.2, d; print('MP4 validated:', v, a, duration)"
 
       - name: Upload MP4 demos
         uses: actions/upload-artifact@v4
