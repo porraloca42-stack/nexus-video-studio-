@@ -36,7 +36,7 @@ Retorne somente JSON válido neste formato:
 
 def _request(prompt, secret_reader):
     key = secret_reader("GEMINI_API_KEY")
-    model = secret_reader("GEMINI_MODEL", "gemini-3.8-flash")
+    model = secret_reader("GEMINI_MODEL", "gemini-4-argon")
     if not key:
         raise RuntimeError("Diretor de IA indisponível.")
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
@@ -54,7 +54,7 @@ def _request(prompt, secret_reader):
     if response.status_code in (401, 403):
         raise RuntimeError("O Gemini recusou a autenticação ou o acesso ao modelo. Confira a configuração da chave e do modelo.")
     if response.status_code == 404:
-        raise RuntimeError(f"O modelo Gemini '{model}' não está disponível para esta chave. Em Secrets, configure GEMINI_MODEL = \"gemini-3.8-flash\".")
+        raise RuntimeError(f"O modelo Gemini '{model}' não está disponível para esta chave. Em Secrets, configure GEMINI_MODEL = \"gemini-4-argon\".")
     if not response.ok:
         raise RuntimeError(f"Falha no Gemini (HTTP {response.status_code}). Tente novamente.")
     data = response.json()
