@@ -272,3 +272,13 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Estado: correção e teste gravados na branch main. Ainda aguardam execução CI e nova produção real no Streamlit. O MP4 final ainda não está validado.
 
 - Commit `edebc82`: identificador visual do app atualizado para `NEXUS-2026.11.16-srt-newline-1`, para confirmar que o worker Streamlit carregou a revisão com a correção.
+
+
+### Validação CI da correção SRT — 16/11/2026
+- GitHub Actions run #89 (43818662048) para o commit c16040b concluiu com sucesso.
+- Job unit-tests: sucesso; compilação dos módulos da aplicação concluída.
+- 19 testes executados em 2,659s: 19 passaram, 0 falharam.
+- Incluído teste de integração de renderização FFmpeg que produz MP4 vertical com áudio e legendas em ambiente CI; isto valida a rotina sintética/isolada, não a produção real com mídia e chaves do Streamlit.
+- A correção SRT e os testes estão validados no CI.
+- Deploy/worker Streamlit ainda não verificado. Próxima confirmação simples na interface: build NEXUS-2026.11.16-srt-newline-1.
+- Primeiro MP4 real do usuário ainda pendente; não declarar pipeline de produção concluído.
