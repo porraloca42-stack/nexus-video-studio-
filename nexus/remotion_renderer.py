@@ -76,6 +76,8 @@ def build_remotion_manifest(plan, media, audio_path, subtitles_path, public_dir,
             "asset": asset_ref,
             "headline": str(scene.get("headline") or ""),
             "visualDescription": str(scene.get("visual_action") or scene.get("purpose") or ""),
+            "imagePrompt": str(scene.get("image_prompt") or ""),
+            "cameraMotion": str(scene.get("camera_motion") or "push_in"),
             "accent": str(scene.get("accent") or "#e8b66b"),
         })
 
