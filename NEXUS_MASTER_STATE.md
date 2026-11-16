@@ -697,3 +697,11 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Commit `936a4ab`: se a primeira resposta vier abaixo do mínimo, o diretor agora faz uma chamada de reparo específica, preservando narração, ordem e sentido, solicitando divisão em unidades visuais menores e completas. Se a segunda resposta continuar abaixo do mínimo, apresenta erro claro sem avançar com storyboard incompleto.
 - Commit `96a765d`: testes adicionados para (a) reparo automático de 8 para 10 cenas em 50s e (b) não fazer chamada extra quando o storyboard já atende ao mínimo.
 - CI disparado pelos commits acima; aprovação automatizada ainda pendente. A captura não foi gerada por falha do motor Cloudflare; é um problema anterior, no planejamento Gemini.
+
+
+## Correção da falha de duração da narração no worker — 16/11/2026
+- Run real #43858265947, usando commit `49703fb`, passou pela geração de imagens Cloudflare e falhou depois da geração TTS: áudio medido em 35,4s para timeline de 40,0s (desvio de 11,5%, acima do limite rígido de 10%).
+- As 8 cenas do planejamento de 40s estavam corretas (mínimo de 8); não era falha de contagem de cenas. A causa da interrupção foi o desvio entre a duração do TTS regenerado no worker e a duração total planejada.
+- Commit `fbe5d8a`: o worker agora faz ajuste de tempo moderado por FFmpeg quando o TTS diverge até 15% da timeline, e aplica o mesmo fator aos timestamps SRT para manter legendas sincronizadas. Diferenças superiores a 15% continuam sendo bloqueadas para evitar áudio muito acelerado/lento.
+- Commit `cde5384`: adicionados testes para reescalonamento dos timestamps das legendas.
+- CI iniciado; ainda pendente. Novo render Cloudflare e MP4 final ainda não validados.
