@@ -84,12 +84,13 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 
 
 ## Biblioteca de narração — expansão e organização
-- Correção planejada/implementada no código: seletor de vozes dentro de gaveta recolhida por padrão; a tela principal mantém apenas o nome da voz ativa.
+- Implementado no código: seletor de vozes dentro de gaveta recolhida por padrão; a tela principal mantém apenas o nome da voz ativa. A busca é enviada por formulário para evitar chamadas à API a cada tecla.
 - A biblioteca consulta o endpoint oficial `GET /model` da Fish Audio, com busca por nome, paginação, filtro de idioma português e ordenação por uso.
 - Catálogos separados: vozes com licença indicada pela Fish Audio, biblioteca pública (com aviso quando a licença individual não está confirmada) e vozes privadas da própria conta.
 - O campo `licensed` retornado pela Fish Audio é preservado; presença na biblioteca pública não será tratada como autorização comercial.
 - Vozes profissionais verificadas/clonagem profissional são uma modalidade específica no web app Fish Audio; o fluxo API de clonagem persistente comum não será apresentado como clone profissional verificado.
-- Status de implantação e teste visual no Streamlit: pendente após commit.
+- Commits: `d52db7d` (metadados/licença no catálogo), `2cabd4b` (gaveta e biblioteca), `fa27503` (busca por formulário e rótulos remotos em texto simples) e commit posterior de segurança do rótulo selecionado.
+- Revisão estática no GitHub confirmou os novos parâmetros, as três categorias e a gaveta recolhida. Teste automatizado Python, implantação no Streamlit e teste visual no celular: ainda pendentes.
 
 ## Regras para o assistente em novos chats
 - Começar lendo este arquivo e o código relevante no GitHub antes de propor mudanças.
