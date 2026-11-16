@@ -109,3 +109,12 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Commit 4caa185: o app apaga resultados anteriores antes de começar um novo planejamento. Isso evita que um storyboard antigo de 44s permaneça visível caso uma nova tentativa falhe. Também valida a soma exata antes de mostrar o novo plano.
 - Teste isolado do algoritmo de duração: 50s/12 cenas, 50s/10 cenas, 40s/10 cenas, 60s/15 cenas e 50s/15 cenas fecharam exatamente o alvo, com cada cena entre 2 e 5 segundos.
 - Limitação: não houve chamada real ao Gemini nem deploy/execução Streamlit neste ambiente. O código está no GitHub; a geração real e o MP4 ainda precisam ser confirmados após a implantação.
+
+ 
+## Resiliência do Gemini — 16/11/2026
+- Evidência do usuário: a interface mostrou "Falha no Gemini (HTTP 503)" ao solicitar novo planejamento.
+- Diagnóstico: a implementação anterior fazia uma única chamada ao modelo selecionado e tratava 503 como erro fatal. A duração do roteiro não causou esse erro.
+- Commit 05e2311: nexus/director.py agora consulta modelos compatíveis, tenta cada modelo com até duas tentativas para erros transitórios (429, 500, 502, 503, 504 e falhas de conexão) e faz failover para até cinco modelos compatíveis.
+- Erros de autenticação (401/403) e erros de requisição não transitórios continuam explícitos; se todos os modelos estiverem indisponíveis, a interface apresenta uma mensagem clara para tentar novamente.
+- O failover preserva o mesmo prompt e a duração escolhida; não troca o pedido do usuário nem usa um storyboard antigo.
+- Estado: código gravado no GitHub. Ainda não houve chamada real ao Gemini após o commit nem validação do deploy Streamlit. O erro 503 deve ser retestado no app publicado.
