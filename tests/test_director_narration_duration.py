@@ -32,7 +32,7 @@ class NarrationDurationRevisionTests(unittest.TestCase):
         prompt = request.call_args.args[0]
         self.assertIn("36.1 segundos", prompt)
         self.assertIn("velocidade NATURAL", prompt)
-        self.assertIn("aproximadamente 3", prompt)
+        self.assertIn("aproximadamente 12 palavras", prompt)
 
     def test_rejects_missing_scene_voiceover(self):
         plan = {"scenes": [{"voiceover": "Fala um."}, {"voiceover": "Fala dois."}]}
