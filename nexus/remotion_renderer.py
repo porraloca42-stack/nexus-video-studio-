@@ -4,7 +4,6 @@ The Streamlit app does not use this adapter by default. The Remotion runtime
 must be installed separately on the render worker.
 """
 import json
-import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -82,41 +81,7 @@ def sanitize_scene_direction(direction, fallback_camera="push_in"):
     }
 
 
-_TIMESTAMP = re.compile(
-    r"(\d{2}):(\d{2}):(\d{2}),(\d{3})\s+-->\s+"
-    r"(\d{2}):(\d{2}):(\d{2}),(\d{3})"
-)
-
-
-def _timestamp_frames(groups, fps):
-    hours, minutes, seconds, millis = (int(value) for value in groups)
-    total_seconds = hours * 3600 + minutes * 60 + seconds + millis / 1000
-    return max(0, round(total_seconds * fps))
-
-
-def parse_srt_captions(path, fps=30):
-    """Convert SRT cues to frame-based caption segments."""
-    if not path or not Path(path).is_file():
-        return []
-    content = Path(path).read_text(encoding="utf-8-sig")
-    captions = []
-    for block in re.split(r"\n\s*\n", content.strip()):
-        lines = block.splitlines()
-        match = next((_TIMESTAMP.search(line) for line in lines if _TIMESTAMP.search(line)), None)
-        if not match:
-            continue
-        text_lines = lines[lines.index(match.string) + 1:] if match.string in lines else []
-        text = " ".join(line.strip() for line in text_lines if line.strip())
-        if not text:
-            continue
-        start = _timestamp_frames(match.groups()[:4], fps)
-        end = _timestamp_frames(match.groups()[4:], fps)
-        if end > start:
-            captions.append({"text": text, "startFrame": start, "endFrame": end})
-    return captions
-
-
-def build_remotion_manifest(plan, media, audio_path, subtitles_path, public_dir, job_id="nexus-job"):
+def build_remotion_manifest(plan, media, audio_path, public_dir, job_id="nexus-job"):
     """Copy approved assets into Remotion public/ and create a render manifest."""
     public_dir = Path(public_dir)
     job_dir = public_dir / "jobs" / job_id
@@ -170,7 +135,6 @@ def build_remotion_manifest(plan, media, audio_path, subtitles_path, public_dir,
         return f"jobs/{job_id}/{destination.name}"
 
     narration_ref = copy_audio(audio_path, "narration.mp3")
-    captions = parse_srt_captions(subtitles_path, fps=fps)
     manifest = {
         "width": 720,
         "height": 1280,
@@ -179,14 +143,13 @@ def build_remotion_manifest(plan, media, audio_path, subtitles_path, public_dir,
         "title": str(plan.get("seo", {}).get("title") or plan.get("topic_interpretation") or "NEXUS VIDEO"),
         "narrationAudio": narration_ref,
         "scenes": scenes,
-        "captions": captions,
     }
     manifest_path = job_dir / "manifest.json"
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
     return manifest_path, manifest
 
 
-def render_video_remotion(media, audio_path, output, plan, subtitles_path=None, project_dir=None, job_id="nexus-job"):
+def render_video_remotion(media, audio_path, output, plan, project_dir=None, job_id="nexus-job"):
     """Render a storyboard through an installed Remotion project."""
     project_dir = Path(project_dir or Path(__file__).resolve().parents[1] / "remotion")
     package_json = project_dir / "package.json"
@@ -197,7 +160,7 @@ def render_video_remotion(media, audio_path, output, plan, subtitles_path=None, 
             "não possui as dependências Node instaladas."
         )
     manifest_path, _ = build_remotion_manifest(
-        plan, media, audio_path, subtitles_path, project_dir / "public", job_id=job_id
+        plan, media, audio_path, project_dir / "public", job_id=job_id
     )
     output = Path(output)
     output.parent.mkdir(parents=True, exist_ok=True)
