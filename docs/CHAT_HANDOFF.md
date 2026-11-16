@@ -128,3 +128,16 @@ O usuário ficou frustrado com orientações longas/repetitivas e com uma previs
 - Isso explica por que uma primeira preparação pode demorar bastante, mas não comprova que o job esteja baixando os pesos neste momento. Precisamos dos logs para saber a etapa atual.
 - Fontes: https://huggingface.co/Lightricks/LTX-Video/tree/a6d59ee37c13c58261aa79027d3e41cd41960925 e https://huggingface.co/Lightricks/LTX-Video/tree/a6d59ee37c13c58261aa79027d3e41cd41960925/transformer
 - Nenhum deploy foi cancelado, reiniciado ou alterado nesta pesquisa.
+
+## Retomada mais recente — correção da seleção de voz (16/11/2026 16:14 BRT)
+- O usuário enviou captura do Streamlit com erro vermelho: `list_fish_voices() got an unexpected keyword argument 'self_only'`.
+- Também pediu interface mínima: apenas seleção de voz e áudio curto de prévia ao lado; sem busca, filtros, origem, paginação ou metadados.
+- Mudanças já gravadas em `main`:
+  - `app.py`: removido o argumento `self_only` da chamada para compatibilidade com o módulo antigo carregado no runtime; simplificada a interface para um único selectbox e player de amostra ao lado; removeu filtros e controles adicionais.
+  - `nexus/audio.py`: prévia e narração enviam `language=pt-BR`.
+  - `tests/test_audio.py`: asserts para idioma `pt-BR` na prévia e na narração.
+- Commits mais recentes: `b44cf80`, `cda2a4a`, `c0430e9`, `13d7379`, `fd3a1c0`, `55adafc` (consultar GitHub main para cadeia completa).
+- A lista consulta vozes públicas com filtro de idioma `pt`. A normalização TTS usa `pt-BR`; isso não garante sotaque brasileiro em cada modelo, pois o sotaque depende da voz cadastrada.
+- Prévia usa sample publicado, se existir; sem sample, aparece botão `▶ Ouvir` que gera áudio curto sob demanda e consome uso da Fish API.
+- Estado: código e testes gravados, blocos conferidos por leitura no GitHub. CI e atualização do Streamlit ainda pendentes de confirmação. Não declarar correção implantada até o usuário atualizar/abrir a aplicação e confirmar a tela.
+- Próximo passo: observar GitHub Actions automático dos commits e aguardar o Streamlit atualizar; depois pedir ao usuário uma única confirmação visual da seleção compacta e do preview, sem erro vermelho.
