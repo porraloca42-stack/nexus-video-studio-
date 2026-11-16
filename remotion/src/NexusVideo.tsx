@@ -12,25 +12,55 @@ const SceneLayer: React.FC<{ scene: NexusScene; duration: number; overlapFrames:
   const camera = direction?.camera;
   const progress = clamp(frame / Math.max(1, duration - overlapFrames), 0, 1);
   const move = camera?.move || scene.cameraMotion || "push_in";
-  const intensity = clamp(camera?.intensity ?? 0.72, 0, 1);
-  const startScale = clamp(camera?.startScale ?? (move === "pull_out" ? 1.15 : 1.08), 1, 1.15);
-  const endScale = clamp(camera?.endScale ?? (move === "pull_out" ? 1.0 : 1.15), 1, 1.15);
-  const beatPulse = (direction?.beats || []).reduce((pulse, beat) => {
-    const distance = Math.abs(frame - clamp(beat.at, 0, 1) * duration);
-    return Math.max(pulse, distance < 7 ? (1 - distance / 7) * 0.018 : 0);
+  const intensity = clamp(camera?.intensity ?? 0.82, 0.35, 1);
+
+  // Motion events are executable visual beats, not descriptive metadata.
+  // Gemini beats take precedence; otherwise distribute the scene's micro-events
+  // evenly through the shot and use them to trigger camera punches and accents.
+  const beats = (direction?.beats?.length
+    ? direction.beats
+    : (scene.motionEvents || []).slice(0, 3).map((event, index, all) => ({
+        at: (index + 1) / (all.length + 1),
+        event,
+        visualTarget: "subject",
+      }))).slice(0, 3);
+  const beatEnergy = beats.reduce((energy, beat) => {
+    const center = clamp(beat.at, 0.08, 0.92) * duration;
+    const distance = Math.abs(frame - center);
+    const envelope = distance < 10 ? Math.sin((1 - distance / 10) * Math.PI / 2) : 0;
+    return Math.max(energy, envelope);
   }, 0);
-  const scale = interpolate(progress, [0, 1], [startScale, endScale]) + beatPulse;
-  const pan = 76 * intensity;
-  const x = move === "pan_left" ? progress * pan : move === "pan_right" ? -progress * pan : 0;
-  const y = move === "tilt_up" ? progress * pan : move === "tilt_down" ? -progress * pan : move === "push_in" ? -progress * 24 * intensity : 0;
+
+  const defaultStart = move === "pull_out" ? 1.22 : 1.04;
+  const defaultEnd = move === "pull_out" ? 1.05 : move === "static" ? 1.10 : 1.22;
+  const startScale = clamp(camera?.startScale ?? defaultStart, 1.02, 1.28);
+  const endScale = clamp(camera?.endScale ?? defaultEnd, 1.02, 1.28);
+  const baseScale = interpolate(progress, [0, 1], [startScale, endScale]);
+  const scale = baseScale + beatEnergy * 0.035;
+
+  const pan = 132 * intensity;
+  const drift = Math.sin(frame / 19) * 3.5;
+  const beatShakeX = Math.sin(frame * 2.15) * beatEnergy * 6;
+  const beatShakeY = Math.cos(frame * 1.83) * beatEnergy * 4;
+  const x = (move === "pan_left" ? progress * pan : move === "pan_right" ? -progress * pan : 0) + drift + beatShakeX;
+  const y = (move === "tilt_up" ? progress * pan : move === "tilt_down" ? -progress * pan : move === "push_in" ? -progress * 34 * intensity : move === "pull_out" ? progress * 14 * intensity : 0) + beatShakeY;
+  const rotation = Math.sin(progress * Math.PI) * intensity * (move === "pan_left" || move === "pan_right" ? 0.42 : 0.18);
   const mediaStyle: React.CSSProperties = {
     width: "100%", height: "100%", objectFit: "cover",
-    transform: `translate(${x}px, ${y}px) scale(${scale})`,
+    transform: `translate(${x}px, ${y}px) scale(${scale}) rotate(${rotation}deg)`,
     transformOrigin: camera?.focus === "foreground" ? "50% 75%" : camera?.focus === "background" ? "50% 25%" : "50% 50%",
+    willChange: "transform",
   };
-  const transitionFrames = direction?.transition?.durationFrames || overlapFrames;
-  const fadeIn = direction?.transition?.in === "crossfade" ? clamp(transitionFrames, 1, 12) : 0;
-  const opacity = fadeIn ? interpolate(frame, [0, fadeIn], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) : 1;
+
+  const transitionFrames = clamp(direction?.transition?.durationFrames || overlapFrames || 8, 1, 12);
+  const transitionIn = direction?.transition?.in || "cut";
+  const transitionOut = direction?.transition?.out || "cut";
+  const fadeIn = transitionIn === "crossfade" || transitionIn === "fade" ? transitionFrames : 0;
+  const fadeOut = transitionOut === "fade" ? transitionFrames : 0;
+  const fadeInOpacity = fadeIn ? interpolate(frame, [0, fadeIn], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) : 1;
+  const fadeOutOpacity = fadeOut ? interpolate(frame, [duration - fadeOut, duration], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) : 1;
+  const opacity = Math.min(fadeInOpacity, fadeOutOpacity);
+
   const lighting = direction?.lighting?.change || "none";
   const flicker = lighting === "subtle_flicker" ? 0.025 * Math.sin(frame * 0.72) : 0;
   const exposure = lighting === "exposure_ramp" ? interpolate(progress, [0, 1], [0.035, -0.02]) : 0;
@@ -45,6 +75,14 @@ const SceneLayer: React.FC<{ scene: NexusScene; duration: number; overlapFrames:
         <div style={{ position: "absolute", width: 680, height: 680, borderRadius: "50%", border: `1px solid ${accent}66`, right: -290 + Math.sin(frame / 32) * 18, top: 190, boxShadow: `0 0 100px ${accent}22, inset 0 0 100px ${accent}12` }} />
         <div style={{ position: "absolute", width: 430, height: 430, borderRadius: "50%", border: `1px solid ${accent}55`, right: -165, top: 315, transform: `rotate(${frame * 0.2}deg)` }} />
       </AbsoluteFill>}
+
+    {beatEnergy > 0 ? <AbsoluteFill style={{
+      pointerEvents: "none",
+      opacity: beatEnergy * 0.20,
+      background: `radial-gradient(ellipse at 50% 48%, transparent 24%, ${accent}55 100%)`,
+      mixBlendMode: "screen",
+    }} /> : null}
+
     {atmosphere === "fog" ? <AbsoluteFill style={{ background: `radial-gradient(ellipse at 50% 70%, #dce8f0${Math.round(16 * strength).toString(16).padStart(2, "0")}, transparent 72%)`, opacity: 0.5 }} /> : null}
     {particleCount > 0 ? <AbsoluteFill style={{ pointerEvents: "none", opacity: strength * 0.72 }}>
       {Array.from({ length: particleCount }, (_, i) => {
@@ -65,7 +103,12 @@ export const NexusVideo: React.FC<NexusVideoProps> = (props) => {
   let cursor = 0;
   const layers = props.scenes.map((scene, index) => {
     const sceneFrames = Math.max(1, Math.round(scene.durationSeconds * fps));
-    const requestedOverlap = scene.sceneDirection?.transition?.in === "crossfade" ? clamp(scene.sceneDirection.transition.durationFrames || 8, 1, 12) : 0;
+    const nextScene = props.scenes[index + 1];
+    const outgoing = scene.sceneDirection?.transition?.out === "crossfade";
+    const incoming = nextScene?.sceneDirection?.transition?.in === "crossfade";
+    const requestedOverlap = outgoing || incoming
+      ? Math.max(scene.sceneDirection?.transition?.durationFrames || 0, nextScene?.sceneDirection?.transition?.durationFrames || 0, 8)
+      : 0;
     const overlap = index === 0 ? 0 : Math.min(requestedOverlap, Math.max(0, sceneFrames - 1));
     const from = Math.max(0, cursor - overlap);
     const duration = sceneFrames + overlap;
