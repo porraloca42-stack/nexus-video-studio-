@@ -105,10 +105,20 @@ def rank_video_candidates(candidates, query):
     )
 
 
-def search_video_sources(query, coverr_key='', pixabay_key='', per_page=20, exclude_urls=None):
+def search_video_sources(
+    query,
+    coverr_key='',
+    pixabay_key='',
+    per_page=20,
+    exclude_urls=None,
+    relevance_query=None,
+    min_relevance=1.5,
+):
+    """Search stock libraries, rejecting results with no scene-level text match."""
     errors = []
     excluded = set(exclude_urls or [])
     variants = build_query_variants(query, max_variants=4)
+    semantic_query = relevance_query if relevance_query is not None else query
 
     def usable(results, source, search_query):
         unique = []
@@ -121,7 +131,13 @@ def search_video_sources(query, coverr_key='', pixabay_key='', per_page=20, excl
             item["matched_query"] = search_query
             item["source"] = item.get("source") or source
             unique.append(item)
-        return rank_video_candidates(unique, query)
+        ranked = rank_video_candidates(unique, semantic_query)
+        # Do not silently accept unrelated stock merely because the API
+        # returned something. Continue with shorter search variants instead.
+        return [
+            item for item in ranked
+            if item.get("_nexus_relevance", 0.0) >= float(min_relevance)
+        ]
 
     if coverr_key:
         for search_query in variants:
