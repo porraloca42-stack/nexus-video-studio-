@@ -33,7 +33,7 @@ def _extract_visual_review_frames(video_path, output_dir, prefix):
         raise RuntimeError("Não foi possível extrair quadros do clipe candidato.")
     return frames
 
-def _search_stock_compatible(query, coverr_key="", pixabay_key="", pexels_key="", per_page=20, exclude_urls=None, relevance_query=None, min_relevance=1.5, style_query="", wikimedia_enabled=True):
+def _search_stock_compatible(query, coverr_key="", pixabay_key="", pexels_key="", per_page=20, exclude_urls=None, relevance_query=None, min_relevance=1.5, style_query="", wikimedia_enabled=False):
     """Search all configured libraries while tolerating an older deployed assets module."""
     try:
         search_parameters = inspect.signature(search_video_sources).parameters
