@@ -283,8 +283,6 @@ def list_fish_professional_narrators(api_key, *, per_gender=25, session=None):
                     break
                 if len(discovered) >= 25:
                     break
-            if len(discovered) >= 25:
-                break
         voices = sorted(
             discovered.values(),
             key=lambda voice: (
