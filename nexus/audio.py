@@ -29,7 +29,7 @@ def _fish_headers(api_key, model=None):
     return headers
 
 
-def list_fish_voices(api_key, *, page=1, page_size=6, title="", tags=None, language="pt", self_only=False, licensed_only=False, sort_by="score", session=None):
+def list_fish_voices(api_key, *, page=1, page_size=6, title="", tags=None, language="pt", self_only=False, sort_by="score", session=None):
     """List public Fish Audio TTS voices, including their published sample audio."""
     client = session or requests
     params = {
@@ -45,8 +45,6 @@ def list_fish_voices(api_key, *, page=1, page_size=6, title="", tags=None, langu
         params["language"] = language
     if self_only:
         params["self"] = "true"
-    elif licensed_only:
-        params["licensed"] = "true"
     response = client.get(
         f"{FISH_API}/model",
         headers=_fish_headers(api_key),
