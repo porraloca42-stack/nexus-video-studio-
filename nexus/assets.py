@@ -7,27 +7,61 @@ _STOPWORDS = {
     "with", "from", "for", "over", "under", "into", "through", "during",
     "person", "people", "man", "woman", "someone", "cinematic", "wide",
     "shot", "footage", "video", "realistic", "beautiful", "professional",
-    "showing", "shows", "scene", "close", "up"
+    "showing", "shows", "scene", "close", "up", "dark", "room", "macro",
+    "heavy", "fast", "early", "turning", "off", "looking", "out", "high",
+    "apartment", "cozy", "light", "sweat"
 }
 
-def build_query_variants(query, max_variants=4):
-    original = re.sub(r"\s+", " ", str(query or "")).strip()
+# Stock libraries index simple subjects and actions more reliably than full cinematic prompts.
+_QUERY_ALIASES = {
+    "alarm": ["alarm clock", "waking up", "bedroom"],
+    "clock": ["alarm clock", "waking up"],
+    "writing": ["writing", "journal", "notebook"],
+    "notebook": ["notebook", "journal", "writing"],
+    "goals": ["planning", "writing goals"],
+    "barbell": ["gym", "weightlifting", "workout"],
+    "athlete": ["gym", "weightlifting", "workout"],
+    "lifting": ["weightlifting", "gym", "workout"],
+    "workout": ["gym", "fitness", "weightlifting"],
+    "book": ["reading", "books", "studying"],
+    "reading": ["reading", "books", "studying"],
+    "study": ["studying", "reading", "books"],
+    "page": ["book", "reading"],
+    "typing": ["typing", "computer", "keyboard"],
+    "keyboard": ["typing", "computer"],
+    "computer": ["computer", "office work", "typing"],
+    "laptop": ["laptop", "computer", "office work"],
+    "city": ["city skyline", "city lights", "night city"],
+    "window": ["window", "city lights", "night city"],
+    "night": ["city lights", "night city"],
+}
+
+def build_query_variants(query, max_variants=8):
+    original = re.sub(r"\\s+", " ", str(query or "")).strip()
     if not original:
         return []
-    variants = [original]
+    variants = []
+    seen = set()
+
+    def add(value):
+        value = re.sub(r"\\s+", " ", str(value or "")).strip()
+        key = value.casefold()
+        if value and key not in seen and len(variants) < max_variants:
+            seen.add(key)
+            variants.append(value)
+
+    add(original)
     words = re.findall(r"[a-zA-Z0-9]+", original.lower())
     keywords = [word for word in words if word not in _STOPWORDS and len(word) > 2]
-    compact = " ".join(keywords[:4])
-    if compact and compact.lower() not in {item.lower() for item in variants}:
-        variants.append(compact)
-    # Relax long prompts into concrete adjacent concepts rather than broad generic searches.
-    for index in range(max(0, len(keywords) - 1)):
-        pair = " ".join(keywords[index:index + 2])
-        if pair and pair.lower() not in {item.lower() for item in variants}:
-            variants.append(pair)
+    # Keep a concise multi-term query, then relax to individual searchable subjects.
+    add(" ".join(keywords[:3]))
+    for word in keywords:
+        add(word)
+        for alias in _QUERY_ALIASES.get(word, []):
+            add(alias)
         if len(variants) >= max_variants:
             break
-    return variants[:max_variants]
+    return variants
 
 def search_coverr_videos(query, api_key, per_page=20):
     response = requests.get('https://api.coverr.co/videos', headers={'x-api-key': api_key}, params={'query': query, 'page': 0, 'page_size': per_page, 'urls': 'true'}, timeout=45)
