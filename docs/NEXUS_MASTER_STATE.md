@@ -130,6 +130,9 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Commit `34afbca8` em `nexus/render.py`: o renderizador mede a duração da narração com FFprobe, ajusta pequenas diferenças de velocidade (faixa máxima de ±15%), completa pequenos déficits com padding e limita áudio/vídeo à duração total do storyboard. Diferenças maiores são rejeitadas com mensagem explícita, em vez de cortar silenciosamente a narração ou o vídeo por `-shortest`.
 - Validação local do renderizador com FFmpeg 7.1.5: duas cenas sintéticas foram normalizadas, concatenadas, receberam áudio AAC e legendas SRT; FFprobe confirmou MP4 H.264/AAC, 720×1280 e 4,0s. Testes adicionais com áudio 5% mais curto e 5% mais longo também resultaram em 4,0s; desvio de 20% foi bloqueado com erro explícito. A inspeção de frame confirmou a renderização das legendas. Este é teste técnico sintético do módulo de render, não é o primeiro vídeo real do usuário com mídia Coverr/Gemini/Edge TTS.
 
+- Commit `04c1cac3` adiciona `tests/test_render.py`, com dois testes de integração reais usando FFmpeg/FFprobe: MP4 vertical com H.264/AAC, legendas e duração correta; e bloqueio de desvio excessivo entre narração e timeline. Commit `c4ec0f00` atualiza CI para instalar FFmpeg antes dos testes.
+- Reteste local completo da suíte de verificação (assets + render): 9 testes passaram em 2,35s; `compileall` dos módulos de busca/render e testes também passou. Os testes foram executados em ambiente local com cópia dos arquivos relevantes do repositório; CI remoto continua aguardando confirmação.
+
 ## Regras para o assistente em novos chats
 - Começar lendo este arquivo e o código relevante no GitHub antes de propor mudanças.
 - Tratar este documento como registro de continuidade, mas conferir o estado atual do repositório e deployment; pode ficar desatualizado.
