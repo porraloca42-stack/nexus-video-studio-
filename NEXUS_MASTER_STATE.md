@@ -217,3 +217,13 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Commit ebdd1e2: teste garante que URLs repetidas entre fornecedores sejam deduplicadas antes do download.
 - Commit fd797bc: produção passa a preservar provedor, página do clipe e autor quando fornecido; a interface exibe créditos das bibliotecas usadas após o vídeo ser produzido.
 - A execução do CI para estes commits ainda está pendente no momento deste registro. Confirmar compilação, testes e deploy antes de declarar a mudança validada.
+
+
+## Credenciais Pixabay e Pexels recebidas — 16/11/2026
+- O usuário compartilhou chaves de API do Pixabay e Pexels na conversa. Por segurança, os valores não foram copiados para o GitHub, para este arquivo, para o código ou para logs.
+- O código do app já lê `PIXABAY_API_KEY` e `PEXELS_API_KEY` via Streamlit Secrets e os adaptadores das duas bibliotecas já estão no repositório.
+- Commit d2ac91c: o painel de diagnóstico foi ampliado para testar cada fonte configurada individualmente: autenticação/busca, download real de um MP4 e leitura técnica por FFprobe. Uma falha de uma fonte não interrompe os testes das outras. O painel não revela nem imprime chaves.
+- Novo identificador de build: `NEXUS-2026.11.16-library-diagnostics-1`.
+- Ação ainda necessária no ambiente Streamlit: cadastrar as chaves recebidas nos Secrets com os nomes `PIXABAY_API_KEY` e `PEXELS_API_KEY`. Não há ferramenta conectada nesta sessão para gravar diretamente os Secrets privados do Streamlit.
+- Após salvar os Secrets, executar no app: Ferramentas avançadas → Testar todas as bibliotecas configuradas. Só marcar Pixabay/Pexels como operacionais depois de confirmar busca, download e leitura MP4.
+- Recomenda-se revogar e gerar novas chaves depois de concluir a configuração, pois as credenciais foram compartilhadas em uma conversa. Nunca armazenar valores de chaves no repositório.
