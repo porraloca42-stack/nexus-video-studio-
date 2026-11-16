@@ -469,7 +469,12 @@ if "nexus_plan" in st.session_state:
                 director_module = importlib.reload(director_module)
                 for i, scene in enumerate(plan["scenes"]):
                     progress.progress((i + 1) / (len(plan["scenes"]) + 2), text=f"Buscando clipe para a cena {i + 1}/{len(plan['scenes'])}...")
-                    style_terms = scene.get("style_search_terms", "")
+                    # Enforce the global style at render time too, including storyboards
+                    # created before the deterministic style-lock fix was deployed.
+                    global_style = plan.get("style_lock", style)
+                    style_terms = scene.get("style_search_terms") or global_style
+                    scene["visual_style"] = global_style
+                    scene["style_search_terms"] = style_terms
                     # Keep scene meaning and visual style as separate search signals.
                     primary_query = scene["asset_search_query"].strip()
                     fallback_query = str(scene.get("fallback_search_query", "")).strip()
