@@ -240,3 +240,33 @@ def download_file(url, destination):
                 if chunk:
                     output.write(chunk)
     return destination
+
+
+def diverse_candidate_shortlist(candidates, limit=3):
+    """Compare the strongest result from each configured library before repeats."""
+    ranked = sorted(
+        candidates or [],
+        key=lambda item: (
+            float(item.get("_nexus_relevance", 0.0)),
+            1 if item.get("vertical") else 0,
+            int(item.get("height") or 0),
+        ),
+        reverse=True,
+    )
+    selected, seen_sources, seen_urls = [], set(), set()
+    for item in ranked:
+        source = str(item.get("source") or "Unknown")
+        if source not in seen_sources and item.get("url") not in seen_urls:
+            selected.append(item)
+            seen_sources.add(source)
+            seen_urls.add(item.get("url"))
+            if len(selected) >= max(1, int(limit)):
+                return selected
+    for item in ranked:
+        if item.get("url") in seen_urls:
+            continue
+        selected.append(item)
+        seen_urls.add(item.get("url"))
+        if len(selected) >= max(1, int(limit)):
+            break
+    return selected
