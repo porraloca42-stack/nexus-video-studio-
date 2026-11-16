@@ -93,9 +93,9 @@ class AssetRankingTests(unittest.TestCase):
         self.assertEqual([item["url"] for item in ranked], ["https://example.test/new.mp4"])
 
     @patch("nexus.assets.search_coverr_videos")
-    def test_all_unrelated_results_return_empty_instead_of_false_match(self, search):
+    def test_scene_query_results_reach_visual_review_even_when_metadata_uses_different_words(self, search):
         search.return_value = [
-            clip("https://example.test/unrelated.mp4", "Crowd beneath giant hand", "Concert crowd")
+            clip("https://example.test/candidate.mp4", "Crowd beneath giant hand", "Concert crowd")
         ]
 
         ranked, errors = search_video_sources(
@@ -104,7 +104,8 @@ class AssetRankingTests(unittest.TestCase):
         )
 
         self.assertFalse(errors)
-        self.assertEqual(ranked, [])
+        self.assertEqual([item["url"] for item in ranked], ["https://example.test/candidate.mp4"])
+        self.assertTrue(ranked[0]["matched_scene_query"])
 
 
     @patch("nexus.assets.search_coverr_videos")
@@ -122,14 +123,16 @@ class AssetRankingTests(unittest.TestCase):
         self.assertEqual([item["url"] for item in ranked], ["https://example.test/weak.mp4"])
 
     @patch("nexus.assets.search_coverr_videos")
-    def test_unrelated_stock_is_still_rejected_by_semantic_fallback(self, search):
-        search.return_value = [
-            clip("https://example.test/unrelated.mp4", "Crowd beneath giant hand", "Concert crowd")
+    def test_style_only_result_without_scene_metadata_is_rejected(self, search):
+        search.side_effect = [
+            [],
+            [clip("https://example.test/anime.mp4", "Anime fantasy landscape", "Japanese animation")],
         ]
 
         ranked, errors = search_video_sources(
             "person writing goals in notebook",
             coverr_key="test-key",
+            style_query="anime fantasy landscape",
         )
 
         self.assertFalse(errors)
