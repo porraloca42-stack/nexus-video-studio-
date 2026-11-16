@@ -631,7 +631,7 @@ Contexto das cenas:
     return plan
 
 
-def review_visual_candidates(scene, candidates_with_frames, secret_reader, minimum_confidence=70):
+def review_visual_candidates(scene, candidates_with_frames, secret_reader, minimum_confidence=55):
     """Use Gemini vision to reject stock clips that do not depict the planned scene."""
     if not candidates_with_frames:
         return {"selected_candidate": 0, "confidence": 0, "reason": "Nenhum candidato visual disponível."}
@@ -641,7 +641,7 @@ def review_visual_candidates(scene, candidates_with_frames, secret_reader, minim
         raise RuntimeError("A avaliação visual exige GEMINI_API_KEY.")
     models = discover_models(key, requested)
     prompt = f"""Você é o supervisor de continuidade visual de uma produtora audiovisual.
-Avalie os quadros reais dos clipes candidatos e escolha somente um que represente DIRETAMENTE a cena planejada.
+Avalie os quadros reais dos clipes candidatos e escolha o que melhor comunica a ideia da cena para o espectador.
 Trecho exato da narração: {scene.get('voiceover', '')}
 Ação visual planejada: {scene.get('visual_action', '')}
 Sujeitos: {scene.get('subjects', '')}
@@ -650,13 +650,13 @@ Justificativa semântica: {scene.get('semantic_reason', '')}
 Estilo visual obrigatório do vídeo: {scene.get('visual_style', scene.get('style_search_terms', ''))}
 Busca visual solicitada: {scene.get('asset_search_query', '')}
 
-REGRA DE DECISÃO, SEM EXCEÇÕES:
-1. A maior prioridade é a correspondência REAL com a narração e a ação desta cena. Escolha o vídeo que melhor mostra o que está sendo dito, mesmo que outro seja mais bonito ou tenha estética mais atraente.
+CRITÉRIO DE DECISÃO:
+1. Priorize a conexão narrativa útil: o clipe pode mostrar a ação literal, uma consequência visual, uma metáfora visual reconhecível ou uma situação cotidiana que comunique claramente a mesma ideia. Não exija que cada objeto ou palavra da narração apareça literalmente no vídeo. Ex.: planejar pode ser mostrado por alguém escrevendo, organizando tarefas ou olhando um calendário; superar um obstáculo pode ser mostrado por alguém subindo uma escada ou atravessando uma porta.
 2. Estilo visual é critério secundário: entre candidatos com conexão narrativa semelhante, prefira o que respeita melhor o estilo bloqueado. Nunca escolha um vídeo de baixa conexão narrativa apenas por combinar com o estilo.
 3. Qualidade técnica é critério terciário: prefira vídeo vertical e enquadramento mais próximo de 9:16 (0,5625), depois resolução e nitidez. Não escolha paisagem horizontal se houver candidato vertical semanticamente equivalente.
-4. Avalie TODOS os candidatos juntos e compare os quadros reais, não apenas títulos, tags ou descrições. Pontue separadamente a conexão com narração/ação (semantic_match, 0–100) e a aderência ao estilo (style_match, 0–100). Escolha o maior semantic_match; use style_match apenas como desempate. confidence deve refletir a conexão semântica, não a beleza geral.
+4. Avalie TODOS os candidatos juntos e compare os quadros reais, não apenas títulos, tags ou descrições. Pontue separadamente a utilidade narrativa (semantic_match, 0–100) e a aderência ao estilo (style_match, 0–100). Escolha o candidato com melhor utilidade narrativa. Considere contexto, gesto, ambiente, consequência e metáfora; não penalize uma representação indireta quando ela comunica bem a ideia. confidence deve refletir o quanto o clipe funciona para ilustrar a cena em uma edição profissional.
 5. O vídeo final será 9:16 (720×1280). Avalie se o conteúdo principal permanece legível e bem composto em corte vertical; evite candidatos cuja ação principal ficaria fora do quadro.
-Não aceite apenas semelhança de cor, clima, emoção ou estética. Natureza genérica, água, paisagem, copos, prédios ou pessoas aleatórias NÃO representam automaticamente conceitos abstratos. Se nenhum candidato tiver relação visual direta e suficiente com a fala, selecione 0. Não invente correspondência. Aprove somente com confidence mínima de {int(minimum_confidence)}.
+Não aceite apenas semelhança de cor, clima ou estética sem conexão narrativa. Porém, não rejeite um clipe só porque ele não reproduz literalmente a frase: metáforas visuais e B-roll contextual são válidos quando um editor humano entenderia a relação sem explicação. Só selecione 0 quando todos os candidatos forem realmente desconexos, tecnicamente inutilizáveis ou incompatíveis com a cena. Entre um candidato imperfeito mas útil e a ausência total de clipe, prefira o candidato útil. Aprove com confidence mínima de {int(minimum_confidence)}.
 Retorne somente JSON: {{"selected_candidate":1,"semantic_match":88,"style_match":72,"confidence":88,"reason":"..."}}.
 Os números dos candidatos aparecem imediatamente antes de seus quadros."""
 
