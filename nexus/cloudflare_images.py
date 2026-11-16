@@ -74,9 +74,9 @@ def generate_image(
     if not image_bytes:
         raise CloudflareAIError("Cloudflare não retornou bytes de imagem.")
 
-    if image_bytes.startswith(b"\\x89PNG\\r\\n\\x1a\\n"):
+    if image_bytes.startswith(b"\x89PNG\r\n\x1a\n"):
         extension = ".png"
-    elif image_bytes.startswith(b"\\xff\\xd8\\xff"):
+    elif image_bytes.startswith(b"\xff\xd8\xff"):
         extension = ".jpg"
     elif image_bytes[:4] == b"RIFF" and image_bytes[8:12] == b"WEBP":
         extension = ".webp"
