@@ -710,13 +710,13 @@ if "nexus_plan" in st.session_state:
                             else:
                                 st.caption("As bibliotecas responderam, mas não retornaram candidatos para a busca de conteúdo. O estilo visual, sozinho, não é usado para preencher uma cena.")
                 else:
-                    progress.progress((len(plan["scenes"]) + 1) / (len(plan["scenes"]) + 2), text="Gerando narração, legendas e montagem...")
+                    progress.progress((len(plan["scenes"]) + 1) / (len(plan["scenes"]) + 2), text="Gerando narração e montagem...")
                     output = work / "nexus_video.mp4"
                     audio = work / "voice.mp3"
                     target_duration = sum(float(scene["duration_seconds"]) for scene in plan["scenes"])
                     for calibration_attempt in range(3):
                         narration = " ".join(scene["voiceover"] for scene in plan["scenes"])
-                        audio, subtitles, actual_tts_provider = make_voice(
+                        audio, actual_tts_provider = make_voice(
                             narration, voice, audio,
                             fish_api_key=secret("FISH_API_KEY"),
                             fish_voice_id=secret("FISH_VOICE_ID"),
@@ -755,7 +755,7 @@ if "nexus_plan" in st.session_state:
                         plan = revise_narration_for_duration(
                             plan, target_duration, actual_audio_duration, topic, style, secret
                         )
-                    render_video(media, audio, output, subtitles_path=subtitles)
+                    render_video(media, audio, output)
                     final_probe = subprocess.run(
                         ["ffprobe", "-v", "error", "-show_entries",
                          "format=duration,size:stream=codec_name,codec_type,width,height",
