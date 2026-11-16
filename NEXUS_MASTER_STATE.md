@@ -872,3 +872,12 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Próxima prioridade: obter suíte verde e, em seguida, produzir e inspecionar um MP4 real com foco em qualidade visual, coerência das cenas e narração. Não reintroduzir legendas no pipeline sem nova solicitação explícita.
 - Commit 9acc215: identificador da interface atualizado para NEXUS-2026.11.16-audio-only-1, permitindo confirmar visualmente que o Streamlit carregou a versão sem legendas.
 - GitHub Actions no commit 48144ae: regressão unitária e smoke test Wikimedia Commons concluídos com sucesso. Render demo separado ainda estava em execução na última consulta; implantação Streamlit e MP4 real seguem pendentes.
+
+ 
+## Preservação do movimento real dos clipes de biblioteca — 16/11/2026
+- Revisão do pipeline ativo confirmou que a produção principal do Streamlit usa FFmpeg e clipes de bibliotecas; o adaptador Remotion é um fluxo alternativo, não o render padrão dessa opção.
+- Problema identificado: `normalize_clip()` aplicava `zoompan` sintético em todos os clipes, mesmo quando o vídeo de origem já tinha movimento de câmera ou de objetos. Isso podia deixar a montagem artificial e repetitiva.
+- Alteração incremental: o pipeline de bibliotecas agora usa o modo `preserve` por padrão e mantém o movimento fotografado no clipe original. O enquadramento continua sendo adaptado para 9:16, 720×1280, 30 fps, sem impor zoom/pan artificial.
+- O app define explicitamente `camera_motion="preserve"` para mídia de bancos de vídeo. A direção cinematográfica do storyboard continua registrada, mas não força movimentos artificiais sobre filmagens reais.
+- Teste de regressão adicionado para confirmar que o caminho padrão preserva o clipe sem filtro `zoompan`.
+- Estado: código alterado no repositório; aguarda CI e render MP4 real para validar resultado audiovisual. Não afirmar implantação no Streamlit nem qualidade final validada antes dessas verificações.
