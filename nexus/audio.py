@@ -64,7 +64,7 @@ def _subtitle_cues(events, narration):
         while lines:
             part = lines[:2]
             lines = lines[2:]
-            cues.append((group_start, group_end, "\\n".join(part)))
+            cues.append((group_start, group_end, "\n".join(part)))
         group = []
         group_start = None
         group_end = 0
@@ -99,11 +99,11 @@ def _write_srt(cues, destination):
     blocks = []
     for index, (start, end, caption) in enumerate(cues, start=1):
         blocks.append(
-            f"{index}\\n"
-            f"{_srt_timestamp(start)} --> {_srt_timestamp(end)}\\n"
+            f"{index}\n"
+            f"{_srt_timestamp(start)} --> {_srt_timestamp(end)}\n"
             f"{caption}"
         )
-    Path(destination).write_text("\\n\\n".join(blocks) + ("\\n" if blocks else ""), encoding="utf-8")
+    Path(destination).write_text("\n\n".join(blocks) + ("\n" if blocks else ""), encoding="utf-8")
 
 
 def make_voice(text, voice, output):
