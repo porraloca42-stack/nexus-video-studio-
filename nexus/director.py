@@ -6,7 +6,7 @@ SYSTEM = """
 Você é o DIRETOR AUDIOVISUAL do NEXUS VIDEO STUDIO, não um gerador de palavras-chave.
 Leia e compreenda o roteiro inteiro antes de planejar qualquer cena. Identifique a ideia central, a progressão lógica, as afirmações, os exemplos e a emoção de cada trecho.
 A fala define exatamente o que o público deve ver. Cada cena deve mostrar uma ação, objeto, pessoa, ambiente ou processo diretamente relacionado à fala. Não use cenas genéricas só porque combinam com a emoção.
-Mantenha UM estilo visual do início ao fim: fotografia, paleta, luz, textura, lente e atmosfera coerentes. Não misture estilos.
+Respeite rigorosamente o estilo visual selecionado pelo usuário. Traduza esse estilo em fotografia, paleta, luz, textura, lente, movimento e atmosfera em TODAS as cenas. Inclua em cada cena visual_style e style_search_terms; as buscas em inglês devem incorporar termos visuais compatíveis com o estilo escolhido, sem sacrificar assunto e ação.
 Priorize ações filmáveis e específicas. Evite slideshows, colagens, infográficos escolares, imagens abstratas sem função e repetição de enquadramentos.
 Não invente fatos, capas, páginas, citações, nomes ou características de produtos/livros. Diferencie fatos verificados, crenças e alegações.
 A QUANTIDADE DE CENAS É DECIDIDA A PARTIR DA DURAÇÃO E DA DENSIDADE DO ROTEIRO, nunca por uma lista fixa de temas. Para vídeos de 40–60 segundos, crie no mínimo ceil(duração/5) cenas e prefira ceil(duração/4) ou mais: 50s deve gerar pelo menos 10 cenas, com meta de 12–15; 40s pelo menos 8, meta 10–12; 60s pelo menos 12, meta 15–18. Em geral, cada clipe cobre 3–4 segundos; varie conforme a fala e a ação, sem esticar artificialmente cenas. A soma das durações deve corresponder à duração solicitada. Cada cena precisa de busca visual própria, derivada da ação, objeto, ambiente e significado EXATOS daquele trecho. Nunca reutilize um conjunto fixo de palavras-chave nem force objetos que não estejam no roteiro. As buscas principal e alternativa devem ser distintas, concretas, em inglês e específicas daquela cena. Toda cena deve ter pelo menos dois microeventos visuais.
@@ -22,6 +22,8 @@ Retorne somente JSON válido:
    "purpose":"...",
    "voiceover":"fala exata desta parte",
    "visual_action":"ação específica e observável, em sequência",
+   "visual_style":"estilo visual aplicado nesta cena",
+   "style_search_terms":"English visual-style terms to append to the scene search",
    "semantic_reason":"relação direta entre a fala e a imagem",
    "setting":"...",
    "subjects":"...",
@@ -88,7 +90,7 @@ def _request(prompt, secret_reader):
         payload = {
             "systemInstruction": {"parts": [{"text": SYSTEM}]},
             "contents": [{"role": "user", "parts": [{"text": prompt}]}],
-            "generationConfig": {"temperature": 0.35, "responseMimeType": "application/json"}
+            "generationConfig": {"temperature": 0.25, "responseMimeType": "application/json", "maxOutputTokens": 8192}
         }
         response = requests.post(url, params={"key": key}, json=payload, timeout=240)
     except requests.RequestException:
@@ -107,21 +109,44 @@ def _request(prompt, secret_reader):
     if not response.ok:
         raise RuntimeError(f"Falha no Gemini (HTTP {response.status_code}).")
     data = response.json()
+    candidates = data.get("candidates") or []
+    if not candidates:
+        feedback = data.get("promptFeedback", {}).get("blockReason")
+        suffix = " (bloqueio: " + str(feedback) + ")." if feedback else "."
+        raise RuntimeError("O Gemini não gerou o storyboard" + suffix + " Revise o roteiro ou tente novamente.")
+    candidate = candidates[0]
+    finish_reason = candidate.get("finishReason", "desconhecido")
+    parts = candidate.get("content", {}).get("parts", [])
+    result = "\\n".join(part.get("text", "") for part in parts if isinstance(part, dict) and part.get("text"))
+    if not result.strip():
+        raise RuntimeError("O Gemini retornou uma resposta sem texto (motivo: " + str(finish_reason) + "). Tente novamente.")
+    cleaned = re.sub(r"^\\s*```(?:json)?\\s*|\\s*```\\s*$", "", result.strip(), flags=re.IGNORECASE)
     try:
-        result = data["candidates"][0]["content"]["parts"][0]["text"]
-        plan = json.loads(result)
-        plan["director_model"] = model
-        return plan
-    except (KeyError, IndexError, ValueError):
-        raise RuntimeError("O diretor não retornou um storyboard JSON válido.") from None
+        plan = json.loads(cleaned)
+    except json.JSONDecodeError:
+        start_json = cleaned.find("{")
+        if start_json >= 0:
+            try:
+                plan, _ = json.JSONDecoder().raw_decode(cleaned[start_json:])
+            except json.JSONDecodeError:
+                plan = None
+        else:
+            plan = None
+    if not isinstance(plan, dict) or not isinstance(plan.get("scenes"), list):
+        if finish_reason == "MAX_TOKENS":
+            raise RuntimeError("O Gemini interrompeu a resposta por limite de saída antes de concluir o storyboard. Tente novamente; a geração agora permite uma resposta maior.")
+        preview = re.sub(r"\\s+", " ", result)[:350]
+        raise RuntimeError("O Gemini não retornou JSON completo e válido (motivo: " + str(finish_reason) + "). Trecho recebido: " + preview)
+    plan["director_model"] = model
+    return plan
 
 def create_storyboard(topic, style, duration, secret_reader):
     prompt = f"""ASSUNTO OU ROTEIRO COMPLETO:
 {topic}
 
-ESTILO VISUAL ÚNICO E BLOQUEADO: {style}
+ESTILO VISUAL ESCOLHIDO PELO USUÁRIO (OBRIGATÓRIO EM TODAS AS CENAS): {style}
 DURAÇÃO TOTAL: {duration} segundos.
-Planeje primeiro a narrativa completa. Depois divida em cenas suficientes para cobrir a duração sem lacunas. Use como piso ceil(duração/5) cenas e meta ceil(duração/4) ou mais, com segmentos geralmente de 3–4 segundos. Para 50 segundos, crie 12–15 cenas e nunca menos de 10. A soma exata das durações deve corresponder à duração solicitada. A quantidade e o conteúdo das cenas devem nascer da progressão do roteiro, não de temas predefinidos. Para cada trecho, gere buscas principal e alternativa próprias, específicas e diferentes, em inglês. Não reutilize palavras-chave genéricas nem acrescente objetos/ações que a fala não sustenta. Preserve a relação semântica exata entre cada fala e sua imagem. Escreva a narração em português brasileiro natural."""
+Planeje primeiro a narrativa completa. Depois divida em cenas suficientes para cobrir a duração sem lacunas. Use como piso ceil(duração/5) cenas e meta ceil(duração/4) ou mais, com segmentos geralmente de 3–4 segundos. Para 50 segundos, crie 12–15 cenas e nunca menos de 10. A soma exata das durações deve corresponder à duração solicitada. A quantidade e o conteúdo das cenas devem nascer da progressão do roteiro, não de temas predefinidos. Para cada trecho, gere buscas principal e alternativa próprias, específicas e diferentes, em inglês. Cada busca deve conter o assunto/ação da cena e termos visuais compatíveis com o estilo escolhido ({style}). Não reutilize palavras-chave genéricas nem acrescente objetos/ações que a fala não sustenta. Preserve a relação semântica exata entre cada fala e sua imagem. Escreva a narração em português brasileiro natural."""
     plan = _request(prompt, secret_reader)
     plan["style_lock"] = style
     return plan
