@@ -38,7 +38,7 @@ Depois de salvar os dois GitHub Secrets:
 O deploy instala o worker `modal_worker.py`, cria/usa o Volume de cache `nexus-ltx-model-cache` e publica a aplicação Modal `nexus-video-i2v`. O primeiro carregamento do modelo pode demorar e usar créditos.
 
 ## 5. Piloto controlado
-Depois do deploy, a primeira produção deve ser um piloto de uma cena. Conferir:
+Depois do deploy, produza apenas um primeiro vídeo de 40–50s como piloto controlado; não inicie uma rotina diária ainda. Todas as cenas desse vídeo serão animadas. Conferir:
 - movimento orgânico e natural;
 - identidade e anatomia estáveis;
 - composição vertical 9:16;
