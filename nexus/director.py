@@ -375,6 +375,76 @@ def _fit_scene_durations(scenes, requested_duration):
     return durations
 
 
+def _repair_semantic_justifications(plan, topic, style, target, secret_reader):
+    """Repair weak scene-to-narration links without rewriting approved narration."""
+    scenes = plan.get("scenes", [])
+    weak = [
+        index for index, scene in enumerate(scenes, 1)
+        if len(str(scene.get("semantic_reason", "")).strip()) < 80
+    ]
+    if not weak:
+        return
+
+    selected = []
+    for index in weak:
+        scene = scenes[index - 1]
+        selected.append({
+            "scene_number": index,
+            "voiceover": scene.get("voiceover", ""),
+            "visual_action": scene.get("visual_action", ""),
+            "setting": scene.get("setting", ""),
+            "subjects": scene.get("subjects", ""),
+            "semantic_reason": scene.get("semantic_reason", ""),
+        })
+
+    repair_prompt = f"""Você é editor de continuidade e coerência semântica audiovisual.
+Reescreva SOMENTE as justificativas e, se necessário, a ação visual das cenas indicadas, explicando precisamente como a imagem materializa o trecho narrado.
+Duração: {target}s. Tema original: {topic}. Estilo visual: {style}.
+Leia a fala de cada cena e descreva a relação concreta entre o que é dito e o que aparece. Não use frases vagas como "transmite a emoção", "representa a mensagem" ou "combina com o tema". Cite o objeto, gesto, pessoa, ambiente ou consequência visual que corresponde à fala.
+Cada semantic_reason deve ter 80 a 160 caracteres e ser específica para aquela fala. Se a ação atual não corresponder à fala, substitua-a por uma ação filmável que corresponda.
+Cenas para reparar:
+{json.dumps(selected, ensure_ascii=False)}
+Retorne somente JSON válido:
+{{"scene_repairs":[{{"scene_number":1,"semantic_reason":"...","visual_action":"...","setting":"...","subjects":"..."}}]}}
+Não altere narração, ordem das cenas, duração, estilo geral nem qualquer cena que não esteja na lista."""
+
+    try:
+        repaired = _request(repair_prompt, secret_reader)
+        for item in repaired.get("scene_repairs", []):
+            try:
+                index = int(item.get("scene_number", 0)) - 1
+            except (TypeError, ValueError):
+                continue
+            if index < 0 or index >= len(scenes) or index + 1 not in weak:
+                continue
+            scene = scenes[index]
+            for field in ("semantic_reason", "visual_action", "setting", "subjects"):
+                value = str(item.get(field, "") or "").strip()
+                if value:
+                    scene[field] = value
+    except Exception:
+        # Preserve original scene data; the grounded fallback below prevents
+        # a short editorial explanation from aborting the whole storyboard.
+        pass
+
+    for index in weak:
+        scene = scenes[index - 1]
+        reason = str(scene.get("semantic_reason", "") or "").strip()
+        if len(reason) >= 80:
+            continue
+        # Build only from this scene's own narration and visual fields.
+        voice = str(scene.get("voiceover", "") or "").strip()
+        action = str(scene.get("visual_action", "") or "").strip()
+        setting = str(scene.get("setting", "") or "").strip()
+        subjects = str(scene.get("subjects", "") or "").strip()
+        scene["semantic_reason"] = (
+            f'A fala "{voice}" é visualizada por meio de {action}. '
+            f'{("No ambiente " + setting + ", ") if setting else ""}'
+            f'{("a presença de " + subjects + " ") if subjects else ""}'
+            "torna observável o ponto específico narrado, em vez de usar uma imagem genérica."
+        )
+
+
 def create_storyboard(topic, style, duration, secret_reader):
     target = int(round(float(duration)))
     minimum_scenes = max(1, (target + 4) // 5)
@@ -432,6 +502,10 @@ Retorne somente JSON válido no formato do sistema."""
             + " mesmo após duas tentativas de correção. O roteiro não foi aceito."
         )
 
+    # Repair weak scene-to-narration links before final validation.
+    # Keep approved narration, scene order and timing independent.
+    _repair_semantic_justifications(plan, topic, style, target, secret_reader)
+
     # The AI creates the script and narrative structure; code owns exact timing.
     original_total = sum(float(scene.get("duration_seconds", 0) or 0) for scene in scenes)
     fitted = _fit_scene_durations(scenes, target)
@@ -461,8 +535,8 @@ def validate_storyboard(plan, requested_duration=None):
         for field in ("voiceover", "visual_action", "semantic_reason", "camera_motion", "asset_search_query", "visual_style", "style_search_terms"):
             if not str(scene.get(field, "")).strip():
                 errors.append(f"Cena {index}: campo {field} vazio.")
-        if len(scene.get("semantic_reason", "")) < 35:
-            errors.append(f"Cena {index}: justificativa semântica superficial.")
+        if len(scene.get("semantic_reason", "")) < 80:
+            errors.append(f"Cena {index}: justificativa semântica insuficiente.")
         if len(scene.get("motion_events", [])) < 2:
             errors.append(f"Cena {index}: faltam microeventos.")
     if requested_duration:
