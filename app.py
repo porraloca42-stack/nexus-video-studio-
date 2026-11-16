@@ -192,7 +192,7 @@ div[data-testid="stTextArea"] textarea,div[data-testid="stSelectbox"] div[data-b
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="nexus-hero"><div class="nexus-brand">NEXUS VIDEO STUDIO</div><div class="nexus-tagline">Transforme seu roteiro em vídeo</div></div>', unsafe_allow_html=True)
-st.caption("Versão: NEXUS-2026.11.16-voice-script-calibration-1")
+st.caption("Versão: NEXUS-2026.11.16-professional-director-1")
 
 if "nexus_style" not in st.session_state or st.session_state["nexus_style"] not in STYLE_OPTIONS:
     st.session_state["nexus_style"] = "Cinematográfico realista"
@@ -353,6 +353,27 @@ if "nexus_plan" in st.session_state:
         st.markdown("### Direção audiovisual")
         st.write(plan.get("topic_interpretation", ""))
         st.write(plan.get("creative_thesis", ""))
+        if plan.get("hook"):
+            st.markdown("**Hook de abertura**")
+            st.write(plan["hook"])
+        if plan.get("retention_strategy"):
+            st.markdown("**Estratégia de retenção**")
+            st.write(plan["retention_strategy"])
+        if plan.get("cta"):
+            st.markdown("**CTA integrado à narração**")
+            st.write(plan["cta"])
+        seo = plan.get("seo", {})
+        if seo:
+            st.markdown("### SEO baseado no roteiro")
+            st.write("**Palavra-chave principal:** " + str(seo.get("primary_keyword", "")))
+            if seo.get("secondary_keywords"):
+                st.write("**Termos secundários:** " + ", ".join(seo["secondary_keywords"]))
+            if seo.get("title"):
+                st.write("**Título:** " + seo["title"])
+            if seo.get("description"):
+                st.write("**Descrição:** " + seo["description"])
+            if seo.get("hashtags"):
+                st.write("**Hashtags:** " + " ".join(seo["hashtags"]))
         if plan.get("director_model"):
             st.caption("Modelo Gemini: " + plan["director_model"])
         st.caption("Estilo visual: " + plan.get("style_lock", style))
