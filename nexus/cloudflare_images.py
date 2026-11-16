@@ -4,6 +4,7 @@ This module is intentionally isolated from the Streamlit render flow until
 credentials, model output, and the Remotion end-to-end pipeline are validated.
 """
 import base64
+import binascii
 import json
 import os
 from pathlib import Path
@@ -67,7 +68,7 @@ def generate_image(
             if encoded:
                 encoded = encoded.split(",", 1)[-1] if encoded.startswith("data:") else encoded
                 image_bytes = base64.b64decode(encoded, validate=True)
-        except (ValueError, TypeError, AttributeError) as exc:
+        except (ValueError, TypeError, AttributeError, binascii.Error) as exc:
             raise CloudflareAIError("Resposta JSON de imagem inválida do Cloudflare.") from exc
     else:
         image_bytes = response.content
