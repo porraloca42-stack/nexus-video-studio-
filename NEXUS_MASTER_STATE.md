@@ -820,5 +820,5 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Commit `ebfbe5c`: corrigida a apresentação da auditoria Cloudflare para usar o mesmo campo `final_visual_audit` da interface comum, preservando a estrutura antiga `visual_reviews` usada para avaliações de clipes stock.
 - A interface agora exibe os resultados da auditoria final em uma tabela por cena para os dois motores. A avaliação de candidatos stock permanece separada da avaliação do MP4 final.
 - Run #43876220228 (commit `fc4e3a8`): testes da auditoria visual, compilação Python e smoke test Commons aprovados.
-- Runs #43876350775 (`2b8e2c8`) e #43876416211 (`ebfbe5c`): execução da regressão para as alterações finais do app ainda em andamento no momento desta atualização.
-- Estado: implementação no GitHub; validação da última integração do app depende da conclusão desses workflows. Deploy Streamlit e render real com credenciais ainda não confirmados.
+- Run #43876350775 (commit `2b8e2c8`) e run #43876416211 (commit `ebfbe5c`): regressão completa concluída com sucesso; compilação Python, testes unitários e smoke test Commons aprovados.
+- Estado: implementação no GitHub e CI da integração final aprovados. O workflow #43876529440, disparado apenas pela atualização documental, ainda estava em execução. Deploy Streamlit e render real com credenciais ainda não confirmados.
