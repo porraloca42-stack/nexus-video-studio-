@@ -1035,3 +1035,5 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 
 - Commit `01471d2`: removido também o último identificador legado `pt-BR-AntonioNeural` do default do worker. Busca no repositório não encontrou mais referências a `edge-tts`, `Edge TTS` ou esse ID de voz.
 - GitHub Actions run #439 (`43888932375`): unit-tests e Remotion typecheck concluíram com sucesso após remoção da dependência Edge; o smoke test Commons ainda estava em execução no momento da atualização.
+
+- GitHub Actions run #441 (`43889005293`), commit `01471d2`: workflow completo `success`. Unit tests: 75/75 aprovados; Remotion typecheck: aprovado; smoke test Wikimedia Commons: aprovado. O worker não instala mais `edge-tts`.
