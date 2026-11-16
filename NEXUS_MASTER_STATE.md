@@ -1232,3 +1232,16 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Pós-commit: app.py relido de main; reload, guard e chamada qualificada confirmados. GitHub connector não retornou workflow runs associados ao commit (consulta wrapper lista apenas PR-triggered runs); CI completo não foi verificado nesta etapa.
 - Estado: patch gravado e leitura estática confirmada. Aguardando reinício/redeploy do Streamlit Cloud; não afirmar resolvido até o catálogo carregar.
 - Próximo passo se ainda falhar: usar o caminho de módulo mostrado no erro e corrigir colisão/checkout/import path com base nessa evidência; não trocar IDs nem API da Fish sem motivo.
+
+## Deploy Modal/LTX confirmado — 16/11/2026 17:15 BRT
+- Usuário informou que o processo LTX finalizou e pediu verificação.
+- Consulta direta à GitHub Actions confirmou workflow `Deploy NEXUS Modal video worker` run #1, ID `43909635680`, evento `workflow_dispatch`, commit `82ab49d7fe50c8e16d78c4a3e3b08c40ae8a1a5b`, status `completed`, conclusão `success`.
+- Job `deploy` ID `133447708054` e todos os steps concluídos com sucesso: checkout, setup Python, instalar Modal CLI e `modal deploy modal_worker.py`.
+- Logs finais confirmam:
+  - imagens Modal construídas, incluindo a imagem com PyTorch 2.6.0, torchvision 0.21.0, diffusers 0.32.2, transformers 4.49.0 e dependências CUDA;
+  - `Created Function Inference.*`;
+  - `App deployed in 95.955s`;
+  - URL do deploy: https://modal.com/apps/porraloca42-stack/main/deployed/nexus-video-i2v
+- Isso valida que o worker foi implantado no Modal e as imagens do container foram construídas. NÃO valida inferência real LTX, download dos pesos LTX-Video, inicialização da GPU H100, geração de clipe nem qualidade audiovisual. Deploy não acionou execução da função de inferência.
+- Foram encontrados render workflows #6 e #7 concluídos com sucesso e artifacts MP4/report, mas ambos foram executados antes do deploy Modal (14:28–14:34 UTC; deploy às 16:37 UTC), portanto não servem como prova de LTX I2V após deploy.
+- Próximo passo para validação real: executar um render de teste pequeno/curto com uma cena ou job mínimo, monitorar custo e logs; só então realizar o primeiro vídeo completo. Respeitar gasto Modal, confirmar spend limit/créditos antes de executar GPU.
