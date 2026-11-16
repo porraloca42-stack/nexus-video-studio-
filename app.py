@@ -2,7 +2,7 @@ import os, tempfile
 from pathlib import Path
 import streamlit as st
 from nexus.director import create_storyboard, validate_storyboard
-from nexus.assets import search_pexels_videos, download_file
+from nexus.assets import search_video_sources, download_file
 from nexus.audio import make_voice
 from nexus.render import render_video
 
@@ -65,19 +65,21 @@ if "nexus_plan" in st.session_state:
             st.caption("Busca visual: " + scene.get("asset_search_query", ""))
 
     if st.button("Renderizar MP4", use_container_width=True):
-        pexels_key = secret("PEXELS_API_KEY")
+        coverr_key = secret("COVERR_API_KEY")
+        pixabay_key = secret("PIXABAY_API_KEY")
         if st.session_state.get("nexus_errors"):
             st.error("O storyboard precisa ser corrigido antes da renderização.")
-        elif not pexels_key:
-            st.error("A biblioteca de clipes ainda não está conectada.")
+        elif not coverr_key and not pixabay_key:
+            st.error("Conecte uma fonte de vídeos: COVERR_API_KEY ou PIXABAY_API_KEY.")
         else:
             work = Path(tempfile.mkdtemp(prefix="nexus_"))
             try:
                 media, missing = [], []
                 for i, scene in enumerate(plan["scenes"]):
-                    candidates = search_pexels_videos(scene["asset_search_query"], pexels_key)
+                    candidates, source_errors = search_video_sources(scene["asset_search_query"], coverr_key, pixabay_key)
                     if not candidates and scene.get("fallback_search_query"):
-                        candidates = search_pexels_videos(scene["fallback_search_query"], pexels_key)
+                        candidates, retry_errors = search_video_sources(scene["fallback_search_query"], coverr_key, pixabay_key)
+                        source_errors.extend(retry_errors)
                     if not candidates:
                         missing.append(i + 1)
                         continue
