@@ -287,7 +287,7 @@ if not fish_api_key:
 else:
     selected_name = st.session_state.get("nexus_fish_voice_name") or "Nenhuma voz selecionada"
     st.markdown("**NARRAÇÃO**")
-    st.markdown(f"**{selected_name}**")
+    st.text(selected_name)
     st.caption("Fish Audio · voz selecionada")
     with st.expander("🎙️ Abrir biblioteca de vozes", expanded=False):
         st.caption("Explore vozes em português, ou carregue as vozes privadas que você já criou na sua conta Fish Audio.")
