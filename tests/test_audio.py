@@ -232,7 +232,17 @@ class AudioOutputTests(unittest.TestCase):
                     }]
                     total = 101
                 elif is_male and params.get("licensed") is None:
-                    items, total = [], 101
+                    items = [
+                        {
+                            "_id": f"community-{index}", "type": "tts", "state": "trained",
+                            "visibility": "public", "title": f"Community male narrator {index}",
+                            "description": "Brazilian Portuguese narration",
+                            "languages": ["pt"], "tags": ["male", "narration"],
+                            "source": "community", "task_count": 1,
+                        }
+                        for index in range(100)
+                    ]
+                    total = 101
                 else:
                     items, total = [], 0
                 return PagedResponse({"total": total, "items": items})
