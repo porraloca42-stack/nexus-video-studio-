@@ -1185,3 +1185,18 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Commits da alteração: `5b9cbc2` (busca ampliada e exclusões) e `900f7d3` (exigência de metadados BR e priorização de narração natural).
 - Estado: arquivo atualizado e relido no GitHub main. Não houve alteração em outros módulos. CI ainda precisa validar compilação e testes; app Streamlit precisa recarregar e confirmar lista real. Não declarar validado até esses checks.
 - Limitação: a Fish Audio não fornece um campo objetivo de naturalidade; a curadoria usa metadados publicados. A audição das prévias continua necessária para aprovação humana.
+
+## Pesquisa e correção definitiva do seletor de vozes — 16/11/2026 16:45 BRT
+- Nova captura do usuário mostrou que o seletor ainda listava "NARRADOR DO TODO MUNDO ODEIA O CHRIS", Neymar, Isabela, Waldo e outras vozes/personagens. O campo inferior abria teclado e permitia editar/buscar texto.
+- Diagnóstico: o filtro por palavras-chave em metadados não identificava nomes de celebridades/personagens desconhecidos (ex.: Neymar); além disso, `st.selectbox` é um combobox pesquisável e abre campo de digitação no mobile. Isso contrariava o pedido de seleção simples.
+- Pesquisa na biblioteca oficial Fish Audio identificou quatro modelos oficiais explicitamente brasileiros e não clonados de pessoas reais:
+  - Ricardo — ID `add7bcb8d3c8423bbfa152ca232aad6e`, voz masculina de meia-idade, clara/profissional.
+  - Rafael (Brasil) — ID `0ffee1af32254090b3630823baade12b`, voz masculina jovem, conversacional/profissional, pt-BR.
+  - Letícia — ID `b3c060cc41544a7da94a2c487647c902`, voz feminina jovem, suave/acolhedora, pt-BR.
+  - Beatriz (Brasil) — ID `0e26d2df0d0848e3b34099bfb55fd6ea`, voz feminina jovem, clara/profissional, pt-BR.
+- Referências oficiais consultadas: https://beta.fish.audio/m/add7bcb8d3c8423bbfa152ca232aad6e/ ; https://beta.fish.audio/m/0ffee1af32254090b3630823baade12b/ ; https://beta.fish.audio/m/b3c060cc41544a7da94a2c487647c902/ ; https://beta.fish.audio/m/0e26d2df0d0848e3b34099bfb55fd6ea/ ; documentação SDK list/get models https://github.com/fishaudio/fish-audio-go/blob/main/voices.go
+- Alterações em `nexus/audio.py` commit `c2c3e7f`: função `get_fish_voice` busca cada modelo pelo ID fixo em `GET /model/{id}`, normaliza amostra e rejeita modelo privado/não treinado/não TTS.
+- Alterações em `app.py` commit `30f2eab`: removido totalmente o `st.selectbox` e a busca dinâmica da comunidade. O seletor agora mostra quatro botões de escolha fixos (Ricardo, Rafael (Brasil), Letícia, Beatriz (Brasil)); cada linha tem o player da amostra oficial ao lado. Isso elimina o campo digitável/teclado e impede modelos de personagens/famosos de entrar no catálogo.
+- Alterações em `tests/test_audio.py` commit `362a771`: testes para buscar voz pelo ID e rejeitar modelos privados.
+- Estado: arquivos gravados e relidos na branch main. Testes automáticos e validação real do Streamlit ainda pendentes; não declarar publicado/validado até CI e confirmação da interface.
+- Decisão: começar com 4 vozes oficiais seguras, com sotaque pt-BR declarado, em vez de expor a biblioteca comunitária inteira. Ampliar somente após curadoria individual e audição de amostras.
