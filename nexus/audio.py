@@ -29,7 +29,7 @@ def _fish_headers(api_key, model=None):
     return headers
 
 
-def list_fish_voices(api_key, *, page=1, page_size=6, title="", language="pt", session=None):
+def list_fish_voices(api_key, *, page=1, page_size=6, title="", language="pt", self_only=False, session=None):
     """List public Fish Audio TTS voices, including their published sample audio."""
     client = session or requests
     params = {
@@ -41,6 +41,8 @@ def list_fish_voices(api_key, *, page=1, page_size=6, title="", language="pt", s
         params["title"] = title.strip()
     if language:
         params["language"] = language
+    if self_only:
+        params["self"] = "true"
     response = client.get(
         f"{FISH_API}/model",
         headers=_fish_headers(api_key),
@@ -54,7 +56,8 @@ def list_fish_voices(api_key, *, page=1, page_size=6, title="", language="pt", s
         detail = getattr(response, "text", "")[:500]
         raise FishAudioError(f"Não foi possível consultar a biblioteca Fish Audio: {detail or exc}") from exc
 
-    items = payload.get("items") or payload.get("data", {}).get("items") or []
+    data = payload.get("data")
+    items = payload.get("items") or (data.get("items") if isinstance(data, dict) else []) or []
     voices = []
     for item in items:
         if not isinstance(item, dict):
@@ -63,7 +66,7 @@ def list_fish_voices(api_key, *, page=1, page_size=6, title="", language="pt", s
             continue
         if item.get("state") not in (None, "", "trained"):
             continue
-        if item.get("visibility") not in (None, "", "public"):
+        if not self_only and item.get("visibility") not in (None, "", "public"):
             continue
         samples = item.get("samples") or []
         sample = next((entry for entry in samples if isinstance(entry, dict) and entry.get("audio")), {})
