@@ -559,3 +559,13 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Execução anterior #43840460460 concluiu com sucesso e publicou artefato MP4 de 2.541.139 bytes para a composição visual inicial. Esse arquivo ainda não foi inspecionado visualmente; portanto, não declarar qualidade audiovisual validada.
 - Integração com Python/Gemini e Streamlit ainda NÃO implementada. O FFmpeg continua como renderizador ativo do aplicativo.
 - Próximo marco: concluir ambos os renders, inspecionar os artefatos e então criar adaptador Python que converta storyboard para o manifesto JSON e invoque o renderer Node isoladamente.
+
+
+## Adaptador Python para Remotion — 16/11/2026
+- Criado `nexus/remotion_renderer.py`: converte storyboard Python, mídia aprovada, narração e SRT em manifesto JSON; copia os assets para `remotion/public/jobs/<job_id>/`; disponibiliza chamada CLI para renderização Remotion quando Node/npm e dependências estiverem instalados no worker.
+- Criado `tests/test_remotion_renderer.py`: cobre cópia de mídia/áudio, cena gráfica sem stock, conversão de legendas SRT para frames e rejeição de duração inválida.
+- Corrigido o componente Remotion para resolver arquivos locais usando `staticFile()`.
+- CI Python no commit `2ef3b18`: compilação e suíte de regressão concluídas com sucesso; teste de integração Wikimedia também passou.
+- CI Remotion anterior no commit `82c7535`: typecheck, render da composição de demonstração e render da composição por manifesto concluídos com sucesso; artefato `nexus-remotion-demos` publicado (4.643.759 bytes). MP4s ainda não foram inspecionados visualmente.
+- CI Remotion mais recente no commit `2ef3b18`: typecheck passou; render da demo está em execução, depois seguirá para o render do manifesto e upload. Verificar conclusão antes de considerar a versão com `staticFile()` validada.
+- O adaptador Python ainda NÃO foi ligado ao botão de renderização do Streamlit. O ambiente Streamlit Community Cloud precisa de uma estratégia Node/Chromium compatível; `packages.txt` instala dependências apt, mas não se deve presumir que o Node disponível tenha versão suficiente. Não alterar o renderer padrão antes de testar o ambiente de execução.
