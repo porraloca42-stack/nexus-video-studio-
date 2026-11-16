@@ -17,12 +17,21 @@ O Wikimedia Commons não exige chave de API. O Coverr foi removido das fontes at
 
 Nunca coloque chaves no repositório nem as envie pelo chat.
 
-## Bibliotecas de vídeo ativas
-1. **Wikimedia Commons** — API pública sem chave. O adaptador pesquisa arquivos de vídeo e só aceita arquivos com licença CC0, domínio público ou CC BY. Arquivos CC BY carregam autor, fonte e link de licença para atribuição.
-2. **Pixabay** — requer `PIXABAY_API_KEY`. A API limita chamadas e exige cache dos resultados por 24 horas; o app deve respeitar os termos de uso.
-3. **Pexels** — requer `PEXELS_API_KEY`. A API usa o endpoint `/v1/videos/search`; respeitar limites e requisitos de atribuição da plataforma.
+## Bibliotecas automáticas gratuitas
+1. **Pixabay** — API gratuita com chave `PIXABAY_API_KEY`; cache e limites da API devem ser respeitados.
+2. **Pexels** — API gratuita com chave `PEXELS_API_KEY`; pesquisa orientada a vídeos verticais.
+3. **Wikimedia Commons** — API pública sem chave; o adaptador aceita apenas CC0, domínio público e CC BY, guardando autor, fonte e licença.
 
-O Commons é uma fonte complementar e não um catálogo de stock cinematográfico tradicional. Seus vídeos podem ser WebM, Ogg ou MPEG; o pipeline usa FFmpeg para leitura e conversão durante a montagem. A disponibilidade, qualidade, orientação e variedade são verificadas por clipe.
+O Coverr não é fonte ativa: a chave previamente testada retornou `Invalid API_KEY` no plano Demo. O NEXUS não exige upgrade pago.
+
+## Bancos gratuitos complementares (curadoria manual)
+- **Mixkit** — [coleção vertical](https://mixkit.co/free-vertical-videos/). Usar somente itens com **Free License**; itens Restricted não podem ser usados em conteúdo comercial. A licença gratuita permite projetos comerciais e não exige atribuição, mas os termos proíbem bots/scraping e downloads em massa.
+- **ISO Republic** — [vídeos CC0](https://isorepublic.com/). Uso pessoal e comercial; sem atribuição obrigatória. Confirmar a licença do item.
+- **Vecteezy** — [vídeos gratuitos](https://www.vecteezy.com/free-videos). A licença Free exige atribuição e impõe limites ao uso comercial e a projetos de vídeo; a API gratuita anuncia 500 downloads/mês, mas não inclui acesso aos metadados de recursos, portanto não serve como busca automática confiável para o NEXUS.
+- **Vidsplay** — [biblioteca gratuita](https://www.vidsplay.com/). Exige crédito/link visível conforme os termos.
+- **National Park Service** — [multimídia e B-roll](https://www.nps.gov/media/multimedia-search.htm). Útil para natureza e parques; verificar direitos/créditos por arquivo.
+
+Esses sites complementam a descoberta e a curadoria humana. O NEXUS não faz scraping nem simula APIs: sem uma API pública que permita pesquisa e download automatizados, o site é apresentado como fonte manual, não como biblioteca automática do render. NASA não entra na seleção comercial automática porque parte do acervo pode conter material de terceiros e as diretrizes restringem usos promocionais/comerciais.
 
 ## Pipeline e critérios de seleção
 - Gemini planeja cenas e cria consultas específicas para ação/conteúdo e estilo.
