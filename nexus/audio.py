@@ -29,7 +29,7 @@ def _fish_headers(api_key, model=None):
     return headers
 
 
-def list_fish_voices(api_key, *, page=1, page_size=6, title="", tags=None, language="pt", self_only=False, sort_by="score", session=None):
+def list_fish_voices(api_key, *, page=1, page_size=6, title="", tags=None, language="pt", self_only=False, licensed_only=False, sort_by="score", session=None):
     """List public Fish Audio TTS voices, including their published sample audio."""
     client = session or requests
     params = {
@@ -45,6 +45,8 @@ def list_fish_voices(api_key, *, page=1, page_size=6, title="", tags=None, langu
         params["language"] = language
     if self_only:
         params["self"] = "true"
+    elif licensed_only:
+        params["licensed"] = "true"
     response = client.get(
         f"{FISH_API}/model",
         headers=_fish_headers(api_key),
@@ -86,7 +88,7 @@ def list_fish_voices(api_key, *, page=1, page_size=6, title="", tags=None, langu
             "sample_text": sample.get("text") or "",
             "visibility": item.get("visibility", "public"),
             "licensed": bool(item.get("licensed", False)),
-            "source": str(item.get("source") or ""),
+            "source": str(item.get("source") or item.get("source_type") or item.get("model_source") or ""),
             "task_count": int(item.get("task_count") or 0),
         })
     total = payload.get("total")
@@ -203,6 +205,76 @@ def list_fish_natural_brazilian_voices(api_key, *, session=None):
     voices.sort(key=lambda voice: (voice.get("task_count", 0)), reverse=True)
     return {"total": len(voices), "items": voices}
 
+
+
+def _is_human_narrator_voice(voice, gender):
+    """Accept human narration voices; reject fictional, celebrity and meme voices."""
+    title = (voice.get("title") or "").casefold()
+    description = (voice.get("description") or "").casefold()
+    tags = [str(tag).casefold() for tag in (voice.get("tags") or [])]
+    metadata = " ".join([title, description, *tags])
+    languages = " ".join(str(lang).casefold() for lang in (voice.get("languages") or []))
+    if not any(token in languages for token in ("pt", "portugu")):
+        return False
+    excluded = (
+        "meme", "anime", "personagem", "character", "celebrity", "celebridade",
+        "ator", "actress", "movie", "filme", "game", "gaming", "jogo",
+        "cartoon", "parody", "paródia", "fictional", "fiction",
+    )
+    if any(token in metadata for token in excluded):
+        return False
+    gender_terms = {
+        "male": ("male", "mascul", "homem", "man"),
+        "female": ("female", "feminin", "mulher", "woman"),
+    }[gender]
+    if not any(term in metadata for term in gender_terms):
+        return False
+    return "narration" in tags or any(
+        term in metadata for term in (
+            "narration", "narrador", "narradora", "voice over", "locução",
+            "locucao", "documentary", "documentário", "documentario",
+        )
+    )
+
+
+def list_fish_professional_narrators(api_key, *, per_gender=25, session=None):
+    """Return up to 25 natural Portuguese male and female professional narrators.
+
+    Queries the same male/female + narration tag combinations used by Fish
+    Discovery, keeps PVC/indicated-licensed sources when source metadata exists,
+    and removes obvious character, anime, celebrity and meme models.
+    """
+    client = session or requests
+    result = {}
+    for gender in ("male", "female"):
+        discovered = {}
+        for licensed_only in (False, True):
+            page = list_fish_voices(
+                api_key, page=1, page_size=100,
+                tags=[gender, "narration"], language="pt",
+                licensed_only=licensed_only, sort_by="task_count",
+                session=client,
+            )
+            for voice in page["items"]:
+                if not voice.get("id"):
+                    continue
+                source = (voice.get("source") or "").casefold()
+                # The Fish discovery "pvc,licensed" view includes PVC and
+                # Fish-licensed sources. When source is exposed, enforce it.
+                if source and not any(token in source for token in ("pvc", "licensed")):
+                    continue
+                if _is_human_narrator_voice(voice, gender):
+                    discovered[voice["id"]] = voice
+        voices = sorted(
+            discovered.values(),
+            key=lambda voice: (
+                bool(voice.get("licensed")),
+                int(voice.get("task_count") or 0),
+            ),
+            reverse=True,
+        )
+        result[gender] = voices[:max(1, min(int(per_gender), 25))]
+    return result
 
 def generate_fish_preview(api_key, voice_id, *, text=FISH_VOICE_TEXT, session=None):
     """Generate a short preview for a voice model that has no published sample."""
