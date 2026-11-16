@@ -76,9 +76,9 @@ Retorne somente JSON válido:
    "setting":"...",
    "subjects":"...",
    "shot_type":"...",
-   "camera_motion":"push_in, pull_out, pan_left ou pan_right",
+   "camera_motion":"push_in, pull_out, pan_left, pan_right, tilt_up ou tilt_down",
    "motion_events":["microevento 1","microevento 2"],
-   "scene_direction":{"camera":{"move":"push_in","intensity":0.5,"start_scale":1.0,"end_scale":1.08,"focus":"subject"},"depth_layers":{"foreground":"...","subject":"...","background":"...","parallax_strength":0.2},"lighting":{"mood":"...","key_direction":"...","change":"none"},"atmosphere":{"effect":"none","intensity":0.0},"transition":{"in":"cut","out":"cut","duration_frames":0},"beats":[{"at":0.35,"event":"...","visual_target":"..."}]},
+   "scene_direction":{"camera":{"move":"push_in","intensity":0.82,"start_scale":1.04,"end_scale":1.22,"focus":"subject"},"depth_layers":{"foreground":"...","subject":"...","background":"...","parallax_strength":0.2},"lighting":{"mood":"...","key_direction":"...","change":"none"},"atmosphere":{"effect":"none","intensity":0.0},"transition":{"in":"cut","out":"cut","duration_frames":0},"beats":[{"at":0.35,"event":"...","visual_target":"..."}]},
    "asset_search_query":"English query with concrete subject and action",
    "fallback_search_query":"different concrete English query"
   }
