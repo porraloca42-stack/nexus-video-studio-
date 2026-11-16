@@ -124,26 +124,29 @@ def _query_tokens(value):
     return [word for word in words if word not in _STOPWORDS and len(word) > 2]
 
 
-def rank_video_candidates(candidates, query):
-    """Rank stock results by scene-query relevance before technical quality."""
+def rank_video_candidates(candidates, query, style_query=""):
+    """Rank narration/scene relevance first; visual style is only a secondary signal."""
     query_terms = list(dict.fromkeys(_query_tokens(query)))
-    if not query_terms:
-        query_terms = []
+    style_terms = list(dict.fromkeys(_query_tokens(style_query)))
     for item in candidates:
         title_terms = set(_query_tokens(item.get("title", "")))
         description_terms = set(_query_tokens(item.get("description", "")))
+        metadata_terms = title_terms | description_terms
         matched_title = len(set(query_terms) & title_terms)
         matched_description = len(set(query_terms) & description_terms)
-        matched_terms = len(set(query_terms) & (title_terms | description_terms))
+        matched_terms = len(set(query_terms) & metadata_terms)
         coverage = (matched_title + matched_description) / max(1, len(query_terms))
-        # Semantic text relevance outranks orientation/resolution; technical
-        # quality is only a tie-breaker and must not promote unrelated stock.
+        style_matches = len(set(style_terms) & metadata_terms)
+        style_coverage = style_matches / max(1, len(style_terms))
+        # Narration/scene relevance is the primary sort key. Style can only
+        # break ties; resolution and orientation come after both.
         item["_nexus_match_count"] = matched_terms
         item["_nexus_relevance"] = (
             matched_title * 4.0
             + matched_description * 1.5
             + coverage * 3.0
         )
+        item["_nexus_style_relevance"] = style_matches * 2.0 + style_coverage
         item["_nexus_quality"] = (
             1 if item.get("vertical") else 0,
             min(int(item.get("height") or 0), 2160),
@@ -151,7 +154,11 @@ def rank_video_candidates(candidates, query):
         )
     return sorted(
         candidates,
-        key=lambda item: (item["_nexus_relevance"], *item["_nexus_quality"]),
+        key=lambda item: (
+            item["_nexus_relevance"],
+            item["_nexus_style_relevance"],
+            *item["_nexus_quality"],
+        ),
         reverse=True,
     )
 
@@ -165,12 +172,17 @@ def search_video_sources(
     relevance_query=None,
     min_relevance=1.5,
     pexels_key='',
+    style_query='',
 ):
-    """Search every configured stock provider and rank their combined candidates."""
+    """Search every enabled library for scene content and style, then rank together."""
     errors = []
     excluded = set(exclude_urls or [])
-    variants = build_query_variants(query, max_variants=2)
     semantic_query = relevance_query if relevance_query is not None else query
+    variants = build_query_variants(query, max_variants=2)
+    # Search the requested style independently so it cannot dilute the
+    # narration query. The style query never qualifies an unrelated clip alone.
+    style_variants = build_query_variants(style_query, max_variants=1)
+    search_variants = list(dict.fromkeys(variants + style_variants))
     query_terms = list(dict.fromkeys(_query_tokens(semantic_query)))
     all_candidates = []
 
@@ -185,7 +197,7 @@ def search_video_sources(
     # Query every enabled provider. Do not return early when the first
     # provider finds a match: the final choice must compare the whole pool.
     for source_name, search_fn, api_key in sources:
-        for search_query in variants:
+        for search_query in search_variants:
             try:
                 results = search_fn(search_query, api_key, per_page)
                 for item in results:
@@ -210,7 +222,7 @@ def search_video_sources(
             providers.add(item.get("source", ""))
             existing["also_found_by"] = sorted(name for name in providers if name)
 
-    ranked = rank_video_candidates(list(deduplicated.values()), semantic_query)
+    ranked = rank_video_candidates(list(deduplicated.values()), semantic_query, style_query=style_query)
     required_matches = min(2, len(query_terms))
     strict = [
         item for item in ranked
@@ -242,12 +254,13 @@ def download_file(url, destination):
     return destination
 
 
-def diverse_candidate_shortlist(candidates, limit=3):
+def diverse_candidate_shortlist(candidates, limit=6):
     """Compare the strongest result from each configured library before repeats."""
     ranked = sorted(
         candidates or [],
         key=lambda item: (
             float(item.get("_nexus_relevance", 0.0)),
+            float(item.get("_nexus_style_relevance", 0.0)),
             1 if item.get("vertical") else 0,
             int(item.get("height") or 0),
         ),
