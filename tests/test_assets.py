@@ -240,6 +240,28 @@ class AssetRankingTests(unittest.TestCase):
         self.assertEqual(ranked[0]["source"], "Pixabay")
 
 
+    @patch("nexus.assets.search_pixabay_videos")
+    @patch("nexus.assets.search_coverr_videos")
+    def test_auth_failure_stops_repeated_queries_for_that_provider_but_keeps_other_libraries(self, coverr, pixabay):
+        import requests
+        response = requests.Response()
+        response.status_code = 403
+        coverr.side_effect = requests.HTTPError("403 Forbidden", response=response)
+        pixabay.return_value = [
+            clip("https://example.test/pixabay.mp4", "Person writing goals in notebook", "Journal writing")
+        ]
+
+        ranked, errors = search_video_sources(
+            "person writing goals in notebook",
+            coverr_key="coverr-key",
+            pixabay_key="pixabay-key",
+        )
+
+        self.assertTrue(any("HTTP 403" in error for error in errors))
+        self.assertEqual(ranked[0]["source"], "Pixabay")
+        self.assertEqual(coverr.call_count, 1)
+        self.assertGreaterEqual(pixabay.call_count, 1)
+
     @patch("nexus.assets.requests.get")
     def test_pexels_adapter_parses_portrait_mp4_and_attribution(self, get):
         class FakeResponse:
