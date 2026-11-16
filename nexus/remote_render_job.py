@@ -13,7 +13,7 @@ from nexus.render_crypto import decrypt_text, encrypt_bytes, encrypt_text
 
 def _retime_srt(source: Path, destination: Path, factor: float) -> None:
     """Scale SRT timestamps by the same factor used for audio time-stretching."""
-    timestamp = re.compile(r"(\\d{2}):(\\d{2}):(\\d{2}),(\\d{3})")
+    timestamp = re.compile(r"(\d{2}):(\d{2}):(\d{2}),(\d{3})")
 
     def scale(match):
         hours, minutes, seconds, millis = map(int, match.groups())
