@@ -294,10 +294,10 @@ else:
         with st.form("fish_voice_search_form"):
             catalog_scope = st.selectbox(
                 "Catálogo",
-                ["Licenciadas pela Fish Audio", "Biblioteca pública", "Minhas vozes"],
+                ["Mais relevantes", "Mais usadas", "Minhas vozes"],
                 key="fish_catalog_scope",
             )
-            search_voice = st.text_input("Buscar por nome", placeholder="Ex.: narrador, grave, feminina, storytelling")
+            search_voice = st.text_input("Buscar em nomes, descrições e tags", placeholder="Ex.: narrador, grave, feminina, storytelling")
             voice_style = st.selectbox(
                 "Estilo vocal",
                 ["Todos", "narration", "conversational", "documentary", "professional", "calm", "deep", "warm", "storytelling"],
@@ -316,12 +316,10 @@ else:
                     fish_api_key,
                     page=int(voice_page),
                     page_size=100,
-                    title=search_voice.strip(),
                     tags=[voice_style] if voice_style != "Todos" else None,
                     language="pt",
                     self_only=(catalog_scope == "Minhas vozes"),
-                    licensed_only=(catalog_scope == "Licenciadas pela Fish Audio"),
-                    sort_by="task_count",
+                    sort_by="task_count" if catalog_scope == "Mais usadas" else "score",
                 )
                 st.session_state["fish_voice_catalog_cache"] = voice_catalog_result
                 st.session_state["fish_voice_catalog_cache_key"] = cache_key
@@ -333,6 +331,17 @@ else:
             st.error(f"Falha ao consultar a biblioteca Fish Audio: {catalog['error']}")
         else:
             voice_catalog = catalog.get("items", [])
+            if search_voice.strip():
+                query_terms = [term.casefold() for term in search_voice.split() if term.strip()]
+                voice_catalog = [
+                    item for item in voice_catalog
+                    if all(term in " ".join([
+                        item.get("title", ""), item.get("description", ""),
+                        item.get("author", ""), item.get("source", ""),
+                        " ".join(item.get("tags", [])),
+                        " ".join(item.get("languages", [])),
+                    ]).casefold() for term in query_terms)
+                ]
             if voice_gender != "Todos":
                 gender_terms = {
                     "Masculina": ("male", "mascul", "man voice", "homem", "masculina"),
@@ -345,7 +354,7 @@ else:
                         " ".join(item.get("tags", [])),
                     ]).casefold() for term in gender_terms)
                 ]
-            st.caption(f"{catalog.get('total', len(voice_catalog)):,} resultado(s) disponíveis · até 100 por página")
+            st.caption(f"{len(voice_catalog):,} voz(es) nesta página após os filtros · até 100 registros consultados")
             if not voice_catalog:
                 st.info("Nenhuma voz encontrada com esses filtros. Tente outro termo ou página.")
             for voice_option in voice_catalog:
@@ -356,12 +365,15 @@ else:
                     tags = ", ".join(voice_option.get("tags", [])[:3])
                     if tags:
                         st.caption(tags)
-                    if catalog_scope == "Licenciadas pela Fish Audio":
-                        st.caption("Licença de voz indicada pela Fish Audio")
-                    elif catalog_scope == "Biblioteca pública":
-                        st.caption("Licença individual não confirmada" if not voice_option.get("licensed") else "Licenciada pela Fish Audio")
-                    else:
+                    if catalog_scope == "Minhas vozes":
                         st.caption("Voz da sua conta")
+                    else:
+                        license_label = "Licença indicada pela Fish Audio" if voice_option.get("licensed") else "Verifique a licença antes do uso comercial"
+                        st.caption(license_label)
+                    if voice_option.get("author") or voice_option.get("source"):
+                        st.caption(" · ".join(value for value in [voice_option.get("author", ""), voice_option.get("source", "")] if value))
+                    if voice_option.get("description"):
+                        st.caption(voice_option["description"][:220])
                     if st.button("Selecionada" if is_selected else "Usar esta voz", key=f"fish_pick_{voice_option['id']}", use_container_width=True, type="primary" if is_selected else "secondary"):
                         st.session_state["nexus_fish_voice_id"] = voice_option["id"]
                         st.session_state["nexus_fish_voice_name"] = voice_option["title"]
