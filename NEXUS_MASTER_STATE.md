@@ -870,3 +870,5 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Testes reorientados para garantir saída de áudio sem SRT, MP4 com vídeo/áudio sem overlay e manifesto Remotion sem campo de captions. Commits de testes: 3eb03e4, e64e2bd, adf962a, b103df9, e7b882d e ajuste final da chamada do manifesto.
 - Estado: alterações gravadas em main; CI após a sequência de commits está em execução/aguarda confirmação. Deploy Streamlit e MP4 real continuam sem validação ponta a ponta.
 - Próxima prioridade: obter suíte verde e, em seguida, produzir e inspecionar um MP4 real com foco em qualidade visual, coerência das cenas e narração. Não reintroduzir legendas no pipeline sem nova solicitação explícita.
+- Commit 9acc215: identificador da interface atualizado para NEXUS-2026.11.16-audio-only-1, permitindo confirmar visualmente que o Streamlit carregou a versão sem legendas.
+- GitHub Actions no commit 48144ae: regressão unitária e smoke test Wikimedia Commons concluídos com sucesso. Render demo separado ainda estava em execução na última consulta; implantação Streamlit e MP4 real seguem pendentes.
