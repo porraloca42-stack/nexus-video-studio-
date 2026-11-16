@@ -1166,3 +1166,11 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Correção aplicada no commit `ac84bad`: removido o import do helper novo; `app.py` voltou a importar apenas as três funções já usadas anteriormente (`generate_fish_preview`, `list_fish_voices`, `make_voice`). A curadoria foi movida para o próprio bloco de interface, usando a função de listagem compatível e metadados disponíveis. Assim a inicialização não depende da existência do helper novo no pacote de áudio publicado.
 - A interface segue compacta; filtros locais excluem palavras ligadas a memes/personagens/figuras públicas e priorizam metadados de narração natural/brasileira. Como a biblioteca pode variar nos metadados, a lista real precisa ser validada após o app subir.
 - Arquivo relido após commit: `app.py` em main. CI e deploy Streamlit ainda precisam confirmar execução. Não declarar incidente resolvido até o app abrir sem ImportError.
+
+## Correção do IndentationError na curadoria de vozes — 16/11/2026 16:30 BRT
+- Nova captura do usuário revelou erro concreto: `IndentationError: unexpected indent` na linha `excluded_voice_terms` em `app.py`.
+- Causa confirmada pela leitura do arquivo: o bloco de curadoria dentro do `try:` tinha indentação excessiva em relação ao restante do bloco.
+- Correção aplicada no commit `60693ba`: reindentado integralmente o bloco desde `voice_page_data = list_fish_voices(...)` até `voice_page_data["items"] = curated_voices`, mantendo todos os comandos no mesmo nível dentro do `try:`.
+- Verificação pós-commit: `app.py` foi relido da branch main; o bloco agora apresenta indentação coerente com o `try:` e com a sequência `voices = [...]`.
+- Estado: patch gravado e leitura estática confirmada. Ainda não executei compilação Python nem CI nesta etapa, e o Streamlit Cloud ainda precisa recarregar para confirmar que o app inicia. Não declarar resolvido até abrir sem erro.
+- Erro anterior de ImportError foi substituído por um erro de sintaxe causado pelo patch de curadoria; assumir responsabilidade por ter enviado código com indentação incorreta.
