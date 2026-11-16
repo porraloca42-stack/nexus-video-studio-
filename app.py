@@ -262,7 +262,7 @@ if "nexus_plan" in st.session_state:
         if adjustment:
             st.info(
                 f"A IA distribuiu os {adjustment['requested_seconds']} segundos entre as cenas "
-                f"(a estimativa inicial era de {adjustment['original_seconds']:.1f}s)."
+                f"(a estimativa inicial era de {adjustment.get('ai_estimated_seconds', adjustment.get('original_seconds', 0)):.1f}s)."
             )
         st.markdown("### Cenas")
         for i, scene in enumerate(scenes, 1):
