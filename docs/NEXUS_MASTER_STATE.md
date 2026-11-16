@@ -102,6 +102,8 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 
 - Alinhamento das miniaturas (commit `7c9e4583`): o contêiner de cada imagem agora usa a mesma largura relativa/máxima do botão (78%, máx. 155 px), com flex centralizado também no contêiner interno e na própria imagem. Objetivo: centralizar cada prévia exatamente sobre seu botão correspondente nas duas colunas. Publicado no GitHub; aguarda reboot e validação visual móvel.
 
+- Correção da galeria após validação visual (commit `99449eaa`): restaurada a miniatura em 85 px reais (largura/min/max fixados em 85 px no CSS e `st.image(..., width=85)` preservado). O contêiner da imagem volta a ocupar 100% da coluna; a própria imagem usa `left:50%` + `translateX(-50%)` para centralização inequívoca sobre o botão, sem reduzir a miniatura para a largura do botão. Publicado no GitHub; aguarda reboot e validação visual.
+
 ## Regras para o assistente em novos chats
 - Começar lendo este arquivo e o código relevante no GitHub antes de propor mudanças.
 - Tratar este documento como registro de continuidade, mas conferir o estado atual do repositório e deployment; pode ficar desatualizado.
