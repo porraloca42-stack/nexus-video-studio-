@@ -16,7 +16,6 @@ class RenderIntegrationTests(unittest.TestCase):
         self.clip_a = self.root / "clip_a.mp4"
         self.clip_b = self.root / "clip_b.mp4"
         self.audio = self.root / "voice.mp3"
-        self.subtitles = self.root / "captions.srt"
 
         subprocess.run([
             "ffmpeg", "-y", "-f", "lavfi", "-i", "testsrc2=size=640x360:rate=25",
@@ -42,9 +41,9 @@ class RenderIntegrationTests(unittest.TestCase):
     def tearDown(self):
         self.temp.cleanup()
 
-    def test_render_produces_vertical_mp4_with_audio_and_subtitles(self):
+    def test_render_produces_vertical_mp4_with_audio_and_no_subtitle_overlay(self):
         output = self.root / "result.mp4"
-        render_video(self.media, self.audio, output, self.subtitles)
+        render_video(self.media, self.audio, output)
 
         probe = subprocess.run([
             "ffprobe", "-v", "error", "-show_entries",
