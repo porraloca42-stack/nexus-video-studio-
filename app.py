@@ -167,7 +167,7 @@ with settings_col2:
     voice = st.selectbox("Voz da narração", ["pt-BR-AntonioNeural", "pt-BR-FranciscaNeural", "pt-BR-ThalitaNeural"], format_func=lambda value: {"pt-BR-AntonioNeural":"Antônio · Masculina", "pt-BR-FranciscaNeural":"Francisca · Feminina", "pt-BR-ThalitaNeural":"Thalita · Feminina"}[value])
 
 with st.expander("Ferramentas avançadas · diagnóstico da biblioteca Coverr"):
-    st.caption("Build do aplicativo: NEXUS-2026.11.16-model-guard-2 · se esta identificação não aparecer, o Streamlit ainda está servindo uma versão anterior.")
+    st.caption("Build do aplicativo: NEXUS-2026.11.16-semantic-repair-1 · se esta identificação não aparecer, o Streamlit ainda está servindo uma versão anterior.")
     st.caption("Ferramenta técnica para verificar a conexão e o download interno. Não é necessária para planejar ou produzir um vídeo.")
     if st.button("Testar conexão e download Coverr", type="secondary"):
         coverr_key = secret("COVERR_API_KEY")
