@@ -968,3 +968,10 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Commits de interface: `bb46bdfe` (Remotion/Cloudflare como padrão), `856a733a` (rótulo de biblioteca alternativa).
 - Estado: correção do código e integração simulada validadas pelo CI Python; typecheck Remotion ainda aguardando conclusão; deploy Streamlit não confirmado; nenhuma execução real do worker com Cloudflare/Fish nem MP4 real de 40–50s foi produzida nesta retomada.
 - Próxima etapa: confirmar typecheck e deploy; executar pelo Streamlit a opção padrão Cloudflare + Remotion com as credenciais já configuradas; inspecionar o MP4 real, incluindo imagens, progressão de cena, movimentos Remotion, transições, sincronização e provedor real de narração.
+
+
+### Atualização de validação do worker — 16/11/2026
+- GitHub Actions run #413 (`43883657226`): job `remotion-typecheck` executou `npm install` e `npm run typecheck`; ambos concluíram com sucesso. O job Python também passou; o smoke test Commons estava em execução separada, sem bloquear a validação Remotion.
+- A correção e a orquestração simulada do worker foram validadas em run #412: 72/72 testes passaram, incluindo o teste integrado que descriptografa as credenciais Fish, confirma que são entregues ao gerador de narração, simula imagem Cloudflare, composição Remotion e valida MP4 vertical de 50s com áudio. MP4 e relatório são gravados cifrados no teste.
+- O app agora inicia com `Imagens originais · Cloudflare AI + Remotion` selecionado; bibliotecas são alternativa. O painel mostra o provedor de narração lido do relatório real do worker.
+- Não houve chamada real ao Cloudflare Workers AI nem Fish Audio nesta validação automatizada; as integrações foram simuladas. Deploy Streamlit não foi confirmado pelo acesso externo nesta sessão. A validação audiovisual final ainda depende de um render real no worker e inspeção do arquivo MP4 produzido.
