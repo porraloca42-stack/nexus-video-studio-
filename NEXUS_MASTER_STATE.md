@@ -1353,3 +1353,11 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Smoke test integrado #2 validou a cadeia visual e muxagem de áudio sintético em 2s. Não confundir esse teste com a validação de uma produção editorial de 40–50s com narração Fish Audio.
 - O app aceita cenas de 2–5s; o adaptador Modal rejeita durações fora dessa faixa e processa todas as cenas num único batch. O worker de produção gera imagens, anima todas as cenas, sintetiza Fish Audio, ajusta áudio dentro de tolerância máxima de 15% e valida o MP4 final via FFprobe.
 - Próximo critério de liberação: um vídeo real de 40–50s, com voz Fish Audio selecionada, todas as cenas animadas e coerência audiovisual revisada. Registrar duração, custo, codecs, resolução e inspeção visual antes de declarar finalizado.
+
+
+## Redesign visual mobile — 16/11/2026
+- Em andamento na branch `feat/mobile-premium-ui`; não altera o pipeline de produção, os provedores ou os contratos de dados.
+- Primeira camada implementada em `app.py`: identidade escura grafite/preto com dourado discreto, fundo com gradiente sutil, hero NEXUS, tipografia e espaçamentos refinados, campos de texto e seletores personalizados, botões primários/secundários, expanders, players, alertas e barras de progresso redesenhados.
+- Responsividade mobile-first: largura fluida, margens compactas, alvos de toque maiores, controles com cantos arredondados e galeria de estilos em grade de duas colunas.
+- Ocultados rodapé e elementos técnicos de toolbar do Streamlit; o cabeçalho de navegação permanece para não remover controles de aplicativo do host.
+- Ainda não executado/validado no navegador ou celular. Requer CI e inspeção visual no Streamlit publicado antes de integrar em `main`.
