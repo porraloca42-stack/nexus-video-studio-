@@ -784,6 +784,10 @@ if st.session_state.get("nexus_rendered_video"):
     info = st.session_state.get("nexus_rendered_info", {})
     st.subheader("Seu vídeo está pronto")
     st.caption(f"{info.get('scene_count', 0)} cenas · {info.get('duration', 0):.1f}s · {info.get('width', 0)}×{info.get('height', 0)} · {info.get('size_mb', 0):.2f} MB")
+    if info.get("visual_source"):
+        st.caption("Direção visual: " + info["visual_source"])
+    if info.get("worker_run_id"):
+        st.caption(f"[Ver execução do render no GitHub Actions](https://github.com/porraloca42-stack/nexus-video-studio-/actions/runs/{info['worker_run_id']})")
     reviews = info.get("visual_reviews", [])
     if reviews:
         average_confidence = sum(item.get("confidence", 0) for item in reviews) / len(reviews)
