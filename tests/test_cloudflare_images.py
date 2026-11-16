@@ -1,4 +1,6 @@
-import pytest
+import tempfile
+import unittest
+from pathlib import Path
 
 from nexus.cloudflare_images import CloudflareAIError, generate_image
 
@@ -26,45 +28,51 @@ class FakeSession:
         return self.response
 
 
-def test_generate_image_saves_png_and_uses_secret_auth(tmp_path):
-    session = FakeSession()
-    result = generate_image(
-        "cinematic portrait, warm light",
-        tmp_path / "scene.png",
-        account_id="account",
-        api_token="secret",
-        session=session,
-    )
-    assert (tmp_path / "scene.png").read_bytes() == PNG
-    assert result["model"] == "@cf/black-forest-labs/flux-1-schnell"
-    assert session.calls[0][1]["headers"]["Authorization"] == "Bearer secret"
-    assert session.calls[0][1]["json"]["steps"] == 6
+class CloudflareImageTests(unittest.TestCase):
+    def test_generate_image_saves_png_and_uses_secret_auth(self):
+        with tempfile.TemporaryDirectory() as temp:
+            session = FakeSession()
+            result = generate_image(
+                "cinematic portrait, warm light",
+                Path(temp) / "scene.png",
+                account_id="account",
+                api_token="secret",
+                session=session,
+            )
+            self.assertEqual((Path(temp) / "scene.png").read_bytes(), PNG)
+            self.assertEqual(result["model"], "@cf/black-forest-labs/flux-1-schnell")
+            self.assertEqual(session.calls[0][1]["headers"]["Authorization"], "Bearer secret")
+            self.assertEqual(session.calls[0][1]["json"]["steps"], 6)
+
+    def test_generate_image_rejects_missing_credentials(self):
+        with tempfile.TemporaryDirectory() as temp:
+            with self.assertRaisesRegex(CloudflareAIError, "CLOUDFLARE_ACCOUNT_ID"):
+                generate_image("a scene", Path(temp) / "scene.png", account_id="", api_token="")
+
+    def test_generate_image_rejects_non_image_payload(self):
+        with tempfile.TemporaryDirectory() as temp:
+            response = FakeResponse()
+            response.content = b"not an image"
+            with self.assertRaisesRegex(CloudflareAIError, "não é PNG"):
+                generate_image(
+                    "a scene",
+                    Path(temp) / "scene.png",
+                    account_id="account",
+                    api_token="secret",
+                    session=FakeSession(response),
+                )
+
+    def test_generate_image_rejects_empty_prompt(self):
+        with tempfile.TemporaryDirectory() as temp:
+            with self.assertRaisesRegex(ValueError, "prompt"):
+                generate_image(
+                    " ",
+                    Path(temp) / "scene.png",
+                    account_id="account",
+                    api_token="secret",
+                    session=FakeSession(),
+                )
 
 
-def test_generate_image_rejects_missing_credentials(tmp_path):
-    with pytest.raises(CloudflareAIError, match="CLOUDFLARE_ACCOUNT_ID"):
-        generate_image("a scene", tmp_path / "scene.png", account_id="", api_token="")
-
-
-def test_generate_image_rejects_non_image_payload(tmp_path):
-    response = FakeResponse()
-    response.content = b"not an image"
-    with pytest.raises(CloudflareAIError, match="não é PNG"):
-        generate_image(
-            "a scene",
-            tmp_path / "scene.png",
-            account_id="account",
-            api_token="secret",
-            session=FakeSession(response),
-        )
-
-
-def test_generate_image_rejects_empty_prompt(tmp_path):
-    with pytest.raises(ValueError, match="prompt"):
-        generate_image(
-            " ",
-            tmp_path / "scene.png",
-            account_id="account",
-            api_token="secret",
-            session=FakeSession(),
-        )
+if __name__ == "__main__":
+    unittest.main()
