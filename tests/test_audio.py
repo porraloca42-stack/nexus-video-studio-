@@ -205,6 +205,43 @@ class AudioOutputTests(unittest.TestCase):
         self.assertFalse(_is_natural_brazilian_voice(character))
         self.assertFalse(_is_natural_brazilian_voice(european))
 
+    def test_professional_narrator_discovery_paginates_until_it_finds_eligible_pvc_voices(self):
+        class PagedResponse:
+            def __init__(self, payload):
+                self.payload = payload
+            def raise_for_status(self):
+                return None
+            def json(self):
+                return self.payload
+
+        class PagedSession:
+            def __init__(self):
+                self.calls = []
+            def get(self, url, headers=None, params=None, timeout=None):
+                self.calls.append(dict(params))
+                is_male = "male" in params.get("tag", [])
+                page_number = params["page_number"]
+                if is_male and params.get("licensed") is None and page_number == 2:
+                    items = [{
+                        "_id": "late-male-pvc", "type": "tts", "state": "trained",
+                        "visibility": "public", "title": "Brazilian Male Narrator",
+                        "description": "Natural Brazilian Portuguese narration",
+                        "languages": ["pt"], "tags": ["male", "narration"],
+                        "source": "pvc", "task_count": 50,
+                        "samples": [{"audio": "https://cdn.example.test/late.mp3"}],
+                    }]
+                    total = 101
+                elif is_male and params.get("licensed") is None:
+                    items, total = [], 101
+                else:
+                    items, total = [], 0
+                return PagedResponse({"total": total, "items": items})
+
+        session = PagedSession()
+        voices = list_fish_professional_narrators("test-key", session=session)
+        self.assertEqual([voice["id"] for voice in voices["male"]], ["late-male-pvc"])
+        self.assertIn(2, [call["page_number"] for call in session.calls])
+
     def test_professional_narrator_accepts_explicit_pt_br_language_metadata(self):
         voice = {
             "title": "Male Narrator",
