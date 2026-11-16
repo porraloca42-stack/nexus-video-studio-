@@ -651,3 +651,10 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Usuário informou que cadastrou no repositório os dois Repository Secrets: `CLOUDFLARE_ACCOUNT_ID` e `CLOUDFLARE_API_TOKEN`.
 - Registro baseado na confirmação do usuário; os valores não foram lidos nem expostos. A existência/validade dos Secrets e a autenticação Cloudflare ainda não foram verificadas por execução do worker.
 - Próxima etapa: cadastrar `CLOUDFLARE_API_TOKEN` em Streamlit Cloud → Manage app → Settings → Secrets, junto de `GITHUB_ACTIONS_TOKEN` (GitHub fine-grained PAT com Actions Read/Write e Contents Read). Depois executar um render real curto e inspecionar o MP4.
+
+
+## Secrets Streamlit cadastrados pelo usuário — 16/11/2026
+- Usuário confirmou que inseriu e salvou no Streamlit Secrets as entradas `GITHUB_ACTIONS_TOKEN` e `CLOUDFLARE_API_TOKEN`.
+- Registro baseado na confirmação do usuário; os valores não foram lidos. Não armazenar credenciais no repositório.
+- Próxima validação: executar o modo opcional “Imagens originais · Cloudflare AI + Remotion” com um roteiro curto e confirmar dispatch do workflow, autenticação Workers AI, geração das imagens, render e recuperação do MP4.
+- Até a execução real, integração Cloudflare em produção permanece configurada segundo relato do usuário, mas não testada nem validada de ponta a ponta.
