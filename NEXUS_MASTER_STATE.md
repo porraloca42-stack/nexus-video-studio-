@@ -136,3 +136,13 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Commit 2408b59: corrigido o fallback; quando o modelo configurado não existe entre os modelos textuais compatíveis, todos os candidatos são ordenados pela classificação de capacidade/estabilidade. A preferência configurada só é mantida se for compatível.
 - Commit b1e6816: alterado também `app.py` para incluir no expander de diagnóstico a identificação `NEXUS-2026.11.16-model-guard-2`. Isso permite confirmar visualmente se o Streamlit carregou o novo commit e separa problema de implantação de problema de configuração.
 - Commits confirmados no branch `main`. Ainda não houve acesso ao ambiente Streamlit publicado nem chamada real à API Gemini; portanto, deploy e execução permanecem pendentes de validação.
+
+
+## Correção de validação semântica — 16/11/2026
+- O usuário confirmou que o erro de modelo Gemini deixou de aparecer; o novo erro foi de validação: "Cena 10: justificativa semântica superficial". Isso indica que o diretor já respondeu e o storyboard chegou à validação.
+- Causa encontrada em `nexus/director.py`: a validação rejeitava qualquer justificativa com menos de 35 caracteres, sem etapa de reparo semântico, embora o prompt não definisse extensão mínima nem houvesse recuperação específica.
+- Commit 89c5cfe: adicionado reparo focado nas cenas com justificativa abaixo de 80 caracteres. O diretor recebe a fala e os elementos visuais daquela cena e tenta explicar a correspondência concreta; narração, ordem e duração não são alteradas. Se a explicação continuar curta ou a chamada de reparo falhar, é criada uma justificativa de apoio usando exclusivamente fala, ação, ambiente e sujeitos já presentes na própria cena, evitando abortar todo o planejamento por concisão textual.
+- A validação agora exige justificativa de pelo menos 80 caracteres; o fluxo tenta corrigir antes de validar.
+- Commit a0942be: identificador visual atualizado para `NEXUS-2026.11.16-semantic-repair-1`.
+- Testes locais executados no trecho do reparador: sintaxe Python aprovada; teste de fallback confirmou justificativa acima de 80 caracteres e preservação de fala/ação da cena.
+- Ainda pendente: confirmar o novo identificador no Streamlit publicado e testar uma solicitação real de planejamento. Deploy e validação end-to-end não estão confirmados.
