@@ -218,7 +218,7 @@ div[data-testid="stTextArea"] textarea,div[data-testid="stSelectbox"] div[data-b
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="nexus-hero"><div class="nexus-brand">NEXUS VIDEO STUDIO</div><div class="nexus-tagline">Transforme seu roteiro em vídeo</div></div>', unsafe_allow_html=True)
-st.caption("Versão: NEXUS-2026.11.16-visual-review-subtitles-2")
+st.caption("Versão: NEXUS-2026.11.16-visual-review-subtitles-3")
 
 if "nexus_style" not in st.session_state or st.session_state["nexus_style"] not in STYLE_OPTIONS:
     st.session_state["nexus_style"] = "Cinematográfico realista"
@@ -488,19 +488,39 @@ if "nexus_plan" in st.session_state:
                         continue
                     shortlist = diverse_candidate_shortlist(candidates, limit=3)
                     reviewed_candidates = []
+                    candidate_errors = []
                     for candidate_index, candidate in enumerate(shortlist, 1):
-                        candidate_path = download_file(
-                            candidate["url"],
-                            work / f"review_scene_{i:02d}_candidate_{candidate_index:02d}.mp4",
-                        )
-                        frame_paths = _extract_visual_review_frames(
-                            candidate_path, work, f"scene_{i:02d}_candidate_{candidate_index:02d}"
-                        )
-                        reviewed_candidates.append({
-                            "candidate": candidate,
-                            "path": candidate_path,
-                            "frame_paths": frame_paths,
+                        try:
+                            candidate_path = download_file(
+                                candidate["url"],
+                                work / f"review_scene_{i:02d}_candidate_{candidate_index:02d}.mp4",
+                            )
+                            frame_paths = _extract_visual_review_frames(
+                                candidate_path, work, f"scene_{i:02d}_candidate_{candidate_index:02d}"
+                            )
+                            reviewed_candidates.append({
+                                "candidate": candidate,
+                                "path": candidate_path,
+                                "frame_paths": frame_paths,
+                            })
+                        except Exception as candidate_error:
+                            candidate_errors.append(
+                                f"{candidate.get('source', 'Biblioteca')}: {candidate_error}"
+                            )
+                    if not reviewed_candidates:
+                        missing.append({
+                            "scene": i + 1,
+                            "query": primary_query,
+                            "fallback": fallback_query,
+                            "errors": source_errors + candidate_errors + [
+                                "Nenhum candidato pôde ser baixado e inspecionado."
+                            ],
                         })
+                        continue
+                    progress.progress(
+                        (i + 1) / (len(plan["scenes"]) + 2),
+                        text=f"IA avaliando a correspondência visual da cena {i + 1}/{len(plan['scenes'])}...",
+                    )
                     try:
                         from nexus.director import review_visual_candidates
                         visual_review = review_visual_candidates(scene, reviewed_candidates, secret)
