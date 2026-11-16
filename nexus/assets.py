@@ -3,7 +3,7 @@ from pathlib import Path
 
 def search_pexels_videos(query, api_key, per_page=15):
     response = requests.get(
-        "https://api.pexels.com/videos/search",
+        "https://api.pexels.com/v1/videos/search",
         headers={"Authorization": api_key},
         params={"query": query, "per_page": per_page, "orientation": "portrait"},
         timeout=45,
