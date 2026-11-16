@@ -20,7 +20,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y ffmpeg
-          python -m pip install requests edge-tts
+          python -m pip install requests edge-tts cryptography
       - name: Compile application modules
         run: python -m compileall -q app.py nexus
       - name: Run regression tests
