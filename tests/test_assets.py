@@ -1,28 +1,39 @@
 import unittest
-from unittest.mock import patch
+from unittest.mock import call, patch
 
 from nexus.assets import rank_video_candidates, search_video_sources
+
+
+def clip(url, title, description="", vertical=True, width=1080, height=1920):
+    return {
+        "url": url,
+        "title": title,
+        "description": description,
+        "vertical": vertical,
+        "width": width,
+        "height": height,
+    }
 
 
 class AssetRankingTests(unittest.TestCase):
     def test_scene_relevance_beats_resolution(self):
         candidates = [
-            {
-                "url": "https://example.test/unrelated.mp4",
-                "title": "Crowd beneath giant hand",
-                "description": "Large crowd at a concert",
-                "vertical": True,
-                "width": 1080,
-                "height": 1920,
-            },
-            {
-                "url": "https://example.test/relevant.mp4",
-                "title": "Person writing goals in notebook",
-                "description": "Close up of hand writing in a journal",
-                "vertical": False,
-                "width": 3840,
-                "height": 2160,
-            },
+            clip(
+                "https://example.test/unrelated.mp4",
+                "Crowd beneath giant hand",
+                "Large crowd at a concert",
+                vertical=True,
+                width=1080,
+                height=1920,
+            ),
+            clip(
+                "https://example.test/relevant.mp4",
+                "Person writing goals in notebook",
+                "Close up of hand writing in a journal",
+                vertical=False,
+                width=3840,
+                height=2160,
+            ),
         ]
 
         ranked = rank_video_candidates(candidates, "person writing goals in notebook")
@@ -30,24 +41,46 @@ class AssetRankingTests(unittest.TestCase):
         self.assertEqual(ranked[0]["url"], "https://example.test/relevant.mp4")
 
     @patch("nexus.assets.search_coverr_videos")
+    def test_unrelated_results_are_rejected_and_shorter_query_is_tried(self, search):
+        search.side_effect = [
+            [clip("https://example.test/unrelated.mp4", "Crowd beneath giant hand", "Concert crowd")],
+            [clip("https://example.test/relevant.mp4", "Writing goals in notebook", "Hand writing in journal")],
+        ]
+
+        ranked, errors = search_video_sources(
+            "person writing goals in notebook",
+            coverr_key="test-key",
+            relevance_query="person writing goals in notebook",
+        )
+
+        self.assertFalse(errors)
+        self.assertEqual(ranked[0]["url"], "https://example.test/relevant.mp4")
+        self.assertGreaterEqual(search.call_count, 2)
+
+    @patch("nexus.assets.search_coverr_videos")
+    def test_style_terms_do_not_replace_scene_semantics(self, search):
+        search.return_value = [
+            clip(
+                "https://example.test/relevant.mp4",
+                "Person writing goals in notebook",
+                "Close up of writing in a journal",
+            )
+        ]
+
+        ranked, errors = search_video_sources(
+            "person writing goals in notebook cinematic 35mm natural light",
+            coverr_key="test-key",
+            relevance_query="person writing goals in notebook",
+        )
+
+        self.assertFalse(errors)
+        self.assertEqual(ranked[0]["url"], "https://example.test/relevant.mp4")
+
+    @patch("nexus.assets.search_coverr_videos")
     def test_excludes_clips_already_used_in_previous_scenes(self, search):
         search.return_value = [
-            {
-                "url": "https://example.test/used.mp4",
-                "title": "Person writing goals in notebook",
-                "description": "Writing in a journal",
-                "vertical": True,
-                "width": 1080,
-                "height": 1920,
-            },
-            {
-                "url": "https://example.test/new.mp4",
-                "title": "Writing goals in a notebook close up",
-                "description": "Hand writing in journal",
-                "vertical": True,
-                "width": 1080,
-                "height": 1920,
-            },
+            clip("https://example.test/used.mp4", "Person writing goals in notebook"),
+            clip("https://example.test/new.mp4", "Writing goals in a notebook close up", "Hand writing in journal"),
         ]
 
         ranked, errors = search_video_sources(
@@ -58,6 +91,20 @@ class AssetRankingTests(unittest.TestCase):
 
         self.assertFalse(errors)
         self.assertEqual([item["url"] for item in ranked], ["https://example.test/new.mp4"])
+
+    @patch("nexus.assets.search_coverr_videos")
+    def test_all_unrelated_results_return_empty_instead_of_false_match(self, search):
+        search.return_value = [
+            clip("https://example.test/unrelated.mp4", "Crowd beneath giant hand", "Concert crowd")
+        ]
+
+        ranked, errors = search_video_sources(
+            "person writing goals in notebook",
+            coverr_key="test-key",
+        )
+
+        self.assertFalse(errors)
+        self.assertEqual(ranked, [])
 
     def test_empty_results_are_safe(self):
         self.assertEqual(rank_video_candidates([], "a scene query"), [])
