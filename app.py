@@ -133,7 +133,12 @@ if "nexus_plan" in st.session_state:
                         candidates, retry_errors = search_video_sources(scene["fallback_search_query"], coverr_key, pixabay_key)
                         source_errors.extend(retry_errors)
                     if not candidates:
-                        missing.append(i + 1)
+                        missing.append({
+                            "scene": i + 1,
+                            "query": scene.get("asset_search_query", ""),
+                            "fallback": scene.get("fallback_search_query", ""),
+                            "errors": source_errors,
+                        })
                         continue
                     chosen = candidates[0]
                     path = download_file(chosen["url"], work / f"scene_{i:02d}.mp4")
@@ -160,7 +165,19 @@ if "nexus_plan" in st.session_state:
                     })
                 if missing:
                     progress.empty()
-                    st.error(f"Não encontrei clipes para as cenas {missing}. Interrompi para evitar um vídeo incompleto.")
+                    scene_numbers = [item["scene"] for item in missing]
+                    st.error(f"Não encontrei clipes para as cenas {scene_numbers}. Interrompi para evitar um vídeo incompleto.")
+                    with st.expander("Detalhes das buscas sem resultado"):
+                        for item in missing:
+                            st.markdown(f"**Cena {item['scene']}**")
+                            st.caption("Busca principal: " + item["query"])
+                            if item["fallback"]:
+                                st.caption("Busca alternativa: " + item["fallback"])
+                            if item["errors"]:
+                                for error in item["errors"]:
+                                    st.caption(error)
+                            else:
+                                st.caption("A API respondeu, mas não encontrou resultados para as consultas tentadas.")
                 else:
                     progress.progress((len(plan["scenes"]) + 1) / (len(plan["scenes"]) + 2), text="Gerando narração, legendas e montagem...")
                     narration = " ".join(scene["voiceover"] for scene in plan["scenes"])
