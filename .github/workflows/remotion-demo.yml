@@ -58,12 +58,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ffmpeg
 
-      - name: Create synthetic video, narration and subtitles for integration test
+      - name: Create synthetic video and narration for integration test
         run: |
           mkdir -p remotion/public/ci-input
           ffmpeg -y -f lavfi -i "testsrc2=size=720x1280:rate=30" -t 4 -an -c:v libx264 -pix_fmt yuv420p remotion/public/ci-input/sample.mp4
           ffmpeg -y -f lavfi -i "sine=frequency=440:duration=4" -c:a pcm_s16le remotion/public/ci-input/narration.wav
-          printf "1\\n00:00:00,000 --> 00:00:04,000\\nTeste de legenda integrada.\\n" > remotion/public/ci-input/captions.srt
 
       - name: Build manifest through the real Python adapter
         run: python scripts/build_remotion_ci_manifest.py
