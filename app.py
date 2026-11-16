@@ -3,7 +3,7 @@ from pathlib import Path
 import requests
 import streamlit as st
 from nexus.director import create_storyboard, validate_storyboard
-from nexus.assets import search_video_sources, search_coverr_videos, download_file, diverse_candidate_shortlist
+from nexus.assets import search_video_sources, download_file, diverse_candidate_shortlist
 from nexus.audio import make_voice
 from nexus.render import render_video
 
@@ -33,15 +33,17 @@ def _extract_visual_review_frames(video_path, output_dir, prefix):
         raise RuntimeError("Não foi possível extrair quadros do clipe candidato.")
     return frames
 
-def _search_stock_compatible(query, coverr_key="", pixabay_key="", pexels_key="", per_page=20, exclude_urls=None, relevance_query=None, min_relevance=1.5, style_query=""):
+def _search_stock_compatible(query, coverr_key="", pixabay_key="", pexels_key="", per_page=20, exclude_urls=None, relevance_query=None, min_relevance=1.5, style_query="", wikimedia_enabled=True):
     """Search all configured libraries while tolerating an older deployed assets module."""
     try:
         search_parameters = inspect.signature(search_video_sources).parameters
         supports_pexels = "pexels_key" in search_parameters
         supports_style_query = "style_query" in search_parameters
+        supports_wikimedia = "wikimedia_enabled" in search_parameters
     except (TypeError, ValueError):
         supports_pexels = False
         supports_style_query = False
+        supports_wikimedia = False
 
     if supports_pexels:
         return search_video_sources(
@@ -49,6 +51,7 @@ def _search_stock_compatible(query, coverr_key="", pixabay_key="", pexels_key=""
             per_page=per_page, exclude_urls=exclude_urls,
             relevance_query=relevance_query, min_relevance=min_relevance,
             **({"style_query": style_query} if supports_style_query else {}),
+            **({"wikimedia_enabled": wikimedia_enabled} if supports_wikimedia else {}),
         )
 
     # Compatibility path for a Streamlit worker that still has the previous
@@ -223,7 +226,7 @@ div[data-testid="stTextArea"] textarea,div[data-testid="stSelectbox"] div[data-b
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="nexus-hero"><div class="nexus-brand">NEXUS VIDEO STUDIO</div><div class="nexus-tagline">Transforme seu roteiro em vídeo</div></div>', unsafe_allow_html=True)
-st.caption("Versão: NEXUS-2026.11.16-runtime-review-auth-diagnostics-1")
+st.caption("Versão: NEXUS-2026.11.16-wikimedia-provider-1")
 
 if "nexus_style" not in st.session_state or st.session_state["nexus_style"] not in STYLE_OPTIONS:
     st.session_state["nexus_style"] = "Cinematográfico realista"
@@ -266,17 +269,17 @@ with settings_col2:
     voice = st.selectbox("Voz da narração", ["pt-BR-AntonioNeural", "pt-BR-FranciscaNeural", "pt-BR-ThalitaNeural"], format_func=lambda value: {"pt-BR-AntonioNeural":"Antônio · Masculina", "pt-BR-FranciscaNeural":"Francisca · Feminina", "pt-BR-ThalitaNeural":"Thalita · Feminina"}[value])
 
 with st.expander("Ferramentas avançadas · diagnóstico das bibliotecas de vídeo"):
-    st.caption("Testa autenticação, busca, download e leitura do MP4 em cada biblioteca que tiver chave configurada. As chaves nunca são exibidas.")
+    st.caption("Testa busca, licença, download e leitura do vídeo no Wikimedia Commons, Pixabay e Pexels. As chaves nunca são exibidas.")
     if st.button("Testar todas as bibliotecas configuradas", type="secondary"):
         providers = [
-            ("Coverr", secret("COVERR_API_KEY"), {"coverr_key": secret("COVERR_API_KEY")}),
+            ("Wikimedia Commons", "", {"wikimedia_enabled": True}),
             ("Pixabay", secret("PIXABAY_API_KEY"), {"pixabay_key": secret("PIXABAY_API_KEY")}),
             ("Pexels", secret("PEXELS_API_KEY"), {"pexels_key": secret("PEXELS_API_KEY")}),
         ]
         tested = 0
         with tempfile.TemporaryDirectory(prefix="nexus_library_diagnostics_") as temp_dir:
             for provider_name, api_key, source_args in providers:
-                if not api_key:
+                if not api_key and provider_name != "Wikimedia Commons":
                     st.warning(f"{provider_name}: chave não configurada nos Secrets.")
                     continue
                 tested += 1
@@ -434,12 +437,12 @@ if "nexus_plan" in st.session_state:
             st.divider()
 
     if st.button("Produzir vídeo completo", type="primary", use_container_width=True):
-        coverr_key = secret("COVERR_API_KEY")
+        coverr_key = ""
         pixabay_key = secret("PIXABAY_API_KEY")
         pexels_key = secret("PEXELS_API_KEY")
         configured_libraries = [
             name for name, key in (
-                ("Coverr", coverr_key), ("Pixabay", pixabay_key), ("Pexels", pexels_key)
+                ("Wikimedia Commons", True), ("Pixabay", pixabay_key), ("Pexels", pexels_key)
             ) if key
         ]
         if len(configured_libraries) == 1:
@@ -450,8 +453,8 @@ if "nexus_plan" in st.session_state:
             )
         if st.session_state.get("nexus_errors"):
             st.error("O storyboard precisa ser corrigido antes da produção.")
-        elif not coverr_key and not pixabay_key and not pexels_key:
-            st.error("Conecte pelo menos uma fonte: COVERR_API_KEY, PIXABAY_API_KEY ou PEXELS_API_KEY.")
+        elif not pixabay_key and not pexels_key:
+            st.error("Configure PIXABAY_API_KEY ou PEXELS_API_KEY. Wikimedia Commons funciona sem chave, mas não substitui essas fontes de stock.")
         else:
             st.session_state.pop("nexus_rendered_video", None)
             st.session_state.pop("nexus_rendered_info", None)
@@ -482,9 +485,10 @@ if "nexus_plan" in st.session_state:
                     if not candidates and fallback_query:
                         candidates, retry_errors = _search_stock_compatible(
                             fallback_query,
-                            coverr_key,
+                            "",
                             pixabay_key,
                             pexels_key=pexels_key,
+                            wikimedia_enabled=True,
                             exclude_urls=used_asset_urls,
                             relevance_query=scene.get("fallback_search_query", scene["asset_search_query"]),
                             style_query=style_terms,
@@ -498,7 +502,7 @@ if "nexus_plan" in st.session_state:
                             "style": style_terms,
                             "sources": [
                                 name for name, configured in (
-                                    ("Coverr", bool(coverr_key)),
+                                    ("Wikimedia Commons", True),
                                     ("Pixabay", bool(pixabay_key)),
                                     ("Pexels", bool(pexels_key)),
                                 ) if configured
@@ -589,6 +593,10 @@ if "nexus_plan" in st.session_state:
                         "source": chosen.get("source", "Stock"),
                         "author": chosen.get("author", ""),
                         "author_url": chosen.get("author_url", ""),
+                        "license": chosen.get("license", ""),
+                        "license_url": chosen.get("license_url", ""),
+                        "credit": chosen.get("credit", ""),
+                        "attribution_required": chosen.get("attribution_required", False),
                         "visual_review_confidence": visual_review.get("confidence", 0),
                         "visual_review_semantic_match": visual_review.get("semantic_match", 0),
                         "visual_review_style_match": visual_review.get("style_match", 0),
