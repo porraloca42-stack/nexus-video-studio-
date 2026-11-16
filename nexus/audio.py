@@ -6,6 +6,7 @@ reported clearly instead of silently changing the selected voice.
 import base64
 import json
 import re
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from urllib.parse import urljoin
 
@@ -138,7 +139,51 @@ def get_fish_voice(api_key, voice_id, *, session=None):
         "sample_audio": sample_audio,
         "sample_text": sample.get("text") or "",
         "visibility": item.get("visibility", "public"),
+        "licensed": bool(item.get("licensed", False)),
+        "source": str(item.get("source") or item.get("source_type") or item.get("model_source") or ""),
+        "tags": item.get("tags") or [],
+        "gender": item.get("gender") or item.get("voice_gender") or item.get("sex") or "",
         "task_count": int(item.get("task_count") or 0),
+    }
+
+
+def list_curated_voice_catalog(api_key, *, session=None, max_workers=8):
+    """Enrich the owner's fixed voice list with Fish metadata without losing supplied IDs."""
+    from .voice_catalog import curated_voice_entries, infer_voice_gender
+
+    entries = curated_voice_entries()
+    def load(entry):
+        base = {
+            **entry,
+            "title": f"Voz {entry['id'][:8]}",
+            "description": "",
+            "languages": [],
+            "tags": [],
+            "author": "",
+            "sample_audio": "",
+            "licensed": False,
+            "source": "",
+            "gender": "unknown",
+            "metadata_available": False,
+            "metadata_error": "",
+        }
+        try:
+            metadata = get_fish_voice(api_key, entry["id"], session=session)
+            base.update(metadata)
+            base["category"] = entry["category"]
+            base["gender"] = infer_voice_gender(metadata)
+            base["metadata_available"] = True
+        except Exception as exc:
+            # Keep the exact user-supplied ID selectable even if metadata is
+            # hidden, temporarily unavailable, or inaccessible to this API key.
+            base["metadata_error"] = str(exc)[:220]
+        return base
+
+    with ThreadPoolExecutor(max_workers=max(1, min(int(max_workers), 12))) as executor:
+        voices = list(executor.map(load, entries))
+    return {
+        category: [voice for voice in voices if voice["category"] == category]
+        for category in dict.fromkeys(entry["category"] for entry in entries)
     }
 
 
