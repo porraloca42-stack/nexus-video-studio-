@@ -223,6 +223,10 @@ def _is_human_narrator_voice(voice, gender):
     )
     if any(token in metadata for token in excluded):
         return False
+    if gender == "male" and "female" in metadata:
+        return False
+    if gender == "female" and any(term in metadata for term in ("male", "mascul")):
+        return False
     gender_terms = {
         "male": ("male", "mascul", "homem", "man"),
         "female": ("female", "feminin", "mulher", "woman"),
