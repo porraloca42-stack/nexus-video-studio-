@@ -221,10 +221,11 @@ def _is_human_narrator_voice(voice, gender):
         "brazilian", "brasileir", "pt-br", "portuguese (brazil)",
         "português do brasil", "portugues do brasil",
     )
-    if not any(token in metadata for token in brazilian_markers):
+    language_context = f"{metadata} {languages}"
+    if not any(token in language_context for token in brazilian_markers):
         return False
     european_markers = ("pt-pt", "european portuguese", "português europeu", "portugues europeu")
-    if any(token in metadata for token in european_markers):
+    if any(token in language_context for token in european_markers):
         return False
     metadata_words = re.findall(r"[a-záéíóúãõç]+", metadata)
     excluded = (
