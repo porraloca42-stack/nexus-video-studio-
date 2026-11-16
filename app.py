@@ -502,10 +502,10 @@ if "nexus_plan" in st.session_state:
                                 qa_video.write_bytes(video_bytes)
                                 frames = extract_scene_frames(qa_video, plan.get("scenes", []), Path(qa_dir) / "frames")
                                 reviews = review_scene_frames(frames, plan.get("scenes", []), visual_key)
-                            st.session_state["nexus_rendered_info"]["visual_reviews"] = reviews
+                            st.session_state["nexus_rendered_info"]["final_visual_audit"] = reviews
                             scored = [item["semantic_score"] for item in reviews]
                             average = round(sum(scored) / max(1, len(scored)), 1)
-                            st.session_state["nexus_rendered_info"]["visual_review_average"] = average
+                            st.session_state["nexus_rendered_info"]["final_visual_review_average"] = average
                             st.session_state["nexus_rendered_info"]["visual_review_status"] = (
                                 "needs_attention" if any(not item["matches_narration"] or item["semantic_score"] < 6 for item in reviews)
                                 else "reviewed"
