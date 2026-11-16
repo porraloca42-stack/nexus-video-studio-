@@ -1362,6 +1362,9 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - `.streamlit/config.toml` alinhado à paleta azul/ciano.
 - Alterações limitadas a `app.py` e `.streamlit/config.toml`; nenhuma lógica de storyboard, seleção de voz, pesquisa de bibliotecas, renderização ou exportação foi intencionalmente alterada.
 - PR #2 aberto em draft: https://github.com/porraloca42-stack/nexus-video-studio-/pull/2
-- Comparação Git: branch 2 commits à frente e 0 atrás da `main`; a versão oficial permanece intacta.
-- Validação atual: inspeção do diff confirma somente arquivos de apresentação/tema alterados. Checks CI no HEAD `ec4a8d3` ainda não apareceram; validação sintática, deploy Streamlit de teste e inspeção visual real desktop/mobile permanecem pendentes. Não declarar publicado, aprovado ou validado.
+- Comparação Git em 16/11/2026: branch 3 commits à frente e 0 atrás da `main`; a versão oficial permanece intacta.
+- CI no HEAD `3e9138cbc0fc58391bf320e4cbc582f8a771609f`: workflow `NEXUS regression tests` run #599, ID `43974674493`, concluído com `success`.
+- O diff contém apenas `app.py` (CSS/cabeçalho), `.streamlit/config.toml` (tema) e este registro. A CI passou, mas não substitui inspeção visual do Streamlit.
+- Deploy/preview Streamlit desta branch e inspeção visual real desktop/mobile continuam pendentes. Não declarar publicado ou aprovado.
+- Não integrar à `main` até obter preview visual verificável e aprovação do usuário.
 - Não integrar à `main` até obter preview visual verificável e aprovação do usuário.
