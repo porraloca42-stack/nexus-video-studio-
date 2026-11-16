@@ -276,15 +276,20 @@ if "nexus_plan" in st.session_state:
             work = Path(tempfile.mkdtemp(prefix="nexus_"))
             try:
                 media, missing = [], []
+                used_asset_urls = set()
                 progress = st.progress(0, text="Preparando cenas...")
                 for i, scene in enumerate(plan["scenes"]):
                     progress.progress((i + 1) / (len(plan["scenes"]) + 2), text=f"Buscando clipe para a cena {i + 1}/{len(plan['scenes'])}...")
                     style_terms = scene.get("style_search_terms", "")
                     primary_query = " ".join(part for part in [scene["asset_search_query"], style_terms] if part).strip()
                     fallback_query = " ".join(part for part in [scene.get("fallback_search_query", ""), style_terms] if part).strip()
-                    candidates, source_errors = search_video_sources(primary_query, coverr_key, pixabay_key)
+                    candidates, source_errors = search_video_sources(
+                        primary_query, coverr_key, pixabay_key, exclude_urls=used_asset_urls
+                    )
                     if not candidates and fallback_query:
-                        candidates, retry_errors = search_video_sources(fallback_query, coverr_key, pixabay_key)
+                        candidates, retry_errors = search_video_sources(
+                            fallback_query, coverr_key, pixabay_key, exclude_urls=used_asset_urls
+                        )
                         source_errors.extend(retry_errors)
                     if not candidates:
                         missing.append({
@@ -295,6 +300,7 @@ if "nexus_plan" in st.session_state:
                         })
                         continue
                     chosen = candidates[0]
+                    used_asset_urls.add(chosen["url"])
                     path = download_file(chosen["url"], work / f"scene_{i:02d}.mp4")
                     probe = subprocess.run(
                         ["ffprobe", "-v", "error", "-show_entries",
