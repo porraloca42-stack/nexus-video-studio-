@@ -39,7 +39,7 @@ class AudioSubtitleTests(unittest.TestCase):
                 )
 
             self.assertEqual(audio_path.read_bytes(), b"fake-mp3")
-            self.assertEqual(FakeCommunicate.last_rate, "-25%")
+            self.assertEqual(FakeCommunicate.last_rate, "+0%")
             content = subtitle_path.read_text(encoding="utf-8")
             self.assertIn("00:00:00,000 --> 00:00:01,000", content)
             self.assertIn("Olá mundo.", content)
