@@ -1010,7 +1010,7 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 ### Melhorias Remotion implementadas
 - `remotion/src/NexusVideo.tsx`: agora executa beats do Gemini e, quando não existem, deriva beats dos `motion_events`; cada beat aciona punch-in, micro-shake e acento gráfico. Movimento de câmera mais forte e variado, light sweep/atmosfera e transições crossfade/fade respeitando entrada/saída.
 - `nexus/remotion_renderer.py`: escala de câmera validada ampliada para 1.02–1.28, com defaults 1.04→1.22.
-- `nexus/director.py`: direção de câmera mais intensa, movimentos variados entre cenas e microeventos observáveis.
+- `nexus/director.py`: direção de câmera mais intensa, movimentos variados entre cenas e microeventos observáveis. A partir do commit `874ef82`, cada cena também recebe `video_motion_prompt` em inglês com ação física específica, duração de 2–5s e instruções para preservar a imagem-base.
 - GitHub Actions Remotion demo run #67 (`43888656099`), commit `a66be40`: sucesso. O manifesto foi criado pelo adaptador Python com uma imagem estática PNG e dois microeventos; Remotion renderizou 120 frames e FFprobe validou MP4 H.264 720×1280 + áudio AAC, 4,011s. Artefato `nexus-remotion-demos` publicado. Isso valida o novo caminho de movimento de câmera/beat na imagem estática, mas não movimento orgânico de personagens.
 - Importante: `motion_events` agora acionam câmera/acentos gráficos; isso não é parallax real nem image-to-video. Não afirmar que braços, rosto ou objetos se movem naturalmente sem gerar vídeo a partir da imagem.
 
@@ -1061,6 +1061,7 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - `.github/workflows/modal-deploy.yml`: workflow manual para implantar `modal_worker.py` depois que os dois secrets estiverem configurados.
 - `app.py`: rótulo e orientação do motor principal atualizados para Cloudflare + Modal I2V + Remotion; a interface lê a fonte visual real do relatório do worker.
 - `tests/test_modal_i2v.py`: testes simulados para prompts, lote, gravação de MP4 e rejeição de durações inválidas.
+- `docs/MODAL_SETUP.md`: passo a passo para criar tokens, guardá-los nos GitHub Actions Secrets, limitar gastos e implantar o worker. O primeiro teste recomendado é um único vídeo completo de 40–50s.
 - `tests/test_remote_render_job.py`: cenário de integração simulado atualizado para 10 cenas animadas antes do Remotion.
 - `.github/workflows/tests.yml`: compilação de sintaxe inclui `modal_worker.py`.
 
@@ -1075,15 +1076,15 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Implementado no GitHub main: integração Modal/LTX e fluxo worker → Modal → Remotion; workflows e testes simulados adicionados.
 - Implantado no Modal: NÃO. Ainda depende de configurar secrets e executar o workflow manual de deploy.
 - Credenciais: `MODAL_TOKEN_ID` e `MODAL_TOKEN_SECRET` ainda NÃO foram fornecidos/configurados no GitHub Actions. Não solicitar que sejam enviados no chat.
-- Teste automatizado: pendente no momento da atualização; consultar GitHub Actions para os runs gerados pelos commits desta integração. Os testes simulados não comprovam chamada real ao Modal.
+- Teste automatizado: aprovado nos GitHub Actions runs #459, #460, #461, #462, #463 e #464. O run #464 (commit `874ef82`) passou em compilação Python, suíte de regressão, typecheck Remotion e smoke test Commons. Isso valida sintaxe, adaptador simulado e compatibilidade da composição, mas não comprova chamada real ao Modal.
 - Teste real de GPU, qualidade image-to-video, duração vertical, custo e MP4 editorial: NÃO executado.
 - Nenhuma execução Modal/GPU foi disparada por esta integração durante a implementação; não houve consumo de créditos Modal nesta etapa.
+- Lacuna de consistência de personagem: as imagens-base Cloudflare continuam sendo geradas independentemente por texto; o NEXUS ainda não encaminha uma imagem de referência persistente do personagem entre keyframes. LTX pode preservar a identidade dentro de cada clipe a partir da imagem-base, mas não garante continuidade de Gabriel entre cenas com imagens-base diferentes. Validar e planejar referência persistente antes de afirmar consistência global do personagem.
 
 ### Próximas etapas obrigatórias
-1. Confirmar CI Python, testes de regressão e typecheck Remotion após os commits desta integração; corrigir falhas.
+1. CI Python, testes de regressão, typecheck Remotion e smoke test Commons aprovados até o run #464; continuar observando novos commits.
 2. Usuário cria token de acesso Modal e configura os dois valores como GitHub Actions Secrets `MODAL_TOKEN_ID` e `MODAL_TOKEN_SECRET`; nunca colar tokens no chat.
 3. Executar manualmente o workflow `Deploy NEXUS Modal video worker`; confirmar deploy e app `nexus-video-i2v`.
 4. Fazer um piloto controlado com uma única cena representativa (imagem/personagem e ação), verificar identidade, anatomia, movimento, saída 9:16 e latência/custo real.
 5. Após aprovação visual do piloto, produzir um MP4 editorial de 40–50s com todas as cenas animadas; inspecionar continuidade, movimento, sincronização, codecs e custo total.
 6. Atualizar este registro com números observados e só então definir limite operacional de cenas e orçamento mensal.
-
