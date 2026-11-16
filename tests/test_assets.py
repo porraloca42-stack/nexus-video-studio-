@@ -158,6 +158,7 @@ class AssetRankingTests(unittest.TestCase):
     def test_style_query_is_searched_separately_but_does_not_admit_style_only_results(self, search):
         search.side_effect = [
             [clip("https://example.test/semantic.mp4", "Person writing goals in notebook", "Writing in journal")],
+            [],
             [clip("https://example.test/anime-only.mp4", "Anime landscape", "Japanese animation scenery")],
         ]
         ranked, errors = search_video_sources(
@@ -169,6 +170,7 @@ class AssetRankingTests(unittest.TestCase):
         self.assertFalse(errors)
         self.assertEqual([item["url"] for item in ranked], ["https://example.test/semantic.mp4"])
         self.assertEqual(search.call_count, 3)
+        self.assertEqual(search.call_args_list[-1].args[0], "anime 2D animation")
 
     def test_empty_results_are_safe(self):
         self.assertEqual(rank_video_candidates([], "a scene query"), [])
