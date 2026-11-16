@@ -50,3 +50,33 @@ O painel avançado testa busca, download e leitura do vídeo. O resultado precis
 - **Wikimedia Commons ao vivo:** busca e download de um vídeo licenciado foram concluídos; FFprobe confirmou arquivo VP9 válido (1920×1080, 261,16 s, CC BY 3.0). Isso valida o fluxo técnico com o candidato testado, não a relevância editorial de todo resultado.
 - **Ainda pendente:** confirmação de deploy no Streamlit Cloud, teste ao vivo de Pixabay/Pexels/Gemini com os Secrets da aplicação e geração/inspeção de um MP4 completo no app publicado.
 - **Não declarar produção ponta a ponta validada** até concluir essas verificações no ambiente publicado.
+
+## Modo experimental: imagens originais + Remotion
+O NEXUS possui um modo opcional de produção com imagens originais por cena:
+- Gemini inclui `image_prompt` em cada cena, com direção vertical 9:16 e estilo global.
+- Cloudflare Workers AI gera imagens com `@cf/black-forest-labs/flux-2-klein-4b`, resolução nativa 512×910 e 4 passos fixos.
+- Edge TTS gera a narração/legendas no worker; Remotion compõe movimento de câmera, texto, áudio e vídeo H.264 720×1280.
+- GitHub Actions atua como worker isolado. O MP4 volta ao Streamlit pelo artefato da execução.
+- FFmpeg continua como pipeline padrão/fallback; o novo modo só é ativado pelo seletor de motor visual.
+
+### Secrets necessários para ativação
+No GitHub → Settings → Secrets and variables → Actions:
+- `CLOUDFLARE_ACCOUNT_ID`
+- `CLOUDFLARE_API_TOKEN` com permissão Account → Workers AI → Read.
+
+No Streamlit → Manage app → Settings → Secrets:
+- `GITHUB_ACTIONS_TOKEN`: fine-grained token do repositório com Actions Read/Write e Contents Read.
+- `CLOUDFLARE_API_TOKEN`: o mesmo token Cloudflare, usado para gerar imagens no worker e derivar a chave de criptografia dos dados privados.
+
+O conteúdo do storyboard é criptografado antes do workflow_dispatch; o MP4 e o relatório também são criptografados antes do upload. O artefato público contém somente arquivos cifrados. Não gravar tokens no repositório, código, logs ou mensagens.
+
+### Custo e limite de imagens
+A franquia Workers AI Free é de 10.000 Neurons por dia, com reinício às 00:00 UTC. FLUX.2 Klein 4B custa 26,05 Neurons por tile de saída 512×512; uma imagem 512×910 usa aproximadamente dois tiles (52,1 Neurons), o que sugere cerca de 191 imagens/dia como teto teórico. O valor real pode variar por contabilização, falhas e uso de outros modelos. Não é uma cota garantida.
+Fontes oficiais: [FLUX.2 Klein 4B](https://developers.cloudflare.com/workers-ai/models/flux-2-klein-4b/), [preços Workers AI](https://developers.cloudflare.com/workers-ai/platform/pricing/), [changelog e parâmetros multipart](https://developers.cloudflare.com/changelog/post/2026-01-15-flux-2-klein-4b-workers-ai/).
+
+### Estado
+- Implementado no GitHub: adaptador Cloudflare, prompts de imagem por cena, manifesto Remotion com movimento por cena, worker GitHub Actions, envio/recuperação de artefato e criptografia do conteúdo.
+- CI: 53 testes passaram no run #271 (incluindo Cloudflare, Remotion, criptografia e regressão FFmpeg). O typecheck Remotion também passou.
+- Pendente: concluir render integrado com clipe+áudio no GitHub Actions; configurar Secrets; realizar geração real no Workers AI; validar MP4 de produção no Streamlit.
+- O novo modo não está validado em produção e não substituiu o motor FFmpeg.
+
