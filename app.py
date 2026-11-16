@@ -103,10 +103,14 @@ st.markdown("""
 .nexus-preview-title {font-weight:750;margin-bottom:4px;}
 .nexus-preview-copy {font-size:.82rem;color:#b8c0cb;line-height:1.4;}
 .nexus-card-label {font-size:.82rem;font-weight:700;margin:.1rem 0 .4rem;color:#e6e9ef;}
-/* Compact two-column cards only inside the style gallery; do not widen the rest of the mobile page. */
-div.st-key-nexus-style-gallery div[data-testid="stHorizontalBlock"] {flex-wrap:nowrap !important; gap:.45rem !important;}
-div.st-key-nexus-style-gallery div[data-testid="column"] {min-width:0 !important; width:50% !important; flex:1 1 50% !important;}
-div.st-key-nexus-style-gallery div[data-testid="stButton"] button {white-space:normal !important; overflow-wrap:anywhere; font-size:.76rem; line-height:1.15; padding:.3rem .25rem; min-height:2.1rem;}
+/* Keep the style gallery inside the viewport; constrain columns without changing the page width. */
+div.st-key-nexus-style-gallery {display:block !important; width:100% !important; max-width:100% !important; min-width:0 !important; overflow-x:clip !important; box-sizing:border-box !important;}
+div.st-key-nexus-style-gallery div[data-testid="stHorizontalBlock"] {display:flex !important; flex-wrap:nowrap !important; width:100% !important; max-width:100% !important; min-width:0 !important; gap:.45rem !important; overflow-x:clip !important; box-sizing:border-box !important;}
+div.st-key-nexus-style-gallery div[data-testid="column"] {flex:0 0 calc(50% - .25rem) !important; width:calc(50% - .25rem) !important; max-width:calc(50% - .25rem) !important; min-width:0 !important; box-sizing:border-box !important; overflow:hidden !important;}
+div.st-key-nexus-style-gallery div[data-testid="column"] > div {width:100% !important; max-width:100% !important; min-width:0 !important; box-sizing:border-box !important;}
+div.st-key-nexus-style-gallery div[data-testid="stImage"], div.st-key-nexus-style-gallery img {max-width:100% !important; height:auto !important;}
+div.st-key-nexus-style-gallery div[data-testid="stButton"] {width:100% !important; max-width:100% !important; min-width:0 !important;}
+div.st-key-nexus-style-gallery div[data-testid="stButton"] button {width:100% !important; max-width:100% !important; min-width:0 !important; white-space:normal !important; overflow-wrap:anywhere; font-size:.76rem; line-height:1.15; padding:.3rem .25rem; min-height:2.1rem; box-sizing:border-box !important;}
 
 div[data-testid="stButton"] button {border-radius:12px;min-height:2.65rem;border:1px solid rgba(210,190,155,.24);box-shadow:0 3px 10px rgba(0,0,0,.16);}
 div[data-testid="stButton"] button[kind="primary"] {border-color:rgba(222,190,132,.7);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 5px 15px rgba(194,157,94,.2);font-weight:750;}
