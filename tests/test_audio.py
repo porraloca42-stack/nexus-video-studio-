@@ -112,7 +112,7 @@ class AudioOutputTests(unittest.TestCase):
         })
         first_voice = catalog["CapCut"][0]
         self.assertEqual(first_voice["id"], "288c050d6afc4a088d085847f941c819")
-        self.assertEqual(first_voice["title"], "Narradora PT")
+        self.assertEqual(first_voice["title"], "Brazilian Female Narrator")
         self.assertEqual(first_voice["gender"], "female")
         self.assertTrue(first_voice["metadata_available"])
         self.assertEqual(len(session.calls), 40)
