@@ -395,3 +395,12 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - A execução seguinte detectou um fixture incompleto no teste de estilo: a função faz duas variantes de consulta de cena antes da consulta de estilo. Fixture corrigido no commit `c7ea142`, com três respostas simuladas na ordem real.
 - CI run #155 (43825816807) estava em execução no momento deste registro; resultado ainda não confirmado.
 - Correção de produção permanece no build `NEXUS-2026.11.16-narration-first-selection-2`. Não declarar validado até CI verde e teste real.
+
+
+### CI verde: recuperação de candidatos e prioridade semântica — 16/11/2026
+- GitHub Actions run #155 (43825816807), commit `c7ea142`: concluído com sucesso.
+- Job `unit-tests`: 31 testes executados em 2,114s; resultado `OK`. Inclui testes de passagem de candidatos da consulta de cena para revisão por quadros e bloqueio de resultados exclusivamente estéticos sem evidência semântica.
+- Código de recuperação de candidatos e testes está validado pelo CI.
+- Build `NEXUS-2026.11.16-narration-first-selection-2`.
+- A atualização documental mais recente (run #156) ainda estava na fila no momento deste registro.
+- Estado operacional: código e testes validados; implantação Streamlit não confirmada; produção e validação de novo MP4 pendentes. O usuário deve atualizar/reabrir o app após o deploy automático do GitHub e confirmar o build visível antes da nova produção.
