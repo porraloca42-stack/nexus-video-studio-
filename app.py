@@ -806,8 +806,8 @@ if "nexus_plan" in st.session_state:
                         narration = " ".join(scene["voiceover"] for scene in plan["scenes"])
                         audio, actual_tts_provider = make_voice(
                             narration, voice, audio,
-                            fish_api_key=secret("FISH_API_KEY"),
-                            fish_voice_id=secret("FISH_VOICE_ID"),
+                            fish_api_key=fish_api_key,
+                            fish_voice_id=voice,
                             return_provider=True,
                         )
                         st.caption(f"Narração gerada por: {actual_tts_provider}")
