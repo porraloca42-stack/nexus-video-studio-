@@ -144,4 +144,9 @@ def validate_storyboard(plan, requested_duration=None):
             errors.append(f"Cena {index}: justificativa semântica superficial.")
         if len(scene.get("motion_events", [])) < 2:
             errors.append(f"Cena {index}: faltam microeventos.")
+    if requested_duration:
+        if abs(total - float(requested_duration)) > 0.75:
+            errors.append(f"A soma das cenas é {total:.1f}s; a duração solicitada é {requested_duration}s.")
+        if any(float(scene.get("duration_seconds", 0) or 0) > 5.0 for scene in scenes):
+            errors.append("Há cenas acima de 5 segundos. Divida a ação em mais clipes específicos.")
     return errors
