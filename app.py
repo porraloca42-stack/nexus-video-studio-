@@ -361,71 +361,78 @@ with col_preview:
         if "nexus_fish_voice_name" not in st.session_state:
             st.session_state["nexus_fish_voice_name"] = ""
 
-        if "nexus_fish_voice_name" not in st.session_state:
-            st.session_state["nexus_fish_voice_name"] = ""
-
         if not fish_api_key:
             st.warning("Configure FISH_API_KEY nos Secrets do Streamlit para carregar as vozes.")
         else:
             selected_name = st.session_state.get("nexus_fish_voice_name") or "Nenhuma voz selecionada"
             st.markdown("**NARRAÇÃO**")
             st.text(selected_name)
-            st.caption("Fish Audio · vozes profissionais de narração em português")
+            st.caption("40 modelos selecionados manualmente · IDs preservados por categoria")
             with st.expander("🎙️ Escolher voz", expanded=False):
-                st.caption("Seleção enxuta de vozes humanas para narração. Personagens, memes, anime e imitações de figuras públicas são excluídos.")
-                catalog_key = "fish_professional_narrators_v1"
+                st.caption("As categorias seguem sua lista. A separação masculino/feminino é feita somente quando os metadados identificam o gênero; os demais ficam em Não identificado.")
+                catalog_key = "nexus_curated_voice_catalog_v1"
                 if catalog_key not in st.session_state:
                     try:
-                        with st.spinner("Carregando vozes profissionais masculinas e femininas..."):
-                            st.session_state[catalog_key] = fish_audio.list_fish_professional_narrators(
-                                fish_api_key, per_gender=25
+                        with st.spinner("Consultando os metadados das 40 vozes selecionadas..."):
+                            st.session_state[catalog_key] = fish_audio.list_curated_voice_catalog(
+                                fish_api_key, max_workers=8
                             )
                     except Exception as catalog_error:
                         st.session_state[catalog_key] = {"error": str(catalog_error)}
                 narrator_catalog = st.session_state[catalog_key]
                 if isinstance(narrator_catalog, dict) and narrator_catalog.get("error"):
-                    st.error(f"Não foi possível carregar as vozes Fish Audio: {narrator_catalog['error']}")
-                    if st.button("Tentar novamente", key="retry_professional_voices"):
+                    st.error(f"Não foi possível carregar o catálogo: {narrator_catalog['error']}")
+                    if st.button("Tentar novamente", key="retry_curated_voices"):
                         st.session_state.pop(catalog_key, None)
                         st.rerun()
                 else:
-                    for gender, label in (("male", "Vozes masculinas"), ("female", "Vozes femininas")):
-                        voices = narrator_catalog.get(gender, [])
-                        with st.expander(f"{label} · {len(voices)} vozes", expanded=(gender == "male")):
-                            if not voices:
-                                st.info("A Fish Audio não retornou vozes compatíveis com os filtros nesta categoria.")
-                            for voice_option in voices:
-                                voice_col, sample_col = st.columns([1.1, 1.5], vertical_alignment="center")
-                                with voice_col:
-                                    is_selected = voice_option["id"] == st.session_state.get("nexus_fish_voice_id", "")
-                                    st.markdown(f"**{voice_option['title']}**")
-                                    details = []
-                                    source_label = str(voice_option.get("source") or "").casefold()
-                                    if "pvc" in source_label:
-                                        details.append("Professional Voice Clone")
-                                    if voice_option.get("licensed"):
-                                        details.append("Licenciada pela Fish Audio")
-                                    if voice_option.get("author"):
-                                        details.append(voice_option["author"])
-                                    if details:
-                                        st.caption(" · ".join(details))
-                                    if voice_option.get("description"):
-                                        st.caption(voice_option["description"][:150])
-                                    if st.button(
-                                        "Selecionada" if is_selected else "Usar esta voz",
-                                        key=f"fish_pick_{voice_option['id']}",
-                                        use_container_width=True,
-                                        type="primary" if is_selected else "secondary",
-                                    ):
-                                        st.session_state["nexus_fish_voice_id"] = voice_option["id"]
-                                        st.session_state["nexus_fish_voice_name"] = voice_option["title"]
-                                        st.rerun()
-                                with sample_col:
-                                    if voice_option.get("sample_audio"):
-                                        st.audio(voice_option["sample_audio"], format="audio/mp3")
-                                    else:
-                                        st.caption("Amostra não publicada pela Fish Audio.");
-
+                    gender_groups = (
+                        ("male", "Masculinas"),
+                        ("female", "Femininas"),
+                        ("unknown", "Gênero não identificado"),
+                    )
+                    for category in ("CapCut", "ElevenLabs", "Licenciadas Fish"):
+                        category_voices = narrator_catalog.get(category, [])
+                        with st.expander(f"{category} · {len(category_voices)} modelos", expanded=False):
+                            for gender, gender_label in gender_groups:
+                                voices = [item for item in category_voices if item.get("gender") == gender]
+                                with st.expander(f"{gender_label} · {len(voices)}", expanded=(gender == "male" and bool(voices))):
+                                    if not voices:
+                                        st.caption("Nenhuma voz identificada nesta divisão.")
+                                    for voice_option in voices:
+                                        voice_col, sample_col = st.columns([1.1, 1.5], vertical_alignment="center")
+                                        with voice_col:
+                                            is_selected = voice_option["id"] == st.session_state.get("nexus_fish_voice_id", "")
+                                            st.markdown(f"**{voice_option['title']}**")
+                                            st.caption(f"ID: {voice_option['id']}")
+                                            details = []
+                                            source_label = str(voice_option.get("source") or "").casefold()
+                                            if "pvc" in source_label:
+                                                details.append("Professional Voice Clone")
+                                            if voice_option.get("licensed"):
+                                                details.append("Licenciada pela Fish Audio")
+                                            if voice_option.get("author"):
+                                                details.append(voice_option["author"])
+                                            if details:
+                                                st.caption(" · ".join(details))
+                                            if voice_option.get("description"):
+                                                st.caption(voice_option["description"][:150])
+                                            if not voice_option.get("metadata_available"):
+                                                st.caption("Metadados indisponíveis; ID mantido conforme sua lista.")
+                                            if st.button(
+                                                "Selecionada" if is_selected else "Usar esta voz",
+                                                key=f"curated_voice_pick_{voice_option['id']}",
+                                                use_container_width=True,
+                                                type="primary" if is_selected else "secondary",
+                                            ):
+                                                st.session_state["nexus_fish_voice_id"] = voice_option["id"]
+                                                st.session_state["nexus_fish_voice_name"] = f"{category} · {voice_option['title']}"
+                                                st.rerun()
+                                        with sample_col:
+                                            if voice_option.get("sample_audio"):
+                                                st.audio(voice_option["sample_audio"], format="audio/mp3")
+                                            else:
+                                                st.caption("Amostra não publicada ou indisponível.")
         voice = st.session_state.get("nexus_fish_voice_id", "")
 
 if st.button("Planejar vídeo", type="primary", use_container_width=True):
