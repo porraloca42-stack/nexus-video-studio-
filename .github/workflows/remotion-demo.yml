@@ -35,6 +35,9 @@ jobs:
         working-directory: remotion
         run: npm run typecheck
 
+      - name: Test Python image and Remotion adapters
+        run: python -m pytest -q tests/test_cloudflare_images.py tests/test_remotion_renderer.py
+
       - name: Render 50-second vertical demo
         working-directory: remotion
         run: npm run render:demo
