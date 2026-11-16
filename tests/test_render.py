@@ -31,7 +31,7 @@ class RenderIntegrationTests(unittest.TestCase):
             "-t", "2.9", "-c:a", "libmp3lame", str(self.audio)
         ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         self.subtitles.write_text(
-            "1\\n00:00:00,000 --> 00:00:01,500\\nNEXUS render test\\n",
+            "1\n00:00:00,000 --> 00:00:01,500\nNEXUS render test\n",
             encoding="utf-8"
         )
         self.media = [
