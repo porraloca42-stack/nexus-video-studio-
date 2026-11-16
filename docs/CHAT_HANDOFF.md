@@ -120,3 +120,11 @@ O usuário ficou frustrado com orientações longas/repetitivas e com uma previs
 - A regra permanente acima foi adicionada também ao `NEXUS_MASTER_STATE.md`.
 - Estado da execução Modal permanece conforme última evidência: run #1, job `deploy`, em andamento aos 30m39s na captura enviada. Não há evidência nova de conclusão nesta atualização.
 - Nenhum deploy foi reiniciado, cancelado ou alterado nesta etapa; apenas documentação foi atualizada.
+
+## Pesquisa técnica adicionada — tamanho da revisão LTX pinada (16/11/2026)
+- Usuário relatou que o deploy chegou a aproximadamente 37 minutos.
+- Consulta à revisão exata fixada em `modal_worker.py` (`a6d59ee37c13c58261aa79027d3e41cd41960925`) no Hugging Face: snapshot listado com aproximadamente **43,8 GB**; diretório `transformer` listado com **7,69 GB**.
+- Não confundir com 254 GB da branch atual do repositório, que inclui diversos checkpoints/versões.
+- Isso explica por que uma primeira preparação pode demorar bastante, mas não comprova que o job esteja baixando os pesos neste momento. Precisamos dos logs para saber a etapa atual.
+- Fontes: https://huggingface.co/Lightricks/LTX-Video/tree/a6d59ee37c13c58261aa79027d3e41cd41960925 e https://huggingface.co/Lightricks/LTX-Video/tree/a6d59ee37c13c58261aa79027d3e41cd41960925/transformer
+- Nenhum deploy foi cancelado, reiniciado ou alterado nesta pesquisa.
