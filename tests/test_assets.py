@@ -60,7 +60,7 @@ class AssetRankingTests(unittest.TestCase):
         self.assertEqual(results[0]["license"], "CC BY 4.0")
         self.assertEqual(results[0]["author"], "Jane Creator")
         self.assertTrue(results[0]["attribution_required"])
-        self.assertEqual(get.call_args.args[0], "filetype:video ocean waves")
+        self.assertEqual(get.call_args.kwargs["params"]["gsrsearch"], "filetype:video ocean waves")
 
     @patch("nexus.assets.search_pixabay_videos")
     @patch("nexus.assets.search_wikimedia_videos")
@@ -86,7 +86,7 @@ class AssetRankingTests(unittest.TestCase):
             wikimedia_enabled=True,
         )
         searched_queries = [
-            call_args.kwargs["params"]["gsrsearch"]
+            call_args.args[0]
             for call_args in search.call_args_list
         ]
         self.assertIn("person writing goals in notebook", searched_queries)
