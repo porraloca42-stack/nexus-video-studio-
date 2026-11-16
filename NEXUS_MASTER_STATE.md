@@ -86,9 +86,9 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 ## Biblioteca de narração — expansão e organização
 - Implementado no código: seletor de vozes dentro de gaveta recolhida por padrão; a tela principal mantém apenas o nome da voz ativa. A busca é enviada por formulário para evitar chamadas à API a cada tecla.
 - A biblioteca consulta o endpoint oficial `GET /model` da Fish Audio, com busca por nome, paginação, filtro de idioma português e ordenação por uso.
-- Catálogos separados: vozes com licença indicada pela Fish Audio, biblioteca pública (com aviso quando a licença individual não está confirmada) e vozes privadas da própria conta.
-- O campo `licensed` retornado pela Fish Audio é preservado; presença na biblioteca pública não será tratada como autorização comercial.
-- Vozes profissionais verificadas/clonagem profissional são uma modalidade específica no web app Fish Audio; o fluxo API de clonagem persistente comum não será apresentado como clone profissional verificado.
+- Catálogos separados: mais relevantes, mais usadas e vozes privadas da própria conta. A busca local percorre nome, descrição, autor, origem declarada, tags e idiomas dentro dos registros da página carregada.
+- Os metadados `licensed`, `source`, autor, descrição, idiomas e tags retornados são preservados e exibidos. A UI alerta para conferir a licença antes de uso comercial. Não usa parâmetros de API de licenciamento que não foram confirmados na documentação pública.
+- A gaveta oferece link oficial para Professional Voice Clone no web app Fish Audio; a documentação informa plano pago, ao menos 10 minutos de áudio limpo e verificação/consentimento do titular. Depois de liberada, a voz só aparece no catálogo do NEXUS se estiver disponível pela API e no idioma filtrado.
 - Commits: `d52db7d` (metadados/licença no catálogo), `2cabd4b` (gaveta e biblioteca), `fa27503` e `f5f9c73` (busca por formulário e rótulos remotos em texto simples), `3b1904c` (filtros por estilo vocal e timbre indicado).
 - Revisão estática no GitHub confirmou os novos parâmetros, as três categorias e a gaveta recolhida. Teste automatizado Python, implantação no Streamlit e teste visual no celular: ainda pendentes.
 
