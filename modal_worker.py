@@ -6,6 +6,7 @@ The GPU is loaded once per container and scaled to zero after 60 seconds idle.
 import io
 import random
 import time
+from pathlib import Path
 
 import modal
 
@@ -47,7 +48,7 @@ def frames_for_duration(seconds):
     return units * 8 + 1
 
 
-@app = modal.App(APP_NAME)
+app = modal.App(APP_NAME)
 
 
 @app.cls(
@@ -104,11 +105,13 @@ class Inference:
                 num_inference_steps=50,
             ).frames[0]
 
-            output = io.BytesIO()
-            self.diffusers.utils.export_to_video(frames, output, fps=FPS)
+            output_path = Path(f"/tmp/nexus-scene-{index:02d}-{seed}.mp4")
+            self.diffusers.utils.export_to_video(frames, str(output_path), fps=FPS)
+            video_bytes = output_path.read_bytes()
+            output_path.unlink(missing_ok=True)
             results.append({
                 "scene_index": index,
-                "video_bytes": output.getvalue(),
+                "video_bytes": video_bytes,
                 "frames": frame_count,
                 "fps": FPS,
                 "duration_seconds": frame_count / FPS,
