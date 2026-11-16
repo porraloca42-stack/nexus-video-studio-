@@ -167,17 +167,17 @@ def _request(prompt, secret_reader):
 
     for model in models[:5]:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
-        payload = {
-            "systemInstruction": {"parts": [{"text": SYSTEM}]},
-            "contents": [{"role": "user", "parts": [{"text": prompt}]}],
-            "generationConfig": {
-                "temperature": 0.25,
-                "responseMimeType": "application/json",
-                "maxOutputTokens": 8192,
-            },
-        }
-
+        request_prompt = prompt
         for attempt in range(2):
+            payload = {
+                "systemInstruction": {"parts": [{"text": SYSTEM}]},
+                "contents": [{"role": "user", "parts": [{"text": request_prompt}]}],
+                "generationConfig": {
+                    "temperature": 0.2 if attempt else 0.25,
+                    "responseMimeType": "application/json",
+                    "maxOutputTokens": 8192,
+                },
+            }
             try:
                 response = requests.post(
                     url, params={"key": key}, json=payload, timeout=240
@@ -285,16 +285,29 @@ def _request(prompt, secret_reader):
                     plan = None
 
             if not isinstance(plan, dict) or not isinstance(plan.get("scenes"), list):
-                if finish_reason == "MAX_TOKENS":
-                    raise RuntimeError(
-                        "O Gemini interrompeu a resposta por limite de saída antes "
-                        "de concluir o storyboard. Tente novamente."
+                # Gemini may stop with malformed JSON even when finishReason is
+                # STOP. Retry once with a compact JSON-only instruction, then
+                # fail over to another compatible model if needed.
+                if attempt == 0:
+                    request_prompt = (
+                        prompt
+                        + "\n\nRETRY OBRIGATÓRIO: a resposta anterior não formou JSON válido. "
+                        "Gere novamente o objeto COMPLETO desde a primeira chave até a última. "
+                        "Retorne apenas JSON, sem Markdown nem comentários. Preserve todos os "
+                        "campos e todas as cenas, mas mantenha descrições concisas: purpose até "
+                        "12 palavras; visual_action até 20; semantic_reason até 24; setting, "
+                        "subjects, shot_type e camera_motion curtos; buscas em inglês com até "
+                        "12 palavras cada; exatamente dois microeventos curtos por cena. "
+                        "Não interrompa strings nem deixe vírgulas finais."
                     )
-                preview = re.sub(r"\s+", " ", result)[:350]
-                raise RuntimeError(
-                    "O Gemini não retornou JSON completo e válido (motivo: "
-                    + str(finish_reason) + "). Trecho recebido: " + preview
+                    continue
+                last_status = "invalid_json"
+                last_detail = (
+                    f"{model}: JSON inválido após duas tentativas "
+                    f"(finishReason={finish_reason})."
                 )
+                attempted.append(f"{model} (JSON inválido)")
+                break
             plan["director_model"] = model
             plan["model_failover"] = attempted
             return plan
@@ -316,6 +329,13 @@ def _request(prompt, secret_reader):
         raise RuntimeError(
             "O modelo configurado não está disponível e os modelos alternativos também falharam. "
             f"Modelos tentados: {tried}. Configure GEMINI_MODEL = \"auto\" em Secrets."
+        )
+    if last_status == "invalid_json":
+        raise RuntimeError(
+            "O Gemini respondeu, mas não conseguiu entregar um JSON completo mesmo após "
+            "uma nova tentativa automática e o teste de outros modelos compatíveis. "
+            f"Modelos verificados: {tried}. Nenhum roteiro incompleto foi aceito. "
+            "Tente novamente em instantes; a duração escolhida foi preservada."
         )
     raise RuntimeError(
         "Não foi possível obter resposta do Gemini após tentar modelos alternativos. "
