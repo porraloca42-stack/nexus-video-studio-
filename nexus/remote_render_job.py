@@ -36,6 +36,20 @@ def main():
     if not narration:
         raise RuntimeError("Narração vazia.")
     audio_path, subtitles_path = make_voice(narration, voice, work / "narration.mp3")
+    expected_duration = sum(float(scene.get("duration_seconds") or scene.get("duration") or 0) for scene in scenes)
+    audio_probe = subprocess.run(
+        ["ffprobe", "-v", "error", "-show_entries", "format=duration",
+         "-of", "default=noprint_wrappers=1:nokey=1", str(audio_path)],
+        capture_output=True, text=True, timeout=60,
+    )
+    if audio_probe.returncode:
+        raise RuntimeError("Não foi possível medir a duração da narração no worker.")
+    narration_duration = float(audio_probe.stdout.strip())
+    if expected_duration <= 0 or abs(narration_duration - expected_duration) / expected_duration > 0.10:
+        raise RuntimeError(
+            f"A narração no worker ficou com {narration_duration:.1f}s para uma meta de "
+            f"{expected_duration:.1f}s. O vídeo não será renderizado com áudio cortado ou silêncio excessivo."
+        )
 
     output = work / "nexus_video.mp4"
     render_video_remotion(
@@ -65,7 +79,7 @@ def main():
     video = next((item for item in streams if item.get("codec_type") == "video"), None)
     audio = next((item for item in streams if item.get("codec_type") == "audio"), None)
     duration = float(metadata.get("format", {}).get("duration") or 0)
-    expected = sum(float(scene.get("duration_seconds") or scene.get("duration") or 0) for scene in scenes)
+    expected = expected_duration
     if not video or video.get("width") != 720 or video.get("height") != 1280:
         raise RuntimeError("MP4 não contém vídeo vertical 720x1280.")
     if not audio:
@@ -79,6 +93,7 @@ def main():
         "job_id": job_id,
         "output": str(output),
         "duration": duration,
+        "narration_duration": narration_duration,
         "width": video["width"],
         "height": video["height"],
         "audio_codec": audio.get("codec_name"),
