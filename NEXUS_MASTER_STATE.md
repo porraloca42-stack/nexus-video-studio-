@@ -712,3 +712,10 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Commit `3e8f726`: corrigida a regex para reconhecer `HH:MM:SS,mmm` e aplicar o fator de sincronização às legendas.
 - Novas execuções de regressão #43861160198 e demo Remotion #43861160323 disparadas; aguardando conclusão.
 - O ajuste TTS/legendas está implementado, mas só será considerado aprovado após os testes verdes. Render Cloudflare real pós-correção permanece pendente.
+
+
+### Aprovação da correção TTS/SRT e demo Remotion — 16/11/2026
+- Run #43861160198 (commit `3e8f726`): regressão completa aprovada; jobs `unit-tests` e `commons-live-smoke` concluídos com sucesso. Os testes de timestamps SRT passaram após correção da regex.
+- Run #43861160323 (commit `3e8f726`): demo Remotion aprovada. Type-check, adaptadores Python/Remotion, render via manifesto real, validação dos streams MP4 e duração e upload de artefatos concluídos com sucesso.
+- O passo de demo manual de 50 segundos foi skipped pelo workflow; não confundir com render real Cloudflare.
+- Estado: correção de sincronização TTS/SRT implementada e regressão aprovada; pipeline sintético Python + Remotion gera MP4 validado. Ainda falta executar novamente o workflow real Cloudflare a partir do Streamlit com o código atualizado, validar geração de imagens, áudio, render e recuperação do MP4.
