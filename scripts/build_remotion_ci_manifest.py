@@ -1,7 +1,12 @@
 from pathlib import Path
-from nexus.remotion_renderer import build_remotion_manifest
+import sys
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from nexus.remotion_renderer import build_remotion_manifest
+
 PUBLIC = ROOT / "remotion" / "public"
 INPUT = PUBLIC / "ci-input"
 INPUT.mkdir(parents=True, exist_ok=True)
