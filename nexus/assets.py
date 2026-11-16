@@ -279,7 +279,7 @@ def search_video_sources(
     errors = []
     excluded = set(exclude_urls or [])
     semantic_query = relevance_query if relevance_query is not None else query
-    variants = build_query_variants(query, max_variants=2)
+    variants = build_query_variants(query, max_variants=5)
     # Search the requested style independently so it cannot dilute the
     # narration query. The style query never qualifies an unrelated clip alone.
     style_variants = build_query_variants(style_query, max_variants=1)
