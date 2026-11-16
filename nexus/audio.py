@@ -217,6 +217,15 @@ def _is_human_narrator_voice(voice, gender):
     languages = " ".join(str(lang).casefold() for lang in (voice.get("languages") or []))
     if not any(token in languages for token in ("pt", "portugu")):
         return False
+    brazilian_markers = (
+        "brazilian", "brasileir", "pt-br", "portuguese (brazil)",
+        "português do brasil", "portugues do brasil",
+    )
+    if not any(token in metadata for token in brazilian_markers):
+        return False
+    european_markers = ("pt-pt", "european portuguese", "português europeu", "portugues europeu")
+    if any(token in metadata for token in european_markers):
+        return False
     metadata_words = re.findall(r"[a-záéíóúãõç]+", metadata)
     excluded = (
         "meme", "anime", "personagem", "character", "celebrity", "celebridade",
