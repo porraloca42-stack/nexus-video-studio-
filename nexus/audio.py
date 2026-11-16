@@ -29,16 +29,18 @@ def _fish_headers(api_key, model=None):
     return headers
 
 
-def list_fish_voices(api_key, *, page=1, page_size=6, title="", language="pt", self_only=False, session=None):
+def list_fish_voices(api_key, *, page=1, page_size=6, title="", tags=None, language="pt", self_only=False, sort_by="score", session=None):
     """List public Fish Audio TTS voices, including their published sample audio."""
     client = session or requests
     params = {
         "page_size": max(1, min(int(page_size), 100)),
         "page_number": max(1, int(page)),
-        "sort_by": "task_count",
+        "sort_by": sort_by,
     }
     if title and title.strip():
         params["title"] = title.strip()
+    for tag in (tags or []):
+        params.setdefault("tag", []).append(tag)
     if language:
         params["language"] = language
     if self_only:
@@ -89,6 +91,71 @@ def list_fish_voices(api_key, *, page=1, page_size=6, title="", language="pt", s
     if total is None and isinstance(data, dict):
         total = data.get("total")
     return {"total": int(total or len(voices)), "items": voices}
+
+
+def _is_natural_brazilian_voice(voice):
+    """Keep only human-style Brazilian Portuguese narration/conversation voices."""
+    title = (voice.get("title") or "").casefold()
+    description = (voice.get("description") or "").casefold()
+    tags = " ".join(voice.get("tags") or []).casefold()
+    metadata = " ".join((title, description, tags))
+    languages = " ".join(voice.get("languages") or []).casefold()
+    if not any(token in languages for token in ("pt", "portugu")):
+        return False
+    excluded = (
+        "meme", "anime", "personagem", "character", "lula", "bolsonaro",
+        "celebrity", "celebridade", "ator", "actress", "movie", "filme",
+        "game", "gaming", "jogo", "cartoon", "parody", "paródia",
+    )
+    if any(token in metadata for token in excluded):
+        return False
+    brazilian = (
+        "brazilian", "brasileir", "português do brasil", "portugues do brasil",
+        "portuguese (brazil)", "pt-br", "brasil",
+    )
+    if not any(token in metadata for token in brazilian):
+        return False
+    natural = (
+        "narration", "narrador", "narradora", "conversational", "conversacional",
+        "documentary", "documentário", "documentario", "professional", "profissional",
+        "neutral", "neutro", "natural", "calm", "calmo", "calma", "warm", "acolhedor",
+        "soft", "suave", "deep", "grave", "storytelling", "contação", "contacao",
+        "voice over", "locução", "locucao",
+    )
+    return any(token in metadata for token in natural)
+
+
+def list_fish_natural_brazilian_voices(api_key, *, session=None):
+    """Discover a curated set of natural Brazilian Portuguese public voices.
+
+    Uses Fish Audio's documented tag/title filters and merges duplicate models.
+    Character, meme and public-figure impersonation models are excluded.
+    """
+    client = session or requests
+    discovered = {}
+    # Tags are queried separately because the API does not document whether
+    # repeated tag filters are OR or AND.
+    for tag in ("narration", "conversational", "documentary", "professional", "neutral"):
+        result = list_fish_voices(
+            api_key, page=1, page_size=100, tags=[tag], language="pt",
+            sort_by="score", session=client,
+        )
+        for voice in result["items"]:
+            if voice.get("id"):
+                discovered[voice["id"]] = voice
+    # Fish Official's two standard voices whose published descriptions
+    # explicitly identify a Brazilian Portuguese accent.
+    for title in ("Letícia", "Ricardo"):
+        result = list_fish_voices(
+            api_key, page=1, page_size=10, title=title, language="pt",
+            sort_by="score", session=client,
+        )
+        for voice in result["items"]:
+            if voice.get("id"):
+                discovered[voice["id"]] = voice
+    voices = [voice for voice in discovered.values() if _is_natural_brazilian_voice(voice)]
+    voices.sort(key=lambda voice: (voice.get("task_count", 0)), reverse=True)
+    return {"total": len(voices), "items": voices}
 
 
 def generate_fish_preview(api_key, voice_id, *, text=FISH_VOICE_TEXT, session=None):
