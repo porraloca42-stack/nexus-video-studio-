@@ -25,7 +25,7 @@ Aplicativo pessoal em nuvem para transformar tema ou roteiro em vídeo vertical 
 - Interface: Streamlit (app.py).
 - Diretor: Gemini API (nexus/director.py), com failover entre modelos textuais compatíveis; produz roteiro, storyboard semântico e contrato `scene_direction` por cena.
 - Narração: Fish Audio S2.1 Pro Free como provedor obrigatório (nexus/audio.py); Edge TTS foi removido do pipeline e das dependências. A interface consulta a biblioteca Fish Audio, mostra amostras e permite selecionar voz pública ou voz própria. Não há trilha de legendas no pipeline.
-- Motor padrão selecionado na interface: Cloudflare Workers AI FLUX.2 Klein gera imagens originais por cena e o worker GitHub Actions usa Remotion (`nexus/remote_render_job.py`, `nexus/remotion_renderer.py`, `remotion/`) para compor o MP4 vertical. As imagens geradas são estáticas, não vídeo.
+- Motor padrão selecionado na interface: Cloudflare Workers AI FLUX.2 Klein gera keyframes por cena; Modal/LTX-Video I2V anima cada keyframe em clipe MP4; o worker GitHub Actions usa Remotion (`nexus/remote_render_job.py`, `nexus/modal_i2v.py`, `nexus/remotion_renderer.py`, `remotion/`) para compor o MP4 vertical. O pipeline integrado foi validado em smoke test de 2s em 16/11/2026; ainda falta validar produção de 40–50s com Fish Audio.
 - Modo alternativo: bibliotecas de vídeo com busca multi-fonte e renderização FFmpeg (`nexus/assets.py`, `nexus/render.py`); preservar o movimento nativo dos clipes.
 - O worker padrão depende dos secrets do Streamlit e do repositório GitHub; implantação do Streamlit e credenciais externas precisam ser verificadas separadamente.
 - Busca de mídia: Wikimedia Commons sem chave; Pixabay e Pexels somente quando suas chaves estiverem configuradas. Coverr não é considerado fonte ativa/validada.
@@ -39,7 +39,7 @@ Nunca armazenar valores de chaves neste arquivo, no GitHub ou em instruções do
 No Streamlit → Manage app → Settings → Secrets, o modo padrão requer:
 - `GITHUB_ACTIONS_TOKEN` — autoriza o dispatch e a leitura do workflow remoto.
 - `CLOUDFLARE_API_TOKEN` — protege o manifesto/MP4 em trânsito e é encaminhado cifrado para o worker.
-- `FISH_API_KEY` — ativa Fish Audio S2.1 Pro Free; sem ela o worker usa Edge TTS como fallback.
+- `FISH_API_KEY` — obrigatório para Fish Audio S2.1 Pro Free; não há fallback para Edge TTS. Sem a chave, a produção é interrompida.
 - `FISH_VOICE_ID` — opcional, se a conta exigir/usar uma voz específica.
 - `GEMINI_API_KEY` e `GEMINI_MODEL = "auto"` — direção e storyboard.
 No repositório GitHub → Settings → Secrets and variables → Actions:
@@ -1324,3 +1324,10 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Limitação explícita: smoke test usa áudio sintético de 440Hz e apenas uma cena/2s. Não valida Fish Audio, narrativa completa, storyboard multi-cena, sincronização de voz, legendas (não fazem parte do fluxo atual), nem MP4 de produção de 40–50s. Não declarar o produto finalizado ainda.
 - Estado atualizado: Cloudflare→Modal/LTX→Remotion está implementado, executado e validado em smoke test de 2s. Worker Modal H100 isolado também validado. Produção real de 40–50s com Fish Audio permanece pendente.
 - Próximo passo de finalização: executar validação de produção controlada com roteiro real de 40–50s e Fish Audio, revisar storyboard e cenas, medir duração/custo total, inspecionar o MP4 final. Preservar H100 até comparar custos e qualidade; não trocar GPU sem benchmark.
+
+
+## Correção de referência operacional — 16/11/2026
+- As descrições antigas que diziam que o motor padrão produzia apenas imagens estáticas e que Edge TTS seria fallback foram substituídas. A referência atual é Cloudflare FLUX.2 Klein → Modal/LTX-Video I2V → Remotion, com Fish Audio obrigatório e sem fallback robótico.
+- Smoke test integrado #2 validou a cadeia visual e muxagem de áudio sintético em 2s. Não confundir esse teste com a validação de uma produção editorial de 40–50s com narração Fish Audio.
+- O app aceita cenas de 2–5s; o adaptador Modal rejeita durações fora dessa faixa e processa todas as cenas num único batch. O worker de produção gera imagens, anima todas as cenas, sintetiza Fish Audio, ajusta áudio dentro de tolerância máxima de 15% e valida o MP4 final via FFprobe.
+- Próximo critério de liberação: um vídeo real de 40–50s, com voz Fish Audio selecionada, todas as cenas animadas e coerência audiovisual revisada. Registrar duração, custo, codecs, resolução e inspeção visual antes de declarar finalizado.
