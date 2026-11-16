@@ -95,7 +95,17 @@ class AudioOutputTests(unittest.TestCase):
         self.assertEqual(infer_voice_gender({"tags": ["male", "female"]}), "unknown")
 
     def test_curated_catalog_enriches_metadata_but_preserves_exact_supplied_ids(self):
-        session = FakeFishSession()
+        session = FakeFishSession(payload={
+            "_id": "metadata-model-id",
+            "type": "tts",
+            "state": "trained",
+            "visibility": "public",
+            "title": "Brazilian Female Narrator",
+            "description": "Natural Brazilian Portuguese narration",
+            "languages": ["pt-BR"],
+            "tags": ["female", "narration"],
+            "samples": [{"audio": "https://cdn.example.test/female.mp3"}],
+        })
         catalog = list_curated_voice_catalog("test-key", session=session, max_workers=4)
         self.assertEqual({key: len(value) for key, value in catalog.items()}, {
             "CapCut": 14, "ElevenLabs": 4, "Licenciadas Fish": 22,
