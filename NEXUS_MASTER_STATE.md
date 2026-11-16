@@ -282,3 +282,5 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - A correção SRT e os testes estão validados no CI.
 - Deploy/worker Streamlit ainda não verificado. Próxima confirmação simples na interface: build NEXUS-2026.11.16-srt-newline-1.
 - Primeiro MP4 real do usuário ainda pendente; não declarar pipeline de produção concluído.
+
+- Commit 221038e: identificador de build movido para logo abaixo do cabeçalho principal, visível sem abrir ferramentas avançadas. Isso simplifica a confirmação do deploy no celular.
