@@ -5,6 +5,7 @@ from pathlib import Path
 from nexus.audio import (
     FishAudioError,
     generate_fish_preview,
+    get_fish_voice,
     list_fish_voices,
     _is_natural_brazilian_voice,
     make_voice,
@@ -73,6 +74,32 @@ class AudioOutputTests(unittest.TestCase):
         self.assertEqual(session.calls[0][2]["params"]["page_number"], 2)
         self.assertEqual(session.calls[0][2]["params"]["language"], "pt")
         self.assertNotIn("self", session.calls[0][2]["params"])
+
+    def test_gets_one_curated_public_voice_by_stable_id(self):
+        session = FakeFishSession(payload={
+            "_id": "voice-ricardo",
+            "type": "tts",
+            "state": "trained",
+            "visibility": "public",
+            "title": "Ricardo",
+            "description": "Brazilian Portuguese male voice",
+            "languages": ["pt"],
+            "samples": [{"audio": "/sample/ricardo.mp3", "text": "Olá."}],
+            "author": {"nickname": "Fish Official"},
+        })
+        voice = get_fish_voice("test-key", "voice-ricardo", session=session)
+        self.assertEqual(voice["id"], "voice-ricardo")
+        self.assertEqual(voice["title"], "Ricardo")
+        self.assertEqual(voice["sample_audio"], "https://api.fish.audio/sample/ricardo.mp3")
+        self.assertEqual(session.calls[0][1][0], "https://api.fish.audio/model/voice-ricardo")
+
+    def test_get_fish_voice_rejects_private_models(self):
+        session = FakeFishSession(payload={
+            "_id": "private-voice", "type": "tts", "state": "trained",
+            "visibility": "private", "title": "Private",
+        })
+        with self.assertRaisesRegex(FishAudioError, "não está publicada"):
+            get_fish_voice("test-key", "private-voice", session=session)
 
     def test_lists_voice_tags_and_score_sort(self):
         session = FakeFishSession()
