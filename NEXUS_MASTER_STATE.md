@@ -1138,3 +1138,6 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Prévia: usa o áudio de amostra publicado pela Fish Audio quando disponível; se não houver amostra, exibe `▶ Ouvir` para gerar uma prévia curta sob demanda. A geração sob demanda consome uso da API. O player fica ao lado do seletor, sem expandir metadados.
 - Testes atualizados em `tests/test_audio.py` para verificar `pt-BR` nos payloads de prévia e narração.
 - Estado: alterações gravadas no GitHub main; leitura posterior confirmou os blocos alterados e o teste. CI automático por push e deploy do Streamlit ainda precisam ser observados; não declarar correção implantada/validada na interface até o usuário confirmar que o app recarregou sem erro.
+
+- Revisão final de leitura em `main` às 16:15 BRT confirmou: UI sem busca/filtros/paginação; chamada da lista sem `self_only`; player de prévia ao lado do selectbox; payloads TTS com `pt-BR`; asserts correspondentes nos testes. Último commit de UI: `567ba08`.
+- A verificação foi estática por leitura dos arquivos no GitHub. A suíte automatizada ainda depende do GitHub Actions; o comportamento visual e a integração real com Fish Audio ainda dependem do Streamlit publicado.
