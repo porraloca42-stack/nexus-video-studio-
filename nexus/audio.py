@@ -30,7 +30,7 @@ def _fish_headers(api_key, model=None):
     return headers
 
 
-def list_fish_voices(api_key, *, page=1, page_size=6, title="", tags=None, language="pt", self_only=False, sort_by="score", session=None):
+def list_fish_voices(api_key, *, page=1, page_size=6, title="", tags=None, language="pt", self_only=False, licensed_only=False, sort_by="score", session=None):
     """List public Fish Audio TTS voices, including their published sample audio."""
     client = session or requests
     params = {
@@ -46,6 +46,8 @@ def list_fish_voices(api_key, *, page=1, page_size=6, title="", tags=None, langu
         params["language"] = language
     if self_only:
         params["self"] = "true"
+    elif licensed_only:
+        params["licensed"] = "true"
     response = client.get(
         f"{FISH_API}/model",
         headers=_fish_headers(api_key),
@@ -248,18 +250,21 @@ def list_fish_professional_narrators(api_key, *, per_gender=25, session=None):
     result = {}
     for gender in ("male", "female"):
         discovered = {}
-        page = list_fish_voices(
-            api_key, page=1, page_size=100,
-            tags=[gender, "narration"], language="pt",
-            sort_by="task_count", session=client,
-        )
-        for voice in page["items"]:
+        for licensed_only in (False, True):
+            page = list_fish_voices(
+                api_key, page=1, page_size=100,
+                tags=[gender, "narration"], language="pt",
+                licensed_only=licensed_only, sort_by="task_count",
+                session=client,
+            )
+            for voice in page["items"]:
                 if not voice.get("id"):
                     continue
                 source = (voice.get("source") or "").casefold()
-                # The Fish discovery "pvc,licensed" view includes PVC and
-                # Fish-licensed sources. When source is exposed, enforce it.
-                if source and not any(token in source for token in ("pvc", "licensed")) and not voice.get("licensed"):
+                # Match the Discovery source=pvc,licensed filter. The API
+                # exposes source and licensed in ModelEntity; unknown sources
+                # are excluded rather than silently broadening the catalog.
+                if not voice.get("licensed") and "pvc" not in source:
                     continue
                 if _is_human_narrator_voice(voice, gender):
                     discovered[voice["id"]] = voice
