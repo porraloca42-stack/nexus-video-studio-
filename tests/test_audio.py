@@ -11,6 +11,7 @@ class FakeCommunicate:
         self.text = text
         self.voice = voice
         self.rate = rate
+        type(self).last_rate = rate
 
     async def stream(self):
         yield {"type": "audio", "data": b"fake-mp3"}
@@ -32,13 +33,13 @@ class AudioSubtitleTests(unittest.TestCase):
     def test_builds_srt_directly_from_word_boundaries(self):
         with tempfile.TemporaryDirectory(prefix="nexus_audio_test_") as temp:
             output = Path(temp) / "voice.mp3"
-            with patch("nexus.audio.edge_tts.Communicate", FakeCommunicate) as communicate:
+            with patch("nexus.audio.edge_tts.Communicate", FakeCommunicate):
                 audio_path, subtitle_path = make_voice(
                     "Olá mundo.", "pt-BR-AntonioNeural", output
                 )
 
             self.assertEqual(audio_path.read_bytes(), b"fake-mp3")
-            self.assertEqual(communicate.call_args.kwargs["rate"], "-25%")
+            self.assertEqual(FakeCommunicate.last_rate, "-25%")
             content = subtitle_path.read_text(encoding="utf-8")
             self.assertIn("00:00:00,000 --> 00:00:01,000", content)
             self.assertIn("Olá mundo.", content)
