@@ -126,9 +126,30 @@ def generate_scene_images(scenes, output_dir, *, steps=6, **kwargs):
     results = []
     for index, scene in enumerate(scenes, start=1):
         prompt = scene.get("image_prompt") or scene.get("visual_action") or ""
-        result = generate_image(
-            prompt, output_dir / f"scene_{index:02d}.png", steps=steps, **kwargs
-        )
+        destination = output_dir / f"scene_{index:02d}.png"
+        try:
+            result = generate_image(prompt, destination, steps=steps, **kwargs)
+        except CloudflareAIError as exc:
+            # Workers AI may reject a generated output even when the request is valid.
+            # Retry only moderation code 3030, once, with a conservative editorial framing.
+            # The scene's subject and action remain in the prompt; no blocked detail is amplified.
+            if '"code":3030' not in str(exc) and '"code": 3030' not in str(exc):
+                raise
+            safe_prompt = (
+                "Create a non-graphic, non-sexual, fictional editorial cinematic image. "
+                "Show the scene in a calm, respectful, non-threatening way; no nudity, "
+                "gore, visible injuries, weapons in use, logos, or text. Preserve the "
+                "setting, subject, and benign action described here: " + str(prompt).strip()
+            )
+            try:
+                result = generate_image(safe_prompt, destination, steps=steps, **kwargs)
+                result["moderation_retry"] = True
+            except CloudflareAIError as retry_exc:
+                raise CloudflareAIError(
+                    f"Cloudflare bloqueou a imagem da cena {index} (código 3030), "
+                    "inclusive após uma tentativa com enquadramento visual seguro. "
+                    "Revise o image_prompt/visual_action dessa cena no planejamento."
+                ) from retry_exc
         result["scene_index"] = index
         results.append(result)
     return results
