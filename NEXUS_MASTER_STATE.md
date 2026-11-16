@@ -658,3 +658,11 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Registro baseado na confirmação do usuário; os valores não foram lidos. Não armazenar credenciais no repositório.
 - Próxima validação: executar o modo opcional “Imagens originais · Cloudflare AI + Remotion” com um roteiro curto e confirmar dispatch do workflow, autenticação Workers AI, geração das imagens, render e recuperação do MP4.
 - Até a execução real, integração Cloudflare em produção permanece configurada segundo relato do usuário, mas não testada nem validada de ponta a ponta.
+
+
+## Primeiro teste real do worker Cloudflare — 16/11/2026
+- Execução manual #2 do workflow `nexus-render-worker.yml`, run ID `43854339955`, foi iniciada pelo Streamlit e terminou em failure.
+- Logs confirmam que checkout, Python, Node, FFmpeg, dependências Remotion e typecheck passaram. O passo de produção recebeu os dois Secrets Cloudflare (valores mascarados nos logs) e avançou até a geração da primeira imagem.
+- A primeira imagem retornou em 512×896; o worker exigia exatamente 512×910 e interrompeu antes da narração/render. Isso confirma resposta de geração do Workers AI, mas ainda não comprova todas as cenas nem MP4.
+- Correção commit `102c5f9`: o worker agora aceita dimensões positivas retornadas pelo modelo e normaliza imagens fora de 512×910 via FFmpeg para o canvas vertical esperado antes de entregar ao Remotion.
+- Estado da correção: commit gravado em main; CI disparado automaticamente, ainda aguardando resultado. Novo teste real do worker e MP4 final ainda pendentes.
