@@ -110,14 +110,16 @@ def discover_models(api_key, requested="auto"):
         raise RuntimeError("A chave não retornou modelos compatíveis com geração de conteúdo.")
 
     requested = (requested or "auto").strip().replace("models/", "")
+    selected = None
     if requested.lower() not in ("", "auto"):
         selected = next(
             (m for m in supported if m.get("name", "").split("/")[-1] == requested),
             None,
         )
+        # A configured model may be stale or incompatible (for example a TTS
+        # model). Never fall back to the API's arbitrary listing order.
         if selected:
-            # Explicit preference first, but keep other compatible models as fallback.
-            supported.sort(key=lambda m: m is not selected)
+            supported = [selected] + [m for m in supported if m is not selected]
 
     def rank(model):
         name = model.get("name", "").split("/")[-1].lower()
@@ -132,13 +134,10 @@ def discover_models(api_key, requested="auto"):
             family = 1
         return (stable, family, _model_version(name))
 
-    if requested.lower() in ("", "auto"):
+    if selected is None:
+        # Auto mode, or configured model filtered out: choose best compatible
+        # text model by capability ranking, not by API response order.
         supported.sort(key=rank, reverse=True)
-    else:
-        # Keep the explicitly configured model first; rank all remaining fallbacks.
-        first = supported[0]
-        remaining = sorted(supported[1:], key=rank, reverse=True)
-        supported = [first] + remaining
 
     names = []
     for item in supported:
