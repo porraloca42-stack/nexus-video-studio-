@@ -861,3 +861,12 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Commit `f71e29d`: teste para confirmar que falha do Fish reporta Edge TTS como fallback.
 - As chamadas antigas de `make_voice` continuam recebendo o par `(audio, subtitles)`; a nova tripla é ativada apenas pelo app com `return_provider=True`.
 - CI e validação com provedor real ainda pendentes. A integração lê `FISH_API_KEY` e `FISH_VOICE_ID` de Streamlit Secrets/ambiente; este registro não contém valores de credenciais.
+
+## Remoção de legendas e foco em vídeo + narração — 16/11/2026
+- Decisão de produto confirmada pelo usuário: o NEXUS deve entregar o vídeo visual com narração; legendas serão adicionadas manualmente na edição de publicação. Não gerar SRT nem inserir texto de legenda no MP4.
+- Commits 1e55059 e f4ec05a: nexus/audio.py gera somente o arquivo de áudio; Fish Audio continua com fallback Edge TTS e informação do provedor. A interface não anuncia mais etapa de legendas.
+- Commit f6d6a02: render FFmpeg recebe apenas mídia, áudio e saída; removida a aplicação de filtro SRT e o retiming de legendas.
+- Commits 7949ed0, 83f387a, c049a3b, c48ebc8: removidas legendas do manifesto, tipos e composição Remotion.
+- Testes reorientados para garantir saída de áudio sem SRT, MP4 com vídeo/áudio sem overlay e manifesto Remotion sem campo de captions. Commits de testes: 3eb03e4, e64e2bd, adf962a, b103df9, e7b882d e ajuste final da chamada do manifesto.
+- Estado: alterações gravadas em main; CI após a sequência de commits está em execução/aguarda confirmação. Deploy Streamlit e MP4 real continuam sem validação ponta a ponta.
+- Próxima prioridade: obter suíte verde e, em seguida, produzir e inspecionar um MP4 real com foco em qualidade visual, coerência das cenas e narração. Não reintroduzir legendas no pipeline sem nova solicitação explícita.
