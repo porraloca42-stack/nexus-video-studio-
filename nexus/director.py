@@ -573,13 +573,13 @@ NÃO acrescente frases vazias, repetições, enchimento, pausas artificiais ou i
 Mantenha exatamente {len(scenes)} cenas e a mesma ordem. Distribua o texto entre elas de forma contínua. Cada fala precisa corresponder à ação visual da própria cena; ajuste a fala para manter coerência semântica. Não altere as ações visuais, buscas, estilo ou estrutura das cenas.
 Use português brasileiro falado, frases naturais e pontuação que favoreça a entonação.
 Retorne somente JSON válido no formato:
-{{"scene_voiceovers":[{{"scene_number":1,"voiceover":"..."}}, ...]}}
+{{"scenes":[{{"scene_number":1,"voiceover":"..."}}, ...]}}
 Inclua exatamente uma entrada para cada cena, com índices de 1 a {len(scenes)}. O conjunto deve formar uma narração completa, sem lacunas nem repetição.
 Contexto das cenas:
 {json.dumps(scene_context, ensure_ascii=False)}"""
 
     revised = _request(prompt, secret_reader)
-    voiceovers = revised.get("scene_voiceovers", [])
+    voiceovers = revised.get("scenes", [])
     if not isinstance(voiceovers, list) or len(voiceovers) != len(scenes):
         raise RuntimeError("O diretor não retornou uma fala revisada para cada cena.")
     mapped = {}
