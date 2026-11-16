@@ -579,3 +579,22 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Workflow ampliado para gerar clipe sintético e áudio, converter SRT, chamar `nexus/remotion_renderer.py`, renderizar a composição resultante e verificar com FFprobe vídeo H.264 720×1280, faixa de áudio e duração de 4 s. O artefato agora também inclui esse MP4 de integração.
 - Execução #43841744780 (commit 447ca5e) está em andamento; typecheck já passou, render gráfico de 50 s em execução, etapa de integração áudio/vídeo ainda pendente. A execução seguinte #43841779142 (commit dbbd961) também foi disparada pelo ajuste de workflow.
 - O adaptador Python e o workflow estão implementados no GitHub. Não conectar ainda ao Streamlit: primeiro aguardar o teste ponta a ponta com áudio e vídeo e decidir a infraestrutura Node/Chromium para o app publicado.
+
+## Integração inicial Cloudflare Workers AI — 16/11/2026
+- Decisão de arquitetura: adicionar geração original de imagens por cena via Cloudflare Workers AI, com Remotion como compositor de vídeo. Objetivo: reduzir dependência de bibliotecas de stock genéricas e dar direção visual específica a cada cena.
+- Pesquisa em documentação oficial Cloudflare (preços atualizados em 12/11/2026): Workers AI inclui 10.000 Neurons/dia no plano Free; acima disso exige Workers Paid e cobra US$ 0,011 por 1.000 Neurons. A franquia diária reinicia às 00:00 UTC. Limites e custo dependem do modelo e parâmetros.
+- Modelo candidato inicial: `@cf/black-forest-labs/flux-1-schnell`. A tabela oficial indica 9,6 Neurons por step; com 6 steps, estimativa simples de 57,6 Neurons por imagem e cerca de 173 imagens/dia na franquia de 10.000 Neurons, antes de variações por tiles/resolução, falhas/retries e demais usos. A estimativa de 140–170 imagens/dia é plausível como margem operacional, mas não é uma cota fixa garantida. Modelos mais caros, como FLUX.2 [dev], reduzem substancialmente a quantidade.
+- Implementado no GitHub: `nexus/cloudflare_images.py`, adaptador isolado para chamada REST autenticada, salvar PNG/JPEG/WebP, validar resposta, controlar steps e gerar imagem por cena a partir de `image_prompt`/descrição visual. Segredos esperados no Streamlit Secrets: `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`; modelo opcional `CLOUDFLARE_IMAGE_MODEL`.
+- Implementado: `tests/test_cloudflare_images.py` com testes de credenciais ausentes, prompt vazio, resposta inválida e persistência de PNG. Ainda aguarda CI.
+- Segurança/escopo: nenhum token foi solicitado ou gravado no repositório. O adaptador não está ligado ao botão de produção nem ao app publicado; ainda não houve chamada real ao Workers AI porque as credenciais não estão disponíveis nesta sessão.
+- Arquitetura de produção proposta: Gemini produz storyboard e prompt visual detalhado por cena; Workers AI gera imagens; revisão visual valida correspondência; Remotion recebe imagens aprovadas, narração e SRT para compor MP4. FFmpeg permanece como fallback até validação real.
+- Não remover ainda Wikimedia/Pixabay/Pexels: fontes de mídia podem continuar como fallback para cenas em que movimento real seja essencial ou em que a imagem gerada não represente adequadamente a ação.
+
+## Correção do CI Remotion e compatibilidade de áudio — 16/11/2026
+- Execução Remotion #43841744780: typecheck e render gráfico de 50s passaram; teste de integração falhou antes do adaptador porque o runner Ubuntu não tinha FFmpeg instalado (`ffmpeg: command not found`). Portanto não houve render do manifesto com mídia/áudio nessa execução.
+- Correção no GitHub: workflow agora instala FFmpeg via apt antes de criar os fixtures sintéticos. Commit `72ec0c6`.
+- Correção no adaptador: preserva a extensão real da narração (por exemplo WAV continua WAV, MP3 continua MP3), evitando rotular conteúdo WAV como MP3. Commit `0306f17`.
+- Adicionado teste de regressão para extensão WAV. Commit `d4e9a15`.
+- Workflow inclui o teste Cloudflare no gatilho de testes. Commit `28976b8`.
+- Estado: correções gravadas em main; novas execuções CI precisam concluir. Nenhuma destas alterações está validada por nova execução ainda.
+
