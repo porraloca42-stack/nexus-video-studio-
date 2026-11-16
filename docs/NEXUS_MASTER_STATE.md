@@ -48,7 +48,7 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Após a criação de nexus/__init__.py, o usuário confirmou em 2026-11-16 que a aplicação abre normalmente no Streamlit.
 - Captura dos logs mostra atualização do app concluída (Updated app!). A inicialização está confirmada visualmente pelo usuário; não há confirmação independente de execução do pipeline.
 - app.py importa search_video_sources, search_coverr_videos e download_file de nexus.assets.
-- Foi adicionado em 2026-11-16 um botão lateral “Testar conexão Coverr”, que faz uma busca real de teste por “nature landscape” e exibe até cinco resultados. Código publicado; ainda aguarda execução pelo usuário para validar a chave no ambiente Streamlit.
+- A primeira versão do diagnóstico Coverr na barra lateral não ficou visível na interface apresentada pelo usuário. Corrigido em 2026-11-16: o botão “Testar conexão Coverr” foi movido para a área principal, logo abaixo da mensagem introdutória, para ficar visível em dispositivos móveis. O novo commit precisa ser implantado e confirmado visualmente; a chave ainda aguarda teste real.
 - nexus/assets.py contém search_coverr_videos, search_pixabay_videos, search_video_sources e download_file.
 - Implementação Coverr/Pixabay é preliminar. A documentação oficial Coverr confirma GET https://api.coverr.co/videos, autenticação x-api-key, parâmetros query/page/page_size/urls e retorno de hits[].urls.mp4_download; o código atual usa esses campos. A chave e o download ainda precisam de teste real no app.
 - MCP oficial do Coverr ainda NÃO está integrado ao NEXUS.
