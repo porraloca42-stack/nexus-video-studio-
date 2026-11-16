@@ -22,6 +22,23 @@ class ProfessionalDirectorBriefTests(unittest.TestCase):
             with self.subTest(requirement=requirement):
                 self.assertIn(requirement, SYSTEM)
 
+    def test_selected_visual_style_is_locked_on_every_scene(self):
+        from nexus.director import apply_visual_style_lock
+
+        plan = {
+            "scenes": [
+                {"voiceover": "Cena um", "visual_style": "Lifestyle realista", "style_search_terms": ""},
+                {"voiceover": "Cena dois"},
+                {"voiceover": "Cena três", "visual_style": "Anime 2D"},
+            ]
+        }
+        result = apply_visual_style_lock(plan, "Anime 2D")
+
+        self.assertEqual(result["style_lock"], "Anime 2D")
+        for scene in result["scenes"]:
+            self.assertEqual(scene["visual_style"], "Anime 2D")
+            self.assertIn("2D anime style", scene["style_search_terms"])
+
     def test_output_contract_includes_editorial_and_seo_metadata(self):
         for field in (
             '"hook"',
