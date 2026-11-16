@@ -30,6 +30,8 @@ class FakeGitHubSession:
         self.job_id = kwargs["json"]["inputs"]["job_id"]
         encrypted_manifest = kwargs["json"]["inputs"]["manifest_encrypted"]
         self.assert_no_plaintext(encrypted_manifest)
+        encrypted_fish = kwargs["json"]["inputs"]["fish_credentials_encrypted"]
+        self.assert_no_plaintext(encrypted_fish)
         buffer = io.BytesIO()
         with zipfile.ZipFile(buffer, "w") as bundle:
             bundle.writestr(
@@ -78,12 +80,18 @@ class GitHubRendererTests(unittest.TestCase):
             "pt-BR-AntonioNeural",
             "github-token",
             encryption_secret=secret,
+            fish_api_key="fish-private-key",
+            fish_voice_id="fish-private-voice",
             session=session,
             poll_interval=0,
         )
         self.assertEqual(result["video"], b"private-mp4")
         self.assertEqual(result["report"]["duration"], 50)
         self.assertEqual(result["run_id"], 123)
+        from nexus.render_crypto import decrypt_text
+        dispatch_inputs = next(call[2]["json"]["inputs"] for call in session.calls if call[0] == "POST")
+        fish = json.loads(decrypt_text(dispatch_inputs["fish_credentials_encrypted"], secret))
+        self.assertEqual(fish, {"api_key": "fish-private-key", "voice_id": "fish-private-voice"})
 
     def test_requires_encryption_secret(self):
         with self.assertRaisesRegex(RuntimeError, "CLOUDFLARE_API_TOKEN"):
