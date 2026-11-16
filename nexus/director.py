@@ -1,5 +1,4 @@
 import json
-import os
 import requests
 
 SYSTEM = """
@@ -37,7 +36,7 @@ Retorne somente JSON válido neste formato:
 
 def _request(prompt, secret_reader):
     key = secret_reader("GEMINI_API_KEY")
-    model = secret_reader("GEMINI_MODEL", "gemini-2.5-flash")
+    model = secret_reader("GEMINI_MODEL", "gemini-3.8-flash")
     if not key:
         raise RuntimeError("Diretor de IA indisponível.")
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
@@ -46,18 +45,24 @@ def _request(prompt, secret_reader):
         "contents": [{"role": "user", "parts": [{"text": prompt}]}],
         "generationConfig": {"temperature": 0.45, "responseMimeType": "application/json"}
     }
-    response = requests.post(url, params={"key": key}, json=payload, timeout=180)
+    try:
+        response = requests.post(url, params={"key": key}, json=payload, timeout=180)
+    except requests.RequestException:
+        raise RuntimeError("Não foi possível conectar ao serviço Gemini. Tente novamente.") from None
     if response.status_code == 429:
         raise RuntimeError("Limite temporário do modelo atingido. Tente novamente mais tarde.")
     if response.status_code in (401, 403):
-        raise RuntimeError("Não foi possível autenticar o serviço de direção.")
-    response.raise_for_status()
+        raise RuntimeError("O Gemini recusou a autenticação ou o acesso ao modelo. Confira a configuração da chave e do modelo.")
+    if response.status_code == 404:
+        raise RuntimeError(f"O modelo Gemini '{model}' não está disponível para esta chave. Em Secrets, configure GEMINI_MODEL = \"gemini-3.8-flash\".")
+    if not response.ok:
+        raise RuntimeError(f"Falha no Gemini (HTTP {response.status_code}). Tente novamente.")
     data = response.json()
     try:
         result = data["candidates"][0]["content"]["parts"][0]["text"]
         return json.loads(result)
-    except (KeyError, IndexError, ValueError) as exc:
-        raise RuntimeError("O diretor não retornou um storyboard válido.") from exc
+    except (KeyError, IndexError, ValueError):
+        raise RuntimeError("O diretor não retornou um storyboard válido.") from None
 
 def create_storyboard(topic, style, duration, secret_reader):
     prompt = f"""ASSUNTO OU ROTEIRO:
