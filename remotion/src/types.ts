@@ -6,6 +6,8 @@ export type NexusScene = {
   asset?: string;
   headline?: string;
   visualDescription?: string;
+  imagePrompt?: string;
+  cameraMotion?: "push_in" | "pull_out" | "pan_left" | "pan_right";
   accent?: string;
 };
 
