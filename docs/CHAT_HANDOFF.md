@@ -231,3 +231,10 @@ O usuário ficou frustrado com orientações longas/repetitivas e com uma previs
 - Leitura pós-commit confirmou os três comportamentos no main. CI e validação real do Streamlit ainda pendentes.
 - Próximo passo: aguardar deploy, conferir se as vozes carregam; se falhar, o caption de diagnóstico agora deve indicar exatamente quais IDs/erros retornaram. Não voltar a alterar código sem essa evidência.
 - Referências: https://github.com/fishaudio/docs/blob/main/api-reference/endpoint/model/get-model.mdx ; https://beta.fish.audio/m/add7bcb8d3c8423bbfa152ca232aad6e/
+
+## Ponto mais recente — catálogo Fish Audio sem get_fish_voice (16/11/2026)
+- Captura do usuário trouxe diagnóstico exato: `module 'nexus.audio' has no attribute 'get_fish_voice'` para Ricardo, Rafael, Letícia e Beatriz.
+- O arquivo atual `nexus/audio.py` em main contém a função, mas o módulo em memória do Streamlit não. Evidência aponta para módulo Python obsoleto retido no processo/cache ou caminho diferente; causa exata entre essas possibilidades ainda não determinada.
+- Commit `ea7fa5a` em `app.py`: recarrega explicitamente o módulo com `importlib.reload(fish_audio)` após import; verifica a existência de `get_fish_voice`; se faltar, mostra caminho real do módulo em erro explícito.
+- Verificação pós-commit: app.py relido de main; reload, guard e chamada confirmados. A consulta de workflow runs não retornou runs porque o wrapper só lista runs disparadas por pull request; CI geral não validado.
+- Próximo passo: aguardar Streamlit sincronizar e verificar se as quatro vozes carregam. Se não, usar o caminho do módulo exposto no erro para identificar import path/checkout divergente; não alterar mais a API Fish ou IDs sem evidência.
