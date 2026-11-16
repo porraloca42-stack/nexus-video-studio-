@@ -261,23 +261,30 @@ def list_fish_professional_narrators(api_key, *, per_gender=25, session=None):
     for gender in ("male", "female"):
         discovered = {}
         for licensed_only in (False, True):
-            page = list_fish_voices(
-                api_key, page=1, page_size=100,
-                tags=[gender, "narration"], language="pt",
-                licensed_only=licensed_only, sort_by="task_count",
-                session=client,
-            )
-            for voice in page["items"]:
-                if not voice.get("id"):
-                    continue
-                source = (voice.get("source") or "").casefold()
-                # Match the Discovery source=pvc,licensed filter. The API
-                # exposes source and licensed in ModelEntity; unknown sources
-                # are excluded rather than silently broadening the catalog.
-                if not voice.get("licensed") and "pvc" not in source:
-                    continue
-                if _is_human_narrator_voice(voice, gender):
-                    discovered[voice["id"]] = voice
+            for page_number in range(1, 6):
+                page = list_fish_voices(
+                    api_key, page=page_number, page_size=100,
+                    tags=[gender, "narration"], language="pt",
+                    licensed_only=licensed_only, sort_by="task_count",
+                    session=client,
+                )
+                for voice in page["items"]:
+                    if not voice.get("id"):
+                        continue
+                    source = (voice.get("source") or "").casefold()
+                    # Match the Discovery source=pvc,licensed filter. The API
+                    # exposes source and licensed in ModelEntity; unknown sources
+                    # are excluded rather than silently broadening the catalog.
+                    if not voice.get("licensed") and "pvc" not in source:
+                        continue
+                    if _is_human_narrator_voice(voice, gender):
+                        discovered[voice["id"]] = voice
+                if not page["items"] or page_number * 100 >= page["total"]:
+                    break
+                if len(discovered) >= 25:
+                    break
+            if len(discovered) >= 25:
+                break
         voices = sorted(
             discovered.values(),
             key=lambda voice: (
