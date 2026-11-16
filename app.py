@@ -267,6 +267,11 @@ with settings_col1:
     duration = st.selectbox("Duração do vídeo", [40, 50, 60], index=1, format_func=lambda value: f"{value} segundos")
 with settings_col2:
     voice = st.selectbox("Voz da narração", ["pt-BR-AntonioNeural", "pt-BR-FranciscaNeural", "pt-BR-ThalitaNeural"], format_func=lambda value: {"pt-BR-AntonioNeural":"Antônio · Masculina", "pt-BR-FranciscaNeural":"Francisca · Feminina", "pt-BR-ThalitaNeural":"Thalita · Feminina"}[value])
+if secret("FISH_API_KEY"):
+    st.caption("Narração: Fish Audio S2.1 Pro Free · fallback automático para Edge TTS")
+else:
+    st.caption("Narração: Edge TTS · configure FISH_API_KEY nos Secrets para ativar Fish Audio")
+
 render_mode = st.selectbox(
     "Motor de produção visual",
     ["Bibliotecas de vídeo (atual)", "Imagens originais · Cloudflare AI + Remotion"],
@@ -711,7 +716,11 @@ if "nexus_plan" in st.session_state:
                     target_duration = sum(float(scene["duration_seconds"]) for scene in plan["scenes"])
                     for calibration_attempt in range(3):
                         narration = " ".join(scene["voiceover"] for scene in plan["scenes"])
-                        audio, subtitles = make_voice(narration, voice, audio)
+                        audio, subtitles = make_voice(
+                            narration, voice, audio,
+                            fish_api_key=secret("FISH_API_KEY"),
+                            fish_voice_id=secret("FISH_VOICE_ID"),
+                        )
                         audio_probe = subprocess.run(
                             ["ffprobe", "-v", "error", "-show_entries", "format=duration",
                              "-of", "default=noprint_wrappers=1:nokey=1", str(audio)],
