@@ -86,7 +86,7 @@ def _subtitle_cues(events, narration):
             sentence_end = word.endswith((".", "!", "?", "…"))
             if group and (
                 len(candidate) > 34
-                or len(group) >= 6
+                or len(group) >= 4
                 or elapsed >= 1_900
                 or (sentence_end and len(candidate) >= 14)
             ):
