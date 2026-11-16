@@ -1368,3 +1368,11 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Deploy/preview Streamlit desta branch e inspeção visual real desktop/mobile continuam pendentes. Não declarar publicado ou aprovado.
 - Não integrar à `main` até obter preview visual verificável e aprovação do usuário.
 - Não integrar à `main` até obter preview visual verificável e aprovação do usuário.
+
+
+## Redesign visual — atualização de validação e preview (16/11/2026)
+- CI regression #600, run ID `43975334482`, no HEAD `a1094431affa273f986d4b0f8c50b039c292d214`: `completed/success`.
+- PR #2 continua aberto, draft, mergeable, sem merge; branch `redesign/studio-workspace-v2` está 4 commits à frente e 0 atrás da `main`.
+- O usuário confirmou que já criou o app secundário no Streamlit Community Cloud. Não solicitar nova criação. A URL desse app e a configuração de branch/arquivo ainda não estão registradas no repositório nem disponíveis nesta conexão; portanto, não afirmar que o preview está apontando para o redesign.
+- A documentação oficial do Streamlit confirma que um app existente pode ser administrado por suas configurações e que as coordenadas GitHub (owner/repository/branch/entrypoint) definem o código publicado. A integração disponível aqui não expõe o painel/conta Streamlit para alterar essas coordenadas diretamente.
+- Estado: código do redesign implementado; CI testada e aprovada; implantação do app secundário e inspeção visual ainda não verificadas. A `main` permanece preservada.
