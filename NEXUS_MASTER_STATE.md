@@ -1088,3 +1088,14 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 4. Fazer um piloto controlado com uma única cena representativa (imagem/personagem e ação), verificar identidade, anatomia, movimento, saída 9:16 e latência/custo real.
 5. Após aprovação visual do piloto, produzir um MP4 editorial de 40–50s com todas as cenas animadas; inspecionar continuidade, movimento, sincronização, codecs e custo total.
 6. Atualizar este registro com números observados e só então definir limite operacional de cenas e orçamento mensal.
+
+## Registro de continuidade — deploy Modal em andamento (16/11/2026)
+
+- O usuário confirmou que criou token Modal e cadastrou os GitHub Actions Secrets `MODAL_TOKEN_ID` e `MODAL_TOKEN_SECRET`. Não registrar valores.
+- O workflow manual `Deploy NEXUS Modal video worker` foi executado como run #1 no commit `82ab49d`, branch `main`.
+- Última evidência enviada pelo usuário: captura do GitHub Actions mostra job `deploy` como `In progress`, com duração `30m 39s`.
+- O YAML contém `timeout-minutes: 30`, mas a execução permanecia ativa após 30m39s na captura. Portanto, não afirmar que o GitHub cancela necessariamente exatamente aos 30 minutos; observar o status real.
+- Orientação vigente: não cancelar, não reiniciar e não disparar outro deploy enquanto o run #1 estiver ativo. Aguardar o resultado e então verificar logs/status.
+- O `timeout=45 * MINUTES` em `modal_worker.py` controla a classe de inferência Modal e é distinto do timeout do job GitHub Actions.
+- Deploy Modal, download do modelo, geração GPU, custo e qualidade ainda não estão confirmados.
+- Ver também `docs/CHAT_HANDOFF.md` para instruções completas e ponto exato de retomada em novo chat.
