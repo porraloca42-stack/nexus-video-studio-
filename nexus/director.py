@@ -492,8 +492,8 @@ def create_storyboard(topic, style, duration, secret_reader):
 DURAÇÃO FINAL ESCOLHIDA: {target} segundos (OBRIGATÓRIA).
 ESTILO VISUAL: {style}
 
-Primeiro interprete o briefing completo (assunto/roteiro, estilo visual e ${target}s) e defina público provável, promessa, hook inicial, progressão de retenção, insight/entrega e CTA adequado.
-Escreva um roteiro narrado completo de aproximadamente ${min_words} a ${max_words} palavras, adequado a ${target}s de fala natural em português brasileiro. A velocidade do sintetizador permanece natural: dimensione o texto, não a voz.
+Primeiro interprete o briefing completo (assunto/roteiro, estilo visual e {target}s) e defina público provável, promessa, hook inicial, progressão de retenção, insight/entrega e CTA adequado.
+Escreva um roteiro narrado completo de aproximadamente {min_words} a {max_words} palavras, adequado a {target}s de fala natural em português brasileiro. A velocidade do sintetizador permanece natural: dimensione o texto, não a voz.
 Se o usuário forneceu apenas um tema, crie o roteiro completo. Se forneceu um texto, preserve as ideias essenciais e adapte a extensão ao tempo.
 O hook precisa estar na primeira fala. O CTA deve estar integrado à conclusão. Use palavras-chave SEO semanticamente relevantes de modo natural na narração. Gere título, descrição e poucas hashtags coerentes com o roteiro, sem keyword stuffing.
 Depois divida esse roteiro em {minimum_scenes} a {preferred_scenes + 3} cenas narrativas. Meta: cerca de {preferred_scenes} cenas. Cada cena deve ter voiceover preenchido e conter um trecho contínuo do roteiro. O campo full_narration deve ser exatamente a concatenação das falas das cenas, com pontuação natural.
