@@ -805,6 +805,24 @@ if "nexus_plan" in st.session_state:
                             for item in media
                         ],
                     }
+                    # Apply the same final-frame audit to the stock-library pipeline.
+                    try:
+                        from nexus.visual_review import extract_scene_frames, review_scene_frames
+                        visual_key = secret("GEMINI_API_KEY")
+                        if visual_key:
+                            with tempfile.TemporaryDirectory(prefix="nexus_visual_review_") as qa_dir:
+                                frames = extract_scene_frames(output, plan.get("scenes", []), Path(qa_dir))
+                                audit = review_scene_frames(frames, plan.get("scenes", []), visual_key)
+                            st.session_state["nexus_rendered_info"]["final_visual_audit"] = audit
+                            scores = [item["semantic_score"] for item in audit]
+                            st.session_state["nexus_rendered_info"]["final_visual_review_average"] = round(
+                                sum(scores) / max(1, len(scores)), 1
+                            )
+                        else:
+                            st.session_state["nexus_rendered_info"]["final_visual_audit_status"] = "not_configured"
+                    except Exception as review_error:
+                        st.session_state["nexus_rendered_info"]["final_visual_audit_status"] = "failed"
+                        st.warning(f"MP4 validado tecnicamente, mas a auditoria visual final falhou: {review_error}")
                     progress.progress(1.0, text="Vídeo produzido e validado.")
                     st.success("Vídeo MP4 produzido. Áudio, vídeo e integridade do arquivo foram verificados.")
             except Exception as exc:
@@ -831,6 +849,17 @@ if st.session_state.get("nexus_rendered_video"):
                 st.markdown(f"**Cena {item['scene']} · {item['source']} · {item['confidence']}% de correspondência geral**")
                 st.caption(f"Narração/ação: {item.get('semantic_match', 0)}% · Estilo: {item.get('style_match', 0)}%")
                 st.write(item.get("reason", ""))
+    final_audit = info.get("final_visual_audit") or []
+    if final_audit:
+        st.caption(f"Auditoria visual final Gemini: média {info.get('final_visual_review_average', 0)}/10 · {len(final_audit)} cenas")
+        with st.expander("Ver auditoria visual final do MP4"):
+            st.dataframe([
+                {"Cena": item["scene_number"], "Aderência": f'{item["semantic_score"]}/10',
+                 "Corresponde à fala": "Sim" if item["matches_narration"] else "Revisar",
+                 "Problemas": "; ".join(item["issues"]),
+                 "Recomendação": item["recommendation"]}
+                for item in final_audit
+            ], use_container_width=True, hide_index=True)
     st.video(st.session_state["nexus_rendered_video"])
     credits = []
     for credit in info.get("source_credits", []):
