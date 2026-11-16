@@ -293,3 +293,14 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Commit af3230f: teste unitário verifica que a taxa -25% é aplicada ao sintetizador.
 - Commit a89c0cc: build identificada como NEXUS-2026.11.16-voice-paced-25, visível abaixo do cabeçalho.
 - CI da nova alteração ainda em execução no momento do registro. A taxa precisa ser confirmada com uma nova produção real; não afirmar MP4 final concluído.
+
+
+### Correção de arquitetura: roteiro calibrado pela voz real — 16/11/2026
+- Feedback explícito do usuário: não desacelerar a voz para preencher duração. A IA deve construir e revisar o roteiro para a duração escolhida, usando ritmo natural.
+- Revertida a alteração experimental de Edge TTS em -25%; o sintetizador voltou a rate=+0% (velocidade natural).
+- Commit 3952b10: nova função `revise_narration_for_duration` no diretor. Usa duração real medida do primeiro áudio, contagem de palavras e velocidade efetiva da voz selecionada para pedir ao Gemini uma revisão editorial da narração, mantendo quantidade/ordem das cenas e coerência fala-imagem.
+- Commit e911f9c: fluxo de produção mede o áudio com ffprobe e pode solicitar até duas revisões automáticas; sintetiza novamente em velocidade natural. Só segue quando a duração fica dentro de 10% da meta. Se não conseguir, interrompe com mensagem clara, sem forçar velocidade nem exportar narração inadequada.
+- Commit 6deae2a: velocidade natural restaurada.
+- Testes adicionados para calibragem da narração e preservação de cenas; CI aguardando conclusão.
+- Build de teste: `NEXUS-2026.11.16-voice-script-calibration-1`.
+- Estado: código enviado; ainda não validado pelo CI nem em produção real. Não considerar o MP4 concluído.
