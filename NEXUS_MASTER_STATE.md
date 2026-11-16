@@ -719,3 +719,10 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Run #43861160323 (commit `3e8f726`): demo Remotion aprovada. Type-check, adaptadores Python/Remotion, render via manifesto real, validação dos streams MP4 e duração e upload de artefatos concluídos com sucesso.
 - O passo de demo manual de 50 segundos foi skipped pelo workflow; não confundir com render real Cloudflare.
 - Estado: correção de sincronização TTS/SRT implementada e regressão aprovada; pipeline sintético Python + Remotion gera MP4 validado. Ainda falta executar novamente o workflow real Cloudflare a partir do Streamlit com o código atualizado, validar geração de imagens, áudio, render e recuperação do MP4.
+
+
+## Protocolo rígido de no mínimo 10 cenas — 16/11/2026
+- Nova captura do usuário confirmou que o planejamento de 40s ainda aceitava 6 cenas; mensagem de validação indicava mínimo 8. Causa exata: `create_storyboard()` e `validate_storyboard()` calculavam o mínimo apenas como duração/5, portanto 40s permitiam 8 cenas. O reparo anterior só tentava alcançar esse mínimo incorreto.
+- Commit `284f56a`: mínimo rígido agora é `max(10, ceil(duração/5))` tanto na geração quanto na validação. Para 40s exige 10; 50s exige 10; 60s exige 12. Prompt inicial e correções instruem explicitamente que 6–9 cenas são proibidas. O diretor tem até 3 tentativas automáticas de reparo e só aceita resposta que alcance o mínimo.
+- Commit `a7de9de`: testes adicionados para reparar 7→10 cenas em 40s e para rejeitar 7 cenas no validador.
+- CI dos commits em execução; ainda não aprovado. Após CI verde, precisa recarregar o Streamlit e confirmar o comportamento real.
