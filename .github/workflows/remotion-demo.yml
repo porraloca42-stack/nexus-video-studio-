@@ -27,14 +27,24 @@ jobs:
         working-directory: remotion
         run: npm install --no-audit --no-fund
 
+      - name: Type-check Remotion project
+        working-directory: remotion
+        run: npm run typecheck
+
       - name: Render 50-second vertical demo
         working-directory: remotion
         run: npm run render:demo
 
-      - name: Upload MP4 demo
+      - name: Render manifest-driven video
+        working-directory: remotion
+        run: npm run render:manifest
+
+      - name: Upload MP4 demos
         uses: actions/upload-artifact@v4
         with:
-          name: nexus-remotion-demo
-          path: remotion/out/nexus-demo.mp4
+          name: nexus-remotion-demos
+          path: |
+            remotion/out/nexus-demo.mp4
+            remotion/out/nexus-manifest.mp4
           if-no-files-found: error
           retention-days: 7
