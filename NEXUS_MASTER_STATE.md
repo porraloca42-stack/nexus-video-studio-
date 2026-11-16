@@ -1200,3 +1200,11 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Alterações em `tests/test_audio.py` commit `362a771`: testes para buscar voz pelo ID e rejeitar modelos privados.
 - Estado: arquivos gravados e relidos na branch main. Testes automáticos e validação real do Streamlit ainda pendentes; não declarar publicado/validado até CI e confirmação da interface.
 - Decisão: começar com 4 vozes oficiais seguras, com sotaque pt-BR declarado, em vez de expor a biblioteca comunitária inteira. Ampliar somente após curadoria individual e audição de amostras.
+
+## Correção de ImportError após troca do seletor — 16/11/2026 17:00 BRT
+- Usuário enviou captura de ImportError durante inicialização após commits de troca do seletor.
+- Revisão do main confirmou que `nexus/audio.py` exporta `generate_fish_preview`, `get_fish_voice` e `make_voice`, mas `app.py` já não usa `generate_fish_preview` após substituir o antigo player de geração sob demanda pelo sample oficial.
+- Correção aplicada no commit `bd54f26`: removido do import de `app.py` o símbolo obsoleto e não utilizado `generate_fish_preview`. Mantidos somente `get_fish_voice` e `make_voice`.
+- Hipótese técnica: o ambiente Streamlit estava carregando uma versão de `nexus.audio` sem o símbolo obsoleto (cache/atualização parcial) ou houve incompatibilidade transitória de checkout. O traceback da captura está truncado e não permite confirmar o nome exato após `generate_fish...`; portanto, não afirmar causa raiz com certeza.
+- Verificação após commit: relido `app.py` e `nexus/audio.py` no main; import agora contém apenas símbolos efetivamente usados e exportados.
+- Validação pendente: CI disparado por push e reinício do Streamlit. Não declarar resolvido até abrir o app.
