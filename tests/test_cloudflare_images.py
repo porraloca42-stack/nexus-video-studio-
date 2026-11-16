@@ -49,7 +49,7 @@ class CloudflareImageTests(unittest.TestCase):
 
     def test_json_base64_jpeg_response_uses_matching_extension(self):
         with tempfile.TemporaryDirectory() as temp:
-            jpeg = b"\\xff\\xd8\\xff" + b"nexus-jpeg"
+            jpeg = b"\xff\xd8\xff" + b"nexus-jpeg"
             response = FakeResponse()
             response.headers = {"content-type": "application/json"}
             response.content = b""
