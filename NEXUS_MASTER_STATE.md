@@ -1363,3 +1363,9 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Testes adicionados para total/categorias/ordem dos IDs, classificação conservadora de gênero e preservação dos IDs após consulta de metadados.
 - Commits relacionados: `ff5f8da` (catálogo), `aca443f` (consulta de metadados), `6dc8f5d` (UI), `ebafc5d` (estrutura UI), `3b4d858` (testes), `11c60ee` e `26bc349` (fixtures/testes), `c33a3e2` (indentação), `239f2d1` (metadados), `6c9c0da` (versão UI), `1c79796` (registro mestre).
 - Estado: código gravado no GitHub main. CI/checks, deploy Streamlit, resposta autenticada dos 40 IDs, audição das amostras e teste de síntese real com IDs selecionados ainda não foram confirmados. Não declarar catálogo validado até esses testes.
+
+
+## Ajuste de interface mobile — remoção do rodapé Streamlit (16/11/2026)
+- Solicitação do usuário: remover a faixa inferior branca do app móvel que exibe “Built with Streamlit” e o atalho “Fullscreen”.
+- Commit `4a80ee8` em `app.py`: ampliados os seletores CSS para ocultar o footer/status inferior do Streamlit e o viewer badge, incluindo variantes de classes dinâmicas usadas pelo badge. A alteração é somente visual; não modifica o pipeline de produção.
+- Estado: alteração gravada em `main`. Ainda não foi confirmada no deploy Streamlit nem visualmente no celular. O CSS atua dentro da aplicação; se a faixa for renderizada pelo contêiner externo da Streamlit Cloud fora do DOM do app, ela poderá permanecer e exigirá outra abordagem suportada pela plataforma.
