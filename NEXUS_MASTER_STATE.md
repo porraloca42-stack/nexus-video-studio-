@@ -82,6 +82,15 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 9. Renderizar primeiro MP4 real de 40–50s, inspecionar qualidade e só então declarar o pipeline validado.
 10. Considerar MCP oficial do Coverr apenas após verificar endpoint, autenticação e ferramentas disponíveis; não confundir MCP no ChatGPT com MCP dentro do app.
 
+
+## Biblioteca de narração — expansão e organização
+- Correção planejada/implementada no código: seletor de vozes dentro de gaveta recolhida por padrão; a tela principal mantém apenas o nome da voz ativa.
+- A biblioteca consulta o endpoint oficial `GET /model` da Fish Audio, com busca por nome, paginação, filtro de idioma português e ordenação por uso.
+- Catálogos separados: vozes com licença indicada pela Fish Audio, biblioteca pública (com aviso quando a licença individual não está confirmada) e vozes privadas da própria conta.
+- O campo `licensed` retornado pela Fish Audio é preservado; presença na biblioteca pública não será tratada como autorização comercial.
+- Vozes profissionais verificadas/clonagem profissional são uma modalidade específica no web app Fish Audio; o fluxo API de clonagem persistente comum não será apresentado como clone profissional verificado.
+- Status de implantação e teste visual no Streamlit: pendente após commit.
+
 ## Regras para o assistente em novos chats
 - Começar lendo este arquivo e o código relevante no GitHub antes de propor mudanças.
 - Tratar este documento como registro de continuidade, mas conferir o estado atual do repositório e deployment; pode ficar desatualizado.
