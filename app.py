@@ -2,7 +2,7 @@ import base64, json, os, shutil, subprocess, tempfile
 from pathlib import Path
 import streamlit as st
 from nexus.director import create_storyboard, validate_storyboard
-from nexus.assets import search_video_sources, search_coverr_videos, download_file
+from nexus.assets import (search_video_sources, search_coverr_videos, search_pixabay_videos, search_pexels_videos, download_file)
 from nexus.audio import make_voice
 from nexus.render import render_video
 
@@ -166,42 +166,64 @@ with settings_col1:
 with settings_col2:
     voice = st.selectbox("Voz da narração", ["pt-BR-AntonioNeural", "pt-BR-FranciscaNeural", "pt-BR-ThalitaNeural"], format_func=lambda value: {"pt-BR-AntonioNeural":"Antônio · Masculina", "pt-BR-FranciscaNeural":"Francisca · Feminina", "pt-BR-ThalitaNeural":"Thalita · Feminina"}[value])
 
-with st.expander("Ferramentas avançadas · diagnóstico da biblioteca Coverr"):
-    st.caption("Build do aplicativo: NEXUS-2026.11.16-multi-source-1 · se esta identificação não aparecer, o Streamlit ainda está servindo uma versão anterior.")
-    st.caption("Ferramenta técnica para verificar a conexão e o download interno. Não é necessária para planejar ou produzir um vídeo.")
-    if st.button("Testar conexão e download Coverr", type="secondary"):
-        coverr_key = secret("COVERR_API_KEY")
-        if not coverr_key:
-            st.error("COVERR_API_KEY não encontrada nos Secrets.")
-        else:
-            with st.spinner("Verificando a biblioteca Coverr..."):
+with st.expander("Ferramentas avançadas · diagnóstico das bibliotecas de vídeo"):
+    st.caption("Build do aplicativo: NEXUS-2026.11.16-library-diagnostics-1 · confirme esta identificação após a publicação.")
+    st.caption("Testa autenticação, busca, download e leitura do MP4 em cada biblioteca que tiver chave configurada. As chaves nunca são exibidas.")
+    if st.button("Testar todas as bibliotecas configuradas", type="secondary"):
+        providers = [
+            ("Coverr", secret("COVERR_API_KEY"), search_coverr_videos),
+            ("Pixabay", secret("PIXABAY_API_KEY"), search_pixabay_videos),
+            ("Pexels", secret("PEXELS_API_KEY"), search_pexels_videos),
+        ]
+        tested = 0
+        with tempfile.TemporaryDirectory(prefix="nexus_library_diagnostics_") as temp_dir:
+            for provider_name, api_key, search_fn in providers:
+                if not api_key:
+                    st.warning(f"{provider_name}: chave não configurada nos Secrets.")
+                    continue
+                tested += 1
                 try:
-                    test_results = search_coverr_videos("nature landscape", coverr_key, per_page=5)
-                    if not test_results:
-                        st.warning("A API respondeu, mas não retornou clipes com URL MP4.")
-                    else:
-                        chosen = next((item for item in test_results if item.get("vertical")), test_results[0])
-                        with tempfile.TemporaryDirectory(prefix="nexus_coverr_test_") as temp_dir:
-                            clip_path = download_file(chosen["url"], Path(temp_dir) / "coverr_test.mp4")
-                            probe = subprocess.run(
-                                ["ffprobe", "-v", "error", "-show_entries", "format=duration,size:stream=codec_name,codec_type,width,height", "-of", "json", str(clip_path)],
-                                capture_output=True, text=True, timeout=60
-                            )
-                            if probe.returncode != 0:
-                                raise RuntimeError(probe.stderr[-1500:] or "FFprobe não conseguiu ler o arquivo.")
-                            metadata = json.loads(probe.stdout)
-                            streams = metadata.get("streams", [])
-                            video = next((stream for stream in streams if stream.get("codec_type") == "video"), None)
-                            if not video:
-                                raise RuntimeError("O arquivo não contém uma faixa de vídeo.")
-                            duration_seconds = float(metadata.get("format", {}).get("duration") or 0)
-                            size_bytes = int(metadata.get("format", {}).get("size") or clip_path.stat().st_size)
-                            if duration_seconds <= 0 or size_bytes <= 0:
-                                raise RuntimeError("O arquivo baixado não apresentou duração ou tamanho válidos.")
-                            st.success(f"Coverr respondeu e o download interno foi validado: {len(test_results)} clipes encontrados.")
-                            st.caption(f"{chosen.get('title') or 'Clipe Coverr'} · {video.get('width')}×{video.get('height')} · {duration_seconds:.1f}s · {video.get('codec_name', 'codec desconhecido')}")
+                    with st.spinner(f"Testando {provider_name}: autenticação, busca e download..."):
+                        results = search_fn("nature landscape", api_key, per_page=5)
+                        if not results:
+                            st.error(f"{provider_name}: a API respondeu, mas não retornou clipes MP4 utilizáveis.")
+                            continue
+                        chosen = next((item for item in results if item.get("vertical")), results[0])
+                        clip_path = download_file(
+                            chosen["url"],
+                            Path(temp_dir) / (provider_name.lower() + "_test.mp4"),
+                        )
+                        probe = subprocess.run(
+                            [
+                                "ffprobe", "-v", "error",
+                                "-show_entries", "format=duration,size:stream=codec_name,codec_type,width,height",
+                                "-of", "json", str(clip_path),
+                            ],
+                            capture_output=True, text=True, timeout=60,
+                        )
+                        if probe.returncode != 0:
+                            raise RuntimeError(probe.stderr[-1200:] or "FFprobe não conseguiu ler o arquivo.")
+                        metadata = json.loads(probe.stdout)
+                        streams = metadata.get("streams", [])
+                        video = next((stream for stream in streams if stream.get("codec_type") == "video"), None)
+                        if not video:
+                            raise RuntimeError("O arquivo baixado não contém uma faixa de vídeo.")
+                        duration_seconds = float(metadata.get("format", {}).get("duration") or 0)
+                        size_bytes = int(metadata.get("format", {}).get("size") or clip_path.stat().st_size)
+                        if duration_seconds <= 0 or size_bytes <= 0:
+                            raise RuntimeError("O MP4 não apresentou duração ou tamanho válidos.")
+                        st.success(
+                            f"{provider_name}: conexão, {len(results)} resultados, download e leitura MP4 aprovados."
+                        )
+                        st.caption(
+                            f"{chosen.get('title') or provider_name} · "
+                            f"{video.get('width')}×{video.get('height')} · "
+                            f"{duration_seconds:.1f}s · {video.get('codec_name', 'codec desconhecido')}"
+                        )
                 except Exception as exc:
-                    st.error(f"Falha no teste Coverr: {exc}")
+                    st.error(f"{provider_name}: falha no teste — {exc}")
+        if not tested:
+            st.info("Nenhuma biblioteca tem chave configurada. Adicione as chaves nos Secrets e tente novamente.")
 
 if st.button("Planejar vídeo", type="primary", use_container_width=True):
     # Remove any previous result first: a failed new request must never leave
