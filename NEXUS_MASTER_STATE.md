@@ -413,3 +413,12 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Busca: erros HTTP 401/403 agora interrompem novas variantes na biblioteca afetada, preservam a tentativa nas demais fontes e exibem orientação para verificar chave/permissões, evitando chamadas repetidas inúteis.
 - Build proposto: `NEXUS-2026.11.16-runtime-review-auth-diagnostics-1`.
 - Estado: alterações preparadas para CI; ainda não implantadas nem validadas com nova produção. O HTTP 403 do Coverr permanece dependente de conferir a chave/permissão configurada; não foi possível validar segredo do Streamlit a partir do repositório.
+
+
+### Substituição do Coverr por Wikimedia Commons — 16/11/2026
+- Decisão: remover Coverr da produção (plano Demo retorna `Invalid API_KEY` para a chave atual; usuário não quer contratar plano pago) e adicionar Wikimedia Commons como fonte sem chave de API.
+- Pesquisa técnica: MediaWiki Action API permite busca de arquivos de vídeo no namespace File; Commons publica vídeos WebM, Ogg Theora e MPEG, que o FFmpeg pode ler. Metadados de licença/autoria são acessíveis por `imageinfo/extmetadata`. Referências: MediaWiki API Search, Commons file types e machine-readable data.
+- Adaptador `search_wikimedia_videos`: consulta `filetype:video`, normaliza URLs, dimensões, título, autor e licença; por segurança comercial, aceita somente CC0, domínio público e CC BY (exclui CC BY-SA, NC e ND). Atribuição é preservada nos metadados por clipe.
+- App: Coverr removido das fontes ativas e do diagnóstico; Wikimedia Commons fica disponível sem chave; Pixabay e Pexels continuam usando as chaves já configuradas. O diagnóstico inclui busca, download e leitura do vídeo. Build: `NEXUS-2026.11.16-wikimedia-provider-1`.
+- Limitação conhecida: Commons não é um stock cinematográfico tradicional; variedade/verticalidade pode ser menor. É fonte complementar e os candidatos continuam sujeitos à inspeção visual do Gemini. A validação de API real e compatibilidade de arquivos depende do deploy e teste de produção.
+- Estado: código e testes gravados no GitHub; CI pendente; não afirmar implantação nem validação audiovisual.
