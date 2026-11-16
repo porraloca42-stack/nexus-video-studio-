@@ -2,7 +2,7 @@ import base64, json, os, shutil, subprocess, tempfile, inspect
 from pathlib import Path
 import requests
 import streamlit as st
-from nexus.director import create_storyboard, revise_narration_for_duration, validate_storyboard
+from nexus.director import create_storyboard, validate_storyboard
 from nexus.assets import search_video_sources, search_coverr_videos, download_file
 from nexus.audio import make_voice
 from nexus.render import render_video
@@ -192,7 +192,7 @@ div[data-testid="stTextArea"] textarea,div[data-testid="stSelectbox"] div[data-b
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="nexus-hero"><div class="nexus-brand">NEXUS VIDEO STUDIO</div><div class="nexus-tagline">Transforme seu roteiro em vídeo</div></div>', unsafe_allow_html=True)
-st.caption("Versão: NEXUS-2026.11.16-human-voice-punctuation-1")
+st.caption("Versão: NEXUS-2026.11.16-import-guard-1")
 
 if "nexus_style" not in st.session_state or st.session_state["nexus_style"] not in STYLE_OPTIONS:
     st.session_state["nexus_style"] = "Cinematográfico realista"
@@ -519,6 +519,15 @@ if "nexus_plan" in st.session_state:
                             (len(plan["scenes"]) + 1) / (len(plan["scenes"]) + 2),
                             text=f"Ajustando o roteiro à duração real da voz ({actual_audio_duration:.1f}s / {target_duration:.1f}s)..."
                         )
+                        # Import the optional calibration step lazily so a stale Streamlit
+                        # worker cannot prevent the entire studio from starting.
+                        try:
+                            from nexus.director import revise_narration_for_duration
+                        except ImportError as exc:
+                            raise RuntimeError(
+                                "O módulo do diretor está desatualizado neste servidor. "
+                                "Reinicie o aplicativo Streamlit para carregar a versão atualizada."
+                            ) from exc
                         plan = revise_narration_for_duration(
                             plan, target_duration, actual_audio_duration, topic, style, secret
                         )
