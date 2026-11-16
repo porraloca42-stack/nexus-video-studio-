@@ -1174,3 +1174,14 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Verificação pós-commit: `app.py` foi relido da branch main; o bloco agora apresenta indentação coerente com o `try:` e com a sequência `voices = [...]`.
 - Estado: patch gravado e leitura estática confirmada. Ainda não executei compilação Python nem CI nesta etapa, e o Streamlit Cloud ainda precisa recarregar para confirmar que o app inicia. Não declarar resolvido até abrir sem erro.
 - Erro anterior de ImportError foi substituído por um erro de sintaxe causado pelo patch de curadoria; assumir responsabilidade por ter enviado código com indentação incorreta.
+
+## Curadoria de vozes humanas — atualização conservadora (16/11/2026 16:45:45 BRT)
+- Usuário confirmou que o app voltou a abrir e pediu substituir vozes de personagens por vozes de pessoas comuns/naturais, mantendo o seletor compacto.
+- Alterado somente `app.py`; não foi alterada a geração de áudio, o módulo `nexus/audio.py`, o player de prévia nem o layout do seletor.
+- Busca agora percorre até 3 páginas de 100 modelos cada na biblioteca Fish Audio (`language="pt"`), deduplica pelo ID e filtra modelos públicos.
+- Exclui metadados que indiquem memes, anime, personagens, imitações, celebridades, figuras políticas, desenhos, paródias e personagens de jogos.
+- Exige que os metadados públicos identifiquem português brasileiro (termos Brazilian/Brasileiro/pt-BR/Brasil) e rejeita descrições explicitamente de Portugal/pt-PT. Isso evita listar vozes cujo sotaque brasileiro não esteja declarado.
+- Entre as vozes brasileiras aprovadas pelo filtro, prioriza termos de narração, conversa, documentário, profissional, neutro, natural, podcast e entrevista; popularidade fica como critério secundário.
+- Commits da alteração: `5b9cbc2` (busca ampliada e exclusões) e `900f7d3` (exigência de metadados BR e priorização de narração natural).
+- Estado: arquivo atualizado e relido no GitHub main. Não houve alteração em outros módulos. CI ainda precisa validar compilação e testes; app Streamlit precisa recarregar e confirmar lista real. Não declarar validado até esses checks.
+- Limitação: a Fish Audio não fornece um campo objetivo de naturalidade; a curadoria usa metadados publicados. A audição das prévias continua necessária para aprovação humana.
