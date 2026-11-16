@@ -275,7 +275,7 @@ class AssetRankingTests(unittest.TestCase):
         )
         self.assertFalse(errors)
         self.assertEqual([item["url"] for item in ranked], ["https://example.test/semantic.mp4"])
-        self.assertEqual(search.call_count, 4)
+        self.assertEqual(search.call_count, 6)
         self.assertEqual(search.call_args_list[-1].args[0], "anime 2D animation")
 
     def test_empty_results_are_safe(self):
