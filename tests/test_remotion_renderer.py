@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from nexus.remotion_renderer import build_remotion_manifest, parse_srt_captions
+from nexus.remotion_renderer import build_remotion_manifest
 
 
 class RemotionManifestTests(unittest.TestCase):
@@ -13,7 +13,6 @@ class RemotionManifestTests(unittest.TestCase):
             public = root / "public"
             clip = root / "clip.mp4"
             audio = root / "voice.mp3"
-            srt = root / "voice.srt"
             clip.write_bytes(b"fake-video")
             audio.write_bytes(b"fake-audio")
             srt.write_text(
@@ -29,13 +28,12 @@ class RemotionManifestTests(unittest.TestCase):
                 }],
             }
             manifest_path, manifest = build_remotion_manifest(
-                plan, [{"path": str(clip)}], audio, srt, public, job_id="test"
+                plan, [{"path": str(clip)}], audio, public, job_id="test"
             )
             self.assertTrue(manifest_path.is_file())
             self.assertEqual(manifest["durationInFrames"], 60)
             self.assertEqual(manifest["scenes"][0]["visualMode"], "video")
-            self.assertEqual(manifest["captions"][0]["startFrame"], 0)
-            self.assertEqual(manifest["captions"][0]["endFrame"], 60)
+            self.assertNotIn("captions", manifest)
             self.assertTrue((public / "jobs/test/scene_01.mp4").is_file())
             self.assertTrue((public / "jobs/test/narration.mp3").is_file())
             self.assertEqual(json.loads(manifest_path.read_text())["title"], "Teste NEXUS")
@@ -54,7 +52,7 @@ class RemotionManifestTests(unittest.TestCase):
                 "camera_motion": "push_in",
             }]}
             _, manifest = build_remotion_manifest(
-                plan, [{"path": str(image)}], None, None, root / "public", job_id="motion"
+                plan, [{"path": str(image)}], None, root / "public", job_id="motion"
             )
             scene = manifest["scenes"][0]
             self.assertEqual(scene["motionEvents"], ["A mão alcança a maçaneta", "A janela se abre"])
@@ -77,7 +75,7 @@ class RemotionManifestTests(unittest.TestCase):
                     "beats": [{"at": 3, "event": "A luz pulsa", "visual_target": "fundo"}] * 5,
                 },
             }]}
-            _, manifest = build_remotion_manifest(plan, [{"path": str(image)}], None, None, root / "public", job_id="direction")
+            _, manifest = build_remotion_manifest(plan, [{"path": str(image)}], None, root / "public", job_id="direction")
             direction = manifest["scenes"][0]["sceneDirection"]
             self.assertEqual(direction["camera"]["move"], "tilt_up")
             self.assertEqual(direction["camera"]["intensity"], 1.0)
@@ -101,7 +99,7 @@ class RemotionManifestTests(unittest.TestCase):
             audio.write_bytes(b"fake-wav")
             plan = {"scenes": [{"duration_seconds": 2, "voiceover": "Teste."}]}
             _, manifest = build_remotion_manifest(
-                plan, [], audio, None, root / "public", job_id="wav"
+                plan, [], audio, root / "public", job_id="wav"
             )
             self.assertEqual(manifest["narrationAudio"], "jobs/wav/narration.wav")
             self.assertTrue((root / "public/jobs/wav/narration.wav").is_file())
