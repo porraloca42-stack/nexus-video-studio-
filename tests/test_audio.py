@@ -62,6 +62,22 @@ class FakeFishSession:
 
 
 class AudioOutputTests(unittest.TestCase):
+    def test_list_voices_preserves_license_and_source_metadata(self):
+        session = FakeFishSession(payload={
+            "total": 1,
+            "items": [{
+                "_id": "licensed-voice", "type": "tts", "state": "trained",
+                "visibility": "public", "title": "Brazilian Studio Narrator",
+                "licensed": True, "source": "Fish Audio Marketplace",
+                "languages": ["pt"], "samples": [], "task_count": 999,
+            }],
+        })
+        result = list_fish_voices("test-key", language="pt", session=session)
+        voice = result["items"][0]
+        self.assertTrue(voice["licensed"])
+        self.assertEqual(voice["source"], "Fish Audio Marketplace")
+        self.assertNotIn("licensed", session.calls[0][2]["params"])
+
     def test_lists_portuguese_fish_voices_with_preview_sample(self):
         session = FakeFishSession()
         result = list_fish_voices("test-key", page=2, page_size=6, language="pt", session=session)
