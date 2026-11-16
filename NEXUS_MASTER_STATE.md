@@ -529,3 +529,9 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - CI #206 confirmou que o novo teste de estilo global passou (`test_selected_visual_style_is_locked_on_every_scene`) e que testes de render/avaliação visual passaram, mas 3 testes antigos de `tests/test_assets.py` ainda tinham assinaturas de mocks/contagens incompatíveis com as chamadas reais (Commons `requests.get`, adaptador Wikimedia e cinco variantes + uma busca de estilo). Não foi falha da função de bloqueio de estilo.
 - Corrigidas as três expectativas restantes em `tests/test_assets.py` (commit `ed1958e`). CI #207 (`43832587620`) está na fila; aguardando conclusão antes de declarar suite verde.
 - O teste ao vivo Commons continuou passando em #206; deploy Streamlit e geração end-to-end permanecem não verificados.
+
+
+### Continuidade após CI #209 — 16/11/2026
+- CI #209: `commons-live-smoke` passou (busca real, download e FFprobe), compilação passou e os testes de estilo global, render MP4, revisão visual e licenças Commons passaram. Suite total: 39 testes; apenas uma expectativa no teste de variantes de busca estava incorreta: código retorna `writing goals notebook`, `writing`, `goals`, `notebook`, e o teste esperava `goals notebook`.
+- Corrigida a expectativa para o termo efetivamente produzido (`writing goals notebook`), commit `76c3ecb`. Nova execução #210 disparada; ainda pendente.
+- Estado: integração Commons e compilação verificadas; suite regressiva quase verde, falta nova execução. Streamlit/deploy e produção end-to-end ainda não confirmados.
