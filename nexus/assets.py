@@ -85,9 +85,11 @@ def rank_video_candidates(candidates, query):
         description_terms = set(_query_tokens(item.get("description", "")))
         matched_title = len(set(query_terms) & title_terms)
         matched_description = len(set(query_terms) & description_terms)
+        matched_terms = len(set(query_terms) & (title_terms | description_terms))
         coverage = (matched_title + matched_description) / max(1, len(query_terms))
         # Semantic text relevance outranks orientation/resolution; technical
         # quality is only a tie-breaker and must not promote unrelated stock.
+        item["_nexus_match_count"] = matched_terms
         item["_nexus_relevance"] = (
             matched_title * 4.0
             + matched_description * 1.5
@@ -132,11 +134,15 @@ def search_video_sources(
             item["source"] = item.get("source") or source
             unique.append(item)
         ranked = rank_video_candidates(unique, semantic_query)
+        # Require at least two distinct scene terms when the query has two or
+        # more meaningful terms. A one-term query still needs that one match.
+        required_matches = min(2, len(_query_tokens(semantic_query)))
         # Do not silently accept unrelated stock merely because the API
         # returned something. Continue with shorter search variants instead.
         return [
             item for item in ranked
             if item.get("_nexus_relevance", 0.0) >= float(min_relevance)
+            and item.get("_nexus_match_count", 0) >= required_matches
         ]
 
     if coverr_key:
