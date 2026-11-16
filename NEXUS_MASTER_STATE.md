@@ -511,3 +511,13 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Commits: `44f5352` prompt/limiar semântico; `059e170` shortlist 12; `9fcc7d3` expectativas de busca; `a6ec100` teste de metáfora visual.
 - CI #195–#198 está em execução/fila no último check; run #198: https://github.com/porraloca42-stack/nexus-video-studio-/actions/runs/43831774818 . Não marcar alterações como testadas/implantadas até CI verde e confirmação do Streamlit.
 - Limitação: a captura mostra apenas cenas rejeitadas, não os detalhes internos nem quadros candidatos; a hipótese do filtro excessivo é confirmada pelo código, mas ainda precisamos de uma produção real pós-deploy para medir a taxa de aceitação e a qualidade editorial.
+
+
+### Correção do bloqueio de estilo global — 16/11/2026
+- Nova evidência do usuário: no diagnóstico da Cena 2, “Estilo solicitado: não informado”, enquanto a consulta de conteúdo continha “anime”. Usuário observou corretamente que o estilo selecionado não parecia aplicado ao vídeo inteiro.
+- Diagnóstico: `create_storyboard` gravava `plan['style_lock']`, mas confiava que o Gemini repetisse `visual_style` e `style_search_terms` em todas as cenas. O código de diagnóstico de falhas lia somente `scene['style_search_terms']`; quando ausente, mostrava “não informado” e a busca não tinha um termo de estilo separado.
+- Correção determinística: novo helper `apply_visual_style_lock(plan, style)` aplica o estilo selecionado a TODAS as cenas e gera termos de busca de estilo por meio de um mapa estável para as 24 opções visuais. Aplicado após criação inicial, após reparo do storyboard e após reparo semântico; assim o estilo não depende de conformidade do modelo.
+- Teste de regressão garante que todas as cenas recebam `visual_style` e `style_search_terms` idênticos ao estilo global selecionado. Commits: `8aaffba` (implementação) e `f4e751a` (teste).
+- Correções adicionais em testes existentes após inspeção de falhas de CI: mocks/expectativas atualizados para o número real de consultas por provedor e nova redação do prompt de revisão. Commits `5a0291d` e `2bd05a5`.
+- CI #202 (43832119971) e #203 (43832130656) em execução/fila; execução #199–#201 falhou por expectativas de teste desatualizadas, não por erro de compilação. Não declarar as alterações validadas até CI verde.
+- Próxima validação: confirmar CI e, após atualização do Streamlit, gerar storyboard novo. Planos já salvos em `st.session_state` não são reescritos automaticamente; o usuário deve clicar “Planejar vídeo” novamente para que o estilo seja propagado a todas as cenas.
