@@ -122,7 +122,7 @@ def secret(name, default=""):
     except Exception:
         return os.getenv(name, default)
 
-st.set_page_config(page_title="NEXUS VIDEO STUDIO", page_icon="🎬", layout="wide")
+st.set_page_config(page_title="NEXUS VIDEO STUDIO", page_icon="🎬", layout="wide", initial_sidebar_state="collapsed")
 
 STYLE_OPTIONS = [
     "Cinematográfico realista", "Documentário cinematográfico",
@@ -202,35 +202,38 @@ def style_preview_svg(style):
 
 st.markdown("""
 <style>
-:root {color-scheme:dark;}
-.block-container {padding-top:1.1rem;padding-bottom:3rem;max-width:980px;}
-.nexus-hero {position:relative;overflow:hidden;padding:1.15rem 1.25rem 1.05rem;border:1px solid rgba(218,190,139,.35);border-radius:20px;background:radial-gradient(ellipse at 88% 8%,rgba(202,166,104,.22),transparent 38%),linear-gradient(145deg,#242a35 0%,#171b24 58%,#202632 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 12px 28px rgba(0,0,0,.28),0 2px 0 rgba(218,190,139,.18);}
-.nexus-brand {font-size:1.32rem;font-weight:850;letter-spacing:.16em;color:#e2c38c;text-shadow:0 2px 12px rgba(218,190,139,.18);}
-.nexus-tagline {font-size:.91rem;color:#d1d5dd;margin-top:.18rem;letter-spacing:.015em;}
-.nexus-kicker {font-size:.75rem;letter-spacing:.13em;text-transform:uppercase;color:#d7bb87;font-weight:750;margin:1.35rem 0 .35rem;}
-.nexus-preview {display:flex;gap:13px;align-items:center;padding:11px;border:1px solid rgba(210,190,155,.28);border-radius:16px;background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.025));box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 7px 18px rgba(0,0,0,.18);margin:.35rem 0 .65rem;}
-.nexus-preview img {width:148px;max-width:42%;aspect-ratio:16/9;object-fit:cover;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,.28);}
-.nexus-preview-title {font-weight:750;margin-bottom:4px;}
-.nexus-preview-copy {font-size:.82rem;color:#b8c0cb;line-height:1.4;}
-.nexus-card-label {font-size:.82rem;font-weight:700;margin:.1rem 0 .4rem;color:#e6e9ef;}
-/* Use a true two-column grid: Streamlit's flex columns were overflowing on narrow mobile screens. */
-div.st-key-nexus-style-gallery {display:block !important; width:100% !important; max-width:100% !important; min-width:0 !important; overflow-x:hidden !important; box-sizing:border-box !important;}
-div.st-key-nexus-style-gallery div[data-testid="stHorizontalBlock"] {display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr)) !important; width:100% !important; max-width:100% !important; min-width:0 !important; column-gap:.55rem !important; row-gap:.7rem !important; margin-bottom:.7rem !important; overflow:hidden !important; box-sizing:border-box !important;}
-div.st-key-nexus-style-gallery div[data-testid="column"] {display:block !important; width:100% !important; max-width:100% !important; min-width:0 !important; flex:none !important; overflow:hidden !important; box-sizing:border-box !important;}
-div.st-key-nexus-style-gallery div[data-testid="column"] > div {width:100% !important; max-width:100% !important; min-width:0 !important; box-sizing:border-box !important;}
-div.st-key-nexus-style-gallery div[data-testid="stImage"] {display:block !important; position:relative !important; width:100% !important; max-width:100% !important; min-width:0 !important; margin:0 auto .15rem !important; text-align:center !important; overflow:visible !important;}
-div.st-key-nexus-style-gallery div[data-testid="stImage"] > div {display:block !important; width:100% !important; max-width:100% !important; margin:0 auto !important; text-align:center !important;}
-div.st-key-nexus-style-gallery div[data-testid="stImage"] img {display:block !important; position:relative !important; left:50% !important; transform:translateX(-50%) !important; width:85px !important; min-width:85px !important; max-width:85px !important; height:auto !important; margin:0 !important;}
-div.st-key-nexus-style-gallery div[data-testid="stButton"] {display:flex !important; justify-content:center !important; width:100% !important; max-width:100% !important; min-width:0 !important;}
-div.st-key-nexus-style-gallery div[data-testid="stButton"] button {display:flex !important; align-items:center !important; justify-content:center !important; width:78% !important; max-width:155px !important; min-width:0 !important; margin-left:auto !important; margin-right:auto !important; height:auto !important; min-height:1.8rem !important; padding:.2rem .25rem !important; white-space:normal !important; overflow:visible !important; text-overflow:clip !important; overflow-wrap:break-word !important; word-break:normal !important; font-size:.62rem !important; line-height:1.1 !important; box-sizing:border-box !important;}
-div.st-key-nexus-style-gallery div[data-testid="stButton"] button *,
-div.st-key-nexus-style-gallery div[data-testid="stButton"] button div,
-div.st-key-nexus-style-gallery div[data-testid="stButton"] button p,
-div.st-key-nexus-style-gallery div[data-testid="stButton"] button span {display:block !important; width:100% !important; max-width:100% !important; min-width:0 !important; height:auto !important; max-height:none !important; margin:0 !important; padding:0 !important; font-size:.62rem !important; line-height:1.1 !important; white-space:normal !important; overflow:visible !important; text-overflow:clip !important; overflow-wrap:break-word !important; word-break:normal !important;}
-
-div[data-testid="stButton"] button {border-radius:12px;min-height:2.65rem;border:1px solid rgba(210,190,155,.24);box-shadow:0 3px 10px rgba(0,0,0,.16);}
-div[data-testid="stButton"] button[kind="primary"] {border-color:rgba(222,190,132,.7);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 5px 15px rgba(194,157,94,.2);font-weight:750;}
-div[data-testid="stTextArea"] textarea,div[data-testid="stSelectbox"] div[data-baseweb="select"] {border-radius:13px;}
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+:root{color-scheme:dark}
+html,body,.stApp,[data-testid="stAppViewContainer"]{background:#09090B!important;color:#F4F4F5!important;font-family:'Plus Jakarta Sans',sans-serif!important}
+[data-testid="stAppViewContainer"]{background:radial-gradient(circle at 50% 0%,#18122B 0%,#09090B 46%)!important}
+[data-testid="stSidebar"],[data-testid="collapsedControl"],[data-testid="stHeader"],[data-testid="stToolbar"],[data-testid="manage-app-button"],#MainMenu,header,footer{display:none!important;visibility:hidden!important}
+.block-container{padding-top:2rem!important;padding-bottom:3rem!important;max-width:1280px!important}
+.nexus-hero{position:relative;overflow:hidden;padding:1.45rem 1.65rem;border:1px solid #30234d;border-radius:22px;background:linear-gradient(115deg,rgba(24,18,43,.98),rgba(18,18,22,.96) 65%,rgba(30,24,52,.95));box-shadow:0 18px 48px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.06);margin-bottom:1rem}
+.nexus-brand{font-size:clamp(1.35rem,3vw,2rem);font-weight:800;letter-spacing:.12em;color:#f4f4f5}
+.nexus-tagline{font-size:.92rem;color:#a1a1aa;margin-top:.35rem}
+.nexus-kicker{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:#a78bfa;font-weight:800;margin:0 0 .8rem}
+.nexus-preview{display:flex;gap:13px;align-items:center;padding:12px;border:1px solid #30234d;border-radius:15px;background:linear-gradient(140deg,rgba(124,58,237,.12),rgba(18,18,22,.7));margin:.4rem 0 .8rem}
+.nexus-preview img{width:136px;max-width:42%;aspect-ratio:16/9;object-fit:cover;border-radius:10px}
+.nexus-preview-title{font-weight:750;color:#fafafa;margin-bottom:4px}
+.nexus-preview-copy{font-size:.8rem;color:#a1a1aa;line-height:1.45}
+[data-testid="stVerticalBlockBorderWrapper"]>div{background-color:rgba(18,18,22,.85)!important;backdrop-filter:blur(12px)!important;border:1px solid #27272A!important;border-radius:16px!important;padding:1.1rem!important;box-shadow:0 10px 30px rgba(0,0,0,.3)!important}
+[data-testid="stTextInput"] input,[data-testid="stTextArea"] textarea,[data-testid="stSelectbox"] div[data-baseweb="select"],[data-testid="stMultiSelect"] div[data-baseweb="select"]{background:#18181B!important;border:1px solid #27272A!important;border-radius:10px!important;color:#FAFAFA!important;transition:border-color .2s ease,box-shadow .2s ease!important}
+[data-testid="stTextInput"] input:focus,[data-testid="stTextArea"] textarea:focus,[data-testid="stSelectbox"] div[data-baseweb="select"]:focus-within{border-color:#8B5CF6!important;box-shadow:0 0 0 1px #8B5CF6!important}
+[data-testid="stTextArea"] textarea{line-height:1.6!important;min-height:185px!important}
+[data-testid="stWidgetLabel"] p,label,[data-testid="stMarkdownContainer"] strong{color:#F4F4F5!important}
+[data-testid="stCaptionContainer"],.stCaption{color:#A1A1AA!important}
+div[data-testid="stButton"] button{background:#1b1b22!important;color:#e4e4e7!important;border:1px solid #34343d!important;border-radius:11px!important;min-height:2.7rem!important;font-weight:650!important;transition:all .18s ease!important;box-shadow:none!important}
+div[data-testid="stButton"] button:hover{border-color:#8B5CF6!important;color:#fff!important;transform:translateY(-1px)!important}
+div[data-testid="stButton"] button[kind="primary"]{background:linear-gradient(135deg,#6366F1 0%,#8B5CF6 100%)!important;color:#fff!important;border:0!important;border-radius:12px!important;font-weight:800!important;box-shadow:0 4px 20px rgba(124,58,237,.35)!important}
+div[data-testid="stButton"] button[kind="primary"]:hover{box-shadow:0 8px 25px rgba(124,58,237,.5)!important}
+[data-testid="stExpander"]{border:1px solid #27272A!important;border-radius:13px!important;background:rgba(24,24,27,.72)!important;overflow:hidden!important}
+[data-testid="stExpander"] summary{color:#F4F4F5!important;font-weight:650!important}
+[data-testid="stAudio"]{border-radius:12px!important;overflow:hidden!important}
+[data-testid="stVideo"]{max-width:320px!important;margin:0 auto!important;border-radius:24px!important;overflow:hidden!important;border:3px solid #27272A!important;box-shadow:0 20px 50px rgba(0,0,0,.7)!important}
+[data-testid="stAlert"]{border-radius:13px!important}
+[data-testid="stProgress"]>div>div{background:linear-gradient(90deg,#6366F1,#8B5CF6)!important}
+hr{border-color:#27272A!important}
+@media(max-width:850px){.block-container{padding:1rem .8rem 2.5rem!important}.nexus-hero{padding:1.1rem;border-radius:17px}[data-testid="stHorizontalBlock"]{flex-wrap:wrap!important}[data-testid="stHorizontalBlock"]>[data-testid="column"]{min-width:100%!important;flex:1 1 100%!important}.nexus-preview img{width:112px}}
 </style>
 """, unsafe_allow_html=True)
 
@@ -240,184 +243,191 @@ st.caption("Versão: NEXUS-2026.11.16-fish-voice-library-2")
 if "nexus_style" not in st.session_state or st.session_state["nexus_style"] not in STYLE_OPTIONS:
     st.session_state["nexus_style"] = "Cinematográfico realista"
 
-st.markdown('<div class="nexus-kicker">01 · Conteúdo</div>', unsafe_allow_html=True)
-topic = st.text_area("Assunto ou roteiro", height=145, placeholder="Cole seu roteiro completo ou descreva o vídeo que deseja criar.")
+col_editor, col_preview = st.columns([1.5, 1], gap="large")
 
-st.markdown('<div class="nexus-kicker">02 · Direção visual</div>', unsafe_allow_html=True)
-style = st.session_state["nexus_style"]
-preview_svg = style_preview_svg(style)
-preview_b64 = base64.b64encode(preview_svg.encode("utf-8")).decode("ascii")
-preview_copy = STYLE_META[style][3]
-st.markdown(
-    f'<div class="nexus-preview"><img src="data:image/svg+xml;base64,{preview_b64}" alt="Referência visual {style}"><div><div class="nexus-preview-title">{style}</div><div class="nexus-preview-copy">{preview_copy}</div></div></div>',
-    unsafe_allow_html=True
-)
-with st.expander("Escolher estilo visual · 24 referências", expanded=False):
-    st.caption("Exemplos ilustrativos · toque para selecionar.")
-    with st.container(key="nexus-style-gallery"):
-        for row_start in range(0, len(STYLE_OPTIONS), 2):
-            cols = st.columns(2)
-            for offset, col in enumerate(cols):
-                index = row_start + offset
-                if index >= len(STYLE_OPTIONS):
-                    continue
-                option = STYLE_OPTIONS[index]
-                with col:
-                    is_selected = option == st.session_state["nexus_style"]
-                    st.image(style_preview_svg(option), width=85)
-                    if st.button(("✓ " if is_selected else "") + option, key="style_" + str(index), type="primary" if is_selected else "secondary", use_container_width=True):
-                        st.session_state["nexus_style"] = option
-                        st.rerun()
-style = st.session_state["nexus_style"]
-
-st.markdown('<div class="nexus-kicker">03 · Configurações</div>', unsafe_allow_html=True)
-duration = st.selectbox("Duração do vídeo", [40, 50, 60], index=1, format_func=lambda value: f"{value} segundos")
-fish_api_key = secret("FISH_API_KEY")
-if "nexus_fish_voice_id" not in st.session_state:
-    st.session_state["nexus_fish_voice_id"] = secret("FISH_VOICE_ID")
-if "nexus_fish_voice_name" not in st.session_state:
-    st.session_state["nexus_fish_voice_name"] = ""
-
-if "nexus_fish_voice_name" not in st.session_state:
-    st.session_state["nexus_fish_voice_name"] = ""
-
-if not fish_api_key:
-    st.warning("Configure FISH_API_KEY nos Secrets do Streamlit para carregar as vozes.")
-else:
-    selected_name = st.session_state.get("nexus_fish_voice_name") or "Nenhuma voz selecionada"
-    st.markdown("**NARRAÇÃO**")
-    st.text(selected_name)
-    st.caption("Fish Audio · vozes profissionais de narração em português")
-    with st.expander("🎙️ Escolher voz", expanded=False):
-        st.caption("Seleção enxuta de vozes humanas para narração. Personagens, memes, anime e imitações de figuras públicas são excluídos.")
-        catalog_key = "fish_professional_narrators_v1"
-        if catalog_key not in st.session_state:
-            try:
-                with st.spinner("Carregando vozes profissionais masculinas e femininas..."):
-                    st.session_state[catalog_key] = fish_audio.list_fish_professional_narrators(
-                        fish_api_key, per_gender=25
-                    )
-            except Exception as catalog_error:
-                st.session_state[catalog_key] = {"error": str(catalog_error)}
-        narrator_catalog = st.session_state[catalog_key]
-        if isinstance(narrator_catalog, dict) and narrator_catalog.get("error"):
-            st.error(f"Não foi possível carregar as vozes Fish Audio: {narrator_catalog['error']}")
-            if st.button("Tentar novamente", key="retry_professional_voices"):
-                st.session_state.pop(catalog_key, None)
-                st.rerun()
-        else:
-            for gender, label in (("male", "Vozes masculinas"), ("female", "Vozes femininas")):
-                voices = narrator_catalog.get(gender, [])
-                with st.expander(f"{label} · {len(voices)} vozes", expanded=(gender == "male")):
-                    if not voices:
-                        st.info("A Fish Audio não retornou vozes compatíveis com os filtros nesta categoria.")
-                    for voice_option in voices:
-                        voice_col, sample_col = st.columns([1.1, 1.5], vertical_alignment="center")
-                        with voice_col:
-                            is_selected = voice_option["id"] == st.session_state.get("nexus_fish_voice_id", "")
-                            st.markdown(f"**{voice_option['title']}**")
-                            details = []
-                            source_label = str(voice_option.get("source") or "").casefold()
-                            if "pvc" in source_label:
-                                details.append("Professional Voice Clone")
-                            if voice_option.get("licensed"):
-                                details.append("Licenciada pela Fish Audio")
-                            if voice_option.get("author"):
-                                details.append(voice_option["author"])
-                            if details:
-                                st.caption(" · ".join(details))
-                            if voice_option.get("description"):
-                                st.caption(voice_option["description"][:150])
-                            if st.button(
-                                "Selecionada" if is_selected else "Usar esta voz",
-                                key=f"fish_pick_{voice_option['id']}",
-                                use_container_width=True,
-                                type="primary" if is_selected else "secondary",
-                            ):
-                                st.session_state["nexus_fish_voice_id"] = voice_option["id"]
-                                st.session_state["nexus_fish_voice_name"] = voice_option["title"]
-                                st.rerun()
-                        with sample_col:
-                            if voice_option.get("sample_audio"):
-                                st.audio(voice_option["sample_audio"], format="audio/mp3")
-                            else:
-                                st.caption("Amostra não publicada pela Fish Audio.");
-
-voice = st.session_state.get("nexus_fish_voice_id", "")
-
-render_mode = st.selectbox(
-    "Motor de produção visual",
-    ["Imagens originais · Cloudflare + Modal I2V + Remotion", "Bibliotecas de vídeo (alternativo)"],
-    index=0,
-    help="Fluxo principal: Cloudflare gera o keyframe de cada cena, Modal/LTX-Video anima cada keyframe em um clipe MP4 e Remotion monta o vídeo final. Requer MODAL_TOKEN_ID e MODAL_TOKEN_SECRET nos GitHub Actions Secrets e o worker Modal implantado. Bibliotecas de vídeo permanecem como alternativa.",
-)
-
-with st.expander("Ferramentas avançadas · diagnóstico das bibliotecas de vídeo"):
-    st.caption("Testa busca, licença, download e leitura do vídeo no Wikimedia Commons, Pixabay e Pexels. As chaves nunca são exibidas.")
-    if st.button("Testar todas as bibliotecas configuradas", type="secondary"):
-        providers = [
-            ("Wikimedia Commons", "", {"wikimedia_enabled": True}),
-            ("Pixabay", secret("PIXABAY_API_KEY"), {"pixabay_key": secret("PIXABAY_API_KEY")}),
-            ("Pexels", secret("PEXELS_API_KEY"), {"pexels_key": secret("PEXELS_API_KEY")}),
-        ]
-        tested = 0
-        with tempfile.TemporaryDirectory(prefix="nexus_library_diagnostics_") as temp_dir:
-            for provider_name, api_key, source_args in providers:
-                if not api_key and provider_name != "Wikimedia Commons":
-                    st.warning(f"{provider_name}: chave não configurada nos Secrets.")
-                    continue
-                tested += 1
-                try:
-                    with st.spinner(f"Testando {provider_name}: autenticação, busca e download..."):
-                        results, source_errors = _search_stock_compatible(
-                            "nature landscape",
-                            per_page=5,
-                            relevance_query="nature landscape",
-                            min_relevance=0,
-                            **source_args,
-                        )
-                        if not results:
-                            detail = "; ".join(source_errors) if source_errors else "A API não retornou clipes relevantes e utilizáveis."
-                            st.error(f"{provider_name}: busca sem resultados — {detail}")
+with col_editor:
+    with st.container(border=True):
+        st.markdown('<div class="nexus-kicker">01 · Conteúdo</div>', unsafe_allow_html=True)
+        topic = st.text_area("Assunto ou roteiro", height=145, placeholder="Cole seu roteiro completo ou descreva o vídeo que deseja criar.")
+        duration = st.selectbox("Duração do vídeo", [40, 50, 60], index=1, format_func=lambda value: f"{value} segundos")
+    with st.container(border=True):
+        st.markdown('<div class="nexus-kicker">Produção</div>', unsafe_allow_html=True)
+        render_mode = st.selectbox(
+            "Motor de produção visual",
+            ["Imagens originais · Cloudflare + Modal I2V + Remotion", "Bibliotecas de vídeo (alternativo)"],
+            index=0,
+            help="Fluxo principal: Cloudflare gera o keyframe de cada cena, Modal/LTX-Video anima cada keyframe em um clipe MP4 e Remotion monta o vídeo final. Requer MODAL_TOKEN_ID e MODAL_TOKEN_SECRET nos GitHub Actions Secrets e o worker Modal implantado. Bibliotecas de vídeo permanecem como alternativa.",
+        )
+        with st.expander("Ferramentas avançadas · diagnóstico das bibliotecas de vídeo"):
+            st.caption("Testa busca, licença, download e leitura do vídeo no Wikimedia Commons, Pixabay e Pexels. As chaves nunca são exibidas.")
+            if st.button("Testar todas as bibliotecas configuradas", type="secondary"):
+                providers = [
+                    ("Wikimedia Commons", "", {"wikimedia_enabled": True}),
+                    ("Pixabay", secret("PIXABAY_API_KEY"), {"pixabay_key": secret("PIXABAY_API_KEY")}),
+                    ("Pexels", secret("PEXELS_API_KEY"), {"pexels_key": secret("PEXELS_API_KEY")}),
+                ]
+                tested = 0
+                with tempfile.TemporaryDirectory(prefix="nexus_library_diagnostics_") as temp_dir:
+                    for provider_name, api_key, source_args in providers:
+                        if not api_key and provider_name != "Wikimedia Commons":
+                            st.warning(f"{provider_name}: chave não configurada nos Secrets.")
                             continue
-                        chosen = next((item for item in results if item.get("vertical")), results[0])
-                        clip_path = download_file(
-                            chosen["url"],
-                            Path(temp_dir) / (provider_name.lower() + "_test.mp4"),
-                        )
-                        probe = subprocess.run(
-                            [
-                                "ffprobe", "-v", "error",
-                                "-show_entries", "format=duration,size:stream=codec_name,codec_type,width,height",
-                                "-of", "json", str(clip_path),
-                            ],
-                            capture_output=True, text=True, timeout=60,
-                        )
-                        if probe.returncode != 0:
-                            raise RuntimeError(probe.stderr[-1200:] or "FFprobe não conseguiu ler o arquivo.")
-                        metadata = json.loads(probe.stdout)
-                        streams = metadata.get("streams", [])
-                        video = next((stream for stream in streams if stream.get("codec_type") == "video"), None)
-                        if not video:
-                            raise RuntimeError("O arquivo baixado não contém uma faixa de vídeo.")
-                        duration_seconds = float(metadata.get("format", {}).get("duration") or 0)
-                        size_bytes = int(metadata.get("format", {}).get("size") or clip_path.stat().st_size)
-                        if duration_seconds <= 0 or size_bytes <= 0:
-                            raise RuntimeError("O MP4 não apresentou duração ou tamanho válidos.")
-                        st.success(
-                            f"{provider_name}: busca, {len(results)} candidatos, download e leitura MP4 aprovados."
-                        )
-                        st.caption(
-                            f"{chosen.get('title') or provider_name} · "
-                            f"{video.get('width')}×{video.get('height')} · "
-                            f"{duration_seconds:.1f}s · {video.get('codec_name', 'codec desconhecido')}"
-                        )
-                        if source_errors:
-                            st.caption("Avisos de busca: " + " | ".join(source_errors))
-                except Exception as exc:
-                    st.error(f"{provider_name}: falha no teste — {exc}")
-        if not tested:
-            st.info("Nenhuma biblioteca tem chave configurada. Adicione as chaves nos Secrets e tente novamente.")
+                        tested += 1
+                        try:
+                            with st.spinner(f"Testando {provider_name}: autenticação, busca e download..."):
+                                results, source_errors = _search_stock_compatible(
+                                    "nature landscape",
+                                    per_page=5,
+                                    relevance_query="nature landscape",
+                                    min_relevance=0,
+                                    **source_args,
+                                )
+                                if not results:
+                                    detail = "; ".join(source_errors) if source_errors else "A API não retornou clipes relevantes e utilizáveis."
+                                    st.error(f"{provider_name}: busca sem resultados — {detail}")
+                                    continue
+                                chosen = next((item for item in results if item.get("vertical")), results[0])
+                                clip_path = download_file(
+                                    chosen["url"],
+                                    Path(temp_dir) / (provider_name.lower() + "_test.mp4"),
+                                )
+                                probe = subprocess.run(
+                                    [
+                                        "ffprobe", "-v", "error",
+                                        "-show_entries", "format=duration,size:stream=codec_name,codec_type,width,height",
+                                        "-of", "json", str(clip_path),
+                                    ],
+                                    capture_output=True, text=True, timeout=60,
+                                )
+                                if probe.returncode != 0:
+                                    raise RuntimeError(probe.stderr[-1200:] or "FFprobe não conseguiu ler o arquivo.")
+                                metadata = json.loads(probe.stdout)
+                                streams = metadata.get("streams", [])
+                                video = next((stream for stream in streams if stream.get("codec_type") == "video"), None)
+                                if not video:
+                                    raise RuntimeError("O arquivo baixado não contém uma faixa de vídeo.")
+                                duration_seconds = float(metadata.get("format", {}).get("duration") or 0)
+                                size_bytes = int(metadata.get("format", {}).get("size") or clip_path.stat().st_size)
+                                if duration_seconds <= 0 or size_bytes <= 0:
+                                    raise RuntimeError("O MP4 não apresentou duração ou tamanho válidos.")
+                                st.success(
+                                    f"{provider_name}: busca, {len(results)} candidatos, download e leitura MP4 aprovados."
+                                )
+                                st.caption(
+                                    f"{chosen.get('title') or provider_name} · "
+                                    f"{video.get('width')}×{video.get('height')} · "
+                                    f"{duration_seconds:.1f}s · {video.get('codec_name', 'codec desconhecido')}"
+                                )
+                                if source_errors:
+                                    st.caption("Avisos de busca: " + " | ".join(source_errors))
+                        except Exception as exc:
+                            st.error(f"{provider_name}: falha no teste — {exc}")
+                if not tested:
+                    st.info("Nenhuma biblioteca tem chave configurada. Adicione as chaves nos Secrets e tente novamente.")
+
+with col_preview:
+    with st.container(border=True):
+        st.markdown('<div class="nexus-kicker">Direção visual</div>', unsafe_allow_html=True)
+        st.markdown('<div class="nexus-kicker">02 · Direção visual</div>', unsafe_allow_html=True)
+        style = st.session_state["nexus_style"]
+        preview_svg = style_preview_svg(style)
+        preview_b64 = base64.b64encode(preview_svg.encode("utf-8")).decode("ascii")
+        preview_copy = STYLE_META[style][3]
+        st.markdown(
+            f'<div class="nexus-preview"><img src="data:image/svg+xml;base64,{preview_b64}" alt="Referência visual {style}"><div><div class="nexus-preview-title">{style}</div><div class="nexus-preview-copy">{preview_copy}</div></div></div>',
+            unsafe_allow_html=True
+        )
+        with st.expander("Escolher estilo visual · 24 referências", expanded=False):
+            st.caption("Exemplos ilustrativos · toque para selecionar.")
+            with st.container(key="nexus-style-gallery"):
+                for row_start in range(0, len(STYLE_OPTIONS), 2):
+                    cols = st.columns(2)
+                    for offset, col in enumerate(cols):
+                        index = row_start + offset
+                        if index >= len(STYLE_OPTIONS):
+                            continue
+                        option = STYLE_OPTIONS[index]
+                        with col:
+                            is_selected = option == st.session_state["nexus_style"]
+                            st.image(style_preview_svg(option), width=85)
+                            if st.button(("✓ " if is_selected else "") + option, key="style_" + str(index), type="primary" if is_selected else "secondary", use_container_width=True):
+                                st.session_state["nexus_style"] = option
+                                st.rerun()
+        style = st.session_state["nexus_style"]
+    with st.container(border=True):
+        st.markdown('<div class="nexus-kicker">Narração</div>', unsafe_allow_html=True)
+        fish_api_key = secret("FISH_API_KEY")
+        if "nexus_fish_voice_id" not in st.session_state:
+            st.session_state["nexus_fish_voice_id"] = secret("FISH_VOICE_ID")
+        if "nexus_fish_voice_name" not in st.session_state:
+            st.session_state["nexus_fish_voice_name"] = ""
+
+        if "nexus_fish_voice_name" not in st.session_state:
+            st.session_state["nexus_fish_voice_name"] = ""
+
+        if not fish_api_key:
+            st.warning("Configure FISH_API_KEY nos Secrets do Streamlit para carregar as vozes.")
+        else:
+            selected_name = st.session_state.get("nexus_fish_voice_name") or "Nenhuma voz selecionada"
+            st.markdown("**NARRAÇÃO**")
+            st.text(selected_name)
+            st.caption("Fish Audio · vozes profissionais de narração em português")
+            with st.expander("🎙️ Escolher voz", expanded=False):
+                st.caption("Seleção enxuta de vozes humanas para narração. Personagens, memes, anime e imitações de figuras públicas são excluídos.")
+                catalog_key = "fish_professional_narrators_v1"
+                if catalog_key not in st.session_state:
+                    try:
+                        with st.spinner("Carregando vozes profissionais masculinas e femininas..."):
+                            st.session_state[catalog_key] = fish_audio.list_fish_professional_narrators(
+                                fish_api_key, per_gender=25
+                            )
+                    except Exception as catalog_error:
+                        st.session_state[catalog_key] = {"error": str(catalog_error)}
+                narrator_catalog = st.session_state[catalog_key]
+                if isinstance(narrator_catalog, dict) and narrator_catalog.get("error"):
+                    st.error(f"Não foi possível carregar as vozes Fish Audio: {narrator_catalog['error']}")
+                    if st.button("Tentar novamente", key="retry_professional_voices"):
+                        st.session_state.pop(catalog_key, None)
+                        st.rerun()
+                else:
+                    for gender, label in (("male", "Vozes masculinas"), ("female", "Vozes femininas")):
+                        voices = narrator_catalog.get(gender, [])
+                        with st.expander(f"{label} · {len(voices)} vozes", expanded=(gender == "male")):
+                            if not voices:
+                                st.info("A Fish Audio não retornou vozes compatíveis com os filtros nesta categoria.")
+                            for voice_option in voices:
+                                voice_col, sample_col = st.columns([1.1, 1.5], vertical_alignment="center")
+                                with voice_col:
+                                    is_selected = voice_option["id"] == st.session_state.get("nexus_fish_voice_id", "")
+                                    st.markdown(f"**{voice_option['title']}**")
+                                    details = []
+                                    source_label = str(voice_option.get("source") or "").casefold()
+                                    if "pvc" in source_label:
+                                        details.append("Professional Voice Clone")
+                                    if voice_option.get("licensed"):
+                                        details.append("Licenciada pela Fish Audio")
+                                    if voice_option.get("author"):
+                                        details.append(voice_option["author"])
+                                    if details:
+                                        st.caption(" · ".join(details))
+                                    if voice_option.get("description"):
+                                        st.caption(voice_option["description"][:150])
+                                    if st.button(
+                                        "Selecionada" if is_selected else "Usar esta voz",
+                                        key=f"fish_pick_{voice_option['id']}",
+                                        use_container_width=True,
+                                        type="primary" if is_selected else "secondary",
+                                    ):
+                                        st.session_state["nexus_fish_voice_id"] = voice_option["id"]
+                                        st.session_state["nexus_fish_voice_name"] = voice_option["title"]
+                                        st.rerun()
+                                with sample_col:
+                                    if voice_option.get("sample_audio"):
+                                        st.audio(voice_option["sample_audio"], format="audio/mp3")
+                                    else:
+                                        st.caption("Amostra não publicada pela Fish Audio.");
+
+        voice = st.session_state.get("nexus_fish_voice_id", "")
 
 if st.button("Planejar vídeo", type="primary", use_container_width=True):
     # Remove any previous result first: a failed new request must never leave
