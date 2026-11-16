@@ -1296,3 +1296,11 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Remotion demo render #75, run ID `43952157522`, commit `c7b6224`: completed/success. Testes de adapters, criação de mídia sintética, manifesto via adapter Python, render de integração Remotion, validação dos streams/duração e upload de demos passaram.
 - Esses resultados validam o Remotion e o adapter de mídia, mas o demo #75 não chama Cloudflare nem Modal LTX; a integração real completa está no workflow novo `nexus-live-pipeline-smoke.yml`.
 - Estado: código e CI do teste integrado aprovados. A execução Cloudflare→LTX→Remotion ainda aguarda disparo manual.
+
+
+## Primeira execução do pipeline integrado e correção de ambiente — 16/11/2026
+- O workflow manual `NEXUS live visual pipeline smoke test` foi iniciado pelo usuário; run #1, ID `43953906585`, commit `245b6c039deb4ed592f58b60d9d65d591987b91f`, conclusão `failure`.
+- Steps de checkout, setup Python 3.11, Node 22, FFmpeg, dependências Python, dependências Remotion e typecheck Remotion passaram.
+- O step de integração falhou antes de chamar qualquer provedor, com `ModuleNotFoundError: No module named 'nexus'` ao importar `nexus.cloudflare_images`. Portanto, nesta execução NÃO houve geração Cloudflare, inferência Modal/LTX, render Remotion, nem artifact. Não houve evidência de falha dos motores.
+- Correção aplicada em `.github/workflows/nexus-live-pipeline-smoke.yml`, commit `e77458e650868bb367d47b0ba5bbaa68550d0dad`: definido `PYTHONPATH: ${{ github.workspace }}` no ambiente do step de integração, para disponibilizar a raiz do checkout ao importador Python.
+- Estado da correção: commit gravado no `main`; aguardando CI pós-commit e nova execução manual do workflow integrado. Não considerar integração validada.
