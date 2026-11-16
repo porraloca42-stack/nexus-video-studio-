@@ -322,7 +322,7 @@ else:
                     tags=[voice_style] if voice_style != "Todos" else None,
                     language="pt",
                     self_only=(catalog_scope == "Minhas vozes"),
-                    sort_by="task_count" if catalog_scope == "Mais usadas" else "score",
+                    sort_by="score",
                 )
                 st.session_state["fish_voice_catalog_cache"] = voice_catalog_result
                 st.session_state["fish_voice_catalog_cache_key"] = cache_key
@@ -334,6 +334,8 @@ else:
             st.error(f"Falha ao consultar a biblioteca Fish Audio: {catalog['error']}")
         else:
             voice_catalog = catalog.get("items", [])
+            if catalog_scope == "Mais usadas":
+                voice_catalog = sorted(voice_catalog, key=lambda item: int(item.get("task_count") or 0), reverse=True)
             if search_voice.strip():
                 query_terms = [term.casefold() for term in search_voice.split() if term.strip()]
                 voice_catalog = [
@@ -366,6 +368,9 @@ else:
                     is_selected = voice_option["id"] == st.session_state.get("nexus_fish_voice_id", "")
                     st.markdown(f"**{voice_option['title']}**")
                     tags = ", ".join(voice_option.get("tags", [])[:3])
+                    languages = ", ".join(voice_option.get("languages", []))
+                    if languages:
+                        st.caption("Idioma: " + languages)
                     if tags:
                         st.caption(tags)
                     if catalog_scope == "Minhas vozes":
