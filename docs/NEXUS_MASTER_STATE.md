@@ -115,6 +115,15 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 
 - Commit `1d390e2c`: criado workflow GitHub Actions `.github/workflows/tests.yml`, executando compilação sintática (`compileall`) e `unittest discover` em pushes/PRs para `main`. O arquivo foi confirmado no GitHub; o endpoint de status ainda não retornou checks, portanto CI permanece pendente e não deve ser descrita como aprovada.
 
+
+## Continuidade técnica — 2026-11-16 (reteste de relevância)
+- Commit `7a2181e8` em `nexus/assets.py`: busca por biblioteca agora descarta candidatos sem correspondência textual mínima com a cena e continua tentando as variações progressivamente, em vez de aceitar o primeiro lote de resultados irrelevantes. A pontuação semântica usa a consulta de conteúdo da cena, separada dos termos de estilo.
+- Commit `3b89cb1d` em `app.py`: chamadas primária e alternativa passam a enviar a consulta semântica específica da cena separadamente dos termos de estilo visual, evitando que palavras como cinematic/35mm dominem o ranking.
+- Commit `aeab13d4` em `tests/test_assets.py`: suíte ampliada para seis casos: ranking por relevância, rejeição de resultados irrelevantes e tentativa de consultas mais curtas, isolamento do estilo visual, exclusão de clipes repetidos e segurança com resultados vazios.
+- Validação local isolada executada nesta sessão: seis testes de regressão passaram e os módulos de mídia/testes compilam com `compileall`. O repositório não pôde ser clonado neste ambiente por indisponibilidade de resolução de rede; portanto, não foi possível executar o app completo nem o workflow remoto. O endpoint de status do commit ainda retornou lista vazia de checks; CI remoto permanece não confirmado.
+- Importante: a pontuação atual é lexical sobre título/descrição/tags fornecidos pela biblioteca, não uma avaliação visual multimodal do conteúdo real do vídeo. Não prometer compreensão visual da imagem até implementar e testar essa etapa.
+- Próximas verificações: CI GitHub, teste Coverr real com buscas semânticas, confirmar se os metadados retornados contêm texto suficiente para o limiar; se não contiverem, integrar avaliação visual de thumbnails/frames antes de seleção. Depois disso, validar narração, sincronismo, duração final, render e download do MP4 real.
+
 ## Regras para o assistente em novos chats
 - Começar lendo este arquivo e o código relevante no GitHub antes de propor mudanças.
 - Tratar este documento como registro de continuidade, mas conferir o estado atual do repositório e deployment; pode ficar desatualizado.
