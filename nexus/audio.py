@@ -263,7 +263,7 @@ def list_fish_professional_narrators(api_key, *, per_gender=25, session=None):
                 source = (voice.get("source") or "").casefold()
                 # The Fish discovery "pvc,licensed" view includes PVC and
                 # Fish-licensed sources. When source is exposed, enforce it.
-                if source and not any(token in source for token in ("pvc", "licensed")):
+                if source and not any(token in source for token in ("pvc", "licensed")) and not voice.get("licensed"):
                     continue
                 if _is_human_narrator_voice(voice, gender):
                     discovered[voice["id"]] = voice
