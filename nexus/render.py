@@ -45,6 +45,47 @@ def _probe_duration(path):
     return duration
 
 
+def _retime_srt(source, destination, tempo, target_duration):
+    """Keep burned-in subtitles aligned when the narration is time-stretched."""
+    import re
+
+    timestamp_pattern = re.compile(
+        r"(\\d{2}:\\d{2}:\\d{2},\\d{3})\\s+-->\\s+(\\d{2}:\\d{2}:\\d{2},\\d{3})"
+    )
+
+    def to_ms(value):
+        hours, minutes, rest = value.split(":")
+        seconds, millis = rest.split(",")
+        return ((int(hours) * 60 + int(minutes)) * 60 + int(seconds)) * 1000 + int(millis)
+
+    def to_timestamp(value):
+        value = max(0, int(value))
+        hours, remainder = divmod(value, 3600000)
+        minutes, remainder = divmod(remainder, 60000)
+        seconds, millis = divmod(remainder, 1000)
+        return f"{hours:02d}:{minutes:02d}:{seconds:02d},{millis:03d}"
+
+    limit_ms = int(round(float(target_duration) * 1000))
+    factor = 1.0 / float(tempo)
+    lines = Path(source).read_text(encoding="utf-8").splitlines()
+    adjusted = []
+    for line in lines:
+        match = timestamp_pattern.search(line)
+        if not match:
+            adjusted.append(line)
+            continue
+        start = min(limit_ms, int(round(to_ms(match.group(1)) * factor)))
+        end = min(limit_ms, int(round(to_ms(match.group(2)) * factor)))
+        if end <= start:
+            continue
+        adjusted.append(
+            line[:match.start(1)] + to_timestamp(start) + " --> " +
+            to_timestamp(end) + line[match.end(2):]
+        )
+    Path(destination).write_text("\\n".join(adjusted) + "\\n", encoding="utf-8")
+    return Path(destination)
+
+
 def render_video(media, audio_path, output, subtitles_path=None):
     if not media:
         raise ValueError("Nenhuma cena foi aprovada.")
@@ -76,7 +117,9 @@ def render_video(media, audio_path, output, subtitles_path=None):
         run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", str(concat), "-c", "copy", "-movflags", "+faststart", str(silent)])
         command = ["ffmpeg", "-y", "-i", str(silent), "-i", str(audio_path)]
         if subtitles_path and Path(subtitles_path).exists():
-            subtitle_file = str(Path(subtitles_path).resolve()).replace("\\", "/").replace(":", "\\:")
+            adjusted_subtitles = temp_dir / "subtitles_retimed.srt"
+            _retime_srt(subtitles_path, adjusted_subtitles, tempo, target_duration)
+            subtitle_file = str(adjusted_subtitles.resolve()).replace("\\", "/").replace(":", "\\:")
             subtitle_filter = f"subtitles='{subtitle_file}':force_style='FontName=Arial,FontSize=17,PrimaryColour=&H00FFFFFF,OutlineColour=&H00101010,BorderStyle=1,Outline=3,Shadow=1,Alignment=2,MarginV=105,Bold=1'"
             command += ["-vf", subtitle_filter]
         audio_filter = (
