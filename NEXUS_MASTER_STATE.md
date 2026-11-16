@@ -128,3 +128,11 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Causa confirmada no código: `discover_models()` ranqueava modelos apenas por `generateContent`; um modelo especializado em TTS podia vencer o ranking Flash Lite, embora o diretor envie `systemInstruction` e espere JSON textual.
 - Commit 941e874: modelos TTS, áudio nativo, imagem e vídeo são excluídos da seleção do diretor. Se a API ainda devolver um erro 400 específico de incompatibilidade com developer/system instruction, o diretor registra o modelo como incompatível e tenta o próximo modelo textual compatível, em vez de abortar.
 - Não foi possível fazer chamada real ao Gemini neste ambiente. Código atualizado no GitHub; implantação e validação ponta a ponta dependem do Streamlit carregar o commit e de uma chamada real.
+
+
+## Investigação do erro persistente de modelo Gemini — 16/11/2026
+- O usuário repetiu o erro HTTP 400 citando `gemini-3.8-flash-lite-tts` depois do commit 941e874. Isso demonstra que o runtime acessado ainda não refletia a correção anterior; não é prova de que o filtro atualizado tenha sido executado.
+- Revisão da seleção encontrou outro defeito: quando `GEMINI_MODEL` apontava para um modelo filtrado/incompatível, o fallback preservava o primeiro item na ordem arbitrária retornada pela API, em vez de ranquear todos os modelos textuais compatíveis.
+- Commit 2408b59: corrigido o fallback; quando o modelo configurado não existe entre os modelos textuais compatíveis, todos os candidatos são ordenados pela classificação de capacidade/estabilidade. A preferência configurada só é mantida se for compatível.
+- Commit b1e6816: alterado também `app.py` para incluir no expander de diagnóstico a identificação `NEXUS-2026.11.16-model-guard-2`. Isso permite confirmar visualmente se o Streamlit carregou o novo commit e separa problema de implantação de problema de configuração.
+- Commits confirmados no branch `main`. Ainda não houve acesso ao ambiente Streamlit publicado nem chamada real à API Gemini; portanto, deploy e execução permanecem pendentes de validação.
