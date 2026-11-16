@@ -51,7 +51,11 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - O usuário executou o diagnóstico Coverr e confirmou em captura que a API respondeu com sucesso e retornou cinco clipes, incluindo um vertical. Autenticação e busca genérica estão TESTADAS no ambiente publicado.
 - Primeiro teste do botão “Produzir vídeo completo” gerou storyboard de seis cenas, mas não encontrou clipes para nenhuma cena. FFmpeg não foi iniciado; pipeline completo permanece NÃO VALIDADO.
 - Primeira correção de busca progressiva foi insuficiente: captura do usuário mostra zero resultados em todas as sete cenas, mesmo após consultas originais e alternativas. As consultas estavam excessivamente específicas para o mecanismo de stock.
-- Nova correção publicada em nexus/assets.py: expande a busca por cena para termos de assunto/ação individuais e aliases específicos (ex.: alarm→alarm clock/waking up; barbell→gym/weightlifting; book→reading; typing→computer/keyboard; city→city lights), além da consulta original e compacta. Limite de oito consultas por fonte/cena. Mantém a busca sem aceitar mídia sem URL MP4. Aguarda novo teste; não afirmar que corrigiu a disponibilidade sem resultado real.
+- O usuário identificou corretamente falha arquitetural: buscas não podem ser guiadas por dicionário fixo; quantidade e conteúdo das cenas devem ser decididos pelo Gemini a partir do roteiro. A expansão anterior com aliases fixos foi removida.
+- Nova arquitetura publicada: Gemini recebe regras de segmentação por duração e densidade do roteiro. Para 40–60s, mínimo ceil(duração/5), meta ceil(duração/4) ou mais; em 50s, mínimo 10 e meta 12–15. Cenas normalmente 3–4s, com buscas próprias, distintas e específicas por cena.
+- validate_storyboard agora recebe a duração solicitada e rejeita contagem inferior ao mínimo, soma de durações divergente em mais de 0,75s e cenas acima de 5s.
+- nexus/assets.py deriva variações apenas dos termos da busca específica criada pelo diretor; não existe mais mapa fixo de temas ou sinônimos.
+- nexus/render.py usa stream_loop para preencher o segmento quando o clipe-fonte for mais curto, evitando quadros vazios. Isso é uma proteção técnica, não substitui a seleção de clipes longos e variados.
 - O usuário executou o download interno e confirmou em captura que o servidor recebeu e validou um MP4: H.264, 606×1080, 8 segundos, 4,65 MB. Download servidor→arquivo e leitura FFprobe estão TESTADOS. O arquivo ficou em diretório temporário do servidor e foi descartado ao fim do teste; não houve download para o celular, nem isso era o objetivo do diagnóstico.
 - A interface explica que o diagnóstico Coverr baixa o clipe temporariamente no servidor; o usuário não deve receber arquivos-fonte individuais.
 - Em 2026-11-16 foi publicado um fluxo de produção atualizado: botão “Produzir vídeo completo”; validação FFprobe de cada clipe baixado; geração de narração/legendas; render FFmpeg; validação do MP4 final com faixas de vídeo e áudio; armazenamento dos bytes do MP4 em session_state para manter prévia e botão de download após reruns. O código foi publicado, mas ainda NÃO foi executado pelo usuário nem validado com um MP4 real.
@@ -66,9 +70,10 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 2. CONCLUÍDO: autenticação e busca Coverr testadas com sucesso pelo usuário; cinco resultados retornados.
 3. CONCLUÍDO: download interno Coverr e validação FFprobe confirmados pelo usuário (H.264, 606×1080, 8 s, 4,65 MB).
 4. IMPLEMENTADO, AGUARDANDO RETESTE: fluxo de produção e entrega MP4 final. Primeiro teste parou antes do FFmpeg porque não houve resultados para as seis buscas específicas.
-5. PRÓXIMO: retestar a busca com termos individuais e aliases semânticos; verificar resultados por cena e conferir a correspondência antes de renderizar.
-6. Melhorar ranking semântico por cena; não selecionar automaticamente o primeiro resultado sem avaliar correspondência.
-7. Implementar avaliação multimodal dos candidatos para verificar correspondência com a narração.
+5. PRÓXIMO: atualizar o app e gerar novo storyboard de 50s; confirmar pelo menos 10 cenas (meta 12–15), buscas específicas geradas pelo Gemini e soma exata de 50s.
+6. Retestar a busca por cena e validar relevância, variedade e duração dos clipes antes de renderizar.
+7. Implementar ranking semântico e avaliação multimodal dos candidatos.
+
 8. Renderizar o primeiro MP4 real de 40–50s, inspecionar qualidade e validar entrega do arquivo final.
 9. Considerar Pixabay como fallback quando a chave estiver disponível; Pexels permanece fora do escopo enquanto a emissão de chaves estiver indisponível.
 10. Avaliar MCP oficial do Coverr somente se trouxer vantagem após validar a integração REST.
