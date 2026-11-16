@@ -2,7 +2,6 @@ import React from "react";
 import {
   AbsoluteFill,
   Audio,
-  Easing,
   Img,
   OffthreadVideo,
   interpolate,
@@ -17,24 +16,24 @@ const SceneLayer: React.FC<{ scene: NexusScene; index: number; from: number; dur
 }) => {
   const frame = useCurrentFrame();
   const local = frame - from;
-  const fade = Math.min(
-    interpolate(local, [0, 18], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) }),
-    interpolate(local, [duration - 18, duration], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }),
-  );
   const accent = scene.accent || "#e8b66b";
   const drift = Math.sin(local / 32) * 18;
   const progress = Math.max(0, Math.min(1, local / Math.max(1, duration)));
   const motion = scene.cameraMotion || "push_in";
-  const imageScale = motion === "pull_out" ? 1.12 - progress * 0.07 : 1.06 + progress * 0.08;
-  const imageX = motion === "pan_left" ? progress * 34 : motion === "pan_right" ? -progress * 34 : 0;
-  const imageY = motion === "push_in" ? -progress * 16 : motion === "pull_out" ? progress * 12 : 0;
+  // Stronger, continuous camera movement: a visible Ken Burns move rather than
+  // the previous nearly imperceptible 6–8% drift. Motion remains camera-based;
+  // still images do not become generated live-action footage.
+  const imageScale = motion === "pull_out" ? 1.28 - progress * 0.16 : 1.12 + progress * 0.16;
+  const imageX = motion === "pan_left" ? progress * 76 : motion === "pan_right" ? -progress * 76 : Math.sin(progress * Math.PI) * 10;
+  const imageY = motion === "push_in" ? -progress * 34 : motion === "pull_out" ? progress * 26 : Math.sin(progress * Math.PI) * 8;
+  const imageRotate = Math.sin(progress * Math.PI) * 0.45;
 
   return (
-    <AbsoluteFill style={{ opacity: fade, overflow: "hidden", background: "#0b111a" }}>
+    <AbsoluteFill style={{ opacity: 1, overflow: "hidden", background: "#0b111a" }}>
       {scene.visualMode === "video" && scene.asset ? (
         <OffthreadVideo src={staticFile(scene.asset!)} muted style={{ width: "100%", height: "100%", objectFit: "cover" }} />
       ) : scene.visualMode === "image" && scene.asset ? (
-        <Img src={staticFile(scene.asset!)} style={{ width: "100%", height: "100%", objectFit: "cover", transform: `translate(${imageX}px, ${imageY}px) scale(${imageScale})` }} />
+        <Img src={staticFile(scene.asset!)} style={{ width: "100%", height: "100%", objectFit: "cover", transform: `translate(${imageX}px, ${imageY}px) scale(${imageScale}) rotate(${imageRotate}deg)` }} />
       ) : (
         <AbsoluteFill style={{ background: "radial-gradient(ellipse at 70% 30%, #33485d 0%, #172330 36%, #090e15 78%)" }}>
           <div style={{ position: "absolute", width: 680, height: 680, borderRadius: "50%", border: `1px solid ${accent}66`, right: -290 + drift, top: 190, boxShadow: `0 0 100px ${accent}22, inset 0 0 100px ${accent}12` }} />
@@ -43,18 +42,6 @@ const SceneLayer: React.FC<{ scene: NexusScene; index: number; from: number; dur
         </AbsoluteFill>
       )}
       <AbsoluteFill style={{ background: "linear-gradient(180deg, #05080b66 0%, transparent 30%, #05080b88 100%)" }} />
-      <div style={{ position: "absolute", top: 105, left: 62, right: 62 }}>
-        <div style={{ color: accent, fontSize: 17, letterSpacing: 4, fontWeight: 700 }}>NEXUS VIDEO STUDIO</div>
-        {scene.headline ? (
-          <div style={{ marginTop: 540, color: "#fff", fontSize: 58, lineHeight: 1.12, fontWeight: 750, whiteSpace: "pre-line", textShadow: "0 8px 40px #000b" }}>{scene.headline}</div>
-        ) : null}
-        {scene.visualDescription ? (
-          <div style={{ marginTop: 22, color: "#e4e9ed", fontSize: 23, lineHeight: 1.4, maxWidth: 570 }}>{scene.visualDescription}</div>
-        ) : null}
-      </div>
-      <div style={{ position: "absolute", bottom: 64, left: 62, right: 62, display: "flex", justifyContent: "space-between", color: "#ffffffaa", fontSize: 15, letterSpacing: 2 }}>
-        <span>ROTEIRO · DIREÇÃO · MOVIMENTO</span><span>{String(index + 1).padStart(2, "0")}</span>
-      </div>
     </AbsoluteFill>
   );
 };
