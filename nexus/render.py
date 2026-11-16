@@ -31,9 +31,36 @@ def normalize_clip(source, destination, duration, motion="push_in"):
     )
     run(["ffmpeg", "-y", "-stream_loop", "-1", "-i", str(source), "-t", str(duration), "-vf", filter_graph, "-an", "-c:v", "libx264", "-preset", "veryfast", "-crf", "24", str(destination)])
 
+def _probe_duration(path):
+    result = run([
+        "ffprobe", "-v", "error", "-show_entries", "format=duration",
+        "-of", "default=noprint_wrappers=1:nokey=1", str(path)
+    ])
+    try:
+        duration = float(result.stdout.strip())
+    except (TypeError, ValueError):
+        raise RuntimeError(f"Não foi possível identificar a duração de mídia: {path}") from None
+    if duration <= 0:
+        raise RuntimeError(f"A mídia não tem duração válida: {path}")
+    return duration
+
+
 def render_video(media, audio_path, output, subtitles_path=None):
     if not media:
         raise ValueError("Nenhuma cena foi aprovada.")
+    target_duration = sum(float(item["duration"]) for item in media)
+    if target_duration <= 0:
+        raise ValueError("A duração total das cenas precisa ser maior que zero.")
+    audio_duration = _probe_duration(audio_path)
+    # Fit small timing differences without allowing FFmpeg's -shortest to
+    # silently truncate the final video or cut the narration mid-sentence.
+    tempo = audio_duration / target_duration
+    if not 0.85 <= tempo <= 1.15:
+        raise RuntimeError(
+            f"A narração tem {audio_duration:.1f}s, mas a linha do tempo tem "
+            f"{target_duration:.1f}s. A diferença excede 15%; ajuste o texto "
+            "ou a duração do storyboard antes de renderizar."
+        )
     output = Path(output)
     output.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="nexus_render_") as temp_dir:
@@ -52,6 +79,18 @@ def render_video(media, audio_path, output, subtitles_path=None):
             subtitle_file = str(Path(subtitles_path).resolve()).replace("\\", "/").replace(":", "\\:")
             subtitle_filter = f"subtitles='{subtitle_file}':force_style='FontName=Arial,FontSize=17,PrimaryColour=&H00FFFFFF,OutlineColour=&H00101010,BorderStyle=1,Outline=3,Shadow=1,Alignment=2,MarginV=105,Bold=1'"
             command += ["-vf", subtitle_filter]
-        command += ["-map", "0:v:0", "-map", "1:a:0", "-c:v", "libx264", "-preset", "veryfast", "-crf", "24", "-c:a", "aac", "-b:a", "160k", "-shortest", "-movflags", "+faststart", str(output)]
+        audio_filter = (
+            f"atempo={tempo:.6f},"
+            f"apad=whole_dur={target_duration:.3f},"
+            f"atrim=duration={target_duration:.3f}"
+        )
+        command += [
+            "-map", "0:v:0", "-map", "1:a:0",
+            "-af", audio_filter,
+            "-c:v", "libx264", "-preset", "veryfast", "-crf", "24",
+            "-c:a", "aac", "-b:a", "160k",
+            "-t", f"{target_duration:.3f}",
+            "-movflags", "+faststart", str(output)
+        ]
         run(command)
     return output
