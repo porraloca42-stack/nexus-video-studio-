@@ -71,6 +71,23 @@ class AudioOutputTests(unittest.TestCase):
         self.assertEqual(session.calls[0][0], "GET")
         self.assertEqual(session.calls[0][2]["params"]["page_number"], 2)
         self.assertEqual(session.calls[0][2]["params"]["language"], "pt")
+        self.assertNotIn("self", session.calls[0][2]["params"])
+
+    def test_lists_private_personal_voice_models(self):
+        session = FakeFishSession(payload={
+            "total": 1,
+            "items": [{
+                "_id": "my-voice",
+                "type": "tts",
+                "state": "trained",
+                "visibility": "private",
+                "title": "Minha voz",
+                "samples": [{"audio": "https://cdn.example.test/sample.mp3"}],
+            }],
+        })
+        result = list_fish_voices("test-key", self_only=True, session=session)
+        self.assertEqual(result["items"][0]["id"], "my-voice")
+        self.assertEqual(session.calls[0][2]["params"]["self"], "true")
 
     def test_generates_short_preview_for_voice_without_public_sample(self):
         session = FakeFishSession()
