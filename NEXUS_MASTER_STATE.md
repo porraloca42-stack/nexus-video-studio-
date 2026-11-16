@@ -121,3 +121,10 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 
 - Commit 944d99e: corrigidos escapes no parser da resposta JSON do Gemini, preservando a separação de blocos de texto e a limpeza de cercas Markdown após a chamada com failover.
 - Revisão estática no GitHub confirmou os escapes corretos no trecho de parsing. Não há status de CI/checks reportado para o commit 05e2311; validação de execução Python e chamada real Gemini ainda pendentes.
+
+
+## Correção de seleção de modelos Gemini — 16/11/2026
+- Evidência do usuário: HTTP 400 no modelo `gemini-3.8-flash-lite-tts`, com mensagem `Developer instruction is not enabled for this model`.
+- Causa confirmada no código: `discover_models()` ranqueava modelos apenas por `generateContent`; um modelo especializado em TTS podia vencer o ranking Flash Lite, embora o diretor envie `systemInstruction` e espere JSON textual.
+- Commit 941e874: modelos TTS, áudio nativo, imagem e vídeo são excluídos da seleção do diretor. Se a API ainda devolver um erro 400 específico de incompatibilidade com developer/system instruction, o diretor registra o modelo como incompatível e tenta o próximo modelo textual compatível, em vez de abortar.
+- Não foi possível fazer chamada real ao Gemini neste ambiente. Código atualizado no GitHub; implantação e validação ponta a ponta dependem do Streamlit carregar o commit e de uma chamada real.
