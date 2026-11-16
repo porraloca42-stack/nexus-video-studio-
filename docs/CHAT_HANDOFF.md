@@ -220,3 +220,14 @@ O usuário ficou frustrado com orientações longas/repetitivas e com uma previs
 - Commit `a8b5ac9` altera `app.py`: troca import nomeado por `import nexus.audio as fish_audio`; chamadas passam a `fish_audio.get_fish_voice` e `fish_audio.make_voice`. Evita ImportError apenas por símbolo nomeado ausente em módulo antigo.
 - Pós-commit, leitura confirmou nenhum `from nexus.audio import ...`, módulo importado e chamadas qualificadas.
 - CI/Streamlit ainda pendentes. Se falhar novamente, capturar logs completos do Streamlit Cloud e identificar exceção raiz antes de alterar mais código.
+
+## Retomada — Fish Audio voice catalog não carregava (16/11/2026)
+- Captura do usuário: app abre, mas mostra "Não foi possível carregar as vozes oficiais brasileiras da Fish Audio."
+- Diagnóstico de código: helper `get_fish_voice()` aceitava apenas `visibility="public"`; documentação Fish Audio reconhece `public`, `unlist`, `private`. Modelos oficiais podem ser unlisted e acessíveis pelo ID direto; código anterior rejeitava-os.
+- Correções em main:
+  - `nexus/audio.py` commit `9bb4bf0`: aceita public/unlist, rejeita private.
+  - `app.py` commit `ab4e097`: se catálogo vazio, tenta de novo a cada rerun; guarda erro por nome da voz e mostra diagnóstico resumido, em vez de ocultar todas as exceções.
+  - `tests/test_audio.py` commit `6dd71be`: teste novo de aceitação unlist, mantendo teste de rejeição private.
+- Leitura pós-commit confirmou os três comportamentos no main. CI e validação real do Streamlit ainda pendentes.
+- Próximo passo: aguardar deploy, conferir se as vozes carregam; se falhar, o caption de diagnóstico agora deve indicar exatamente quais IDs/erros retornaram. Não voltar a alterar código sem essa evidência.
+- Referências: https://github.com/fishaudio/docs/blob/main/api-reference/endpoint/model/get-model.mdx ; https://beta.fish.audio/m/add7bcb8d3c8423bbfa152ca232aad6e/
