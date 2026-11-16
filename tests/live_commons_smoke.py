@@ -6,7 +6,11 @@ and verifies the media with FFprobe.
 import json
 import subprocess
 import tempfile
+import sys
 from pathlib import Path
+
+# Running a file inside tests/ puts that directory first on sys.path.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from nexus.assets import download_file, search_wikimedia_videos
 
