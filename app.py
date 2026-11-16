@@ -267,6 +267,11 @@ with settings_col1:
     duration = st.selectbox("Duração do vídeo", [40, 50, 60], index=1, format_func=lambda value: f"{value} segundos")
 with settings_col2:
     voice = st.selectbox("Voz da narração", ["pt-BR-AntonioNeural", "pt-BR-FranciscaNeural", "pt-BR-ThalitaNeural"], format_func=lambda value: {"pt-BR-AntonioNeural":"Antônio · Masculina", "pt-BR-FranciscaNeural":"Francisca · Feminina", "pt-BR-ThalitaNeural":"Thalita · Feminina"}[value])
+render_mode = st.selectbox(
+    "Motor de produção visual",
+    ["Bibliotecas de vídeo (atual)", "Imagens originais · Cloudflare AI + Remotion"],
+    help="O modo Cloudflare gera imagens específicas para cada cena e compõe o MP4 no trabalhador Remotion do GitHub Actions. Requer credenciais configuradas nos Secrets.",
+)
 
 with st.expander("Ferramentas avançadas · diagnóstico das bibliotecas de vídeo"):
     st.caption("Testa busca, licença, download e leitura do vídeo no Wikimedia Commons, Pixabay e Pexels. As chaves nunca são exibidas.")
@@ -453,6 +458,42 @@ if "nexus_plan" in st.session_state:
             )
         if st.session_state.get("nexus_errors"):
             st.error("O storyboard precisa ser corrigido antes da produção.")
+        elif render_mode == "Imagens originais · Cloudflare AI + Remotion":
+            github_token = secret("GITHUB_ACTIONS_TOKEN")
+            if not github_token:
+                st.error("Configure GITHUB_ACTIONS_TOKEN nos Secrets do Streamlit para habilitar o trabalhador Remotion.")
+                st.info("O trabalhador também exige CLOUDFLARE_ACCOUNT_ID e CLOUDFLARE_API_TOKEN como Secrets do repositório GitHub.")
+            else:
+                progress = st.progress(0.05, text="Enviando storyboard para o trabalhador audiovisual...")
+                try:
+                    from nexus.github_renderer import render_on_github
+                    def update_worker_progress(message):
+                        progress.progress(0.55, text=message)
+                    result = render_on_github(
+                        plan, voice, github_token, progress_callback=update_worker_progress
+                    )
+                    video_bytes = result["video"]
+                    report = result.get("report") or {}
+                    st.session_state["nexus_rendered_video"] = video_bytes
+                    st.session_state["nexus_rendered_filename"] = "nexus_video.mp4"
+                    st.session_state["nexus_rendered_info"] = {
+                        "duration": float(report.get("duration") or duration),
+                        "width": int(report.get("width") or 720),
+                        "height": int(report.get("height") or 1280),
+                        "video_codec": report.get("video_codec", "h264"),
+                        "audio_codec": report.get("audio_codec", ""),
+                        "size_mb": len(video_bytes) / (1024 * 1024),
+                        "scene_count": len(plan.get("scenes", [])),
+                        "visual_source": "Cloudflare Workers AI + Remotion",
+                        "worker_run_id": result.get("run_id"),
+                        "visual_reviews": [],
+                        "source_credits": [],
+                    }
+                    progress.progress(1.0, text="Vídeo produzido pelo Remotion e recuperado do trabalhador.")
+                    st.success("Vídeo MP4 produzido. O trabalhador verificou vídeo, áudio, resolução e duração.")
+                except Exception as exc:
+                    progress.empty()
+                    st.error(f"Produção Cloudflare + Remotion interrompida: {exc}")
         elif not configured_libraries:
             st.error("Nenhuma biblioteca de vídeo está disponível para pesquisa.")
         else:
