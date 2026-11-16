@@ -457,3 +457,12 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Referências de licença consultadas: Mixkit Free vs Restricted e termos contra scraping; Vecteezy API/pricing e Free License; ISO Republic CC0; NASA excluída da seleção comercial automática por direitos de terceiros e restrições de uso promocional.
 - Commits desta etapa: `0f67aed` (ranking 9:16), `a8259b3` (teste), `31b9b9e` (direção visual), `e5752fe` (painel de fontes), `db290c6` (README).
 - Estado de validação no momento do registro: CI dos commits 175–179 em execução/fila. Ainda não há prova de deploy Streamlit nem de busca externa/download/render real com essas alterações. O MP4 final continua não validado.
+
+
+
+## Teste de integração ao vivo — 16/11/2026
+- Confirmado CI principal no commit `4c45884`: compilação dos módulos e 36 testes unitários passaram (`OK`), incluindo o teste de desempate 9:16 e teste de render MP4 vertical com áudio/legendas em ambiente de CI.
+- Adicionado job separado `commons-live-smoke` para testar API pública real do Wikimedia Commons, baixar um arquivo com licença aceita e inspecioná-lo via FFprobe. O job usa `continue-on-error: true` para que indisponibilidade temporária externa não bloqueie regressões locais.
+- Primeira execução do smoke test detectou erro de importação por execução direta do script dentro de `tests/`; corrigido `sys.path` no commit `3a0d728`.
+- CI do commit `3a0d728` (run #183, ID `43828898694`) está em execução no momento deste registro; o job Commons ainda não terminou. Não declarar API/download reais aprovados até ler o log final.
+- Limite: workflow atual não tem as chaves privadas do Streamlit Cloud para Pixabay/Pexels/Gemini. Portanto, APIs que exigem essas chaves, Gemini Vision ao vivo, deploy e geração MP4 ponta a ponta no app publicado ainda dependem do diagnóstico avançado no ambiente Streamlit.
