@@ -501,3 +501,13 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Adicionado teste de regressão para verificar expansão da busca a consultas curtas. Build UI: `NEXUS-2026.11.16-stock-search-recovery-1`.
 - Commits: `9b44d28` remoção do painel manual e build; `a026923` expansão da busca; `6c5f403` teste de regressão.
 - CI #191 (app), #192 (assets) e #193 (teste) estão em execução/fila. Não marcar a correção como testada até verificar CI; tampouco assumir deploy automático confirmado. Após CI, confirmar no Streamlit publicado e, se a busca ainda falhar, coletar o conteúdo expandido de “Detalhes das buscas sem resultado” para identificar erro de autenticação, rate limit, indisponibilidade ou ausência de resultados.
+
+
+### Revisão da avaliação semântica visual — 16/11/2026
+- Evidência adicional do usuário: em novo planejamento com 11 cenas, o app rejeitou clipes nas cenas [2, 3, 5, 7, 8, 9, 10, 11]. A repetição após ampliação de consultas indica que o gargalo não era apenas busca; a etapa de revisão semântica estava rejeitando candidatos demais.
+- Diagnóstico do código: `review_visual_candidates` exigia confiança mínima 70 e instruía a IA a aceitar somente representação DIRETA, com regra explícita para selecionar nenhum candidato se não houvesse relação direta. Isso excluía metáforas visuais, B-roll contextual e equivalências narrativas razoáveis. O app revisava apenas os 6 primeiros candidatos.
+- Alterações: confiança mínima padrão reduzida de 70 para 55; prompt passa a aceitar ação literal, consequência visual, metáfora reconhecível e situação cotidiana que comunique a ideia, sem aprovar clipes meramente estéticos/desconexos; shortlist aumentada de 6 para 12 candidatos por cena. Critérios de licença, inspeção dos quadros reais, prioridade semântica e composição vertical permanecem.
+- Adicionado teste de aceitação de metáfora visual útil (61%) e atualizado teste de rejeição de candidato fraco (42%). Atualizados testes de contagem de consultas para a expansão a cinco variantes.
+- Commits: `44f5352` prompt/limiar semântico; `059e170` shortlist 12; `9fcc7d3` expectativas de busca; `a6ec100` teste de metáfora visual.
+- CI #195–#198 está em execução/fila no último check; run #198: https://github.com/porraloca42-stack/nexus-video-studio-/actions/runs/43831774818 . Não marcar alterações como testadas/implantadas até CI verde e confirmação do Streamlit.
+- Limitação: a captura mostra apenas cenas rejeitadas, não os detalhes internos nem quadros candidatos; a hipótese do filtro excessivo é confirmada pelo código, mas ainda precisamos de uma produção real pós-deploy para medir a taxa de aceitação e a qualidade editorial.
