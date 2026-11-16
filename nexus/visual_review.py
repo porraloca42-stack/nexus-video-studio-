@@ -55,30 +55,35 @@ def normalize_review(payload, scenes):
 
 
 def review_scene_frames(frame_paths, scenes, api_key, model=None, timeout=180, session=None):
-    """Review one representative rendered frame per scene against its narration."""
+    """Review one or three ordered frames per scene against narration and continuity."""
     if not api_key:
         raise RuntimeError("GEMINI_API_KEY ausente para auditoria visual.")
-    if len(frame_paths) != len(scenes) or not scenes:
-        raise ValueError("A auditoria exige exatamente um quadro por cena.")
-    parts = [{
-        "text": (
-            "Você é revisor editorial audiovisual. Compare cada quadro com a fala da cena "
-            "correspondente. Avalie correspondência literal/semântica, qualidade visual, "
-            "composição, artefatos, texto/logos indesejados e continuidade de estilo. "
-            "Não infira movimento a partir de um quadro estático. Seja rigoroso e específico. "
-            "Retorne somente um objeto JSON com a chave reviews. Cada item deve conter scene_number, "
-            "semantic_score de 0 a 10, matches_narration booleano, visual_quality como texto, "
-            "issues como lista de problemas e recommendation como recomendação editorial. "
-            "Inclua exatamente uma avaliação para cada cena, na ordem recebida.\nCENAS:\n"
-            + json.dumps([
-                {"scene_number": i + 1, "voiceover": scene.get("voiceover", ""),
-                 "visual_action": scene.get("visual_action", ""),
-                 "style": scene.get("visual_style", "")}
-                for i, scene in enumerate(scenes)
-            ], ensure_ascii=False)
-        )
-    }]
-    for path in frame_paths:
+    if not scenes or len(frame_paths) not in (len(scenes), len(scenes) * 3):
+        raise ValueError("A auditoria exige um ou três quadros ordenados por cena.")
+    frames_per_scene = len(frame_paths) // len(scenes)
+    temporal = frames_per_scene == 3
+    prompt = (
+        "Você é revisor editorial audiovisual. Cada cena vem acompanhada de "
+        + ("três quadros em ordem temporal: início, meio e fim. " if temporal else "um quadro representativo. ")
+        + "Compare as imagens com a fala e a ação da cena. Avalie aderência semântica, qualidade, composição, artefatos, "
+        "texto/logos indesejados e continuidade de estilo. "
+        + ("Use a sequência para observar movimento real, progressão da ação e repetição; não confunda zoom digital "
+           "ou mudanças pequenas de enquadramento com ação significativa. " if temporal else
+           "Não infira movimento a partir de um quadro estático. ")
+        + "Se as imagens não permitirem concluir algo, registre a limitação. Retorne somente JSON com a chave reviews; "
+        "cada item deve conter scene_number, semantic_score de 0 a 10, matches_narration booleano, visual_quality, "
+        "issues como lista e recommendation. Inclua uma avaliação por cena na ordem recebida.\nCENAS:\n"
+        + json.dumps([
+            {"scene_number": i + 1, "voiceover": scene.get("voiceover", ""),
+             "visual_action": scene.get("visual_action", ""),
+             "style": scene.get("visual_style", ""), "frames": frames_per_scene}
+            for i, scene in enumerate(scenes)
+        ], ensure_ascii=False)
+    )
+    parts = [{"text": prompt}]
+    for index, path in enumerate(frame_paths):
+        if temporal and index % 3 == 0:
+            parts.append({"text": f"Sequência temporal da cena {index // 3 + 1}: início, meio e fim."})
         image_bytes = Path(path).read_bytes()
         parts.append({"inlineData": {
             "mimeType": "image/jpeg",
@@ -120,15 +125,14 @@ def review_scene_frames(frame_paths, scenes, api_key, model=None, timeout=180, s
     try:
         payload = json.loads(text)
     except json.JSONDecodeError:
-        start = text.find("{")
-        if start < 0:
+        position = text.find("{")
+        if position < 0:
             raise RuntimeError("Gemini retornou JSON inválido na auditoria visual.")
-        payload, _ = json.JSONDecoder().raw_decode(text[start:])
+        payload, _ = json.JSONDecoder().raw_decode(text[position:])
     return normalize_review(payload, scenes)
 
-
 def extract_scene_frames(video_path, scenes, output_dir):
-    """Extract one centered JPEG frame per scene from a rendered MP4."""
+    """Extract three ordered JPEG frames per scene for temporal editorial review."""
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     probe = subprocess.run(
@@ -147,15 +151,16 @@ def extract_scene_frames(video_path, scenes, output_dir):
     paths = []
     cursor = 0.0
     for index, duration in enumerate(durations, 1):
-        timestamp = min(total - 0.08, cursor + duration / 2)
-        frame = output_dir / f"scene_review_{index:02d}.jpg"
-        result = subprocess.run(
-            ["ffmpeg", "-y", "-ss", f"{timestamp:.3f}", "-i", str(video_path),
-             "-frames:v", "1", "-vf", "scale=512:-2", "-q:v", "7", str(frame)],
-            capture_output=True, text=True, timeout=45,
-        )
-        if result.returncode or not frame.is_file() or frame.stat().st_size < 500:
-            raise RuntimeError(f"Não foi possível extrair o quadro da cena {index}.")
-        paths.append(str(frame))
+        for frame_index, fraction in enumerate((0.2, 0.5, 0.8), 1):
+            timestamp = min(total - 0.08, cursor + duration * fraction)
+            frame = output_dir / f"scene_review_{index:02d}_{frame_index}.jpg"
+            result = subprocess.run(
+                ["ffmpeg", "-y", "-ss", f"{timestamp:.3f}", "-i", str(video_path),
+                 "-frames:v", "1", "-vf", "scale=512:-2", "-q:v", "7", str(frame)],
+                capture_output=True, text=True, timeout=45,
+            )
+            if result.returncode or not frame.is_file() or frame.stat().st_size < 500:
+                raise RuntimeError(f"Não foi possível extrair o quadro {frame_index} da cena {index}.")
+            paths.append(str(frame))
         cursor += duration
     return paths
