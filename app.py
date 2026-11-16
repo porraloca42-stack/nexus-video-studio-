@@ -581,6 +581,9 @@ if "nexus_plan" in st.session_state:
                         "narration_provider": report.get("narration_provider", "não informado pelo worker"),
                         "size_mb": len(video_bytes) / (1024 * 1024),
                         "scene_count": len(plan.get("scenes", [])),
+                        "motion_clip_count": len(report.get("motion_clips") or []),
+                        "total_i2v_seconds": float(report.get("total_i2v_seconds") or 0),
+                        "total_i2v_inference_seconds": float(report.get("total_i2v_inference_seconds") or 0),
                         "visual_source": report.get("visual_source", "Cloudflare + Modal I2V + Remotion"),
                         "worker_run_id": result.get("run_id"),
                         "visual_reviews": [],
@@ -943,6 +946,13 @@ if st.session_state.get("nexus_rendered_video"):
         st.caption("Direção visual: " + info["visual_source"])
     if info.get("narration_provider"):
         st.caption("Narração: " + info["narration_provider"])
+    if info.get("motion_clip_count"):
+        st.caption(
+            f"Animação LTX: {info['motion_clip_count']} cenas · "
+            f"{info.get('total_i2v_seconds', 0):.1f}s de vídeo gerado · "
+            f"{info.get('total_i2v_inference_seconds', 0):.1f}s de inferência GPU "
+            "(tempo de inferência, não o total faturado)"
+        )
     if info.get("worker_run_id"):
         st.caption(f"[Ver execução do render no GitHub Actions](https://github.com/porraloca42-stack/nexus-video-studio-/actions/runs/{info['worker_run_id']})")
     reviews = info.get("visual_reviews", [])
