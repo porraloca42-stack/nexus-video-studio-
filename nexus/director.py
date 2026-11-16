@@ -541,6 +541,71 @@ Retorne somente JSON válido no formato do sistema."""
     }
     return plan
 
+
+def revise_narration_for_duration(plan, target_duration, actual_duration, topic, style, secret_reader):
+    """Ask the director to revise narration using the selected voice's measured speaking rate."""
+    scenes = plan.get("scenes", [])
+    if not scenes or float(actual_duration) <= 0 or float(target_duration) <= 0:
+        raise ValueError("Não há dados suficientes para calibrar a duração da narração.")
+
+    current_words = sum(len(str(scene.get("voiceover", "")).split()) for scene in scenes)
+    target_words = max(1, int(round(current_words * float(target_duration) / float(actual_duration))))
+    scene_context = [
+        {
+            "scene_number": index,
+            "voiceover": str(scene.get("voiceover", "")),
+            "visual_action": str(scene.get("visual_action", "")),
+            "setting": str(scene.get("setting", "")),
+            "subjects": str(scene.get("subjects", "")),
+        }
+        for index, scene in enumerate(scenes, 1)
+    ]
+    prompt = f"""Você é o roteirista responsável por adequar a narração ao tempo real de locução.
+Tema original: {topic}
+Estilo: {style}
+Duração escolhida pelo usuário: {target_duration:.1f} segundos.
+A voz selecionada, em velocidade NATURAL, leu a versão atual em {actual_duration:.1f} segundos.
+A versão atual tem {current_words} palavras. Com a velocidade REAL medida dessa voz, a estimativa inicial para a nova versão é aproximadamente {target_words} palavras.
+
+Reescreva a narração para que, falada naturalmente pela mesma voz e sem acelerar ou desacelerar o sintetizador, fique próxima de {target_duration:.1f} segundos (tolerância editorial desejada: cerca de 10%).
+Se ficou curta, desenvolva melhor o raciocínio com explicações, exemplos concretos, transições e uma conclusão que feche a ideia. Se ficou longa, corte redundâncias sem perder a mensagem.
+NÃO acrescente frases vazias, repetições, enchimento, pausas artificiais ou instruções de silêncio. Preserve gancho, progressão lógica e conclusão.
+Mantenha exatamente {len(scenes)} cenas e a mesma ordem. Distribua o texto entre elas de forma contínua. Cada fala precisa corresponder à ação visual da própria cena; ajuste a fala para manter coerência semântica. Não altere as ações visuais, buscas, estilo ou estrutura das cenas.
+Use português brasileiro falado, frases naturais e pontuação que favoreça a entonação.
+Retorne somente JSON válido no formato:
+{{"scene_voiceovers":[{{"scene_number":1,"voiceover":"..."}}, ...]}}
+Inclua exatamente uma entrada para cada cena, com índices de 1 a {len(scenes)}. O conjunto deve formar uma narração completa, sem lacunas nem repetição.
+Contexto das cenas:
+{json.dumps(scene_context, ensure_ascii=False)}"""
+
+    revised = _request(prompt, secret_reader)
+    voiceovers = revised.get("scene_voiceovers", [])
+    if not isinstance(voiceovers, list) or len(voiceovers) != len(scenes):
+        raise RuntimeError("O diretor não retornou uma fala revisada para cada cena.")
+    mapped = {}
+    for item in voiceovers:
+        try:
+            index = int(item.get("scene_number", 0))
+        except (TypeError, ValueError, AttributeError):
+            raise RuntimeError("O diretor retornou numeração inválida nas falas revisadas.") from None
+        voice = str(item.get("voiceover", "") or "").strip()
+        if index < 1 or index > len(scenes) or not voice or index in mapped:
+            raise RuntimeError("O diretor retornou falas vazias, duplicadas ou fora de ordem.")
+        mapped[index] = voice
+    if set(mapped) != set(range(1, len(scenes) + 1)):
+        raise RuntimeError("A revisão da narração não cobriu todas as cenas.")
+
+    for index, scene in enumerate(scenes, 1):
+        scene["voiceover"] = mapped[index]
+    plan["full_narration"] = " ".join(mapped[index] for index in range(1, len(scenes) + 1))
+    plan["narration_calibration"] = {
+        "previous_audio_seconds": round(float(actual_duration), 2),
+        "target_audio_seconds": round(float(target_duration), 2),
+        "previous_word_count": current_words,
+        "estimated_target_word_count": target_words,
+    }
+    return plan
+
 def validate_storyboard(plan, requested_duration=None):
     errors = []
     scenes = plan.get("scenes", [])
