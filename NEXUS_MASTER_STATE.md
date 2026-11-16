@@ -45,14 +45,15 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - A interface Streamlit e o planejamento de storyboard com Gemini já foram vistos funcionando em capturas do usuário.
 - O diretor instrui o modelo a criar no mínimo ceil(duração/5) cenas e prefere ceil(duração/4) ou mais; para 50s, mínimo 10 e meta 12–15.
 - O validador rejeita storyboard cuja soma das cenas difere da duração solicitada em mais de 0,75s, cenas acima de 5s ou campos obrigatórios ausentes.
-- O usuário mostrou um storyboard de 12 cenas somando 43s para 50s. A geração agora redistribui deterministicamente a duração solicitada entre as cenas existentes, preservando o ritmo relativo e limitando cada clipe a 2–5s. Se a quantidade de cenas não comportar a duração, a geração falha explicitamente em vez de aceitar uma linha do tempo impossível.
+- O usuário mostrou storyboards com soma abaixo do solicitado e uma cena sem voiceover. A geração agora aceita uma primeira soma entre duração escolhida ±5s, solicita uma segunda correção ao Gemini quando a soma sai da faixa ou há voiceover vazio, exige narração preenchida em todas as cenas e então redistribui as durações para fechar exatamente a duração escolhida.
 - Render MP4 final ainda NÃO está validado de ponta a ponta.
 - Coverr/Pixabay são implementações preliminares; confirmar documentação/API, autenticação, URLs e licenças antes de considerar fontes validadas.
 - MCP oficial do Coverr ainda NÃO está integrado ao NEXUS.
 
 ## Alterações recentes
 - Commit f617fb3: primeira compactação dos detalhes do planejamento.
-- Commit f0e0ddf: nexus/director.py redistribui o tempo solicitado entre as cenas quando o Gemini retorna soma diferente; mantém cada clipe entre 2 e 5 segundos e registra a correção no plano.
+- Commit f0e0ddf: primeira versão da redistribuição determinística do tempo.
+- Commit b518894: nexus/director.py agora permite tolerância de ±5s na estimativa inicial do Gemini; fora dessa faixa ou com voiceover vazio, faz uma segunda chamada de correção. Exige narração em todas as cenas e normaliza a linha do tempo para a duração exata escolhida, mantendo clipes entre 2 e 5s.
 - Commit 3b2cab7: app.py reúne interpretação, tese e detalhes de todas as cenas em um único expander recolhido: "Ver planejamento completo". Não há expanders individuais por cena.
 - Commit 954c413: nexus/render.py ajusta também os tempos das legendas quando a narração é acelerada/desacelerada para caber na linha do tempo.
 - Alterações gravadas na branch main. Ainda precisam ser confirmadas no deploy do Streamlit e testadas no celular.
@@ -88,3 +89,12 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Interface alterada para um único expander recolhido contendo direção audiovisual e todas as informações das cenas.
 - Legendas SRT são retimadas pelo mesmo fator aplicado ao áudio; teste com 43s de áudio ajustado para 50s passou.
 - Não foi executado Streamlit, Gemini, Coverr ou FFmpeg neste ambiente. Portanto, as alterações estão implementadas e commits confirmados no GitHub, mas implantação, integração real e MP4 final ainda NÃO estão testados/validados.
+
+ 
+## Tolerância do diretor e reparo de narração — 16/11/2026
+- Commit b518894 implementa margem de ±5 segundos na soma inicial de duração retornada pelo Gemini.
+- Se a soma inicial sair da faixa ou qualquer cena vier sem voiceover, o diretor faz uma segunda chamada de correção com o roteiro original, o storyboard e os problemas detectados.
+- Se a segunda chamada continuar sem narração ou fora da margem, o planejamento é interrompido com erro claro; não permite seguir com cena sem fala.
+- Se o storyboard corrigido estiver dentro da margem, o sistema ajusta proporcionalmente as durações para fechar exatamente a duração escolhida pelo usuário.
+- Teste isolado da distribuição: 50s/12 cenas a partir de estimativa de 44s, 50s/10 cenas, 40s/12 cenas e 60s/15 cenas fecharam exatamente o alvo, com cenas entre 2 e 5 segundos.
+- Não houve chamada real ao Gemini nem renderização de MP4 neste ambiente. Código implementado no GitHub; deploy e fluxo real ainda aguardam validação.
