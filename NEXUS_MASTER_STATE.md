@@ -689,3 +689,11 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Run #43855679107 (commit `9b747ad`) também concluiu com sucesso; os jobs unit-tests e commons-live-smoke passaram.
 - O usuário enviou captura após recarregar o Streamlit: interface inicial do NEXUS abriu normalmente e mostra rótulo de versão `NEXUS-2026.11.16-stock-search-recovery-1`. Esse rótulo é o identificador exibido pela aplicação; não é, isoladamente, prova do SHA exato implantado.
 - Próximo passo operacional: usuário deve preencher um roteiro de teste benigno, gerar o planejamento e acionar “Produzir vídeo completo” com “Imagens originais · Cloudflare AI + Remotion”. A execução real pós-correção de moderação ainda não foi disparada nem validada.
+
+
+## Correção de storyboard com quantidade insuficiente de cenas — 16/11/2026
+- Captura do usuário mostrou falha intermitente no planejamento: Gemini retornou 8 cenas para vídeo de 50s; a validação exige pelo menos 10 cenas (segmentos de até 5s). O mesmo limite se aplica proporcionalmente a 40s e 60s.
+- Diagnóstico no código: `create_storyboard()` solicitava a quantidade adequada, mas aceitava a primeira resposta com cenas não vazias e não tinha etapa automática de reparo quando o modelo subsegmentava a narrativa. O botão “Planejar vídeo” dependia de nova tentativa manual.
+- Commit `936a4ab`: se a primeira resposta vier abaixo do mínimo, o diretor agora faz uma chamada de reparo específica, preservando narração, ordem e sentido, solicitando divisão em unidades visuais menores e completas. Se a segunda resposta continuar abaixo do mínimo, apresenta erro claro sem avançar com storyboard incompleto.
+- Commit `96a765d`: testes adicionados para (a) reparo automático de 8 para 10 cenas em 50s e (b) não fazer chamada extra quando o storyboard já atende ao mínimo.
+- CI disparado pelos commits acima; aprovação automatizada ainda pendente. A captura não foi gerada por falha do motor Cloudflare; é um problema anterior, no planejamento Gemini.
