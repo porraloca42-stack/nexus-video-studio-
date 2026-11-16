@@ -1141,3 +1141,14 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 
 - Revisão final de leitura em `main` às 16:15 BRT confirmou: UI sem busca/filtros/paginação; chamada da lista sem `self_only`; player de prévia ao lado do selectbox; payloads TTS com `pt-BR`; asserts correspondentes nos testes. Último commit de UI: `567ba08`.
 - A verificação foi estática por leitura dos arquivos no GitHub. A suíte automatizada ainda depende do GitHub Actions; o comportamento visual e a integração real com Fish Audio ainda dependem do Streamlit publicado.
+
+## Curadoria de vozes naturais brasileiras — 16/11/2026 16:24 BRT
+- Pedido do usuário: ampliar o seletor com vozes normais/humanizadas, evitando memes, imitações de figuras públicas e personagens.
+- Pesquisa na biblioteca oficial Fish Audio identificou filtros/categorias úteis: Narração, Conversacional, Documentário, Profissional, Neutro, além de tags e amostras de áudio. A documentação do SDK oficial confirma suporte a filtros `tag`, `language`, `sort_by` e paginação em `GET /model`.
+- A biblioteca oficial descreve Letícia como voz feminina com sotaque brasileiro, suave e acolhedora; Ricardo como voz masculina com sotaque brasileiro, clara e profissional. Outras vozes padrão como Tomás/Rafael não foram incluídas automaticamente porque a descrição consultada não confirma sotaque brasileiro.
+- Alterações em `nexus/audio.py` (commit `5105372`): adicionados filtros por tags, ordenação por score e função `list_fish_natural_brazilian_voices`, que consulta tags de narração/conversação/documentário/profissional/neutro, inclui buscas por Letícia e Ricardo, mescla por ID e filtra metadados para priorizar português brasileiro e estilos humanos, excluindo termos de memes/personagens/figuras públicas.
+- Alterações em `app.py` (commit `322d299`): seletor compacto passa a usar a lista curada, mantendo player de amostra ao lado.
+- Testes em `tests/test_audio.py` (commit `efc5b09`): cobrem parâmetros de tags/score e regras de inclusão/exclusão.
+- Limitação conhecida: API da Fish Audio não oferece um atributo objetivo de “humanizada”; a curadoria depende de tags, descrição e idioma declarados pelo criador. A amostra de áudio ainda precisa ser ouvida para validar naturalidade, sotaque e adequação. Vozes comunitárias podem ter direitos/licenças distintos; verificar termos comerciais da Fish e da voz antes de monetizar.
+- Estado: commits gravados na branch main e arquivos relidos. Testes automatizados e comportamento ao vivo no Streamlit ainda precisam de confirmação pelo GitHub Actions e pela interface publicada.
+- Fontes consultadas: biblioteca oficial https://fish.audio/pt/app/voice-library/ ; categoria de narração https://fish.audio/pt/voice-library/narration/ ; categoria conversacional https://fish.audio/pt/voice-library/conversational/ ; SDK oficial https://github.com/fishaudio/fish-audio-go/blob/main/voices.go
