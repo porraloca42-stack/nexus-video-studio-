@@ -93,6 +93,16 @@ class AudioOutputTests(unittest.TestCase):
         self.assertEqual(voice["sample_audio"], "https://api.fish.audio/sample/ricardo.mp3")
         self.assertEqual(session.calls[0][1][0], "https://api.fish.audio/model/voice-ricardo")
 
+    def test_get_fish_voice_accepts_unlisted_public_model(self):
+        session = FakeFishSession(payload={
+            "_id": "voice-unlisted", "type": "tts", "state": "trained",
+            "visibility": "unlist", "title": "Official Voice",
+            "samples": [{"audio": "/sample.mp3", "text": "Olá"}],
+        })
+        voice = get_fish_voice("test-key", "voice-unlisted", session=session)
+        self.assertEqual(voice["id"], "voice-unlisted")
+        self.assertEqual(voice["visibility"], "unlist")
+
     def test_get_fish_voice_rejects_private_models(self):
         session = FakeFishSession(payload={
             "_id": "private-voice", "type": "tts", "state": "trained",
