@@ -155,3 +155,10 @@ O usuário ficou frustrado com orientações longas/repetitivas e com uma previs
 - A classificação “natural” depende dos metadados do criador e não substitui ouvir a amostra. Vozes públicas comunitárias podem ter termos/licenças diferentes; verificar direitos comerciais antes de monetizar.
 - Próximo passo: observar CI no GitHub e validar lista real e amostras na interface Streamlit. Não afirmar que todas as vozes passaram em audição; não validar sotaque sem ouvir.
 - Fontes: https://fish.audio/pt/app/voice-library/ ; https://fish.audio/pt/voice-library/narration/ ; https://fish.audio/pt/voice-library/conversational/ ; https://github.com/fishaudio/fish-audio-go/blob/main/voices.go
+
+## Ponto atual — Streamlit falha com ImportError (16/11/2026)
+- Captura mais recente do usuário mostra erro de importação na inicialização do app, na linha `from nexus.audio import generate...` em `app.py`; traceback está cortado e não revela qual nome exato falhou.
+- Conferi os arquivos atuais na branch main: app importa `generate_fish_preview`, `list_fish_natural_brazilian_voices`, `make_voice`; os três símbolos existem em `nexus/audio.py`.
+- Hipótese a testar: Streamlit Cloud está com commit/árvore de arquivos diferente do main atual ou outra falha de import no ambiente. Ainda sem prova.
+- Não fiz alteração de código para este incidente; documentação atualizada para preservar diagnóstico. Não dizer que foi corrigido.
+- Próxima ação: pedir ao usuário abrir Manage app → Logs e enviar a mensagem completa da exceção/linha do import. Depois comparar commit implantado e corrigir causa real.
