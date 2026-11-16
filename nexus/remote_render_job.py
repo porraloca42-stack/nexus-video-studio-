@@ -28,7 +28,7 @@ def main():
     generated = generate_scene_images(
         scenes,
         work / "images",
-        steps=int(os.environ.get("CLOUDFLARE_IMAGE_STEPS", "6")),
+        steps=int(os.environ.get("CLOUDFLARE_IMAGE_STEPS", "4")),
     )
     media = []
     for item in generated:
