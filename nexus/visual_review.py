@@ -66,10 +66,9 @@ def review_scene_frames(frame_paths, scenes, api_key, model=None, timeout=180, s
             "correspondente. Avalie correspondência literal/semântica, qualidade visual, "
             "composição, artefatos, texto/logos indesejados e continuidade de estilo. "
             "Não infira movimento a partir de um quadro estático. Seja rigoroso e específico. "
-            "Retorne somente JSON: {\\"reviews\\":[{\\"scene_number\\":1,"
-            "\\"semantic_score\\":0-10,\\"matches_narration\\":true,"
-            "\\"visual_quality\\":\\"...\\",\\"issues\\":[\\"...\\"],"
-            "\\"recommendation\\":\\"...\\"}]}. "
+            "Retorne somente um objeto JSON com a chave reviews. Cada item deve conter scene_number, "
+            "semantic_score de 0 a 10, matches_narration booleano, visual_quality como texto, "
+            "issues como lista de problemas e recommendation como recomendação editorial. "
             "Inclua exatamente uma avaliação para cada cena, na ordem recebida.\nCENAS:\n"
             + json.dumps([
                 {"scene_number": i + 1, "voiceover": scene.get("voiceover", ""),
