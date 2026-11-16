@@ -81,7 +81,7 @@ export const NexusVideo: React.FC<NexusVideoProps> = (props) => {
   });
 
   return (
-    <AbsoluteFill style={{ backgroundColor: "#080d14" }}>
+    <AbsoluteFill style={{ backgroundColor: "#080d14", fontFamily: "Arial, Helvetica, sans-serif" }}>
       {layers.map((layer) => (
         <SceneLayer key={layer.scene.id} {...layer} />
       ))}
