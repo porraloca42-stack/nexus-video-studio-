@@ -200,9 +200,11 @@ class FishAudioTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix="nexus_fish_fallback_") as temp:
             output = Path(temp) / "voice.mp3"
             with patch("nexus.audio.edge_tts.Communicate", FakeCommunicate):
-                audio_path, subtitle_path = make_voice(
+                audio_path, subtitle_path, provider = make_voice(
                     "Olá mundo.", "pt-BR-AntonioNeural", output,
-                    fish_api_key="test-key", session=BrokenFishSession()
+                    fish_api_key="test-key", session=BrokenFishSession(),
+                    return_provider=True,
                 )
             self.assertEqual(audio_path.read_bytes(), b"fake-mp3")
+            self.assertTrue(provider.startswith("Edge TTS (fallback:"))
             self.assertTrue(subtitle_path.exists())
