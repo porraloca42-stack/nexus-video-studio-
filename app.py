@@ -274,8 +274,9 @@ else:
 
 render_mode = st.selectbox(
     "Motor de produção visual",
-    ["Bibliotecas de vídeo (atual)", "Imagens originais · Cloudflare AI + Remotion"],
-    help="O modo Cloudflare gera imagens específicas para cada cena e compõe o MP4 no trabalhador Remotion do GitHub Actions. Requer credenciais configuradas nos Secrets.",
+    ["Imagens originais · Cloudflare AI + Remotion", "Bibliotecas de vídeo (alternativo)"],
+    index=0,
+    help="Fluxo principal: Cloudflare Workers AI gera imagens específicas para cada cena e o Remotion compõe o MP4 no trabalhador GitHub Actions. As bibliotecas de vídeo permanecem disponíveis como alternativa.",
 )
 
 with st.expander("Ferramentas avançadas · diagnóstico das bibliotecas de vídeo"):
