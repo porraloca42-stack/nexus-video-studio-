@@ -1,5 +1,6 @@
 import json
 import re
+import time
 import requests
 
 SYSTEM = """
@@ -55,104 +56,244 @@ def _model_version(name):
     nums = re.findall(r"\d+", name.lower())
     return tuple(int(n) for n in nums[:3]) if nums else (0,)
 
-def discover_model(api_key, requested="auto"):
-    response = requests.get(
-        "https://generativelanguage.googleapis.com/v1beta/models",
-        params={"key": api_key},
-        timeout=45,
-    )
-    if response.status_code in (401, 403):
-        raise RuntimeError("A API do Gemini recusou a chave ou não autorizou a listagem de modelos.")
-    response.raise_for_status()
-    models = response.json().get("models", [])
+def discover_models(api_key, requested="auto"):
+    """Return compatible Gemini models in preference order for failover."""
+    last_error = None
+    response = None
+    for attempt in range(3):
+        try:
+            response = requests.get(
+                "https://generativelanguage.googleapis.com/v1beta/models",
+                params={"key": api_key},
+                timeout=45,
+            )
+            if response.status_code in (500, 502, 503, 504):
+                last_error = f"HTTP {response.status_code}"
+                if attempt < 2:
+                    time.sleep(2 ** attempt)
+                    continue
+            response.raise_for_status()
+            break
+        except requests.RequestException as exc:
+            last_error = str(exc)
+            if attempt < 2:
+                time.sleep(2 ** attempt)
+            else:
+                raise RuntimeError(
+                    "Não foi possível consultar os modelos disponíveis do Gemini após 3 tentativas. "
+                    "O serviço pode estar temporariamente indisponível."
+                ) from None
+    if response is None or not response.ok:
+        raise RuntimeError(
+            "O catálogo de modelos do Gemini está indisponível"
+            + (f" ({last_error})." if last_error else ".")
+            + " Tente novamente em alguns minutos."
+        )
+
     supported = [
-        m for m in models
+        m for m in response.json().get("models", [])
         if "generateContent" in m.get("supportedGenerationMethods", [])
         and "embedding" not in m.get("name", "").lower()
     ]
     if not supported:
         raise RuntimeError("A chave não retornou modelos compatíveis com geração de conteúdo.")
-    requested = (requested or "auto").strip()
+
+    requested = (requested or "auto").strip().replace("models/", "")
     if requested.lower() not in ("", "auto"):
-        match = next((m for m in supported if m.get("name", "").split("/")[-1] == requested.replace("models/", "")), None)
-        if match:
-            return match["name"].split("/")[-1]
-    # Use the model the user confirmed has available quota in their AI Studio project.
-    preferred = next(
-        (m for m in supported if m.get("name", "").split("/")[-1] == "gemini-3.5-flash-lite"),
-        None,
-    )
-    if preferred:
-        return preferred["name"].split("/")[-1]
-    # Fallback: prefer stable Flash-Lite before higher tiers that may be quota-blocked.
-    def rank(m):
-        name = m.get("name", "").split("/")[-1].lower()
-        lite = 1 if "flash-lite" in name else 0
+        selected = next(
+            (m for m in supported if m.get("name", "").split("/")[-1] == requested),
+            None,
+        )
+        if selected:
+            # Explicit preference first, but keep other compatible models as fallback.
+            supported.sort(key=lambda m: m is not selected)
+
+    def rank(model):
+        name = model.get("name", "").split("/")[-1].lower()
         stable = 1 if "preview" not in name and "exp" not in name else 0
-        return (lite, stable, _model_version(name))
-    supported.sort(key=rank, reverse=True)
-    return supported[0]["name"].split("/")[-1]
+        if "flash-lite" in name:
+            family = 4
+        elif "flash" in name:
+            family = 3
+        elif "pro" in name:
+            family = 2
+        else:
+            family = 1
+        return (stable, family, _model_version(name))
+
+    if requested.lower() in ("", "auto"):
+        supported.sort(key=rank, reverse=True)
+    else:
+        # Keep the explicitly configured model first; rank all remaining fallbacks.
+        first = supported[0]
+        remaining = sorted(supported[1:], key=rank, reverse=True)
+        supported = [first] + remaining
+
+    names = []
+    for item in supported:
+        name = item.get("name", "").split("/")[-1]
+        if name and name not in names:
+            names.append(name)
+    return names
+
+
+def discover_model(api_key, requested="auto"):
+    """Backward-compatible single-model selector."""
+    return discover_models(api_key, requested)[0]
+
 
 def _request(prompt, secret_reader):
     key = secret_reader("GEMINI_API_KEY")
     requested = secret_reader("GEMINI_MODEL", "auto")
     if not key:
         raise RuntimeError("Diretor de IA indisponível: configure GEMINI_API_KEY.")
-    try:
-        model = discover_model(key, requested)
+
+    models = discover_models(key, requested)
+    # A transient outage on one model must not abort the user's planning request.
+    # Try up to two times per model, then fail over to another compatible model.
+    attempted = []
+    last_status = None
+    last_detail = ""
+
+    for model in models[:5]:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
         payload = {
             "systemInstruction": {"parts": [{"text": SYSTEM}]},
             "contents": [{"role": "user", "parts": [{"text": prompt}]}],
-            "generationConfig": {"temperature": 0.25, "responseMimeType": "application/json", "maxOutputTokens": 8192}
+            "generationConfig": {
+                "temperature": 0.25,
+                "responseMimeType": "application/json",
+                "maxOutputTokens": 8192,
+            },
         }
-        response = requests.post(url, params={"key": key}, json=payload, timeout=240)
-    except requests.RequestException:
-        raise RuntimeError("Não foi possível conectar ao serviço Gemini. Tente novamente.") from None
-    if response.status_code == 429:
-        try:
-            detail = response.json().get("error", {}).get("message", "")
-        except ValueError:
-            detail = ""
-        detail = detail[:700] if detail else "A API não informou o detalhe da cota."
-        raise RuntimeError(f"Gemini recusou a solicitação por limite/cota (HTTP 429) no modelo {model}. Detalhe: {detail} Confira o limite desse modelo no AI Studio: https://aistudio.google.com/rate-limit")
-    if response.status_code in (401, 403):
-        raise RuntimeError("O Gemini recusou a autenticação ou o acesso ao modelo.")
-    if response.status_code == 404:
-        raise RuntimeError(f"O modelo selecionado ({model}) não está disponível. Configure GEMINI_MODEL = \"auto\" em Secrets.")
-    if not response.ok:
-        raise RuntimeError(f"Falha no Gemini (HTTP {response.status_code}).")
-    data = response.json()
-    candidates = data.get("candidates") or []
-    if not candidates:
-        feedback = data.get("promptFeedback", {}).get("blockReason")
-        suffix = " (bloqueio: " + str(feedback) + ")." if feedback else "."
-        raise RuntimeError("O Gemini não gerou o storyboard" + suffix + " Revise o roteiro ou tente novamente.")
-    candidate = candidates[0]
-    finish_reason = candidate.get("finishReason", "desconhecido")
-    parts = candidate.get("content", {}).get("parts", [])
-    result = "\n".join(part.get("text", "") for part in parts if isinstance(part, dict) and part.get("text"))
-    if not result.strip():
-        raise RuntimeError("O Gemini retornou uma resposta sem texto (motivo: " + str(finish_reason) + "). Tente novamente.")
-    cleaned = re.sub(r"^\s*```(?:json)?\s*|\s*```\s*$", "", result.strip(), flags=re.IGNORECASE)
-    try:
-        plan = json.loads(cleaned)
-    except json.JSONDecodeError:
-        start_json = cleaned.find("{")
-        if start_json >= 0:
+
+        for attempt in range(2):
             try:
-                plan, _ = json.JSONDecoder().raw_decode(cleaned[start_json:])
+                response = requests.post(
+                    url, params={"key": key}, json=payload, timeout=240
+                )
+            except requests.RequestException:
+                if attempt == 0:
+                    time.sleep(2)
+                    continue
+                last_status = "conexão"
+                last_detail = f"{model}: falha de conexão após duas tentativas."
+                break
+
+            if response.status_code in (429, 500, 502, 503, 504):
+                last_status = response.status_code
+                try:
+                    detail = response.json().get("error", {}).get("message", "")
+                except (ValueError, AttributeError):
+                    detail = ""
+                last_detail = str(detail)[:500] or "Sem detalhe adicional informado pela API."
+                attempted.append(f"{model} (HTTP {response.status_code})")
+                if attempt == 0:
+                    time.sleep(2)
+                    continue
+                # Try the next model instead of showing a fatal error immediately.
+                break
+
+            if response.status_code in (401, 403):
+                raise RuntimeError(
+                    "O Gemini recusou a autenticação ou o acesso à API. "
+                    "Verifique GEMINI_API_KEY e as permissões do projeto."
+                )
+            if response.status_code == 404:
+                last_status = 404
+                last_detail = f"O modelo {model} não está disponível."
+                attempted.append(f"{model} (HTTP 404)")
+                break
+            if not response.ok:
+                detail = ""
+                try:
+                    detail = response.json().get("error", {}).get("message", "")
+                except (ValueError, AttributeError):
+                    pass
+                raise RuntimeError(
+                    f"Falha no Gemini (HTTP {response.status_code}) no modelo {model}. "
+                    + (str(detail)[:500] if detail else "")
+                )
+
+            data = response.json()
+            candidates = data.get("candidates") or []
+            if not candidates:
+                feedback = data.get("promptFeedback", {}).get("blockReason")
+                suffix = " (bloqueio: " + str(feedback) + ")." if feedback else "."
+                raise RuntimeError(
+                    "O Gemini não gerou o storyboard" + suffix
+                    + " Revise o roteiro ou tente novamente."
+                )
+
+            candidate = candidates[0]
+            finish_reason = candidate.get("finishReason", "desconhecido")
+            parts = candidate.get("content", {}).get("parts", [])
+            result = "\\n".join(
+                part.get("text", "")
+                for part in parts
+                if isinstance(part, dict) and part.get("text")
+            )
+            if not result.strip():
+                raise RuntimeError(
+                    "O Gemini retornou uma resposta sem texto (motivo: "
+                    + str(finish_reason) + "). Tente novamente."
+                )
+
+            cleaned = re.sub(
+                r"^\\s*```(?:json)?\\s*|\\s*```\\s*$",
+                "",
+                result.strip(),
+                flags=re.IGNORECASE,
+            )
+            try:
+                plan = json.loads(cleaned)
             except json.JSONDecodeError:
-                plan = None
-        else:
-            plan = None
-    if not isinstance(plan, dict) or not isinstance(plan.get("scenes"), list):
-        if finish_reason == "MAX_TOKENS":
-            raise RuntimeError("O Gemini interrompeu a resposta por limite de saída antes de concluir o storyboard. Tente novamente; a geração agora permite uma resposta maior.")
-        preview = re.sub(r"\s+", " ", result)[:350]
-        raise RuntimeError("O Gemini não retornou JSON completo e válido (motivo: " + str(finish_reason) + "). Trecho recebido: " + preview)
-    plan["director_model"] = model
-    return plan
+                start_json = cleaned.find("{")
+                if start_json >= 0:
+                    try:
+                        plan, _ = json.JSONDecoder().raw_decode(cleaned[start_json:])
+                    except json.JSONDecodeError:
+                        plan = None
+                else:
+                    plan = None
+
+            if not isinstance(plan, dict) or not isinstance(plan.get("scenes"), list):
+                if finish_reason == "MAX_TOKENS":
+                    raise RuntimeError(
+                        "O Gemini interrompeu a resposta por limite de saída antes "
+                        "de concluir o storyboard. Tente novamente."
+                    )
+                preview = re.sub(r"\\s+", " ", result)[:350]
+                raise RuntimeError(
+                    "O Gemini não retornou JSON completo e válido (motivo: "
+                    + str(finish_reason) + "). Trecho recebido: " + preview
+                )
+            plan["director_model"] = model
+            plan["model_failover"] = attempted
+            return plan
+
+    tried = ", ".join(attempted) if attempted else "nenhum modelo"
+    if last_status == 503 or last_status in (500, 502, 504):
+        raise RuntimeError(
+            "O Gemini está temporariamente sobrecarregado ou indisponível. "
+            f"Tentei novamente e recorri a outros modelos compatíveis ({tried}), "
+            "mas nenhum respondeu. Aguarde um minuto e tente outra vez."
+        )
+    if last_status == 429:
+        raise RuntimeError(
+            "Os modelos Gemini disponíveis recusaram a solicitação por limite de uso/cota. "
+            f"Modelos tentados: {tried}. Confira os limites no AI Studio: "
+            "https://aistudio.google.com/rate-limit"
+        )
+    if last_status == 404:
+        raise RuntimeError(
+            "O modelo configurado não está disponível e os modelos alternativos também falharam. "
+            f"Modelos tentados: {tried}. Configure GEMINI_MODEL = \"auto\" em Secrets."
+        )
+    raise RuntimeError(
+        "Não foi possível obter resposta do Gemini após tentar modelos alternativos. "
+        f"Último detalhe: {last_detail}"
+    )
 
 def _fit_scene_durations(scenes, requested_duration):
     """Assign the exact requested runtime using each scene's narration length."""
