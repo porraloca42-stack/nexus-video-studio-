@@ -491,3 +491,13 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - URL de publicação registrada no histórico do projeto: https://htykbebk3hceoen5bvopax.streamlit.app/ . Não há confirmação independente nesta sessão de que o deploy esteja servindo o commit mais recente; tentativa de acesso externo não retornou conteúdo verificável.
 - Commit documental do README: ffef2bd122a4b6457190ce056b9e04da5d103b17. CI #189 (43829849725) disparado por essa atualização está em execução; não marcar a revisão documental como CI validada até concluir.
 - Próximo bloqueio real: executar no Streamlit publicado o painel Ferramentas avançadas → Testar todas as bibliotecas configuradas e depois uma produção curta/real; esse ambiente contém os Secrets Gemini/Pixabay/Pexels que não estão disponíveis ao GitHub Actions. Sem o resultado desse teste, não declarar deploy nem pipeline ponta a ponta validados.
+
+
+### Correção após falha reportada no Streamlit — 16/11/2026
+- Evidência do usuário: geração planejada com 10 cenas/50s interrompeu a produção porque não encontrou clipes nas cenas [1, 2, 5, 6, 8, 9]. A captura não inclui o conteúdo expandido de “Detalhes das buscas sem resultado”; portanto, não atribuir a falha a uma API/chave específica sem essa evidência.
+- Removido do `app.py` o expander “Bancos gratuitos complementares · pesquisa manual”. Essas fontes não participam do render automático; não devem ocupar espaço na interface principal.
+- Diagnóstico de código: `search_video_sources` estava limitando a consulta de cada cena a somente duas variantes (frase completa e combinação de palavras), apesar de `build_query_variants` suportar termos individuais. Isso tornava a recuperação excessivamente restrita em bibliotecas com indexação/tagging diferente.
+- Correção incremental: ampliada a busca por cena para até cinco variantes de consulta, incluindo consultas mais curtas e termos-chave individuais. A seleção final continua condicionada à revisão visual semântica; não se relaxa o filtro de licença nem se permite clipe de estilo apenas.
+- Adicionado teste de regressão para verificar expansão da busca a consultas curtas. Build UI: `NEXUS-2026.11.16-stock-search-recovery-1`.
+- Commits: `9b44d28` remoção do painel manual e build; `a026923` expansão da busca; `6c5f403` teste de regressão.
+- CI #191 (app), #192 (assets) e #193 (teste) estão em execução/fila. Não marcar a correção como testada até verificar CI; tampouco assumir deploy automático confirmado. Após CI, confirmar no Streamlit publicado e, se a busca ainda falhar, coletar o conteúdo expandido de “Detalhes das buscas sem resultado” para identificar erro de autenticação, rate limit, indisponibilidade ou ausência de resultados.
