@@ -633,3 +633,8 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Criado `docs/WORKERS_AI_SETUP.md` com instruções de criação e armazenamento seguro dos Secrets. O modo remoto não será ativado até o usuário configurar os Secrets em GitHub e Streamlit.
 - Adicionada validação de tamanho e resolução 512×910 para cada imagem gerada e bloqueio quando a duração de áudio Edge TTS divergir mais de 10% da meta; essas alterações aguardam a CI dos commits mais recentes.
 - O teste de resposta JSON Base64/JPEG foi adicionado para confirmar extensão de arquivo correta; aguardar execução #290/#291 antes de declarar o teste aprovado.
+
+- **CI Remotion #31** (`43844936917`, commit `352236cb`): sucesso. Typecheck, testes Cloudflare/Remotion, fixture sintética, build do manifesto, render via Remotion, validação H.264/AAC 720×1280 e upload do artefato passaram.
+- CI #291 (`43844936875`): suíte principal passou após corrigir o fixture JPEG para usar bytes reais da assinatura JPEG. A falha anterior no Remotion #30 era somente o fixture de teste com assinatura escapada incorretamente; corrigido no commit `352236c`.
+- Testes de render com manifesto agora passaram em duas execuções consecutivas (#27 e #31); fonte sans-serif validada visualmente no artefato do #29.
+- Estado técnico: Remotion + adaptador Python + render de vídeo/áudio/legendas validados em GitHub Actions com fixtures. Cloudflare Workers AI real, worker de produção com credenciais, deploy Streamlit e MP4 final gerado com imagens Cloudflare ainda aguardam Secrets e validação ao vivo.
