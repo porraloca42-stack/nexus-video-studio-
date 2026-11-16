@@ -59,7 +59,7 @@ def _subtitle_cues(events, narration):
         if not group:
             return
         words = group
-        # Four words per cue make a compact, readable block on a phone.
+        # Split short phrases evenly over at most two mobile-safe lines.
         split_at = (len(words) + 1) // 2
         lines = [
             " ".join(words[:split_at]).strip(),
