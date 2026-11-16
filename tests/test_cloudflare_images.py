@@ -3,7 +3,7 @@ import pytest
 from nexus.cloudflare_images import CloudflareAIError, generate_image
 
 
-PNG = b"\\x89PNG\\r\\n\\x1a\\n" + b"nexus-test-image"
+PNG = b"\x89PNG\r\n\x1a\n" + b"nexus-test-image"
 
 
 class FakeResponse:
