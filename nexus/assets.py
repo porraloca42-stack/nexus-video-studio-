@@ -70,6 +70,55 @@ def search_pixabay_videos(query, api_key, per_page=20):
     results.sort(key=lambda x: (x['vertical'], x['width'] * x['height']), reverse=True)
     return results
 
+
+def search_pexels_videos(query, api_key, per_page=20):
+    """Search Pexels video library and normalize results to the NEXUS asset schema."""
+    response = requests.get(
+        "https://api.pexels.com/v1/videos/search",
+        headers={"Authorization": api_key},
+        params={
+            "query": query,
+            "orientation": "portrait",
+            "locale": "pt-BR",
+            "per_page": min(int(per_page), 80),
+        },
+        timeout=45,
+    )
+    response.raise_for_status()
+    results = []
+    for item in response.json().get("videos", []):
+        files = [
+            video_file for video_file in item.get("video_files", [])
+            if video_file.get("link")
+            and video_file.get("file_type") == "video/mp4"
+            and int(video_file.get("width") or 0) >= 480
+            and int(video_file.get("height") or 0) >= 700
+        ]
+        if not files:
+            continue
+        files.sort(
+            key=lambda video_file: (
+                1 if str(video_file.get("quality", "")).lower() in {"hd", "uhd"} else 0,
+                int(video_file.get("width") or 0) * int(video_file.get("height") or 0),
+            ),
+            reverse=True,
+        )
+        chosen = files[0]
+        user = item.get("user") or {}
+        results.append({
+            "url": chosen["link"],
+            "width": int(chosen.get("width") or 0),
+            "height": int(chosen.get("height") or 0),
+            "vertical": int(chosen.get("height") or 0) > int(chosen.get("width") or 0),
+            "title": item.get("alt") or "",
+            "description": item.get("alt") or "",
+            "source": "Pexels",
+            "source_url": item.get("url") or "https://www.pexels.com/videos/",
+            "author": user.get("name") or "",
+            "author_url": user.get("url") or "",
+        })
+    return results
+
 def _query_tokens(value):
     words = re.findall(r"[a-zA-Z0-9]+", str(value or "").lower())
     return [word for word in words if word not in _STOPWORDS and len(word) > 2]
@@ -115,86 +164,71 @@ def search_video_sources(
     exclude_urls=None,
     relevance_query=None,
     min_relevance=1.5,
+    pexels_key='',
 ):
-    """Search stock libraries with strict matching, then a controlled semantic fallback."""
+    """Search every configured stock provider and rank their combined candidates."""
     errors = []
     excluded = set(exclude_urls or [])
-    variants = build_query_variants(query, max_variants=8)
+    variants = build_query_variants(query, max_variants=2)
     semantic_query = relevance_query if relevance_query is not None else query
     query_terms = list(dict.fromkeys(_query_tokens(semantic_query)))
-    weak_candidates = []
-
-    def rank_results(results, source, search_query):
-        unique = []
-        seen = set(excluded)
-        for item in results:
-            url = item.get("url")
-            if not url or url in seen:
-                continue
-            seen.add(url)
-            item["matched_query"] = search_query
-            item["source"] = item.get("source") or source
-            unique.append(item)
-        return rank_video_candidates(unique, semantic_query)
-
-    def strict_matches(ranked):
-        required_matches = min(2, len(query_terms))
-        return [
-            item for item in ranked
-            if item.get("_nexus_relevance", 0.0) >= float(min_relevance)
-            and item.get("_nexus_match_count", 0) >= required_matches
-        ]
-
-    def partial_matches(ranked):
-        # Last-resort recovery: accept a real match on one scene-specific term
-        # only after every strict query/source combination has been exhausted.
-        # Zero-overlap stock is never accepted.
-        if len(query_terms) < 2:
-            return []
-        return [
-            item for item in ranked
-            if item.get("_nexus_match_count", 0) >= 1
-            and item.get("_nexus_relevance", 0.0) >= 2.0
-        ]
+    all_candidates = []
 
     sources = []
     if coverr_key:
         sources.append(("Coverr", search_coverr_videos, coverr_key))
     if pixabay_key:
         sources.append(("Pixabay", search_pixabay_videos, pixabay_key))
+    if pexels_key:
+        sources.append(("Pexels", search_pexels_videos, pexels_key))
 
-    # First pass: require two distinct semantic matches whenever possible.
+    # Query every enabled provider. Do not return early when the first
+    # provider finds a match: the final choice must compare the whole pool.
     for source_name, search_fn, api_key in sources:
         for search_query in variants:
             try:
                 results = search_fn(search_query, api_key, per_page)
-                ranked = rank_results(results, source_name, search_query)
-                matches = strict_matches(ranked)
-                if matches:
-                    return matches, errors
-                weak_candidates.extend(partial_matches(ranked))
+                for item in results:
+                    url = item.get("url")
+                    if not url or url in excluded:
+                        continue
+                    item["matched_query"] = search_query
+                    item["source"] = item.get("source") or source_name
+                    all_candidates.append(item)
             except requests.RequestException as exc:
                 errors.append(f"{source_name} ({search_query}): {exc}")
 
-    # Second pass: recover scenes for which stock metadata uses different
-    # wording. Keep a minimum one-term overlap with the actual scene request.
-    if weak_candidates:
-        deduplicated = {}
-        for item in weak_candidates:
-            url = item.get("url")
-            if url and url not in deduplicated:
-                deduplicated[url] = item
-        return sorted(
-            deduplicated.values(),
-            key=lambda item: (
-                item.get("_nexus_match_count", 0),
-                item.get("_nexus_relevance", 0.0),
-                *item.get("_nexus_quality", (0, 0, 0)),
-            ),
-            reverse=True,
-        ), errors
+    # Deduplicate identical downloads while preserving provider provenance.
+    deduplicated = {}
+    for item in all_candidates:
+        url = item["url"]
+        existing = deduplicated.get(url)
+        if existing is None:
+            deduplicated[url] = item
+        else:
+            providers = set(existing.get("also_found_by", []))
+            providers.add(item.get("source", ""))
+            existing["also_found_by"] = sorted(name for name in providers if name)
 
-    return [], errors
+    ranked = rank_video_candidates(list(deduplicated.values()), semantic_query)
+    required_matches = min(2, len(query_terms))
+    strict = [
+        item for item in ranked
+        if item.get("_nexus_relevance", 0.0) >= float(min_relevance)
+        and item.get("_nexus_match_count", 0) >= required_matches
+    ]
+    if strict:
+        return strict, errors
+
+    # Last-resort recovery: accept a real scene-term match only after all
+    # enabled providers and concise query variants have been exhausted.
+    partial = [
+        item for item in ranked
+        if len(query_terms) >= 2
+        and item.get("_nexus_match_count", 0) >= 1
+        and item.get("_nexus_relevance", 0.0) >= 2.0
+    ]
+    return partial, errors
 
 def download_file(url, destination):
     destination = Path(destination)
