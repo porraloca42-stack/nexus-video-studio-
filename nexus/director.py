@@ -9,7 +9,7 @@ A fala define exatamente o que o público deve ver. Cada cena deve mostrar uma a
 Mantenha UM estilo visual do início ao fim: fotografia, paleta, luz, textura, lente e atmosfera coerentes. Não misture estilos.
 Priorize ações filmáveis e específicas. Evite slideshows, colagens, infográficos escolares, imagens abstratas sem função e repetição de enquadramentos.
 Não invente fatos, capas, páginas, citações, nomes ou características de produtos/livros. Diferencie fatos verificados, crenças e alegações.
-Divida a duração em cenas com ritmo variado, normalmente 3 a 7 segundos. Não force cenas de 10 segundos. Toda cena deve ter pelo menos dois microeventos visuais.
+A QUANTIDADE DE CENAS É DECIDIDA A PARTIR DA DURAÇÃO E DA DENSIDADE DO ROTEIRO, nunca por uma lista fixa de temas. Para vídeos de 40–60 segundos, crie no mínimo ceil(duração/5) cenas e prefira ceil(duração/4) ou mais: 50s deve gerar pelo menos 10 cenas, com meta de 12–15; 40s pelo menos 8, meta 10–12; 60s pelo menos 12, meta 15–18. Em geral, cada clipe cobre 3–4 segundos; varie conforme a fala e a ação, sem esticar artificialmente cenas. A soma das durações deve corresponder à duração solicitada. Cada cena precisa de busca visual própria, derivada da ação, objeto, ambiente e significado EXATOS daquele trecho. Nunca reutilize um conjunto fixo de palavras-chave nem force objetos que não estejam no roteiro. As buscas principal e alternativa devem ser distintas, concretas, em inglês e específicas daquela cena. Toda cena deve ter pelo menos dois microeventos visuais.
 Para cada cena, descreva: o que aparece, o que acontece em ordem, onde, quem/que objeto, enquadramento, movimento de câmera e duas buscas alternativas de clipes em inglês.
 Retorne somente JSON válido:
 {
@@ -121,17 +121,20 @@ def create_storyboard(topic, style, duration, secret_reader):
 
 ESTILO VISUAL ÚNICO E BLOQUEADO: {style}
 DURAÇÃO TOTAL: {duration} segundos.
-Planeje primeiro a narrativa completa. Depois divida em cenas com ritmo variado. A soma das durações deve ficar próxima da duração pedida. Preserve a relação semântica exata entre cada fala e sua imagem. Escreva a narração em português brasileiro natural."""
+Planeje primeiro a narrativa completa. Depois divida em cenas suficientes para cobrir a duração sem lacunas. Use como piso ceil(duração/5) cenas e meta ceil(duração/4) ou mais, com segmentos geralmente de 3–4 segundos. Para 50 segundos, crie 12–15 cenas e nunca menos de 10. A soma exata das durações deve corresponder à duração solicitada. A quantidade e o conteúdo das cenas devem nascer da progressão do roteiro, não de temas predefinidos. Para cada trecho, gere buscas principal e alternativa próprias, específicas e diferentes, em inglês. Não reutilize palavras-chave genéricas nem acrescente objetos/ações que a fala não sustenta. Preserve a relação semântica exata entre cada fala e sua imagem. Escreva a narração em português brasileiro natural."""
     plan = _request(prompt, secret_reader)
     plan["style_lock"] = style
     return plan
 
-def validate_storyboard(plan):
+def validate_storyboard(plan, requested_duration=None):
     errors = []
     scenes = plan.get("scenes", [])
     if not scenes:
         return ["O diretor não criou cenas."]
     total = 0
+    minimum_scenes = max(1, int((float(requested_duration) + 4) // 5)) if requested_duration else 1
+    if len(scenes) < minimum_scenes:
+        errors.append(f"O diretor criou {len(scenes)} cenas, mas são necessárias pelo menos {minimum_scenes} para cobrir {requested_duration}s sem segmentos longos.")
     for index, scene in enumerate(scenes, 1):
         total += float(scene.get("duration_seconds", 0) or 0)
         for field in ("voiceover", "visual_action", "semantic_reason", "camera_motion", "asset_search_query"):
