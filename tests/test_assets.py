@@ -126,6 +126,7 @@ class AssetRankingTests(unittest.TestCase):
     def test_style_only_result_without_scene_metadata_is_rejected(self, search):
         search.side_effect = [
             [],
+            [],
             [clip("https://example.test/anime.mp4", "Anime fantasy landscape", "Japanese animation")],
         ]
 
