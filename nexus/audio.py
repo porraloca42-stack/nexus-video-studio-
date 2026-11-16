@@ -114,10 +114,108 @@ def _write_srt(cues, destination):
     Path(destination).write_text("\n\n".join(blocks) + ("\n" if blocks else ""), encoding="utf-8")
 
 
-def make_voice(text, voice, output):
+def _fish_timestamp_cues(events, narration):
+    aligned = []
+    for event in events:
+        alignment = event.get("alignment") or {}
+        for item in alignment.get("segments") or []:
+            try:
+                start = max(0, round(float(item.get("start", 0)) * 1000))
+                end = max(start + 1, round(float(item.get("end", 0)) * 1000))
+                word = str(item.get("text") or "").strip()
+            except (TypeError, ValueError):
+                continue
+            if word:
+                aligned.append((start, end, word))
+    if not aligned:
+        return _subtitle_cues([], narration)
+    return _subtitle_cues(
+        [{"type": "WordBoundary", "offset": start * 10_000,
+          "duration": (end - start) * 10_000, "text": word}
+         for start, end, word in aligned],
+        narration,
+    )
+
+
+def _make_fish_voice(text, output, api_key, voice_id=None, session=None):
+    """Generate Fish S2.1 Pro Free audio and native word alignment via SSE."""
+    import base64
+    import json
+    import requests
+
+    client = session or requests
+    payload = {
+        "text": text,
+        "format": "mp3",
+        "sample_rate": 44100,
+        "mp3_bitrate": 128,
+        "normalize": True,
+        "language": "pt",
+        "temperature": 0.72,
+        "top_p": 0.75,
+        "chunk_length": 300,
+        "condition_on_previous_chunks": True,
+    }
+    if voice_id:
+        payload["reference_id"] = voice_id
+    response = client.post(
+        "https://api.fish.audio/v1/tts/stream/with-timestamp",
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+            "model": "s2.1-pro-free",
+        },
+        json=payload,
+        stream=True,
+        timeout=(20, 240),
+    )
+    response.raise_for_status()
+    audio_parts = []
+    events = []
+    for raw_line in response.iter_lines(decode_unicode=True):
+        if not raw_line:
+            continue
+        line = raw_line.decode("utf-8") if isinstance(raw_line, bytes) else raw_line
+        if not line.startswith("data:"):
+            continue
+        data = line[5:].strip()
+        if not data or data == "[DONE]":
+            continue
+        try:
+            event = json.loads(data)
+        except json.JSONDecodeError:
+            continue
+        encoded = event.get("audio_base64")
+        if encoded:
+            audio_parts.append(base64.b64decode(encoded))
+        if event.get("alignment"):
+            events.append(event)
+    if not audio_parts:
+        raise RuntimeError("Fish Audio não retornou segmentos de áudio.")
+    output.write_bytes(b"".join(audio_parts))
+    cues = _fish_timestamp_cues(events, text)
+    _write_srt(cues, output.with_suffix(".srt"))
+    return output, output.with_suffix(".srt")
+
+
+def make_voice(text, voice, output, fish_api_key=None, fish_voice_id=None, session=None):
     output = Path(output)
     output.parent.mkdir(parents=True, exist_ok=True)
     subtitles = output.with_suffix(".srt")
+
+    if fish_api_key:
+        try:
+            result = _make_fish_voice(
+                text, output, fish_api_key, voice_id=fish_voice_id, session=session
+            )
+            if not output.exists() or output.stat().st_size == 0:
+                raise RuntimeError("Fish Audio retornou um arquivo de áudio vazio.")
+            return result
+        except Exception:
+            # Preserve a working production path while the external TTS provider
+            # is unavailable, rate-limited, or outside its temporary free window.
+            output.unlink(missing_ok=True)
+            subtitles.unlink(missing_ok=True)
 
     async def generate():
         communicate = edge_tts.Communicate(text, voice, rate="+0%")
@@ -134,7 +232,7 @@ def make_voice(text, voice, output):
 
     asyncio.run(generate())
     if not output.exists() or output.stat().st_size == 0:
-        raise RuntimeError("O Edge TTS não gerou um arquivo de áudio válido.")
+        raise RuntimeError("O sintetizador não gerou um arquivo de áudio válido.")
     if not subtitles.exists():
         raise RuntimeError("Não foi possível criar o arquivo de legendas SRT.")
     return output, subtitles
