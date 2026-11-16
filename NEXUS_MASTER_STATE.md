@@ -675,3 +675,10 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Commit `f673d92`: adicionados testes unitários para a nova tentativa moderada e para garantir que erros não relacionados a moderação não sejam repetidos.
 - CI dos commits `a3a81a8` e `f673d92` está em execução (runs #43855578370, #43855578442, #43855616814 e #43855616779); ainda sem resultado final nesta atualização.
 - Não houve nova execução real do worker após esta correção. MP4 final e fluxo de ponta a ponta continuam não validados.
+
+
+### Validação automatizada do retry de moderação — 16/11/2026
+- Run #43855616814 (commit `f673d92`): regressão concluída com sucesso; jobs `unit-tests` e `commons-live-smoke` aprovados. Isso valida os testes simulados do retry 3030 e a compilação/suíte de regressão no commit com a implementação.
+- Run #43855578442 (commit `a3a81a8`): demo Remotion concluída; steps de type-check, testes dos adaptadores, render via adaptador Python/Remotion e validação do MP4 sintético 720×1280 com áudio/duração passaram. A etapa de demo manual de 50s foi explicitamente skipped; não confundir com render Cloudflare real.
+- Run #43855679107 (commit de documentação `9b747ad`): nova regressão disparada pela atualização deste arquivo; ainda em andamento na última consulta.
+- Estado atualizado: correção de moderação implementada e coberta por testes automatizados aprovados; Remotion demo e integração sintética aprovadas. Falta implantação efetiva no Streamlit e novo render real via Cloudflare para validar se o modelo aceita as imagens e se o MP4 final é produzido.
