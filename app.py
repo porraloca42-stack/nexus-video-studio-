@@ -2,7 +2,7 @@ import base64, json, os, shutil, subprocess, tempfile, inspect
 from pathlib import Path
 import requests
 import streamlit as st
-from nexus.director import create_storyboard, validate_storyboard
+from nexus.director import create_storyboard, revise_narration_for_duration, validate_storyboard
 from nexus.assets import search_video_sources, search_coverr_videos, download_file
 from nexus.audio import make_voice
 from nexus.render import render_video
@@ -192,7 +192,7 @@ div[data-testid="stTextArea"] textarea,div[data-testid="stSelectbox"] div[data-b
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="nexus-hero"><div class="nexus-brand">NEXUS VIDEO STUDIO</div><div class="nexus-tagline">Transforme seu roteiro em vídeo</div></div>', unsafe_allow_html=True)
-st.caption("Versão: NEXUS-2026.11.16-voice-paced-25")
+st.caption("Versão: NEXUS-2026.11.16-voice-script-calibration-1")
 
 if "nexus_style" not in st.session_state or st.session_state["nexus_style"] not in STYLE_OPTIONS:
     st.session_state["nexus_style"] = "Cinematográfico realista"
@@ -472,9 +472,35 @@ if "nexus_plan" in st.session_state:
                                 st.caption("A API respondeu, mas não encontrou resultados para as consultas tentadas.")
                 else:
                     progress.progress((len(plan["scenes"]) + 1) / (len(plan["scenes"]) + 2), text="Gerando narração, legendas e montagem...")
-                    narration = " ".join(scene["voiceover"] for scene in plan["scenes"])
-                    audio, subtitles = make_voice(narration, voice, work / "voice.mp3")
                     output = work / "nexus_video.mp4"
+                    audio = work / "voice.mp3"
+                    target_duration = sum(float(scene["duration_seconds"]) for scene in plan["scenes"])
+                    for calibration_attempt in range(3):
+                        narration = " ".join(scene["voiceover"] for scene in plan["scenes"])
+                        audio, subtitles = make_voice(narration, voice, audio)
+                        audio_probe = subprocess.run(
+                            ["ffprobe", "-v", "error", "-show_entries", "format=duration",
+                             "-of", "default=noprint_wrappers=1:nokey=1", str(audio)],
+                            capture_output=True, text=True, timeout=60
+                        )
+                        if audio_probe.returncode != 0:
+                            raise RuntimeError("Não foi possível medir a duração real da narração.")
+                        actual_audio_duration = float(audio_probe.stdout.strip())
+                        difference_ratio = abs(actual_audio_duration - target_duration) / target_duration
+                        if difference_ratio <= 0.10:
+                            break
+                        if calibration_attempt == 2:
+                            raise RuntimeError(
+                                f"A IA revisou a narração, mas a voz ainda ficou com {actual_audio_duration:.1f}s "
+                                f"para uma meta de {target_duration:.1f}s. O texto não será forçado por alteração de velocidade."
+                            )
+                        progress.progress(
+                            (len(plan["scenes"]) + 1) / (len(plan["scenes"]) + 2),
+                            text=f"Ajustando o roteiro à duração real da voz ({actual_audio_duration:.1f}s / {target_duration:.1f}s)..."
+                        )
+                        plan = revise_narration_for_duration(
+                            plan, target_duration, actual_audio_duration, topic, style, secret
+                        )
                     render_video(media, audio, output, subtitles_path=subtitles)
                     final_probe = subprocess.run(
                         ["ffprobe", "-v", "error", "-show_entries",
