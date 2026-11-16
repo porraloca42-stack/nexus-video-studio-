@@ -523,3 +523,9 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Próxima validação: confirmar CI e, após atualização do Streamlit, gerar storyboard novo. Planos já salvos em `st.session_state` não são reescritos automaticamente; o usuário deve clicar “Planejar vídeo” novamente para que o estilo seja propagado a todas as cenas.
 
 - Hardening adicional no render: `app.py` agora reaplica `plan['style_lock']` a cada cena no início da produção, com fallback para planos salvos antigos sem `style_search_terms`; a busca e o diagnóstico passam a usar o estilo global mesmo quando o storyboard anterior veio incompleto. Commit `7da9c87`. CI correspondente #205 disparado; aguardar resultado.
+
+
+### Ajustes finais de regressão após revisão de CI — 16/11/2026
+- CI #206 confirmou que o novo teste de estilo global passou (`test_selected_visual_style_is_locked_on_every_scene`) e que testes de render/avaliação visual passaram, mas 3 testes antigos de `tests/test_assets.py` ainda tinham assinaturas de mocks/contagens incompatíveis com as chamadas reais (Commons `requests.get`, adaptador Wikimedia e cinco variantes + uma busca de estilo). Não foi falha da função de bloqueio de estilo.
+- Corrigidas as três expectativas restantes em `tests/test_assets.py` (commit `ed1958e`). CI #207 (`43832587620`) está na fila; aguardando conclusão antes de declarar suite verde.
+- O teste ao vivo Commons continuou passando em #206; deploy Streamlit e geração end-to-end permanecem não verificados.
