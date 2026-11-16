@@ -24,7 +24,7 @@ Aplicativo pessoal em nuvem para transformar tema ou roteiro em vídeo vertical 
 ## Arquitetura atual — estado do repositório em 16/11/2026
 - Interface: Streamlit (app.py).
 - Diretor: Gemini API (nexus/director.py), com failover entre modelos textuais compatíveis; produz roteiro, storyboard semântico e contrato `scene_direction` por cena.
-- Narração: Fish Audio S2.1 Pro Free como provedor obrigatório (nexus/audio.py); Edge TTS foi removido do pipeline e das dependências. A interface consulta a biblioteca Fish Audio, mostra amostras e permite selecionar voz pública ou voz própria. Não há trilha de legendas no pipeline.
+- Narração: Fish Audio S2.1 Pro Free como provedor obrigatório (nexus/audio.py); Edge TTS foi removido do pipeline e das dependências. A interface apresenta uma curadoria de até 25 vozes masculinas e 25 femininas de narração em português, com amostras e seleção. Não há busca nem criação/gravação de voz na UI. Não há trilha de legendas no pipeline.
 - Motor padrão selecionado na interface: Cloudflare Workers AI FLUX.2 Klein gera keyframes por cena; Modal/LTX-Video I2V anima cada keyframe em clipe MP4; o worker GitHub Actions usa Remotion (`nexus/remote_render_job.py`, `nexus/modal_i2v.py`, `nexus/remotion_renderer.py`, `remotion/`) para compor o MP4 vertical. O pipeline integrado foi validado em smoke test de 2s em 16/11/2026; ainda falta validar produção de 40–50s com Fish Audio.
 - Modo alternativo: bibliotecas de vídeo com busca multi-fonte e renderização FFmpeg (`nexus/assets.py`, `nexus/render.py`); preservar o movimento nativo dos clipes.
 - O worker padrão depende dos secrets do Streamlit e do repositório GitHub; implantação do Streamlit e credenciais externas precisam ser verificadas separadamente.
