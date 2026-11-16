@@ -291,6 +291,9 @@ else:
     st.caption("Fish Audio · voz selecionada")
     with st.expander("🎙️ Abrir biblioteca de vozes", expanded=False):
         st.caption("Explore vozes em português, ou carregue as vozes privadas que você já criou na sua conta Fish Audio.")
+        st.link_button("Criar Professional Voice Clone na Fish Audio", "https://fish.audio/app/create-voice", use_container_width=True)
+        st.caption("O Professional Voice Clone é criado no site da Fish Audio, exige plano pago, ao menos 10 minutos de áudio limpo e verificação/consentimento do titular. Depois de liberada na plataforma, a voz pode ser localizada aqui se estiver disponível para API.")
+        st.caption("Nomes como CapCut ou ElevenLabs são pesquisáveis nos metadados, mas não significam parceria, origem oficial ou licença. Confira os direitos da voz antes de publicar ou monetizar.")
         with st.form("fish_voice_search_form"):
             catalog_scope = st.selectbox(
                 "Catálogo",
