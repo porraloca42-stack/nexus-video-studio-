@@ -30,7 +30,26 @@ def main():
         work / "images",
         steps=int(os.environ.get("CLOUDFLARE_IMAGE_STEPS", "6")),
     )
-    media = [{"path": item["path"]} for item in generated]
+    media = []
+    for item in generated:
+        image_path = Path(item["path"])
+        if image_path.stat().st_size < 10_000:
+            raise RuntimeError(f"Imagem gerada muito pequena para uso editorial: cena {item.get('scene_index')}.")
+        image_probe = subprocess.run(
+            ["ffprobe", "-v", "error", "-select_streams", "v:0",
+             "-show_entries", "stream=width,height", "-of", "json", str(image_path)],
+            capture_output=True, text=True, timeout=45,
+        )
+        if image_probe.returncode:
+            raise RuntimeError(f"Imagem da cena {item.get('scene_index')} não passou no FFprobe.")
+        image_streams = json.loads(image_probe.stdout).get("streams", [])
+        image_size = image_streams[0] if image_streams else {}
+        if image_size.get("width") != 512 or image_size.get("height") != 910:
+            raise RuntimeError(
+                f"Imagem da cena {item.get('scene_index')} saiu com "
+                f"{image_size.get('width')}×{image_size.get('height')}; esperado 512×910."
+            )
+        media.append({"path": str(image_path)})
 
     narration = " ".join(str(scene.get("voiceover", "")).strip() for scene in scenes).strip()
     if not narration:
