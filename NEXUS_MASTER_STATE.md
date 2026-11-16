@@ -190,3 +190,11 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Commit e12d2a4: testes atualizados para cobrir recuperação por correspondência parcial e rejeição de stock sem relação semântica.
 - Aumento das variantes de busca de quatro para oito, derivadas exclusivamente da consulta específica da cena; sem dicionário temático fixo.
 - Pendente: GitHub Actions, implantação Streamlit e novo teste real. A API Coverr/Pixabay não foi chamada neste ambiente; não afirmar que as cenas 4–12 já encontraram clipes nem que o MP4 foi produzido.
+
+
+## Correções adicionais encontradas na regressão — 16/11/2026
+- A inspeção dos logs do GitHub Actions revelou dois defeitos adicionais que impediam a validação global:
+  1. `tests/test_audio.py` tinha erro de sintaxe no uso de múltiplos context managers; commit 72a3212 corrigiu o teste.
+  2. `nexus/render.py` tinha o padrão regex de timestamps SRT com escapes duplicados e escrevia separadores `\\n` literais, não quebras de linha; commit de correção de renderização antecedente ao teste removeu os escapes duplicados. A fixture do teste também escrevia `\\n` literal; commit 6e209d6 corrigiu a fixture.
+- A falha FFmpeg ao abrir `subtitles_retimed.srt` era compatível com a geração de SRT inválido; agora o parser reconhece timestamps SRT e o arquivo retimado é gravado com linhas reais.
+- A suíte ainda precisa concluir novamente após esses commits. Nenhuma renderização MP4 real do usuário foi validada.
