@@ -233,7 +233,7 @@ div[data-testid="stButton"] button[kind="primary"]:hover{box-shadow:0 8px 25px r
 [data-testid="stAlert"]{border-radius:13px!important}
 [data-testid="stProgress"]>div>div{background:linear-gradient(90deg,#6366F1,#8B5CF6)!important}
 hr{border-color:#27272A!important}
-@media(max-width:850px){.block-container{padding:1rem .8rem 2.5rem!important}.nexus-hero{padding:1.1rem;border-radius:17px}.nexus-preview img{width:112px}}
+@media(max-width:850px){.block-container{padding:1rem .8rem 7rem!important}.nexus-hero{padding:1.1rem;border-radius:17px}.nexus-preview img{width:112px}}
 </style>
 """, unsafe_allow_html=True)
 
