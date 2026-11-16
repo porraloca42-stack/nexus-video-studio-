@@ -1,4 +1,4 @@
-import os, tempfile
+import json, os, subprocess, tempfile
 from pathlib import Path
 import streamlit as st
 from nexus.director import create_storyboard, validate_storyboard
@@ -43,6 +43,43 @@ with st.sidebar:
     style = st.selectbox("Estilo visual", ["Cinematográfico realista", "Dark cinematográfico", "Documental realista", "Surrealista fotográfico", "Anime cinematográfico", "Graphic novel", "3D conceitual", "Vintage cinematográfico", "Cyberpunk"])
     voice = st.selectbox("Voz", ["pt-BR-AntonioNeural", "pt-BR-FranciscaNeural", "pt-BR-ThalitaNeural"])
     duration = st.selectbox("Duração", [40, 50, 60], index=1)
+
+if st.session_state.get("coverr_test_results"):
+    if st.button("Baixar e validar um clipe de teste", type="secondary"):
+        candidates = st.session_state["coverr_test_results"]
+        chosen = next((item for item in candidates if item.get("vertical")), candidates[0] if candidates else None)
+        if not chosen:
+            st.error("Não há clipes disponíveis para validar.")
+        else:
+            with st.spinner("Baixando o clipe e verificando o arquivo com FFprobe..."):
+                try:
+                    with tempfile.TemporaryDirectory(prefix="nexus_coverr_test_") as temp_dir:
+                        clip_path = download_file(chosen["url"], Path(temp_dir) / "coverr_test.mp4")
+                        probe = subprocess.run(
+                            ["ffprobe", "-v", "error", "-show_entries",
+                             "format=duration,size:stream=codec_name,codec_type,width,height",
+                             "-of", "json", str(clip_path)],
+                            capture_output=True, text=True, timeout=60
+                        )
+                        if probe.returncode != 0:
+                            raise RuntimeError(probe.stderr[-1500:] or "FFprobe não conseguiu ler o arquivo.")
+                        metadata = json.loads(probe.stdout)
+                        streams = metadata.get("streams", [])
+                        video = next((stream for stream in streams if stream.get("codec_type") == "video"), None)
+                        if not video:
+                            raise RuntimeError("O arquivo baixado não contém uma faixa de vídeo.")
+                        duration_seconds = float(metadata.get("format", {}).get("duration") or 0)
+                        size_bytes = int(metadata.get("format", {}).get("size") or clip_path.stat().st_size)
+                        if duration_seconds <= 0 or size_bytes <= 0:
+                            raise RuntimeError("O arquivo baixado não apresentou duração ou tamanho válidos.")
+                        st.success("Download concluído e arquivo de vídeo validado.")
+                        st.write(f"**Arquivo:** {chosen.get('title') or 'Clipe Coverr'}")
+                        st.write(f"**Resolução:** {video.get('width')} × {video.get('height')}")
+                        st.write(f"**Codec:** {video.get('codec_name', 'não identificado')}")
+                        st.write(f"**Duração:** {duration_seconds:.2f} segundos")
+                        st.write(f"**Tamanho:** {size_bytes / (1024 * 1024):.2f} MB")
+                except Exception as exc:
+                    st.error(f"Falha ao baixar ou validar o clipe: {exc}")
 
 topic = st.text_area("Assunto ou roteiro", height=150, placeholder="Digite um assunto ou cole o roteiro completo.")
 if st.button("Planejar vídeo", type="primary", use_container_width=True):
