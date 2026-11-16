@@ -602,7 +602,7 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 
 ## Modo Cloudflare Workers AI + Remotion — atualização 16/11/2026
 - Revisão de modelo: FLUX.1 schnell não aceita resolução/aspect ratio como parâmetros; para evitar crop de imagem quadrada no vídeo vertical, selecionado FLUX.2 Klein 4B, que aceita width/height por multipart/form-data e possui inferência fixa de 4 passos.
-- Configuração inicial: 512×910 pixels (proporção praticamente 9:16). Pricing oficial: 26,05 Neurons por tile de saída 512×512; estimativa aproximada de dois tiles por imagem (52,1 Neurons), cerca de 191 imagens/dia dentro dos 10.000 Neurons gratuitos. Teto teórico, não garantia.
+- Configuração inicial: 512×910 pixels (proporção praticamente 9:16). Pricing oficial: 26,05 Neurons por tile de saída 512×512; estimativa aproximada de dois tiles por imagem (52,1 Neurons), cerca de 191 imagens/dia dentro dos 10.000 Neurons gratuitos. Teto teórico, não garantia. FLUX.2 Klein 4B é Apache 2.0 e permite uso comercial; Klein 9B e FLUX.2 dev não devem ser confundidos com essa licença.
 - Criado `nexus/cloudflare_images.py`: autenticação REST, multipart para FLUX.2 Klein, validação de imagem, assinatura real PNG/JPEG/WebP, extensão coerente com o conteúdo e geração por cena.
 - Diretor: prompt de storyboard agora inclui `image_prompt` em inglês, com enquadramento 9:16 e sem texto embutido. Validador exige esse campo.
 - Remotion: manifesto carrega `imagePrompt` e `cameraMotion`; camadas de imagem recebem movimentos individuais (push-in, pull-out e pans).
