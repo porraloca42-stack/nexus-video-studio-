@@ -716,11 +716,13 @@ if "nexus_plan" in st.session_state:
                     target_duration = sum(float(scene["duration_seconds"]) for scene in plan["scenes"])
                     for calibration_attempt in range(3):
                         narration = " ".join(scene["voiceover"] for scene in plan["scenes"])
-                        audio, subtitles = make_voice(
+                        audio, subtitles, actual_tts_provider = make_voice(
                             narration, voice, audio,
                             fish_api_key=secret("FISH_API_KEY"),
                             fish_voice_id=secret("FISH_VOICE_ID"),
+                            return_provider=True,
                         )
+                        st.caption(f"Narração gerada por: {actual_tts_provider}")
                         audio_probe = subprocess.run(
                             ["ffprobe", "-v", "error", "-show_entries", "format=duration",
                              "-of", "default=noprint_wrappers=1:nokey=1", str(audio)],
