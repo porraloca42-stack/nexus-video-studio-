@@ -617,3 +617,8 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Nenhuma chamada real ao Cloudflare Workers AI foi feita, pois credenciais ainda não foram fornecidas/configuradas. O worker remoto está implementado, mas não testado com credenciais nem artefato de produção. Deploy Streamlit não confirmado.
 - Não declarar novo modo concluído/validado até gerar imagens reais, executar worker e inspecionar MP4 final no app publicado.
 
+- Correção do smoke test Remotion: execução #25 falhou no script `scripts/build_remotion_ci_manifest.py` por `ModuleNotFoundError: nexus` ao ser chamado como script dentro de `scripts/`. Adicionado o diretório raiz do repositório a `sys.path` (commit `a54e14c`). Execução #26 está em andamento para validar novamente o build do manifesto, o render com áudio/vídeo e FFprobe.
+- CI #277 (commit `39bbaf4`): suíte principal passou com 53 testes; Commons smoke também passou. Isso inclui o modo opcional de render remoto, seletor da interface e a recuperação do artefato criptografado em teste simulado.
+- CI #271 (commit `ae27ac6`): 53 testes passaram, incluindo geração Cloudflare simulada, criptografia e regressões de render FFmpeg. Typecheck Remotion passou.
+- CI #25 Remotion: render gráfico de 50s e FFmpeg fixture passaram; build do manifesto falhou apenas pela importação Python acima. Não houve render real de manifesto com mídia/áudio nessa execução.
+- Estado atual: código do modo Cloudflare + Remotion no GitHub; testes unitários aprovados. O worker de produção ainda não foi executado porque faltam Secrets do usuário. Deploy Streamlit e render de integração com áudio/vídeo continuam pendentes.
