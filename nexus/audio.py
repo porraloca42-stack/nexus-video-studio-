@@ -85,7 +85,10 @@ def list_fish_voices(api_key, *, page=1, page_size=6, title="", language="pt", s
             "visibility": item.get("visibility", "public"),
             "task_count": int(item.get("task_count") or 0),
         })
-    return {"total": int(payload.get("total") or len(voices)), "items": voices}
+    total = payload.get("total")
+    if total is None and isinstance(data, dict):
+        total = data.get("total")
+    return {"total": int(total or len(voices)), "items": voices}
 
 
 def generate_fish_preview(api_key, voice_id, *, text=FISH_VOICE_TEXT, session=None):
