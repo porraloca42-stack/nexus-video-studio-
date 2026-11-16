@@ -1224,3 +1224,11 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Teste em `tests/test_audio.py`, commit `6dd71be`: novo teste garante aceitação de modelo `unlist`; teste existente continua rejeitando `private`.
 - Verificação pós-commit por leitura do main: condição de visibilidade permite public/unlist; private continua rejeitado; UI refaz tentativa se catálogo vazio e mostra diagnóstico; teste novo presente.
 - Estado: commits gravados e leitura estática conferida. Testes CI e carregamento real no Streamlit ainda pendentes. Não declarar resolvido até os quatro modelos aparecerem e amostras funcionarem.
+
+## Diagnóstico definitivo do catálogo vazio — módulo Fish Audio obsoleto no Streamlit — 16/11/2026
+- Captura do usuário mostrou diagnóstico explícito repetido: `module 'nexus.audio' has no attribute 'get_fish_voice'` para os quatro modelos.
+- Isso prova que o objeto de módulo carregado no processo Streamlit não contém a função, embora o arquivo `nexus/audio.py` atual em main contenha `def get_fish_voice(...)`. A causa é módulo antigo retido no processo/cache do Python/Streamlit, ou caminho carregado diferente; a captura sozinha não identifica qual.
+- Correção em `app.py`, commit `ea7fa5a`: imediatamente após `import nexus.audio as fish_audio`, executar `importlib.reload(fish_audio)` (importlib já era importado no topo). Adicionado guard que verifica `hasattr(fish_audio, "get_fish_voice")` e, se ausente, gera erro explícito com o caminho de `fish_audio.__file__`. Isso impede o app de continuar silenciosamente com módulo sem o helper.
+- Pós-commit: app.py relido de main; reload, guard e chamada qualificada confirmados. GitHub connector não retornou workflow runs associados ao commit (consulta wrapper lista apenas PR-triggered runs); CI completo não foi verificado nesta etapa.
+- Estado: patch gravado e leitura estática confirmada. Aguardando reinício/redeploy do Streamlit Cloud; não afirmar resolvido até o catálogo carregar.
+- Próximo passo se ainda falhar: usar o caminho de módulo mostrado no erro e corrigir colisão/checkout/import path com base nessa evidência; não trocar IDs nem API da Fish sem motivo.
