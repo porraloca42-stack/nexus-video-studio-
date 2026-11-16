@@ -211,7 +211,17 @@ def search_video_sources(
                     item["source"] = item.get("source") or source_name
                     all_candidates.append(item)
             except requests.RequestException as exc:
+                response = getattr(exc, "response", None)
+                status_code = getattr(response, "status_code", None)
                 errors.append(f"{source_name} ({search_query}): {exc}")
+                # Authentication/permission failures will not be fixed by trying
+                # more query variants with the same credential.
+                if status_code in (401, 403):
+                    errors.append(
+                        f"{source_name}: HTTP {status_code}; interrompi novas consultas "
+                        "nesta biblioteca. Verifique a chave e as permissões da API."
+                    )
+                    break
 
     # Deduplicate identical downloads while preserving provider provenance
     # and whether the asset came from a scene query or a style-only query.
