@@ -598,3 +598,4 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Workflow inclui o teste Cloudflare no gatilho de testes. Commit `28976b8`.
 - Estado: correções gravadas em main; novas execuções CI precisam concluir. Nenhuma destas alterações está validada por nova execução ainda.
 
+- CI adicional: workflow Remotion agora instala dependências de teste Python e executa `pytest` nos adaptadores Cloudflare e Remotion antes dos renders. Últimos commits do workflow: `ffde1e6` e `04617fa`. Aguardar execução e logs antes de marcar testes aprovados.
