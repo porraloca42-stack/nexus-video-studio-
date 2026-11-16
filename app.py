@@ -88,7 +88,7 @@ def style_preview_svg(style):
       "island": f'<path d="M0 170Q130 130 240 180T480 160V270H0Z" fill="#176e85"/><path d="M80 165Q190 45 340 120Q420 155 395 185Q260 215 80 165Z" fill="#7ea97d"/><path d="M190 125Q240 60 290 125" stroke="#e6d6ae" stroke-width="10" fill="none"/>'
     }
     svg = f'<svg xmlns="http://www.w3.org/2000/svg" width="480" height="270" viewBox="0 0 480 270">{base}{art[scene]}<rect x="5" y="5" width="470" height="260" rx="13" fill="none" stroke="{accent}" stroke-opacity=".45" stroke-width="3"/></svg>'
-    return svg.encode("utf-8")
+    return svg
 
 st.markdown("""
 <style>
@@ -120,7 +120,7 @@ topic = st.text_area("Assunto ou roteiro", height=145, placeholder="Cole seu rot
 st.markdown('<div class="nexus-kicker">02 · Direção visual</div>', unsafe_allow_html=True)
 style = st.session_state["nexus_style"]
 preview_svg = style_preview_svg(style)
-preview_b64 = base64.b64encode(preview_svg).decode("ascii")
+preview_b64 = base64.b64encode(preview_svg.encode("utf-8")).decode("ascii")
 preview_copy = STYLE_META[style][3]
 st.markdown(
     f'<div class="nexus-preview"><img src="data:image/svg+xml;base64,{preview_b64}" alt="Referência visual {style}"><div><div class="nexus-preview-title">{style}</div><div class="nexus-preview-copy">{preview_copy}</div></div></div>',
