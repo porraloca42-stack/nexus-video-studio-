@@ -110,18 +110,20 @@ if "nexus_plan" in st.session_state:
             st.write(" → ".join(scene.get("motion_events", [])))
             st.caption("Busca visual: " + scene.get("asset_search_query", ""))
 
-    if st.button("Renderizar MP4", use_container_width=True):
+    if st.button("Produzir vídeo completo", type="primary", use_container_width=True):
         coverr_key = secret("COVERR_API_KEY")
         pixabay_key = secret("PIXABAY_API_KEY")
         if st.session_state.get("nexus_errors"):
-            st.error("O storyboard precisa ser corrigido antes da renderização.")
+            st.error("O storyboard precisa ser corrigido antes da produção.")
         elif not coverr_key and not pixabay_key:
             st.error("Conecte uma fonte de vídeos: COVERR_API_KEY ou PIXABAY_API_KEY.")
         else:
             work = Path(tempfile.mkdtemp(prefix="nexus_"))
             try:
                 media, missing = [], []
+                progress = st.progress(0, text="Preparando cenas...")
                 for i, scene in enumerate(plan["scenes"]):
+                    progress.progress((i + 1) / (len(plan["scenes"]) + 2), text=f"Buscando clipe para a cena {i + 1}/{len(plan['scenes'])}...")
                     candidates, source_errors = search_video_sources(scene["asset_search_query"], coverr_key, pixabay_key)
                     if not candidates and scene.get("fallback_search_query"):
                         candidates, retry_errors = search_video_sources(scene["fallback_search_query"], coverr_key, pixabay_key)
@@ -131,16 +133,78 @@ if "nexus_plan" in st.session_state:
                         continue
                     chosen = candidates[0]
                     path = download_file(chosen["url"], work / f"scene_{i:02d}.mp4")
-                    media.append({"path": str(path), "duration": scene["duration_seconds"], "camera_motion": scene.get("camera_motion", "push_in")})
+                    probe = subprocess.run(
+                        ["ffprobe", "-v", "error", "-show_entries",
+                         "format=duration,size:stream=codec_name,codec_type,width,height",
+                         "-of", "json", str(path)],
+                        capture_output=True, text=True, timeout=60
+                    )
+                    if probe.returncode != 0:
+                        raise RuntimeError(f"Não foi possível validar o arquivo da cena {i + 1}: {probe.stderr[-1200:]}")
+                    metadata = json.loads(probe.stdout)
+                    video_stream = next((item for item in metadata.get("streams", []) if item.get("codec_type") == "video"), None)
+                    if not video_stream:
+                        raise RuntimeError(f"O clipe da cena {i + 1} não contém vídeo.")
+                    media.append({
+                        "path": str(path),
+                        "duration": scene["duration_seconds"],
+                        "camera_motion": scene.get("camera_motion", "push_in"),
+                        "source_title": chosen.get("title", ""),
+                        "source_url": chosen.get("source_url", ""),
+                        "source_width": video_stream.get("width"),
+                        "source_height": video_stream.get("height"),
+                    })
                 if missing:
-                    st.error(f"Não encontrei clipes para as cenas {missing}. Interrompi para evitar um vídeo visualmente incoerente.")
+                    progress.empty()
+                    st.error(f"Não encontrei clipes para as cenas {missing}. Interrompi para evitar um vídeo incompleto.")
                 else:
-                    with st.spinner("Gerando narração, legendas e vídeo..."):
-                        narration = " ".join(scene["voiceover"] for scene in plan["scenes"])
-                        audio, subtitles = make_voice(narration, voice, work / "voice.mp3")
-                        output = work / "nexus_video.mp4"
-                        render_video(media, audio, output, subtitles_path=subtitles)
-                    st.video(str(output))
-                    st.download_button("Baixar MP4", output.read_bytes(), "nexus_video.mp4", "video/mp4")
+                    progress.progress((len(plan["scenes"]) + 1) / (len(plan["scenes"]) + 2), text="Gerando narração, legendas e montagem...")
+                    narration = " ".join(scene["voiceover"] for scene in plan["scenes"])
+                    audio, subtitles = make_voice(narration, voice, work / "voice.mp3")
+                    output = work / "nexus_video.mp4"
+                    render_video(media, audio, output, subtitles_path=subtitles)
+                    final_probe = subprocess.run(
+                        ["ffprobe", "-v", "error", "-show_entries",
+                         "format=duration,size:stream=codec_name,codec_type,width,height",
+                         "-of", "json", str(output)],
+                        capture_output=True, text=True, timeout=60
+                    )
+                    if final_probe.returncode != 0:
+                        raise RuntimeError("O FFmpeg terminou, mas o MP4 final não passou na leitura do FFprobe.")
+                    final_metadata = json.loads(final_probe.stdout)
+                    final_streams = final_metadata.get("streams", [])
+                    final_video = next((item for item in final_streams if item.get("codec_type") == "video"), None)
+                    final_audio = next((item for item in final_streams if item.get("codec_type") == "audio"), None)
+                    final_duration = float(final_metadata.get("format", {}).get("duration") or 0)
+                    if not final_video or not final_audio or final_duration <= 0 or output.stat().st_size == 0:
+                        raise RuntimeError("O MP4 final não contém vídeo e áudio válidos.")
+                    video_bytes = output.read_bytes()
+                    st.session_state["nexus_rendered_video"] = video_bytes
+                    st.session_state["nexus_rendered_filename"] = "nexus_video.mp4"
+                    st.session_state["nexus_rendered_info"] = {
+                        "duration": final_duration,
+                        "width": final_video.get("width"),
+                        "height": final_video.get("height"),
+                        "video_codec": final_video.get("codec_name"),
+                        "audio_codec": final_audio.get("codec_name"),
+                        "size_mb": len(video_bytes) / (1024 * 1024),
+                        "scene_count": len(media),
+                    }
+                    st.session_state["nexus_rendered_workdir"] = str(work)
+                    progress.progress(1.0, text="Vídeo produzido e validado.")
+                    st.success("Vídeo MP4 produzido. Áudio, vídeo e integridade do arquivo foram verificados.")
             except Exception as exc:
                 st.exception(exc)
+
+if st.session_state.get("nexus_rendered_video"):
+    info = st.session_state.get("nexus_rendered_info", {})
+    st.subheader("Seu vídeo está pronto")
+    st.caption(f"{info.get('scene_count', 0)} cenas · {info.get('duration', 0):.1f}s · {info.get('width', 0)}×{info.get('height', 0)} · {info.get('size_mb', 0):.2f} MB")
+    st.video(st.session_state["nexus_rendered_video"])
+    st.download_button(
+        "Baixar vídeo MP4",
+        data=st.session_state["nexus_rendered_video"],
+        file_name=st.session_state.get("nexus_rendered_filename", "nexus_video.mp4"),
+        mime="video/mp4",
+        use_container_width=True,
+    )
