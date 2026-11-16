@@ -73,7 +73,7 @@ def _subtitle_cues(events, narration):
                 current = proposed
         if current:
             lines.append(current)
-        caption = "\\n".join(lines[:2])
+        caption = "\n".join(lines[:2])
         cues.append((group_start, group_end, caption))
         group = []
         group_start = None
