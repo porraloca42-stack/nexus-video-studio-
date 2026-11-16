@@ -240,8 +240,7 @@ div.st-key-nexus-style-gallery div[data-testid="stButton"] button{min-height:2.5
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="nexus-hero"><div class="nexus-brand">NEXUS VIDEO STUDIO</div><div class="nexus-tagline">Transforme seu roteiro em vídeo</div></div>', unsafe_allow_html=True)
-st.caption("Versão: NEXUS-2026.11.16-fish-voice-library-2")
+st.markdown('<div class="nexus-hero"><div class="nexus-brand">NEXUS VIDEO STUDIO</div><div class="nexus-tagline">Seu estúdio inteligente de produção audiovisual</div></div>', unsafe_allow_html=True)
 
 if "nexus_style" not in st.session_state or st.session_state["nexus_style"] not in STYLE_OPTIONS:
     st.session_state["nexus_style"] = "Cinematográfico realista"
