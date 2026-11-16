@@ -237,10 +237,20 @@ def rank_video_candidates(candidates, query, style_query=""):
             + coverage * 3.0
         )
         item["_nexus_style_relevance"] = style_matches * 2.0 + style_coverage
+        width = max(0, int(item.get("width") or 0))
+        height = max(0, int(item.get("height") or 0))
+        ratio = (width / height) if width and height else 0.0
+        target_ratio = 9 / 16
+        # Prefer true portrait footage and, within that group, frames closest
+        # to the 9:16 delivery canvas. Semantic relevance remains the primary key.
+        aspect_fit = max(0.0, 1.0 - abs(ratio - target_ratio) / target_ratio) if ratio else 0.0
+        item["_nexus_aspect_ratio"] = round(ratio, 4) if ratio else None
+        item["_nexus_aspect_fit"] = round(aspect_fit, 4)
         item["_nexus_quality"] = (
-            1 if item.get("vertical") else 0,
-            min(int(item.get("height") or 0), 2160),
-            min(int(item.get("width") or 0), 2160),
+            1 if height > width else 0,
+            aspect_fit,
+            min(height, 2160),
+            min(width, 2160),
         )
     return sorted(
         candidates,
