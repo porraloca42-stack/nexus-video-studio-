@@ -396,10 +396,10 @@ with col_preview:
                         with st.expander(f"{category} · {len(category_voices)} modelos", expanded=False):
                             for gender, gender_label in gender_groups:
                                 voices = [item for item in category_voices if item.get("gender") == gender]
-                                with st.expander(f"{gender_label} · {len(voices)}", expanded=(gender == "male" and bool(voices))):
-                                    if not voices:
-                                        st.caption("Nenhuma voz identificada nesta divisão.")
-                                    for voice_option in voices:
+                                st.markdown(f"**{gender_label} · {len(voices)}**")
+                                if not voices:
+                                    st.caption("Nenhuma voz identificada nesta divisão.")
+                                for voice_option in voices:
                                         voice_col, sample_col = st.columns([1.1, 1.5], vertical_alignment="center")
                                         with voice_col:
                                             is_selected = voice_option["id"] == st.session_state.get("nexus_fish_voice_id", "")
