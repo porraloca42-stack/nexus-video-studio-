@@ -746,3 +746,22 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - A regra rígida de mínimo `max(10, ceil(duração/5))` está no código e a regressão correspondente passou: 40s = mínimo 10; 50s = mínimo 10; 60s = mínimo 12.
 - O teste inclui cenário de resposta inicial com 7 cenas para 40s, reparo automático para 10, e validação que rejeita 7 cenas.
 - Aprovado em CI; falta confirmação funcional pelo Streamlit publicado. O usuário pode atualizar a página e executar o planejamento de 40s. Ainda não é necessário iniciar render Cloudflare até confirmar que o planejamento entrega pelo menos 10 cenas.
+
+
+## Auditoria do MP4 real enviado pelo usuário — 16/11/2026
+- Arquivo recebido: MP4 de 40s, 720×1280, H.264/AAC, 30fps; metadado do container identifica Remotion 4.0.543.
+- Inspeção visual de quadros: imagens fotográficas distintas aparecem ao longo das cenas; não é correto afirmar que o vídeo foi composto exclusivamente por stock. O worker chama `generate_scene_images()` com `image_prompt` de cada cena, usa o modelo Cloudflare FLUX.2 Klein e passa os arquivos como mídia para o adaptador Remotion. A execução reporta uso de imagens geradas, mas o MP4 isolado não contém proveniência criptográfica por quadro; a participação do worker é sustentada pelo código e metadados, não pela imagem isolada.
+- Defeitos confirmados no MP4/código:
+  1. `NexusVideo.tsx` exibia `visualDescription` em inglês, headline, marca e rodapé técnico sobre cada imagem, poluindo o vídeo com texto de direção que deveria ser apenas metadado.
+  2. Movimento aplicado a imagens era mínimo (zoom aproximado de 6–8%, deslocamento de até 34px); `motion_events` não eram propagados no manifesto. Isso não produz movimento perceptível para o padrão pretendido.
+  3. Fade in/out simultâneo por cena zerava a opacidade no primeiro frame da nova cena e no último frame da anterior, gerando quadros pretos nas transições.
+  4. Legendas preferiam WordBoundary, gerando flashes de palavras isoladas em vez de frases naturais quando SentenceBoundary estava disponível.
+- Commits de correção:
+  - `d330197`: removidos overlays editoriais/descrições/headlines e rodapé; removido fade que causava frames pretos; reforçado movimento de câmera Ken Burns (push/pull 16%, pan até 76px e drift discreto).
+  - `3ba6da1`: manifesto não expõe visualDescription/headline como texto e transporta motion_events como metadado.
+  - `20aa757`: tipos Remotion alinhados ao manifesto e eventos de movimento.
+  - `f829a7f`: legendas priorizam SentenceBoundary e agrupam WordBoundary em frases maiores.
+  - `f287146`: testes para priorização de frase e agrupamento de palavras.
+  - `7763634`: teste para impedir texto editorial no manifesto e garantir propagação de motionEvents.
+- Limitação explícita: o pipeline atual gera imagens estáticas via Cloudflare FLUX e anima movimento de câmera via Remotion; ainda não integra um modelo de geração de vídeo com movimento orgânico de pessoas/objetos. motion_events agora seguem no manifesto, mas não são ainda animação semântica de personagens.
+- CI para esses commits iniciado; MP4 de usuário permanece reprovado. Não marcar produção audiovisual como validada até novo render real e revisão quadro a quadro.
