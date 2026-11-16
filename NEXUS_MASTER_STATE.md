@@ -155,3 +155,12 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Commit 5e545f9: build atualizado para `NEXUS-2026.11.16-plan-ui-keyerror-fix-1`, para facilitar a confirmação da versão no Streamlit.
 - Validação estática: confirmado que o produtor e o consumidor usam agora a mesma chave; o acesso antigo direto foi removido. A mensagem de sucesso e o painel de cenas não foram alterados.
 - Estado: correção gravada no branch main do GitHub. Deploy e reteste na interface Streamlit ainda pendentes; não declarar produção validada até o usuário confirmar a abertura do planejamento sem erro.
+
+
+## Recuperação automática de JSON Gemini — 16/11/2026
+- Evidência do usuário: nova tentativa falhou com `finishReason=STOP` e mensagem de JSON incompleto/inválido. O trecho exibido na tela era apenas uma prévia truncada pelo app; não prova por si só que o texto completo do Gemini terminou naquele ponto.
+- Causa técnica no fluxo: `_request()` encerrava o planejamento imediatamente quando a resposta não podia ser decodificada como JSON, sem nova tentativa de geração e sem failover para outro modelo. O tratamento anterior só repetia falhas HTTP/conexão.
+- Commit 8a09542: ao detectar JSON inválido, o diretor tenta uma segunda geração no mesmo modelo com instrução explícita para reconstruir o JSON completo e conciso; se falhar novamente, segue para os demais modelos compatíveis. Não aceita storyboard incompleto e não exibe conteúdo parcial do roteiro na mensagem de erro.
+- Commit 34c5c2d: teste unitário com respostas simuladas verifica duas respostas JSON inválidas no primeiro modelo, retry com instrução corretiva e sucesso no segundo modelo, sem chamadas externas.
+- Commit 225adce: identificador visual atualizado para `NEXUS-2026.11.16-json-recovery-1`.
+- Pendente: execução do GitHub Actions após os commits, confirmação de implantação no Streamlit e nova geração real via Gemini. A API real não foi chamada neste ambiente; produção MP4 continua não validada.
