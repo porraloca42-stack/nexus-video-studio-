@@ -58,29 +58,37 @@ def _subtitle_cues(events, narration):
         nonlocal group, group_start, group_end
         if not group:
             return
-        caption = " ".join(group).strip()
-        lines = textwrap.wrap(caption, width=42) or [caption]
-        # Keep captions readable on mobile: at most two lines per cue.
-        while lines:
-            part = lines[:2]
-            lines = lines[2:]
-            cues.append((group_start, group_end, "\n".join(part)))
+        words = group
+        # Balance the phrase over no more than two short mobile-safe lines.
+        lines = []
+        current = ""
+        for word in words:
+            proposed = (current + " " + word).strip()
+            if current and len(proposed) > 30 and len(lines) == 0:
+                lines.append(current)
+                current = word
+            elif current and len(proposed) > 30:
+                break
+            else:
+                current = proposed
+        if current:
+            lines.append(current)
+        caption = "\\n".join(lines[:2])
+        cues.append((group_start, group_end, caption))
         group = []
         group_start = None
         group_end = 0
 
     for start, end, content in timed:
-        parts = content.split()
-        if not parts:
-            continue
-        for word in parts:
+        for word in content.split():
             candidate = " ".join(group + [word])
             elapsed = (end - group_start) if group_start is not None else 0
             sentence_end = word.endswith((".", "!", "?", "…"))
             if group and (
-                len(candidate) > 42
-                or elapsed >= 2_800
-                or (sentence_end and len(candidate) >= 18)
+                len(candidate) > 34
+                or len(group) >= 6
+                or elapsed >= 1_900
+                or (sentence_end and len(candidate) >= 14)
             ):
                 flush()
             if group_start is None:
@@ -89,10 +97,14 @@ def _subtitle_cues(events, narration):
             group_end = max(group_end, end)
     flush()
 
-    return [
-        (max(0, int(start)), max(int(start) + 250, int(end)), caption)
-        for start, end, caption in cues
-    ]
+    # Ensure cues never overlap and stack on screen.
+    normalized = []
+    for index, (start, end, caption) in enumerate(cues):
+        next_start = cues[index + 1][0] if index + 1 < len(cues) else end
+        safe_end = min(int(end), int(next_start) - 40) if next_start > start else int(end)
+        safe_end = max(int(start) + 250, safe_end)
+        normalized.append((max(0, int(start)), safe_end, caption))
+    return normalized
 
 
 def _write_srt(cues, destination):
