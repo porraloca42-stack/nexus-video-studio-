@@ -17,7 +17,7 @@ As chaves são lidas do gerenciador de segredos e não devem ser inseridas no re
 ## Estado desta versão
 O diretor gera storyboard com Gemini; Edge TTS gera a narração e as legendas; FFmpeg monta o vídeo vertical. A aplicação abre normalmente no Streamlit, conforme confirmação do usuário em 2026-11-16.
 
-A busca Coverr está implementada no código e usa o endpoint `GET https://api.coverr.co/videos`, com autenticação `x-api-key`. A chave já está configurada pelo usuário, mas a chamada real, o download de clipes e a renderização final ainda precisam ser testados.
+A busca Coverr está implementada e foi testada no ambiente publicado: a API autenticou e retornou cinco clipes. O download interno e a validação de integridade ainda aguardam teste; a renderização final também não foi validada.
 
 Pixabay possui implementação preliminar como alternativa, mas ainda não está operacional sem sua chave. Pexels não está integrado; a emissão de novas chaves API está temporariamente indisponível.
 
