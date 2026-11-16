@@ -304,3 +304,15 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Testes adicionados para calibragem da narração e preservação de cenas; CI aguardando conclusão.
 - Build de teste: `NEXUS-2026.11.16-voice-script-calibration-1`.
 - Estado: código enviado; ainda não validado pelo CI nem em produção real. Não considerar o MP4 concluído.
+
+
+### Diretor profissional: retenção, CTA e SEO semântico — 16/11/2026
+- Requisito do usuário: assunto/roteiro + estilo visual + duração do painel devem ser o briefing completo para a IA entregar conteúdo profissional, incluindo hook, retenção, CTA e SEO.
+- Commit d00397b: ampliado o SYSTEM do diretor Gemini com regras editoriais para hook nos primeiros segundos, progressão de retenção, narrativa falada natural, estrutura com payoff e CTA contextual, sem empilhar pedidos.
+- SEO semântico: palavra-chave principal/secundárias, integração natural no roteiro, título, descrição e hashtags fiéis ao conteúdo; proíbe keyword stuffing e clickbait enganoso.
+- Contrato JSON ampliado com hook, retention_strategy, cta e seo (primary_keyword, secondary_keywords, title, description, hashtags).
+- Commit 822c8c2: painel do storyboard exibe estratégia editorial e pacote SEO para revisão.
+- Commit bffb6fb: corrigidos placeholders de duração e contagem de palavras no prompt do diretor.
+- Teste específico criado em tests/test_professional_director_brief.py.
+- Build indicado na interface: NEXUS-2026.11.16-professional-director-1.
+- CI do novo diretor ainda em execução após os commits mais recentes. Implantação Streamlit e geração MP4 real ainda não confirmadas.
