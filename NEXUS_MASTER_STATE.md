@@ -822,3 +822,26 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Run #43876220228 (commit `fc4e3a8`): testes da auditoria visual, compilação Python e smoke test Commons aprovados.
 - Run #43876350775 (commit `2b8e2c8`) e run #43876416211 (commit `ebfbe5c`): regressão completa concluída com sucesso; compilação Python, testes unitários e smoke test Commons aprovados.
 - Estado: implementação no GitHub e CI da integração final aprovados. O workflow #43876529440, disparado apenas pela atualização documental, ainda estava em execução. Deploy Streamlit e render real com credenciais ainda não confirmados.
+
+
+## Pesquisa comparativa Revid AI / AutoShorts.ai e upgrade de narração — 16/11/2026
+### Pesquisa pública (não representa acesso ao código interno dos concorrentes)
+- Revid declara pipeline integrado: descoberta de formatos virais por biblioteca de vídeos reais e engajamento, geração de roteiro, mídia por cena (stock, imagem, vídeo IA ou motion graphics), voz, legendas, música, editor de timeline, publicação e analytics. A empresa informa suporte a múltiplos modelos externos; não há evidência pública de um "Gemini secreto" proprietário.
+- AutoShorts.ai declara fluxo de séries recorrentes: tema/prompt, configurações de voz/estilo/duração/música, prévia e edição de roteiro/título/imagens/música, agendamento e publicação. A página pública apresenta créditos de movimento separados, sinal de que geração de movimento é um recurso/custo distinto de imagens estáticas.
+- Conclusão de arquitetura: a vantagem aparente dos SaaS não é um único prompt secreto, mas orquestração de modelos especializados, biblioteca/benchmark de formatos, templates, geração por cena, edição granular, publicação, automação e feedback de desempenho.
+### Verificação de stack
+- Gemini: o diretor atual usa REST generateContent, systemInstruction, JSON MIME e validação/retry manual. Ainda não usa responseSchema formal do Structured Outputs; fica registrada como melhoria futura.
+- Cloudflare: NEXUS usa atualmente `@cf/black-forest-labs/flux-2-klein-4b`, não FLUX.1 schnell. O adaptador envia prompt e dimensões via multipart; a documentação do FLUX.1 schnell não deve ser aplicada automaticamente ao Klein.
+- Remotion: o motor aplica transformações reais de câmera em imagens estáticas, atmosferas e transições. Isso não é geração de movimento orgânico. Revid diferencia explicitamente imagens animadas por pan/zoom de AI video com movimento real.
+- faster-whisper: suporta `word_timestamps=True`, mas exige runtime/dependências de inferência e CPU/RAM; não foi adicionado ainda. Fish oferece endpoint de TTS com alinhamento por palavra, preferível para a narração que ele próprio gera.
+- GitHub Actions: 2.000 minutos mensais no GitHub Free são para repositórios privados elegíveis; runners padrão em repositórios públicos são gratuitos. Não assumir 2.000 minutos como benefício universal.
+### Fish Audio
+- Documentação oficial: `POST /v1/tts/stream/with-timestamp`, header `model: s2.1-pro-free`, fornece blocos de áudio e alinhamento por palavra com offsets; permite evitar Whisper para esse caminho.
+- A oferta grátis S2.1 Pro Free é anunciada como temporária até 30/11/2026 e sem SLA. A documentação também sinaliza política Fair Use e possíveis restrições para alguns usos comerciais; revisar termos antes de usar em escala/monetização.
+- Commit `49bd18a`: integração Fish Audio S2.1 Pro Free com fallback Edge TTS e geração de SRT.
+- Commit `6f6f519`: correção para somar offsets entre chunks no alinhamento de palavras.
+- Commit `2160e02`: app passa FISH_API_KEY e FISH_VOICE_ID via Secrets para o narrador primário.
+- Commit `d8fcd18`: interface identifica a voz Edge como fallback.
+- Commit `c22eb61`: testes de Fish Audio e fallback Edge adicionados.
+- A chave Fish publicada pelo usuário não foi inserida no repositório. Configurar uma chave nova em Streamlit Secrets como `FISH_API_KEY`; opcionalmente `FISH_VOICE_ID` para uma voz de referência. Revogar a chave exposta.
+- Pendente: validar a integração com chave real, conferir se o áudio MP3 concatenado é aceito pelo FFprobe, confirmar identidade de voz de referência e aprovar condições comerciais. Até lá, Fish está implementado no código, mas não validado em produção.
