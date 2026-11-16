@@ -108,7 +108,7 @@ class AudioOutputTests(unittest.TestCase):
             "_id": "private-voice", "type": "tts", "state": "trained",
             "visibility": "private", "title": "Private",
         })
-        with self.assertRaisesRegex(FishAudioError, "não está publicada"):
+        with self.assertRaisesRegex(FishAudioError, "é privada e não está disponível"):
             get_fish_voice("test-key", "private-voice", session=session)
 
     def test_lists_voice_tags_and_score_sort(self):
