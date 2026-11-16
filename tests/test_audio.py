@@ -81,7 +81,7 @@ class AudioOutputTests(unittest.TestCase):
 
     def test_professional_narrators_are_split_by_gender_and_exclude_characters(self):
         session = FakeFishSession(payload={
-            "total": 3,
+            "total": 4,
             "items": [
                 {
                     "_id": "male-pvc", "type": "tts", "state": "trained",
@@ -98,6 +98,13 @@ class AudioOutputTests(unittest.TestCase):
                     "languages": ["pt"], "tags": ["female", "narration"],
                     "source": "licensed", "licensed": True, "task_count": 800,
                     "samples": [{"audio": "https://cdn.example.test/female.mp3"}],
+                },
+                {
+                    "_id": "european-male", "type": "tts", "state": "trained",
+                    "visibility": "public", "title": "European Male Narrator",
+                    "description": "Professional European Portuguese narration",
+                    "languages": ["pt"], "tags": ["male", "narration"],
+                    "source": "pvc", "task_count": 1100,
                 },
                 {
                     "_id": "anime-male", "type": "tts", "state": "trained",
