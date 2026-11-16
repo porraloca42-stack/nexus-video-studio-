@@ -33,9 +33,10 @@ def _subtitle_cues(events, narration):
         elif event.get("type") == "SentenceBoundary":
             timed_sentences.append(item)
 
-    # Word boundaries provide the best synchronization. Sentence boundaries
-    # are a valid fallback for Edge TTS configurations that omit word events.
-    timed = timed_words or timed_sentences
+    # Prefer sentence-level cues so captions read as natural phrases instead of
+    # isolated word flashes. Fall back to grouped word boundaries only when the
+    # voice provider does not emit sentence timing.
+    timed = timed_sentences or timed_words
     if not timed:
         # Keep production resilient if a provider stops emitting timing events.
         # This fallback is approximate, but still produces a valid subtitle file.
@@ -77,9 +78,9 @@ def _subtitle_cues(events, narration):
             elapsed = (end - group_start) if group_start is not None else 0
             sentence_end = word.endswith((".", "!", "?", "…"))
             if group and (
-                len(candidate) > 34
-                or len(group) >= 4
-                or elapsed >= 1_900
+                len(candidate) > 52
+                or len(group) >= 7
+                or elapsed >= 3_200
                 or (sentence_end and len(candidate) >= 14)
             ):
                 flush()
