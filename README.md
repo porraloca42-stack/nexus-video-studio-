@@ -44,5 +44,9 @@ Esses sites complementam a descoberta e a curadoria humana. O NEXUS não faz scr
 ## Diagnóstico
 O painel avançado testa busca, download e leitura do vídeo. O resultado precisa ser validado no Streamlit publicado e com uma geração real; testes unitários simulados não comprovam a disponibilidade externa das bibliotecas.
 
-## Estado
-Build atual em desenvolvimento: `NEXUS-2026.11.16-wikimedia-provider-2` (a integração Commons e os ajustes de fluxo foram gravados no GitHub; CI e implantação ainda precisam ser confirmados). A seleção multimodal e o pipeline final devem ser considerados validados apenas após inspecionar um MP4 real produzido nesta versão.
+## Estado de validação — 16/11/2026
+- **Código no GitHub:** alterações de seleção 9:16, revisão visual, bibliotecas gratuitas e Wikimedia Commons registradas na branch `main`.
+- **CI:** run #187 aprovado; compilação e 36 testes automatizados passaram. O teste de integração de render confirma MP4 vertical 720×1280 com áudio e legendas em ambiente de CI.
+- **Wikimedia Commons ao vivo:** busca e download de um vídeo licenciado foram concluídos; FFprobe confirmou arquivo VP9 válido (1920×1080, 261,16 s, CC BY 3.0). Isso valida o fluxo técnico com o candidato testado, não a relevância editorial de todo resultado.
+- **Ainda pendente:** confirmação de deploy no Streamlit Cloud, teste ao vivo de Pixabay/Pexels/Gemini com os Secrets da aplicação e geração/inspeção de um MP4 completo no app publicado.
+- **Não declarar produção ponta a ponta validada** até concluir essas verificações no ambiente publicado.
