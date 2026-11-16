@@ -79,6 +79,21 @@ class AssetRankingTests(unittest.TestCase):
         self.assertEqual(ranked[0]["source"], "Pixabay")
 
     @patch("nexus.assets.search_wikimedia_videos")
+    def test_search_expands_scene_query_into_shorter_terms(self, search):
+        search.return_value = []
+        search_video_sources(
+            "person writing goals in notebook",
+            wikimedia_enabled=True,
+        )
+        searched_queries = [
+            call_args.kwargs["params"]["gsrsearch"]
+            for call_args in search.call_args_list
+        ]
+        self.assertIn("filetype:video person writing goals in notebook", searched_queries)
+        self.assertIn("filetype:video goals notebook", searched_queries)
+        self.assertIn("filetype:video goals", searched_queries)
+
+    @patch("nexus.assets.search_wikimedia_videos")
     def test_wikimedia_can_supply_candidates_without_an_api_key(self, search):
         search.return_value = [
             {**clip("https://example.test/commons.webm", "Person writing goals in notebook"), "source": "Wikimedia Commons"}
