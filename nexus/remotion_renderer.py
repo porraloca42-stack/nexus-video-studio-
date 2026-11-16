@@ -111,8 +111,7 @@ def build_remotion_manifest(plan, media, audio_path, public_dir, job_id="nexus-j
             "narration": str(scene.get("voiceover") or ""),
             "visualMode": visual_mode,
             "asset": asset_ref,
-            # Descriptive copy and image prompts are director metadata, never
-            # on-screen typography. Only narration captions are rendered.
+            # Descriptive copy and image prompts remain metadata, never on-screen text.
             "imagePrompt": str(scene.get("image_prompt") or ""),
             "cameraMotion": str(scene.get("camera_motion") or "push_in"),
             "motionEvents": list(scene.get("motion_events") or []),
