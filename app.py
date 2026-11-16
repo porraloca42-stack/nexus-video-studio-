@@ -315,8 +315,10 @@ else:
                 continue
             if any(term in metadata for term in ("portugal", "european portuguese", "pt-pt")):
                 continue
+            # Only show models whose public metadata identifies Brazilian Portuguese.
+            if not any(term in metadata for term in brazilian_voice_terms):
+                continue
             candidate["_nexus_voice_rank"] = (
-                2 if any(term in metadata for term in brazilian_voice_terms) else 0,
                 1 if any(term in metadata for term in natural_voice_terms) else 0,
                 int(candidate.get("task_count") or 0),
             )
