@@ -102,3 +102,21 @@ Essa pauta deve ser retomada antes de considerar o projeto encerrado.
 
 ## ORIENTAÇÃO DE COMUNICAÇÃO
 O usuário ficou frustrado com orientações longas/repetitivas e com uma previsão errada sobre o timeout. Ser direto, assumir erros com clareza, não discutir, não mandar reiniciar sem evidência. O usuário não é programador; executar mudanças diretamente no GitHub.
+
+
+## Regra permanente — atualização de continuidade entre chats
+**Obrigatória em toda sessão e após cada etapa concluída:**
+1. Sempre que uma atualização, correção, teste, decisão, configuração ou etapa de trabalho for concluída nesta conversa, atualizar imediatamente `docs/CHAT_HANDOFF.md` com o que foi feito, evidências, arquivos/commits envolvidos, resultado e próximo passo exato.
+2. Atualizar também `NEXUS_MASTER_STATE.md` quando a mudança alterar arquitetura, decisões, estado técnico, segurança, custos, implantação, validação ou prioridades do projeto. O master state continua sendo a fonte principal do estado do projeto; o handoff registra a linha do tempo e o ponto exato para retomada.
+3. Registrar data e horário local de Brasília (America/Sao_Paulo, UTC−03:00) sempre que disponíveis. Se o horário não puder ser confirmado, registrar somente a data e não inventar horário.
+4. Separar explicitamente fatos confirmados, evidências observadas, hipóteses e itens pendentes. Nunca transformar uma intenção, instrução ou execução em andamento em tarefa concluída.
+5. Depois de gravar, reler os arquivos no GitHub para confirmar que a atualização realmente ficou na branch `main`. Só então informar ao usuário que foi salva.
+6. Em novo chat, ler integralmente o master state e o handoff, conferir o estado vivo do GitHub e continuar do último ponto registrado sem repetir etapas concluídas.
+7. Não armazenar segredos, tokens, senhas ou valores de credenciais nos documentos; registrar apenas os nomes dos secrets e seu estado de configuração.
+
+## Registro cronológico mais recente
+### 16/11/2026 — 14:12:52 (Brasília, UTC−03:00)
+- O usuário solicitou que este handoff seja mantido atualizado após cada etapa concluída, com histórico, data/horário e ponto exato para novos chats.
+- A regra permanente acima foi adicionada também ao `NEXUS_MASTER_STATE.md`.
+- Estado da execução Modal permanece conforme última evidência: run #1, job `deploy`, em andamento aos 30m39s na captura enviada. Não há evidência nova de conclusão nesta atualização.
+- Nenhum deploy foi reiniciado, cancelado ou alterado nesta etapa; apenas documentação foi atualizada.
