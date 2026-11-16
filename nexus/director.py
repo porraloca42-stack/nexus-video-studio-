@@ -87,7 +87,12 @@ def _request(prompt, secret_reader):
     except requests.RequestException:
         raise RuntimeError("Não foi possível conectar ao serviço Gemini. Tente novamente.") from None
     if response.status_code == 429:
-        raise RuntimeError("Limite temporário do modelo atingido. Tente novamente mais tarde.")
+        try:
+            detail = response.json().get("error", {}).get("message", "")
+        except ValueError:
+            detail = ""
+        detail = detail[:700] if detail else "A API não informou o detalhe da cota."
+        raise RuntimeError(f"Gemini recusou a solicitação por limite/cota (HTTP 429) no modelo {model}. Detalhe: {detail} Confira o limite desse modelo no AI Studio: https://aistudio.google.com/rate-limit")
     if response.status_code in (401, 403):
         raise RuntimeError("O Gemini recusou a autenticação ou o acesso ao modelo.")
     if response.status_code == 404:
