@@ -240,16 +240,27 @@ if st.button("Planejar vídeo", type="primary", use_container_width=True):
 
 if "nexus_plan" in st.session_state:
     plan = st.session_state["nexus_plan"]
-    st.subheader("Planejamento do vídeo")
-    with st.expander("Direção audiovisual · interpretação do roteiro", expanded=False):
+    scenes = plan.get("scenes", [])
+    total_seconds = sum(float(scene.get("duration_seconds", 0) or 0) for scene in scenes)
+    with st.expander(
+        f"Ver planejamento completo · {len(scenes)} cenas · {total_seconds:.0f}s",
+        expanded=False,
+    ):
+        st.markdown("### Direção audiovisual")
         st.write(plan.get("topic_interpretation", ""))
         st.write(plan.get("creative_thesis", ""))
         if plan.get("director_model"):
-            st.caption("Modelo Gemini selecionado automaticamente: " + plan["director_model"])
-        st.caption("Estilo visual solicitado: " + plan.get("style_lock", style))
-    st.markdown("**Cenas planejadas**")
-    for i, scene in enumerate(plan.get("scenes", []), 1):
-        with st.expander(f"Cena {i} · {scene.get('duration_seconds', 0)}s · {scene.get('purpose', '')}", expanded=False):
+            st.caption("Modelo Gemini: " + plan["director_model"])
+        st.caption("Estilo visual: " + plan.get("style_lock", style))
+        adjustment = plan.get("duration_adjustment")
+        if adjustment:
+            st.info(
+                f"A IA distribuiu os {adjustment['requested_seconds']} segundos entre as cenas "
+                f"(a estimativa inicial era de {adjustment['original_seconds']:.1f}s)."
+            )
+        st.markdown("### Cenas")
+        for i, scene in enumerate(scenes, 1):
+            st.markdown(f"**Cena {i} · {scene.get('duration_seconds', 0)}s · {scene.get('purpose', '')}**")
             st.markdown("**Narração**")
             st.write(scene.get("voiceover", ""))
             st.markdown("**Ação visual**")
@@ -257,13 +268,14 @@ if "nexus_plan" in st.session_state:
             st.markdown("**Estilo visual aplicado**")
             st.write(scene.get("visual_style", plan.get("style_lock", style)))
             if scene.get("style_search_terms"):
-                st.caption("Termos de estilo para busca: " + scene.get("style_search_terms", ""))
+                st.caption("Termos de estilo: " + scene.get("style_search_terms", ""))
             st.markdown("**Correspondência semântica**")
             st.write(scene.get("semantic_reason", ""))
             st.markdown("**Movimento e microeventos**")
             st.write(scene.get("camera_motion", ""))
             st.write(" → ".join(scene.get("motion_events", [])))
             st.caption("Busca visual: " + scene.get("asset_search_query", ""))
+            st.divider()
 
     if st.button("Produzir vídeo completo", type="primary", use_container_width=True):
         coverr_key = secret("COVERR_API_KEY")
