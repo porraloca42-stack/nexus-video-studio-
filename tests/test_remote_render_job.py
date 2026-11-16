@@ -19,15 +19,11 @@ class RemoteNarrationTests(unittest.TestCase):
         self.assertEqual(make.call_args.kwargs["fish_voice_id"], "voice-123")
         self.assertTrue(make.call_args.kwargs["return_provider"])
 
-    def test_worker_falls_back_to_edge_when_fish_credentials_absent(self):
+    def test_worker_requires_fish_credentials_instead_of_using_robotic_fallback(self):
+        from nexus.audio import FishAudioError
         audio = Path("/tmp/nexus-test-narration.mp3")
-        with patch("nexus.remote_render_job.make_voice", return_value=(audio, "Edge TTS")) as make:
-            result = generate_worker_narration(
-                "Texto narrado", "pt-BR-AntonioNeural", audio,
-            )
-        self.assertEqual(result[1], "Edge TTS")
-        self.assertIsNone(make.call_args.kwargs["fish_api_key"])
-        self.assertIsNone(make.call_args.kwargs["fish_voice_id"])
+        with self.assertRaisesRegex(FishAudioError, "FISH_API_KEY"):
+            generate_worker_narration("Texto narrado", "", audio)
 
 
     def test_worker_main_runs_cloudflare_remotion_with_decrypted_fish_credentials(self):
