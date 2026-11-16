@@ -261,3 +261,12 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - O CI do commit `386bc2e` executou 19 testes: 18 passaram e 1 falhou por uma expectativa excessivamente rígida no teste de fallback por sentença (o algoritmo pode dividir uma frase longa em mais de uma legenda para manter legibilidade).
 - Ajustado o teste para validar o conteúdo integral, sem impor quantidade fixa de blocos.
 - Aguardando nova execução CI. Ainda não há validação do pipeline real no Streamlit.
+
+
+
+## Correção da estrutura SRT — 16/11/2026
+- Evidência do usuário: a produção já havia gerado vídeo intermediário H.264 vertical de 50s e narração MP3 de 50,69s, mas FFmpeg falhou ao abrir `subtitles_retimed.srt` durante o filtro de legendas.
+- Diagnóstico no código: `nexus/audio.py` escrevia separadores de linha como barras invertidas literais seguidas de `n`, em vez de quebras de linha reais. Isso produzia um arquivo que não obedecia à estrutura SRT esperada pelo FFmpeg.
+- Commit `2b63e5b`: corrigidas as quebras de linha na escrita dos blocos SRT e nas legendas multilinha.
+- Commit `7ee0182`: teste de áudio reforçado para exigir que o arquivo tenha quebras de linha reais e não contenha sequências literais `\\n`.
+- Estado: correção e teste gravados na branch main. Ainda aguardam execução CI e nova produção real no Streamlit. O MP4 final ainda não está validado.
