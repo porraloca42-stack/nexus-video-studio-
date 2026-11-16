@@ -70,9 +70,9 @@ No Streamlit → Manage app → Settings → Secrets:
 
 O conteúdo do storyboard é criptografado antes do workflow_dispatch; o MP4 e o relatório também são criptografados antes do upload. O artefato público contém somente arquivos cifrados. Não gravar tokens no repositório, código, logs ou mensagens.
 
-### Custo e limite de imagens
-A franquia Workers AI Free é de 10.000 Neurons por dia, com reinício às 00:00 UTC. FLUX.2 Klein 4B custa 26,05 Neurons por tile de saída 512×512; uma imagem 512×910 usa aproximadamente dois tiles (52,1 Neurons), o que sugere cerca de 191 imagens/dia como teto teórico. O valor real pode variar por contabilização, falhas e uso de outros modelos. Não é uma cota garantida.
-Fontes oficiais: [FLUX.2 Klein 4B](https://developers.cloudflare.com/workers-ai/models/flux-2-klein-4b/), [preços Workers AI](https://developers.cloudflare.com/workers-ai/platform/pricing/), [changelog e parâmetros multipart](https://developers.cloudflare.com/changelog/post/2026-01-15-flux-2-klein-4b-workers-ai/).
+### Custo, licença e limite de imagens
+A franquia Workers AI Free é de 10.000 Neurons por dia, com reinício às 00:00 UTC. FLUX.2 Klein 4B custa 26,05 Neurons por tile de saída 512×512; uma imagem 512×910 usa aproximadamente dois tiles (52,1 Neurons), o que sugere cerca de 191 imagens/dia como teto teórico. O valor real pode variar por contabilização, falhas e uso de outros modelos. Não é uma cota garantida. A variante Klein 4B é Apache 2.0 e permite uso comercial; não confundir com Klein 9B ou FLUX.2 dev, que têm licenças não comerciais.
+Fontes oficiais: [FLUX.2 Klein 4B no Cloudflare](https://developers.cloudflare.com/workers-ai/models/flux-2-klein-4b/), [preços Workers AI](https://developers.cloudflare.com/workers-ai/platform/pricing/), [parâmetros multipart](https://developers.cloudflare.com/changelog/post/2026-01-15-flux-2-klein-4b-workers-ai/), [licença FLUX.2](https://github.com/black-forest-labs/flux2).
 
 ### Estado
 - Implementado no GitHub: adaptador Cloudflare, prompts de imagem por cena, manifesto Remotion com movimento por cena, worker GitHub Actions, envio/recuperação de artefato e criptografia do conteúdo.
