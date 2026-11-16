@@ -273,8 +273,6 @@ if not fish_api_key:
     st.error("Configure FISH_API_KEY nos Secrets do Streamlit.")
 else:
     try:
-        # Keep this call compatible with older Streamlit workers that may
-        # still have a cached audio module without the newer self_only arg.
         voice_page_data = list_fish_voices(
             fish_api_key, page=1, page_size=100, language="pt",
         )
