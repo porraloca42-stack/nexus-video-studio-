@@ -1376,3 +1376,11 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - O usuário confirmou que já criou o app secundário no Streamlit Community Cloud. Não solicitar nova criação. A URL desse app e a configuração de branch/arquivo ainda não estão registradas no repositório nem disponíveis nesta conexão; portanto, não afirmar que o preview está apontando para o redesign.
 - A documentação oficial do Streamlit confirma que um app existente pode ser administrado por suas configurações e que as coordenadas GitHub (owner/repository/branch/entrypoint) definem o código publicado. A integração disponível aqui não expõe o painel/conta Streamlit para alterar essas coordenadas diretamente.
 - Estado: código do redesign implementado; CI testada e aprovada; implantação do app secundário e inspeção visual ainda não verificadas. A `main` permanece preservada.
+
+
+## URL do app secundário Streamlit — 16/11/2026
+- O usuário forneceu a URL do segundo app: https://frgapwhgughgdgqnkqdscj.streamlit.app/
+- Esse endereço fica registrado como o preview destinado à validação do redesign Studio Workspace v2.
+- O código do redesign está na branch `redesign/studio-workspace-v2`, entrypoint `app.py`; PR #2 permanece aberto, draft e sem merge.
+- A URL foi recebida, mas a conexão atual não oferece acesso ao painel/configurações do Streamlit nem execução de navegador para inspecionar o app publicado. A tentativa de abrir o endereço nesta sessão não retornou conteúdo verificável. Portanto, ainda NÃO está confirmado que o app aponta para o repositório correto, branch `redesign/studio-workspace-v2` e arquivo `app.py`, nem que o redesign está implantado.
+- Próxima verificação necessária: confirmar as coordenadas do app no Streamlit Community Cloud e então inspecionar visualmente desktop/mobile. Não alterar a `main` nem fazer merge do PR sem aprovação explícita.
