@@ -124,6 +124,9 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Importante: a pontuação atual é lexical sobre título/descrição/tags fornecidos pela biblioteca, não uma avaliação visual multimodal do conteúdo real do vídeo. Não prometer compreensão visual da imagem até implementar e testar essa etapa.
 - Próximas verificações: CI GitHub, teste Coverr real com buscas semânticas, confirmar se os metadados retornados contêm texto suficiente para o limiar; se não contiverem, integrar avaliação visual de thumbnails/frames antes de seleção. Depois disso, validar narração, sincronismo, duração final, render e download do MP4 real.
 
+- Commit `0674f866` em `nexus/assets.py`: além da pontuação, a seleção exige correspondência de pelo menos dois termos distintos da cena quando a consulta contém dois ou mais termos significativos; consultas curtas exigem o único termo disponível. Isso reduz falsos positivos causados por coincidência de uma palavra isolada.
+- Commit `26a50b42` amplia a suíte para sete testes. Reteste local da lógica de assets após essa alteração: `compileall` e os sete testes passaram. O teste local foi executado sobre cópia de verificação dos módulos de busca e testes; não equivale a execução do Streamlit ou ao pipeline com APIs reais.
+
 ## Regras para o assistente em novos chats
 - Começar lendo este arquivo e o código relevante no GitHub antes de propor mudanças.
 - Tratar este documento como registro de continuidade, mas conferir o estado atual do repositório e deployment; pode ficar desatualizado.
