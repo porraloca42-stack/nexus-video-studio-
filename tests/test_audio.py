@@ -6,6 +6,7 @@ from nexus.audio import (
     FishAudioError,
     generate_fish_preview,
     list_fish_voices,
+    _is_natural_brazilian_voice,
     make_voice,
 )
 
@@ -72,6 +73,36 @@ class AudioOutputTests(unittest.TestCase):
         self.assertEqual(session.calls[0][2]["params"]["page_number"], 2)
         self.assertEqual(session.calls[0][2]["params"]["language"], "pt")
         self.assertNotIn("self", session.calls[0][2]["params"])
+
+    def test_lists_voice_tags_and_score_sort(self):
+        session = FakeFishSession()
+        list_fish_voices("test-key", tags=["narration", "conversational"], sort_by="score", session=session)
+        params = session.calls[0][2]["params"]
+        self.assertEqual(params["tag"], ["narration", "conversational"])
+        self.assertEqual(params["sort_by"], "score")
+
+    def test_natural_voice_filter_requires_brazilian_human_narration_and_excludes_characters(self):
+        natural = {
+            "title": "Narrador Brasileiro Natural",
+            "description": "Brazilian Portuguese professional narration, calm and conversational",
+            "tags": ["narration", "neutral"],
+            "languages": ["pt"],
+        }
+        character = {
+            "title": "Lula Meme",
+            "description": "Brazilian Portuguese character voice for memes",
+            "tags": ["meme", "character"],
+            "languages": ["pt"],
+        }
+        european = {
+            "title": "Narrador Português",
+            "description": "Professional narration in European Portuguese",
+            "tags": ["narration"],
+            "languages": ["pt"],
+        }
+        self.assertTrue(_is_natural_brazilian_voice(natural))
+        self.assertFalse(_is_natural_brazilian_voice(character))
+        self.assertFalse(_is_natural_brazilian_voice(european))
 
     def test_lists_private_personal_voice_models(self):
         session = FakeFishSession(payload={
