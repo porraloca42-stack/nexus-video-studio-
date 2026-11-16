@@ -1355,11 +1355,14 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Próximo critério de liberação: um vídeo real de 40–50s, com voz Fish Audio selecionada, todas as cenas animadas e coerência audiovisual revisada. Registrar duração, custo, codecs, resolução e inspeção visual antes de declarar finalizado.
 
 
-## Redesign visual mobile — 16/11/2026
-- Em andamento na branch `feat/mobile-premium-ui`; não altera o pipeline de produção, os provedores ou os contratos de dados.
-- Primeira camada implementada em `app.py`: identidade escura grafite/preto com dourado discreto, fundo com gradiente sutil, hero NEXUS, tipografia e espaçamentos refinados, campos de texto e seletores personalizados, botões primários/secundários, expanders, players, alertas e barras de progresso redesenhados.
-- Responsividade mobile-first: largura fluida, margens compactas, alvos de toque maiores, controles com cantos arredondados e galeria de estilos em grade de duas colunas.
-- Ocultados rodapé e elementos técnicos de toolbar do Streamlit; o cabeçalho de navegação permanece para não remover controles de aplicativo do host.
-- CI #590 executou com sucesso os jobs `unit-tests` (incluindo compilação dos módulos Python), `remotion-typecheck` e `commons-live-smoke`.
-- Revisão do diff confirmou que a mudança está restrita ao CSS/hero em `app.py` e ao registro técnico; não altera provedores, contratos de dados ou pipeline.
-- Ainda não há inspeção visual em navegador/celular nem confirmação de implantação na Streamlit Cloud. O PR #1 permanece draft e não foi integrado à `main`; manter assim até a validação visual mobile.
+## Redesign da interface — Studio Workspace (16/11/2026)
+- O primeiro rascunho visual limitava-se a CSS e cabeçalho, sem reorganizar a experiência; não foi aprovado pelo usuário e não deve ser tratado como redesign concluído.
+- Nova iteração implementada na branch `feat/mobile-premium-ui`, mantendo `main` intacta: a tela foi reorganizada em três áreas de trabalho navegáveis — Briefing, Direção visual e Voz e motor — em vez de apresentar todas as configurações numa única coluna contínua.
+- Novo conceito visual: console audiovisual escuro em azul-noite, ciano e violeta; hero editorial com identificação do estúdio; navegação por etapas; controles de briefing e duração agrupados; painel de direção com prévia e galeria de estilos; painel de voz/motor com diagnóstico avançado; resumo da configuração antes do planejamento.
+- Galeria alterada para três colunas em telas amplas e duas colunas em mobile. Campos, botões, métricas, abas, players, expanders e indicadores receberam novo sistema visual.
+- Alterações limitadas à apresentação e organização da interface em `app.py`; a lógica do diretor, seleção de voz, diagnóstico de bibliotecas, renderização e contratos de dados foram preservados.
+- Commits da nova iteração: `769f35e` (estrutura por áreas e sistema visual) e `f97d251` (inicialização segura do estilo e grade responsiva).
+- PR #1 permanece aberto, draft e não integrado à `main`. A prévia Streamlit criada anteriormente aponta para esta branch e deve refletir as novas alterações após sincronização do deploy.
+- Validação pendente: CI após os últimos commits, inspeção visual real da nova interface no celular e teste funcional de navegação entre as três áreas. Não declarar o redesign aprovado nem implantado na aplicação principal antes dessas etapas.
+
+
