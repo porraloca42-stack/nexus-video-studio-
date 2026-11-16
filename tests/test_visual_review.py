@@ -5,6 +5,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from nexus.director import review_visual_candidates
+from nexus.visual_review import review_scene_frames
 
 
 class FakeResponse:
@@ -79,6 +80,35 @@ class VisualReviewTests(unittest.TestCase):
                 )
         self.assertEqual(result["selected_candidate"], 1)
         self.assertEqual(result["confidence"], 61)
+
+    def test_final_review_accepts_three_ordered_frames_per_scene(self):
+        response = FakeResponse()
+        response.json = lambda: {
+            "candidates": [{
+                "content": {"parts": [{
+                    "text": '{"reviews":[{"scene_number":1,"semantic_score":8,"matches_narration":true,"visual_quality":"Boa sequência","issues":[],"recommendation":"Manter."}]}'
+                }]}
+            }]
+        }
+        with tempfile.TemporaryDirectory() as temp:
+            paths = []
+            for index in range(3):
+                frame = Path(temp) / f"frame_{index}.jpg"
+                frame.write_bytes(f"frame-{index}".encode())
+                paths.append(str(frame))
+            from unittest.mock import Mock
+            session = Mock()
+            session.post.return_value = response
+            result = review_scene_frames(
+                paths, [{"voiceover":"A pessoa abre a porta.","visual_action":"Pessoa entrando."}],
+                "test-key", model="gemini-test", session=session
+            )
+        self.assertEqual(result[0]["semantic_score"], 8)
+        self.assertEqual(len(session.post.call_args.kwargs["json"]["contents"][0]["parts"]), 5)
+
+    def test_final_review_rejects_incomplete_temporal_frame_groups(self):
+        with self.assertRaisesRegex(ValueError, "um ou três quadros"):
+            review_scene_frames(["one.jpg", "two.jpg"], [{"voiceover":"fala"}], "test-key", model="gemini-test")
 
     def test_rejects_candidate_below_visual_confidence_threshold(self):
         response = FakeResponse()
