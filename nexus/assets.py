@@ -235,16 +235,18 @@ def search_video_sources(
     # The visual reviewer inspects actual frames and rejects unrelated clips.
     # Style-only search results are admitted only if their metadata also has
     # a meaningful overlap with the scene brief.
+    ranked_all = rank_video_candidates(
+        list(deduplicated.values()), semantic_query, style_query=style_query
+    )
     scene_candidates = [
-        item for item in deduplicated.values()
+        item for item in ranked_all
         if item.get("matched_scene_query")
         or (
             len(query_terms) >= 2
             and item.get("_nexus_match_count", 0) >= 1
         )
     ]
-    ranked = rank_video_candidates(scene_candidates, semantic_query, style_query=style_query)
-    return ranked, errors
+    return scene_candidates, errors
 
 def download_file(url, destination):
     destination = Path(destination)
