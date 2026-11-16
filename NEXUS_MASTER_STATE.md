@@ -210,3 +210,10 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Estado de credenciais confirmado no registro: Coverr configurado; Pixabay ainda sem chave; Pexels sem integração anterior e emissão pública de novas chaves pausada conforme página oficial consultada. O adaptador Pexels está pronto no código, mas não operacional até existir uma chave válida.
 - Regras de licença: validar os termos do plano/API de cada fornecedor e mostrar créditos exigidos. Não tratar um clipe como liberado para uso comercial só por ser retornado pela API.
 - Pendente: resultado do GitHub Actions para estes commits, implantação Streamlit, configurar/validar Pixabay ou Pexels quando possível e executar uma nova produção real. Não afirmar que a cobertura de todas as cenas ou MP4 está garantida.
+
+
+### Extensão de testes e créditos de mídia — 16/11/2026
+- Commit ebdd1e2: teste do adaptador Pexels valida endpoint atual, orientação portrait, escolha MP4 e metadados de autoria/URL da fonte.
+- Commit ebdd1e2: teste garante que URLs repetidas entre fornecedores sejam deduplicadas antes do download.
+- Commit fd797bc: produção passa a preservar provedor, página do clipe e autor quando fornecido; a interface exibe créditos das bibliotecas usadas após o vídeo ser produzido.
+- A execução do CI para estes commits ainda está pendente no momento deste registro. Confirmar compilação, testes e deploy antes de declarar a mudança validada.
