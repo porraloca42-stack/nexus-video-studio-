@@ -29,7 +29,7 @@ def normalize_clip(source, destination, duration, motion="push_in"):
         f"zoompan=z='{zoom}':x='{x}':y='ih/2-(ih/zoom/2)':d=1:s={WIDTH}x{HEIGHT}:fps={FPS},"
         "eq=contrast=1.04:saturation=1.04:brightness=0.005,setsar=1,format=yuv420p"
     )
-    run(["ffmpeg", "-y", "-i", str(source), "-t", str(duration), "-vf", filter_graph, "-an", "-c:v", "libx264", "-preset", "veryfast", "-crf", "24", str(destination)])
+    run(["ffmpeg", "-y", "-stream_loop", "-1", "-i", str(source), "-t", str(duration), "-vf", filter_graph, "-an", "-c:v", "libx264", "-preset", "veryfast", "-crf", "24", str(destination)])
 
 def render_video(media, audio_path, output, subtitles_path=None):
     if not media:
