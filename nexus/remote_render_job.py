@@ -44,11 +44,27 @@ def main():
             raise RuntimeError(f"Imagem da cena {item.get('scene_index')} não passou no FFprobe.")
         image_streams = json.loads(image_probe.stdout).get("streams", [])
         image_size = image_streams[0] if image_streams else {}
-        if image_size.get("width") != 512 or image_size.get("height") != 910:
+        width = int(image_size.get("width") or 0)
+        height = int(image_size.get("height") or 0)
+        if width < 1 or height < 1:
             raise RuntimeError(
-                f"Imagem da cena {item.get('scene_index')} saiu com "
-                f"{image_size.get('width')}×{image_size.get('height')}; esperado 512×910."
+                f"Imagem da cena {item.get('scene_index')} não informou dimensões válidas."
             )
+        # FLUX.2 Klein pode arredondar a altura solicitada para múltiplos internos
+        # (ex.: 512×896). Normalize para o canvas vertical do manifesto antes do Remotion.
+        if width != 512 or height != 910:
+            normalized_path = image_path.with_name(f"{image_path.stem}_vertical{image_path.suffix}")
+            normalize = subprocess.run(
+                ["ffmpeg", "-y", "-i", str(image_path), "-vf", "scale=512:910:flags=lanczos",
+                 "-frames:v", "1", str(normalized_path)],
+                capture_output=True, text=True, timeout=90,
+            )
+            if normalize.returncode or not normalized_path.exists():
+                raise RuntimeError(
+                    f"Não foi possível normalizar a imagem da cena {item.get('scene_index')} "
+                    f"de {width}×{height} para 512×910: {normalize.stderr[-1200:]}"
+                )
+            image_path = normalized_path
         media.append({"path": str(image_path)})
 
     narration = " ".join(str(scene.get("voiceover", "")).strip() for scene in scenes).strip()
