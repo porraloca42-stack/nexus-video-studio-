@@ -1120,3 +1120,11 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Após cada gravação, reler os documentos na branch main para verificar persistência antes de confirmar ao usuário.
 - Nunca incluir valores de tokens, senhas ou credenciais.
 - Horário desta atualização confirmado: 16/11/2026 14:12:52 UTC−03:00.
+
+## Pesquisa do tamanho do modelo LTX na revisão pinada — 16/11/2026
+- O código `modal_worker.py` fixa o repositório Hugging Face `Lightricks/LTX-Video` na revisão `a6d59ee37c13c58261aa79027d3e41cd41960925`.
+- A página do Hugging Face para essa revisão informa tamanho total do snapshot de aproximadamente **43,8 GB**. A pasta `transformer` sozinha aparece com **7,69 GB** (dois shards de 4,94 GB e 2,75 GB). Isso confirma que o conjunto de arquivos da revisão é grande; não confundir com o tamanho de 254 GB mostrado na branch atual do repositório, que contém várias versões/checkpoints.
+- O pipeline pode precisar baixar componentes distribuídos em várias pastas, além de instalar dependências Python/PyTorch na imagem Modal. O tempo real depende de cache, rede, construção da imagem e arquivos que Diffusers efetivamente solicita.
+- A duração de 37 minutos relatada pelo usuário é longa, mas compatível com uma preparação que envolva dezenas de GB; **não prova** que o download esteja ativo nem que o deploy esteja saudável. Só os logs/etapa atual confirmam.
+- Evidência externa consultada: página do Hugging Face para a revisão exata e listagem da pasta transformer. Links: https://huggingface.co/Lightricks/LTX-Video/tree/a6d59ee37c13c58261aa79027d3e41cd41960925 e https://huggingface.co/Lightricks/LTX-Video/tree/a6d59ee37c13c58261aa79027d3e41cd41960925/transformer
+- Próximo passo permanece: não cancelar/reiniciar enquanto o job estiver ativo; se continuar muito tempo, abrir os logs da etapa `deploy` e identificar a última operação. Não assumir que basta esperar indefinidamente.
