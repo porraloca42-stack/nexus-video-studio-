@@ -218,7 +218,7 @@ div[data-testid="stTextArea"] textarea,div[data-testid="stSelectbox"] div[data-b
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="nexus-hero"><div class="nexus-brand">NEXUS VIDEO STUDIO</div><div class="nexus-tagline">Transforme seu roteiro em vídeo</div></div>', unsafe_allow_html=True)
-st.caption("Versão: NEXUS-2026.11.16-visual-review-subtitles-3")
+st.caption("Versão: NEXUS-2026.11.16-visual-review-subtitles-4")
 
 if "nexus_style" not in st.session_state or st.session_state["nexus_style"] not in STYLE_OPTIONS:
     st.session_state["nexus_style"] = "Cinematográfico realista"
@@ -665,6 +665,15 @@ if "nexus_plan" in st.session_state:
                         "audio_codec": final_audio.get("codec_name"),
                         "size_mb": len(video_bytes) / (1024 * 1024),
                         "scene_count": len(media),
+                        "visual_reviews": [
+                            {
+                                "scene": index + 1,
+                                "source": item.get("source", "Stock"),
+                                "confidence": item.get("visual_review_confidence", 0),
+                                "reason": item.get("visual_review_reason", ""),
+                            }
+                            for index, item in enumerate(media)
+                        ],
                         "source_credits": [
                             {
                                 "source": item.get("source", "Stock"),
@@ -689,6 +698,14 @@ if st.session_state.get("nexus_rendered_video"):
     info = st.session_state.get("nexus_rendered_info", {})
     st.subheader("Seu vídeo está pronto")
     st.caption(f"{info.get('scene_count', 0)} cenas · {info.get('duration', 0):.1f}s · {info.get('width', 0)}×{info.get('height', 0)} · {info.get('size_mb', 0):.2f} MB")
+    reviews = info.get("visual_reviews", [])
+    if reviews:
+        average_confidence = sum(item.get("confidence", 0) for item in reviews) / len(reviews)
+        st.caption(f"Revisão visual por IA: {average_confidence:.0f}% de confiança média · {len(reviews)} cenas avaliadas")
+        with st.expander("Ver correspondência visual por cena"):
+            for item in reviews:
+                st.markdown(f"**Cena {item['scene']} · {item['source']} · {item['confidence']}%**")
+                st.write(item.get("reason", ""))
     st.video(st.session_state["nexus_rendered_video"])
     credits = []
     for credit in info.get("source_credits", []):
