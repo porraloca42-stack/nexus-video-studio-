@@ -164,3 +164,10 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Commit 34c5c2d: teste unitário com respostas simuladas verifica duas respostas JSON inválidas no primeiro modelo, retry com instrução corretiva e sucesso no segundo modelo, sem chamadas externas.
 - Commit 225adce: identificador visual atualizado para `NEXUS-2026.11.16-json-recovery-1`.
 - Pendente: execução do GitHub Actions após os commits, confirmação de implantação no Streamlit e nova geração real via Gemini. A API real não foi chamada neste ambiente; produção MP4 continua não validada.
+
+
+### Resultado dos testes automatizados — 16/11/2026
+- GitHub Actions executou `python -m compileall -q app.py nexus`: sucesso.
+- O novo teste `test_retries_malformed_json_then_fails_over_to_next_model`: sucesso. Simula duas respostas inválidas no primeiro modelo, verifica a instrução de retry e confirma recuperação no segundo modelo.
+- A suíte geral ainda termina com 1 erro preexistente/fora deste reparo em `tests/test_render.py::test_render_produces_vertical_mp4_with_audio_and_subtitles`: FFmpeg não consegue abrir `subtitles_retimed.srt`. Não atribuir essa falha ao reparo JSON; ela precisa ser investigada em uma etapa própria antes de declarar toda a suíte verde.
+- O workflow não está verde; portanto, status técnico atual: compilação e teste unitário específico aprovados, suíte global reprovada por falha de renderização; chamada Gemini real e implantação Streamlit ainda pendentes.
