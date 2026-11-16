@@ -36,13 +36,30 @@ class RemoteNarrationTests(unittest.TestCase):
             root = Path(temp)
             image_dir = root / "worker_output" / "job-test" / "images"
             image_dir.mkdir(parents=True)
-            image = image_dir / "scene_01.png"
-            image.write_bytes(b"x" * 12000)
+            images = []
+            for index in range(1, 11):
+                image = image_dir / f"scene_{index:02d}.png"
+                image.write_bytes(b"x" * 12000)
+                images.append({"path": str(image), "scene_index": index})
+            motion_dir = root / "worker_output" / "job-test" / "motion"
+            motion_dir.mkdir(parents=True, exist_ok=True)
+            clips = []
+            for index in range(1, 11):
+                clip = motion_dir / f"scene_{index:02d}.mp4"
+                clip.write_bytes(b"m" * 12000)
+                clips.append({
+                    "path": str(clip), "scene_index": index,
+                    "duration_seconds": 5.04, "inference_seconds": 15.0,
+                    "frames": 121, "model": "Lightricks/LTX-Video",
+                })
             audio = root / "worker_output" / "job-test" / "narration.mp3"
             audio.parent.mkdir(parents=True, exist_ok=True)
             audio.write_bytes(b"fish-audio")
             output = root / "worker_output" / "job-test" / "nexus_video.mp4"
-            plan = {"scenes": [{"duration_seconds": 50, "voiceover": "Uma fala completa.", "image_prompt": "A cinematic portrait."}]}
+            plan = {"scenes": [
+                {"duration_seconds": 5, "voiceover": "Uma fala completa.", "image_prompt": "A cinematic portrait."}
+                for _ in range(10)
+            ]}
             secret = "cloudflare-encryption-secret"
             env = {
                 "NEXUS_MANIFEST_ENCRYPTED": encrypt_text(json.dumps(plan), secret),
@@ -54,6 +71,10 @@ class RemoteNarrationTests(unittest.TestCase):
                 "NEXUS_VOICE": "pt-BR-AntonioNeural",
             }
             image_result = Mock(returncode=0, stdout=json.dumps({"streams": [{"width": 512, "height": 910}]}), stderr="")
+            clip_result = Mock(returncode=0, stdout=json.dumps({
+                "format": {"duration": 5.04},
+                "streams": [{"codec_type": "video", "width": 512, "height": 896}],
+            }), stderr="")
             audio_result = Mock(returncode=0, stdout="50.0\n", stderr="")
             final_result = Mock(returncode=0, stdout=json.dumps({
                 "format": {"duration": 50.0, "size": 123456},
@@ -67,13 +88,18 @@ class RemoteNarrationTests(unittest.TestCase):
                 Path(destination).write_bytes(b"realistic-mocked-mp4")
                 return Path(destination)
             with patch.dict(os.environ, env, clear=False), \
-                 patch("nexus.remote_render_job.generate_scene_images", return_value=[{"path": str(image), "scene_index": 1}]) as gen_images, \
+                 patch("nexus.remote_render_job.generate_scene_images", return_value=images) as gen_images, \
+                 patch("nexus.remote_render_job.animate_scene_images", return_value=clips) as animate, \
                  patch("nexus.remote_render_job.generate_worker_narration", return_value=(audio, "Fish Audio")) as gen_voice, \
                  patch("nexus.remote_render_job.render_video_remotion", side_effect=fake_render) as render, \
-                 patch("nexus.remote_render_job.subprocess.run", side_effect=[image_result, audio_result, final_result]):
+                 patch("nexus.remote_render_job.subprocess.run", side_effect=(
+                     [image_result] * 10 + [clip_result] * 10 + [audio_result, final_result]
+                 )):
                 from nexus.remote_render_job import main
                 main(project_root=root)
 
+            self.assertEqual(animate.call_args.args[0], images)
+            self.assertEqual(len(animate.call_args.args[1]), 10)
             self.assertEqual(gen_voice.call_args.kwargs["fish_api_key"], "fish-secret")
             self.assertEqual(gen_voice.call_args.kwargs["fish_voice_id"], "voice-369")
             self.assertEqual(render.call_args.kwargs, {"project_dir": root / "remotion", "job_id": "job-test"})
@@ -82,6 +108,8 @@ class RemoteNarrationTests(unittest.TestCase):
             report = json.loads(decrypt_text(report_path.read_text(encoding="ascii"), secret))
             self.assertEqual(report["narration_provider"], "Fish Audio")
             self.assertEqual(report["duration"], 50.0)
+            self.assertEqual(report["visual_source"], "Cloudflare FLUX.2 Klein + Modal LTX-Video I2V + Remotion")
+            self.assertEqual(len(report["motion_clips"]), 10)
             self.assertEqual(decrypt_bytes(video_path.read_bytes(), secret), b"realistic-mocked-mp4")
 
     def test_audio_sync_has_no_subtitle_dependency(self):
