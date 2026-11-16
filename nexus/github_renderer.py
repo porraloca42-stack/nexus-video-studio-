@@ -2,6 +2,7 @@
 import io
 import json
 import time
+import uuid
 import zipfile
 
 import requests
@@ -37,7 +38,7 @@ def render_on_github(
     if not isinstance(plan, dict) or not plan.get("scenes"):
         raise ValueError("O storyboard não contém cenas.")
     manifest_json = json.dumps(plan, ensure_ascii=False, separators=(",", ":"))
-    if len(manifest_json) > 60000:
+    if len(manifest_json) > 45000:
         raise GitHubRenderError("O storyboard excede o limite seguro de envio ao GitHub Actions.")
 
     client = session or requests
@@ -46,7 +47,7 @@ def render_on_github(
         "Accept": "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
     }
-    job_id = f"nexus-{int(time.time())}-{id(plan) % 100000:05d}"
+    job_id = f"nexus-{uuid.uuid4().hex[:12]}"
     workflow_url = f"{API}/repos/{repository}/actions/workflows/{WORKFLOW}/dispatches"
     dispatch = client.post(
         workflow_url,
