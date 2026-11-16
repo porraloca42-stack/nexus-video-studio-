@@ -682,3 +682,10 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Run #43855578442 (commit `a3a81a8`): demo Remotion concluída; steps de type-check, testes dos adaptadores, render via adaptador Python/Remotion e validação do MP4 sintético 720×1280 com áudio/duração passaram. A etapa de demo manual de 50s foi explicitamente skipped; não confundir com render Cloudflare real.
 - Run #43855679107 (commit de documentação `9b747ad`): nova regressão disparada pela atualização deste arquivo; ainda em andamento na última consulta.
 - Estado atualizado: correção de moderação implementada e coberta por testes automatizados aprovados; Remotion demo e integração sintética aprovadas. Falta implantação efetiva no Streamlit e novo render real via Cloudflare para validar se o modelo aceita as imagens e se o MP4 final é produzido.
+
+
+### Confirmação de recarga do aplicativo e CI — 16/11/2026
+- Run #43855829296 (commit `d4dc4bf`) concluiu com sucesso a suíte de regressão.
+- Run #43855679107 (commit `9b747ad`) também concluiu com sucesso; os jobs unit-tests e commons-live-smoke passaram.
+- O usuário enviou captura após recarregar o Streamlit: interface inicial do NEXUS abriu normalmente e mostra rótulo de versão `NEXUS-2026.11.16-stock-search-recovery-1`. Esse rótulo é o identificador exibido pela aplicação; não é, isoladamente, prova do SHA exato implantado.
+- Próximo passo operacional: usuário deve preencher um roteiro de teste benigno, gerar o planejamento e acionar “Produzir vídeo completo” com “Imagens originais · Cloudflare AI + Remotion”. A execução real pós-correção de moderação ainda não foi disparada nem validada.
