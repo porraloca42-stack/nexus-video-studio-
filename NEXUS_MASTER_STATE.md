@@ -171,3 +171,13 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - O novo teste `test_retries_malformed_json_then_fails_over_to_next_model`: sucesso. Simula duas respostas inválidas no primeiro modelo, verifica a instrução de retry e confirma recuperação no segundo modelo.
 - A suíte geral ainda termina com 1 erro preexistente/fora deste reparo em `tests/test_render.py::test_render_produces_vertical_mp4_with_audio_and_subtitles`: FFmpeg não consegue abrir `subtitles_retimed.srt`. Não atribuir essa falha ao reparo JSON; ela precisa ser investigada em uma etapa própria antes de declarar toda a suíte verde.
 - O workflow não está verde; portanto, status técnico atual: compilação e teste unitário específico aprovados, suíte global reprovada por falha de renderização; chamada Gemini real e implantação Streamlit ainda pendentes.
+
+
+## Correção de compatibilidade Edge TTS — 16/11/2026
+- Evidência do usuário: planejamento concluído (10 cenas, 50s) e a produção avançou até "Gerando narração, legendas e montagem", mas interrompeu com `'SubMaker' object has no attribute 'generate_subs'`.
+- Diagnóstico: `nexus/audio.py` usava a API antiga do `edge_tts.SubMaker` (`create_sub` + `generate_subs()`). A API atual utiliza `feed(chunk)` e `get_srt()`; a biblioteca não expõe mais o método antigo na versão instalada.
+- Commit 18bbe69: atualizado o gerador para usar `feed()` com o evento completo e `get_srt()` quando disponíveis, mantendo fallback para `create_sub()`/`generate_subs()` em instalações antigas. Também aceita eventos WordBoundary e SentenceBoundary.
+- Commit e7f9742: CI passa a instalar `edge-tts`, dependência real do módulo de áudio, para que os testes importem e exercitem o caminho de produção.
+- Commit faf7461: identificador visual atualizado para `NEXUS-2026.11.16-edge-tts-compat-1`.
+- Commit b7b7a19: testes unitários simulam as APIs moderna e legada e verificam gravação de áudio e arquivo SRT.
+- Pendente: resultado do GitHub Actions, confirmação do novo build no Streamlit e produção real completa. Ainda não declarar MP4 validado até FFprobe confirmar áudio, vídeo, duração e dimensões.
