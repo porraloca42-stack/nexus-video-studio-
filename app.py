@@ -481,6 +481,7 @@ if "nexus_plan" in st.session_state:
                         exclude_urls=used_asset_urls,
                         relevance_query=scene["asset_search_query"],
                         style_query=style_terms,
+                        wikimedia_enabled=True,
                     )
                     if not candidates and fallback_query:
                         candidates, retry_errors = _search_stock_compatible(
@@ -488,7 +489,6 @@ if "nexus_plan" in st.session_state:
                             "",
                             pixabay_key,
                             pexels_key=pexels_key,
-                            wikimedia_enabled=True,
                             exclude_urls=used_asset_urls,
                             relevance_query=scene.get("fallback_search_query", scene["asset_search_query"]),
                             style_query=style_terms,
