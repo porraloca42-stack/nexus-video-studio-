@@ -1366,3 +1366,16 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Validação pendente: CI após os últimos commits, inspeção visual real da nova interface no celular e teste funcional de navegação entre as três áreas. Não declarar o redesign aprovado nem implantado na aplicação principal antes dessas etapas.
 
 
+
+
+## Teste da proposta visual Gemini — SaaS Premium Dark Studio (16/11/2026)
+- Usuário autorizou validar a proposta do Gemini na aplicação de teste; a branch `feat/mobile-premium-ui` continua separada da `main`.
+- `.streamlit/config.toml` da branch foi atualizado para tema dark roxo/preto: primary `#7C3AED`, background `#09090B`, secondary `#121216`, text `#F4F4F5`, fonte sans serif. A configuração já existia na branch, mas usava a paleta anterior grafite/dourado.
+- CSS premium foi movido para imediatamente após `st.set_page_config`, com seletores Streamlit `data-testid`, estados focus/hover, cartões, inputs, botões, expander, player e responsividade. Corrigido o endereço da Google Font para `fonts.googleapis.com/css2?family=Plus+Jakarta+Sans...`; o exemplo original do Gemini (`https://googleapis.com`) não carregava a fonte.
+- A interface de briefing agora usa `st.columns([1.5, 1], gap="large")`: editor à esquerda e painel de prévia/resumo à direita. Em mobile as colunas são empilhadas. A prévia é explicitamente ilustrativa e não representa imagem gerada.
+- Briefing, direção visual e voz/motor foram envolvidos em `st.container(border=True)`; galeria preserva 3 colunas em desktop e 2 em mobile.
+- Não há chamadas `st.sidebar` no `app.py` desta branch; portanto não havia campos de sidebar a mover. Estado confirmado por busca estática no código.
+- Alterações limitadas a `app.py` e `.streamlit/config.toml`; nenhuma função de backend, provedor, seleção de voz, planejamento, geração, renderização ou validação do MP4 foi intencionalmente modificada.
+- Commits desta iteração: `e0a3ca1` (layout/CSS e colunas), `6f18c9a` (tema Streamlit), `4aae09e` (CSS logo após page config), `647c470` (remoção das barras nativas).
+- Validação disponível até aqui: leitura pós-commit do código e conferência estática das áreas alteradas. CI/workflow não retornou execução associada aos commits na consulta; não declarar testes automatizados aprovados. Falta validação visual real no app de teste e teste funcional do planejamento até MP4.
+- O preview Streamlit continua sendo uma segunda instância de teste apontada para esta branch; ela permite avaliar sem alterar o app principal. `main` permanece intacta.
