@@ -284,11 +284,19 @@ if "nexus_plan" in st.session_state:
                     primary_query = " ".join(part for part in [scene["asset_search_query"], style_terms] if part).strip()
                     fallback_query = " ".join(part for part in [scene.get("fallback_search_query", ""), style_terms] if part).strip()
                     candidates, source_errors = search_video_sources(
-                        primary_query, coverr_key, pixabay_key, exclude_urls=used_asset_urls
+                        primary_query,
+                        coverr_key,
+                        pixabay_key,
+                        exclude_urls=used_asset_urls,
+                        relevance_query=scene["asset_search_query"],
                     )
                     if not candidates and fallback_query:
                         candidates, retry_errors = search_video_sources(
-                            fallback_query, coverr_key, pixabay_key, exclude_urls=used_asset_urls
+                            fallback_query,
+                            coverr_key,
+                            pixabay_key,
+                            exclude_urls=used_asset_urls,
+                            relevance_query=scene.get("fallback_search_query", scene["asset_search_query"]),
                         )
                         source_errors.extend(retry_errors)
                     if not candidates:
