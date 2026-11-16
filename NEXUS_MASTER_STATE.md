@@ -535,3 +535,14 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - CI #209: `commons-live-smoke` passou (busca real, download e FFprobe), compilação passou e os testes de estilo global, render MP4, revisão visual e licenças Commons passaram. Suite total: 39 testes; apenas uma expectativa no teste de variantes de busca estava incorreta: código retorna `writing goals notebook`, `writing`, `goals`, `notebook`, e o teste esperava `goals notebook`.
 - Corrigida a expectativa para o termo efetivamente produzido (`writing goals notebook`), commit `76c3ecb`. Nova execução #210 disparada; ainda pendente.
 - Estado: integração Commons e compilação verificadas; suite regressiva quase verde, falta nova execução. Streamlit/deploy e produção end-to-end ainda não confirmados.
+
+
+## Prova técnica Remotion — 16/11/2026
+- Criado projeto isolado em `remotion/`, sem alterar o pipeline atual Streamlit/Python/FFmpeg.
+- Pacotes Remotion/CLI fixados em 4.0.543 e React 18.3.1; composição `NexusDemo` configurada em 720×1280, 30 fps e 50 segundos.
+- Primeira composição demonstrativa contém cinco sequências animadas, tipografia, elementos gráficos, movimento e barra de progresso. Ainda é uma composição de demonstração, sem narração real nem integração com storyboard.
+- Criado workflow manual/por alterações em `remotion/**` para instalar dependências, renderizar MP4 e publicar artefato por 7 dias.
+- Workflow: `.github/workflows/remotion-demo.yml`.
+- Estado: scaffold e workflow gravados na branch main. A renderização no GitHub Actions ainda precisa concluir; não declarar MP4 validado até inspecionar o artefato e os logs.
+- Próxima etapa: validar CI de Remotion; corrigir falhas de dependências/render; baixar/inspecionar MP4; depois definir contrato JSON para receber cenas do diretor Gemini. Não substituir FFmpeg nem alterar o app publicado antes dessa validação.
+- Licença consultada em 16/11/2026: a Free License cobre indivíduos para uso pessoal ou comercial e permite automações sem pagar por renderizações; custos de infraestrutura de renderização permanecem separados. A elegibilidade muda se o uso passar a ser feito por organização/equipe fora dos critérios gratuitos. Fontes oficiais: https://www.remotion.dev/docs/license/faq e https://www.remotion.dev/docs/terms.
