@@ -1215,3 +1215,12 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Alteração em `app.py`, commit `a8b5ac9`: substituído import nomeado `from nexus.audio import ...` por import de módulo `import nexus.audio as fish_audio`; chamadas passaram a usar `fish_audio.get_fish_voice(...)` e `fish_audio.make_voice(...)`. Isso elimina falha de import por símbolo ausente em versões antigas do módulo e deixa eventual incompatibilidade localizada na chamada.
 - Pós-commit, leitura do main confirmou: nenhum import nomeado de nexus.audio; import de módulo presente; referências às duas funções qualificadas no módulo.
 - Validação pendente: CI e reload/restart Streamlit. Se continuar falhando, precisamos obter logs completos porque o traceback curto não identifica a exceção raiz; não fazer nova alteração às cegas.
+
+## Fish Audio — correção de carregamento de vozes oficiais — 16/11/2026
+- Usuário confirmou que o Streamlit abre, mas a área de vozes mostra "Não foi possível carregar as vozes oficiais brasileiras da Fish Audio."
+- Causa provável encontrada no código: `get_fish_voice()` rejeitava qualquer modelo cujo campo `visibility` não fosse exatamente `public`. A documentação de modelo Fish Audio distingue `public`, `unlist` e `private`; vozes oficiais podem estar acessíveis por URL direta sem aparecer em busca pública. O código anterior rejeitava `unlist` como se fosse privado. Fonte de contexto: docs oficiais Fish Audio para GET /model/{id}; página oficial de voz Ricardo confirma modelo/descrição pt-BR.
+- Alterações em `nexus/audio.py`, commit `9bb4bf0`: agora aceita `public` e `unlist`, mas continua bloqueando `private`.
+- Alterações em `app.py`, commit `ab4e097`: se a lista em session_state estiver vazia, tenta novamente em vez de guardar o erro indefinidamente; registra falha individual por nome de voz e mostra diagnóstico curto em caption, em vez de engolir todos os erros.
+- Teste em `tests/test_audio.py`, commit `6dd71be`: novo teste garante aceitação de modelo `unlist`; teste existente continua rejeitando `private`.
+- Verificação pós-commit por leitura do main: condição de visibilidade permite public/unlist; private continua rejeitado; UI refaz tentativa se catálogo vazio e mostra diagnóstico; teste novo presente.
+- Estado: commits gravados e leitura estática conferida. Testes CI e carregamento real no Streamlit ainda pendentes. Não declarar resolvido até os quatro modelos aparecerem e amostras funcionarem.
