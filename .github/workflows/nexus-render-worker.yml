@@ -63,8 +63,8 @@ jobs:
           NEXUS_VOICE: ${{ inputs.voice }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_IMAGE_MODEL: "@cf/black-forest-labs/flux-1-schnell"
-          CLOUDFLARE_IMAGE_STEPS: "6"
+          CLOUDFLARE_IMAGE_MODEL: "@cf/black-forest-labs/flux-2-klein-4b"
+          CLOUDFLARE_IMAGE_STEPS: "4"
         run: python -m nexus.remote_render_job
 
       - name: Upload rendered MP4 and report
