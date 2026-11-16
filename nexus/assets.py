@@ -116,13 +116,15 @@ def search_video_sources(
     relevance_query=None,
     min_relevance=1.5,
 ):
-    """Search stock libraries, rejecting results with no scene-level text match."""
+    """Search stock libraries with strict matching, then a controlled semantic fallback."""
     errors = []
     excluded = set(exclude_urls or [])
-    variants = build_query_variants(query, max_variants=4)
+    variants = build_query_variants(query, max_variants=8)
     semantic_query = relevance_query if relevance_query is not None else query
+    query_terms = list(dict.fromkeys(_query_tokens(semantic_query)))
+    weak_candidates = []
 
-    def usable(results, source, search_query):
+    def rank_results(results, source, search_query):
         unique = []
         seen = set(excluded)
         for item in results:
@@ -133,36 +135,65 @@ def search_video_sources(
             item["matched_query"] = search_query
             item["source"] = item.get("source") or source
             unique.append(item)
-        ranked = rank_video_candidates(unique, semantic_query)
-        # Require at least two distinct scene terms when the query has two or
-        # more meaningful terms. A one-term query still needs that one match.
-        required_matches = min(2, len(_query_tokens(semantic_query)))
-        # Do not silently accept unrelated stock merely because the API
-        # returned something. Continue with shorter search variants instead.
+        return rank_video_candidates(unique, semantic_query)
+
+    def strict_matches(ranked):
+        required_matches = min(2, len(query_terms))
         return [
             item for item in ranked
             if item.get("_nexus_relevance", 0.0) >= float(min_relevance)
             and item.get("_nexus_match_count", 0) >= required_matches
         ]
 
+    def partial_matches(ranked):
+        # Last-resort recovery: accept a real match on one scene-specific term
+        # only after every strict query/source combination has been exhausted.
+        # Zero-overlap stock is never accepted.
+        if len(query_terms) < 2:
+            return []
+        return [
+            item for item in ranked
+            if item.get("_nexus_match_count", 0) >= 1
+            and item.get("_nexus_relevance", 0.0) >= 2.0
+        ]
+
+    sources = []
     if coverr_key:
-        for search_query in variants:
-            try:
-                results = search_coverr_videos(search_query, coverr_key, per_page)
-                ranked = usable(results, "Coverr", search_query)
-                if ranked:
-                    return ranked, errors
-            except requests.RequestException as exc:
-                errors.append(f'Coverr ({search_query}): {exc}')
+        sources.append(("Coverr", search_coverr_videos, coverr_key))
     if pixabay_key:
+        sources.append(("Pixabay", search_pixabay_videos, pixabay_key))
+
+    # First pass: require two distinct semantic matches whenever possible.
+    for source_name, search_fn, api_key in sources:
         for search_query in variants:
             try:
-                results = search_pixabay_videos(search_query, pixabay_key, per_page)
-                ranked = usable(results, "Pixabay", search_query)
-                if ranked:
-                    return ranked, errors
+                results = search_fn(search_query, api_key, per_page)
+                ranked = rank_results(results, source_name, search_query)
+                matches = strict_matches(ranked)
+                if matches:
+                    return matches, errors
+                weak_candidates.extend(partial_matches(ranked))
             except requests.RequestException as exc:
-                errors.append(f'Pixabay ({search_query}): {exc}')
+                errors.append(f"{source_name} ({search_query}): {exc}")
+
+    # Second pass: recover scenes for which stock metadata uses different
+    # wording. Keep a minimum one-term overlap with the actual scene request.
+    if weak_candidates:
+        deduplicated = {}
+        for item in weak_candidates:
+            url = item.get("url")
+            if url and url not in deduplicated:
+                deduplicated[url] = item
+        return sorted(
+            deduplicated.values(),
+            key=lambda item: (
+                item.get("_nexus_match_count", 0),
+                item.get("_nexus_relevance", 0.0),
+                *item.get("_nexus_quality", (0, 0, 0)),
+            ),
+            reverse=True,
+        ), errors
+
     return [], errors
 
 def download_file(url, destination):
