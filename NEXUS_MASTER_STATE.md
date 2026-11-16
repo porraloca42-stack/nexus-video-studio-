@@ -1353,3 +1353,13 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Smoke test integrado #2 validou a cadeia visual e muxagem de áudio sintético em 2s. Não confundir esse teste com a validação de uma produção editorial de 40–50s com narração Fish Audio.
 - O app aceita cenas de 2–5s; o adaptador Modal rejeita durações fora dessa faixa e processa todas as cenas num único batch. O worker de produção gera imagens, anima todas as cenas, sintetiza Fish Audio, ajusta áudio dentro de tolerância máxima de 15% e valida o MP4 final via FFprobe.
 - Próximo critério de liberação: um vídeo real de 40–50s, com voz Fish Audio selecionada, todas as cenas animadas e coerência audiovisual revisada. Registrar duração, custo, codecs, resolução e inspeção visual antes de declarar finalizado.
+
+
+## Catálogo manual de narrações — 16/11/2026
+- Usuário forneceu 40 IDs de modelos e definiu três grupos, preservados sem alteração: CapCut (14), ElevenLabs (4) e Licenciadas Fish (22).
+- Criado `nexus/voice_catalog.py` com os 40 IDs exatos na ordem recebida e classificação conservadora de gênero por metadados explícitos. Metadados ambíguos ou sem marcador ficam em `unknown`; não inferir gênero pelo nome de forma especulativa.
+- `nexus/audio.py` agora enriquece cada ID consultando `GET /model/{id}` na Fish Audio, em até 8 chamadas concorrentes. Falha/indisponibilidade de metadados não remove o ID do catálogo; a interface mantém o ID selecionável e sinaliza que os metadados não foram carregados. A validação de acesso/compatibilidade real de cada ID ainda depende da API autenticada.
+- `app.py` substitui a descoberta automática anterior por três grupos manuais, cada um subdividido em vozes masculinas, femininas e gênero não identificado. A seleção grava o ID original em `nexus_fish_voice_id`, que continua sendo passado ao pipeline Fish Audio como `reference_id`.
+- Testes adicionados para total/categorias/ordem dos IDs, classificação conservadora de gênero e preservação dos IDs após consulta de metadados.
+- Commits relacionados: `ff5f8da` (catálogo), `aca443f` (consulta de metadados), `6dc8f5d` (UI), `3b4d858` (testes), `26bc349` (fixture), `c33a3e2` (indentação), `11c60ee` (ajuste fixture).
+- Estado: código gravado no GitHub main. CI/checks, deploy Streamlit, resposta autenticada dos 40 IDs, audição das amostras e teste de síntese real com IDs selecionados ainda não foram confirmados. Não declarar catálogo validado até esses testes.
