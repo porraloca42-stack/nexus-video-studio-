@@ -154,7 +154,7 @@ class FishAudioTests(unittest.TestCase):
             )
             self.assertEqual(audio_path.read_bytes(), b"fish-mp3")
             srt = subtitle_path.read_text(encoding="utf-8")
-            self.assertIn("Olá mundo.", srt)
+            self.assertIn("Olá mundo.", " ".join(srt.splitlines()[2:]))
             self.assertIn("00:00:00,000 --> 00:00:00,900", srt)
         args, kwargs = session.calls[0]
         self.assertIn("/v1/tts/stream/with-timestamp", args[0])
