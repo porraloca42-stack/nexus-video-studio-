@@ -400,39 +400,39 @@ with col_preview:
                                 if not voices:
                                     st.caption("Nenhuma voz identificada nesta divisão.")
                                 for voice_option in voices:
-                                        voice_col, sample_col = st.columns([1.1, 1.5], vertical_alignment="center")
-                                        with voice_col:
-                                            is_selected = voice_option["id"] == st.session_state.get("nexus_fish_voice_id", "")
-                                            st.markdown(f"**{voice_option['title']}**")
-                                            st.caption(f"ID: {voice_option['id']}")
-                                            details = []
-                                            source_label = str(voice_option.get("source") or "").casefold()
-                                            if "pvc" in source_label:
-                                                details.append("Professional Voice Clone")
-                                            if voice_option.get("licensed"):
-                                                details.append("Licenciada pela Fish Audio")
-                                            if voice_option.get("author"):
-                                                details.append(voice_option["author"])
-                                            if details:
-                                                st.caption(" · ".join(details))
-                                            if voice_option.get("description"):
-                                                st.caption(voice_option["description"][:150])
-                                            if not voice_option.get("metadata_available"):
-                                                st.caption("Metadados indisponíveis; ID mantido conforme sua lista.")
-                                            if st.button(
-                                                "Selecionada" if is_selected else "Usar esta voz",
-                                                key=f"curated_voice_pick_{voice_option['id']}",
-                                                use_container_width=True,
-                                                type="primary" if is_selected else "secondary",
-                                            ):
-                                                st.session_state["nexus_fish_voice_id"] = voice_option["id"]
-                                                st.session_state["nexus_fish_voice_name"] = f"{category} · {voice_option['title']}"
-                                                st.rerun()
-                                        with sample_col:
-                                            if voice_option.get("sample_audio"):
-                                                st.audio(voice_option["sample_audio"], format="audio/mp3")
-                                            else:
-                                                st.caption("Amostra não publicada ou indisponível.")
+                                    voice_col, sample_col = st.columns([1.1, 1.5], vertical_alignment="center")
+                                    with voice_col:
+                                        is_selected = voice_option["id"] == st.session_state.get("nexus_fish_voice_id", "")
+                                        st.markdown(f"**{voice_option['title']}**")
+                                        st.caption(f"ID: {voice_option['id']}")
+                                        details = []
+                                        source_label = str(voice_option.get("source") or "").casefold()
+                                        if "pvc" in source_label:
+                                            details.append("Professional Voice Clone")
+                                        if voice_option.get("licensed"):
+                                            details.append("Licenciada pela Fish Audio")
+                                        if voice_option.get("author"):
+                                            details.append(voice_option["author"])
+                                        if details:
+                                            st.caption(" · ".join(details))
+                                        if voice_option.get("description"):
+                                            st.caption(voice_option["description"][:150])
+                                        if not voice_option.get("metadata_available"):
+                                            st.caption("Metadados indisponíveis; ID mantido conforme sua lista.")
+                                        if st.button(
+                                            "Selecionada" if is_selected else "Usar esta voz",
+                                            key=f"curated_voice_pick_{voice_option['id']}",
+                                            use_container_width=True,
+                                            type="primary" if is_selected else "secondary",
+                                        ):
+                                            st.session_state["nexus_fish_voice_id"] = voice_option["id"]
+                                            st.session_state["nexus_fish_voice_name"] = f"{category} · {voice_option['title']}"
+                                            st.rerun()
+                                    with sample_col:
+                                        if voice_option.get("sample_audio"):
+                                            st.audio(voice_option["sample_audio"], format="audio/mp3")
+                                        else:
+                                            st.caption("Amostra não publicada ou indisponível.")
         voice = st.session_state.get("nexus_fish_voice_id", "")
 
 if st.button("Planejar vídeo", type="primary", use_container_width=True):
