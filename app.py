@@ -1,4 +1,4 @@
-import base64, json, os, subprocess, tempfile
+import base64, json, os, shutil, subprocess, tempfile
 from pathlib import Path
 import streamlit as st
 from nexus.director import create_storyboard, validate_storyboard
@@ -365,8 +365,16 @@ if "nexus_plan" in st.session_state:
                     final_video = next((item for item in final_streams if item.get("codec_type") == "video"), None)
                     final_audio = next((item for item in final_streams if item.get("codec_type") == "audio"), None)
                     final_duration = float(final_metadata.get("format", {}).get("duration") or 0)
+                    expected_duration = sum(float(scene["duration_seconds"]) for scene in plan["scenes"])
                     if not final_video or not final_audio or final_duration <= 0 or output.stat().st_size == 0:
                         raise RuntimeError("O MP4 final não contém vídeo e áudio válidos.")
+                    if final_video.get("width") != 720 or final_video.get("height") != 1280:
+                        raise RuntimeError("O MP4 final não está no formato vertical esperado de 720×1280.")
+                    if abs(final_duration - expected_duration) > 0.75:
+                        raise RuntimeError(
+                            f"O MP4 final ficou com {final_duration:.1f}s; "
+                            f"o storyboard exige {expected_duration:.1f}s."
+                        )
                     video_bytes = output.read_bytes()
                     st.session_state["nexus_rendered_video"] = video_bytes
                     st.session_state["nexus_rendered_filename"] = "nexus_video.mp4"
@@ -379,11 +387,14 @@ if "nexus_plan" in st.session_state:
                         "size_mb": len(video_bytes) / (1024 * 1024),
                         "scene_count": len(media),
                     }
-                    st.session_state["nexus_rendered_workdir"] = str(work)
                     progress.progress(1.0, text="Vídeo produzido e validado.")
                     st.success("Vídeo MP4 produzido. Áudio, vídeo e integridade do arquivo foram verificados.")
             except Exception as exc:
-                st.exception(exc)
+                st.error(f"Produção interrompida: {exc}")
+            finally:
+                # The MP4 bytes are retained in session_state; temporary source
+                # clips and audio are no longer needed after this run.
+                shutil.rmtree(work, ignore_errors=True)
 
 if st.session_state.get("nexus_rendered_video"):
     info = st.session_state.get("nexus_rendered_info", {})
