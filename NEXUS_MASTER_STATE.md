@@ -892,3 +892,57 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Testes adicionados para trio temporal válido e grupos incompletos.
 - Limite: três amostras não equivalem a análise quadro a quadro nem medem optical flow/lip-sync. A revisão segue consultiva e depende da disponibilidade do Gemini.
 - Estado: alteração gravada no GitHub; CI e render real ainda precisam confirmar comportamento e custo/latência da auditoria.
+
+
+## Continuidade para novo chat — estado consolidado em 16/11/2026
+Este bloco é a referência mais recente para continuar o trabalho. Em caso de conflito com trechos históricos abaixo, priorizar as decisões e o estado descritos aqui e conferir o código atual na branch `main`.
+
+### Decisões de produto confirmadas pelo usuário
+- Prioridade absoluta: resultado audiovisual para TikTok, com vídeo forte e narração natural.
+- Não gerar legendas, SRT ou texto de legenda no MP4. O usuário adiciona legendas manualmente no editor final.
+- Manter um estilo visual consistente dentro de cada vídeo, mas variar cenas, pessoas, ambientes, ações, enquadramentos e fontes de mídia. Consistência estética não deve virar repetição de imagens.
+- Preferir vídeos reais de bibliotecas quando fizerem sentido; avaliar a qualidade e adequação para o resultado do TikTok, não apenas a facilidade técnica.
+- Não ativar geração de vídeo IA paga nem consumir créditos sem autorização explícita.
+- NEXUS deve ser genérico; não presumir que todo vídeo usa Gabriel/personagem fixo.
+- O assistente é responsável por pesquisa, estratégia, engenharia, direção e validação. O usuário não deve ser instruído a programar.
+
+### Pesquisa e direção audiovisual acordadas
+- Benchmark público de Revid AI, AutoShorts e Pictory sugere valor em pipeline integrado: roteiro, cenas específicas, fontes visuais variadas, seleção por cena, edição, som e análise. Materiais dos fornecedores são marketing público, não prova de algoritmo proprietário nem garantia de visualizações.
+- Estratégia aprovada: narração guia a história; cada cena deve corresponder à fala; identidade estética consistente com variedade real de conteúdo; cortes e duração definidos pela progressão narrativa; evitar slideshows, colagens, stock genérico e zoom repetitivo.
+- Roadmap: melhorar direção por cena; elevar qualidade e diversidade de busca/seleção de mídia; evoluir montagem e ritmo; acrescentar sound design após validar fontes/licenças; fortalecer auditoria audiovisual.
+
+### Alterações técnicas mais recentes gravadas em main
+- `a87495a`: `nexus/render.py` passa a preservar movimento nativo dos clipes de biblioteca por padrão (`camera_motion="preserve"`), sem aplicar `zoompan` artificial a cada cena.
+- `b478217`: `app.py` envia explicitamente `camera_motion="preserve"` para clipes de bancos de vídeo.
+- `cdfa798`: teste de regressão confirma que o modo padrão não inclui `zoompan` e mantém o recorte vertical.
+- `a44c0d8`: `nexus/visual_review.py` extrai três quadros por cena (20%, 50%, 80%) para a auditoria do MP4 e os agrupa em sequência temporal para Gemini. Mantém compatibilidade com um quadro por cena.
+- `0525fa6`: testes para grupo temporal válido e grupo incompleto.
+- `9469818` e `ffd67f3`: atualização deste registro e correção do resumo arquitetural para refletir o pipeline real.
+- A revisão temporal pode apontar progressão/repetição e aderência semântica, mas três quadros não são análise quadro a quadro, não calculam optical flow e não validam lip-sync. A auditoria continua consultiva; não regenera automaticamente cenas ruins.
+
+### Arquitetura ativa verificada
+- Opção de produção por bibliotecas no Streamlit: `app.py` + `nexus/assets.py` + `nexus/render.py` (FFmpeg).
+- Remotion/Cloudflare é um caminho alternativo via worker, não confundir com o render FFmpeg principal da opção de bibliotecas.
+- Gemini dirige roteiro/storyboard e faz revisão visual; Fish Audio S2.1 Pro Free é o TTS primário quando configurado, Edge TTS é fallback.
+- A seleção de candidatos já faz busca multi-fonte, shortlist diversa e revisão visual com dois quadros por candidato; verificar a implementação atual antes de expandir, para não duplicar mecanismos existentes.
+- Fontes: Wikimedia Commons sem chave; Pixabay/Pexels dependem de configuração e validação de credenciais/licenças. Não declarar Coverr ativo/validado.
+- O render preserva movimento de filmagem; ainda é necessário avaliar variedade real das cenas, ritmo, enquadramento, continuidade, qualidade de áudio e adequação ao formato TikTok.
+
+### Estado de validação — não confundir etapas
+- Código: alterações acima gravadas na branch `main`; commits confirmados por leitura no GitHub.
+- Testes: foram adicionados testes de regressão. A consulta de status/checks para os commits recentes retornou lista vazia; portanto, não há confirmação disponível nessa consulta de que CI executou ou passou. Executar/consultar CI antes de declarar testes aprovados.
+- Deploy: atualização do Streamlit publicado não confirmada.
+- Integração real: ainda não confirmadas nesta sequência uma chamada Gemini de auditoria temporal em MP4 publicado, nem produção Fish real.
+- Validação audiovisual: ainda falta produzir e inspecionar um MP4 real de 40–50s, ouvir a narração e assistir às cenas em sequência. Não declarar NEXUS ponta a ponta concluído antes disso.
+
+### Próximos passos prioritários
+1. Consultar workflow/CI e executar a suíte de testes; corrigir falhas antes de avançar.
+2. Verificar se o Streamlit publicado carregou os commits (usar marcador de build se necessário).
+3. Produzir um MP4 real de 40–50s no fluxo de bibliotecas, sem legendas, e inspecionar vídeo e áudio.
+4. Avaliar criticamente variedade de bibliotecas, correspondência fala-imagem, movimento, enquadramento vertical, cortes e repetição. Se a seleção de mídia não for boa, melhorar ranking/shortlist e cobertura das fontes sem inventar provedores nem pressupor credenciais.
+5. Validar a auditoria de três quadros no MP4 real e seu custo/latência.
+6. Só depois avançar para ritmo editorial variável e sound design (música, ambientes, efeitos e ducking), respeitando licenças e sem prejudicar a voz.
+7. Atualizar este arquivo após cada etapa com commit, testes executados, resultado, limitações e o que falta.
+
+### Instrução para iniciar no próximo chat
+Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo os arquivos/commits mais recentes de `main`. Não pedir ao usuário para repetir o contexto. Informar que o registro preserva decisões e estado técnico, mas não prometer memória literal de todas as mensagens do chat anterior. Continuar do próximo passo prioritário, sem reabrir decisões já aprovadas.
