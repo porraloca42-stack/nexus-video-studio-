@@ -117,6 +117,7 @@ class AudioOutputTests(unittest.TestCase):
         self.assertEqual(kwargs["headers"]["model"], "s2.1-pro-free")
         self.assertEqual(kwargs["headers"]["Authorization"], "Bearer test-key")
         self.assertEqual(kwargs["json"]["reference_id"], "voice-123")
+        self.assertEqual(kwargs["json"]["language"], "pt-BR")
 
     def test_narration_requires_fish_credentials_and_never_uses_edge_tts(self):
         with tempfile.TemporaryDirectory(prefix="nexus_fish_required_") as temp:
