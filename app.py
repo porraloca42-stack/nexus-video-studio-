@@ -167,7 +167,7 @@ with settings_col2:
     voice = st.selectbox("Voz da narração", ["pt-BR-AntonioNeural", "pt-BR-FranciscaNeural", "pt-BR-ThalitaNeural"], format_func=lambda value: {"pt-BR-AntonioNeural":"Antônio · Masculina", "pt-BR-FranciscaNeural":"Francisca · Feminina", "pt-BR-ThalitaNeural":"Thalita · Feminina"}[value])
 
 with st.expander("Ferramentas avançadas · diagnóstico da biblioteca Coverr"):
-    st.caption("Build do aplicativo: NEXUS-2026.11.16-asset-recovery-1 · se esta identificação não aparecer, o Streamlit ainda está servindo uma versão anterior.")
+    st.caption("Build do aplicativo: NEXUS-2026.11.16-multi-source-1 · se esta identificação não aparecer, o Streamlit ainda está servindo uma versão anterior.")
     st.caption("Ferramenta técnica para verificar a conexão e o download interno. Não é necessária para planejar ou produzir um vídeo.")
     if st.button("Testar conexão e download Coverr", type="secondary"):
         coverr_key = secret("COVERR_API_KEY")
@@ -286,10 +286,11 @@ if "nexus_plan" in st.session_state:
     if st.button("Produzir vídeo completo", type="primary", use_container_width=True):
         coverr_key = secret("COVERR_API_KEY")
         pixabay_key = secret("PIXABAY_API_KEY")
+        pexels_key = secret("PEXELS_API_KEY")
         if st.session_state.get("nexus_errors"):
             st.error("O storyboard precisa ser corrigido antes da produção.")
-        elif not coverr_key and not pixabay_key:
-            st.error("Conecte uma fonte de vídeos: COVERR_API_KEY ou PIXABAY_API_KEY.")
+        elif not coverr_key and not pixabay_key and not pexels_key:
+            st.error("Conecte pelo menos uma fonte: COVERR_API_KEY, PIXABAY_API_KEY ou PEXELS_API_KEY.")
         else:
             st.session_state.pop("nexus_rendered_video", None)
             st.session_state.pop("nexus_rendered_info", None)
@@ -307,6 +308,7 @@ if "nexus_plan" in st.session_state:
                         primary_query,
                         coverr_key,
                         pixabay_key,
+                        pexels_key=pexels_key,
                         exclude_urls=used_asset_urls,
                         relevance_query=scene["asset_search_query"],
                     )
@@ -315,6 +317,7 @@ if "nexus_plan" in st.session_state:
                             fallback_query,
                             coverr_key,
                             pixabay_key,
+                            pexels_key=pexels_key,
                             exclude_urls=used_asset_urls,
                             relevance_query=scene.get("fallback_search_query", scene["asset_search_query"]),
                         )
