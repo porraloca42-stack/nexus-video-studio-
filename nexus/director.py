@@ -653,8 +653,9 @@ Busca visual solicitada: {scene.get('asset_search_query', '')}
 REGRA DE DECISÃO, SEM EXCEÇÕES:
 1. A maior prioridade é a correspondência REAL com a narração e a ação desta cena. Escolha o vídeo que melhor mostra o que está sendo dito, mesmo que outro seja mais bonito ou tenha estética mais atraente.
 2. Estilo visual é critério secundário: entre candidatos com conexão narrativa semelhante, prefira o que respeita melhor o estilo bloqueado. Nunca escolha um vídeo de baixa conexão narrativa apenas por combinar com o estilo.
-3. Qualidade técnica (resolução, enquadramento e nitidez) é critério terciário, usado para desempate entre candidatos semanticamente equivalentes.
+3. Qualidade técnica é critério terciário: prefira vídeo vertical e enquadramento mais próximo de 9:16 (0,5625), depois resolução e nitidez. Não escolha paisagem horizontal se houver candidato vertical semanticamente equivalente.
 4. Avalie TODOS os candidatos juntos e compare os quadros reais, não apenas títulos, tags ou descrições. Pontue separadamente a conexão com narração/ação (semantic_match, 0–100) e a aderência ao estilo (style_match, 0–100). Escolha o maior semantic_match; use style_match apenas como desempate. confidence deve refletir a conexão semântica, não a beleza geral.
+5. O vídeo final será 9:16 (720×1280). Avalie se o conteúdo principal permanece legível e bem composto em corte vertical; evite candidatos cuja ação principal ficaria fora do quadro.
 Não aceite apenas semelhança de cor, clima, emoção ou estética. Natureza genérica, água, paisagem, copos, prédios ou pessoas aleatórias NÃO representam automaticamente conceitos abstratos. Se nenhum candidato tiver relação visual direta e suficiente com a fala, selecione 0. Não invente correspondência. Aprove somente com confidence mínima de {int(minimum_confidence)}.
 Retorne somente JSON: {{"selected_candidate":1,"semantic_match":88,"style_match":72,"confidence":88,"reason":"..."}}.
 Os números dos candidatos aparecem imediatamente antes de seus quadros."""
@@ -665,7 +666,9 @@ Os números dos candidatos aparecem imediatamente antes de seus quadros."""
         parts.append({"text": (
             f"CANDIDATO {index} | Biblioteca: {candidate.get('source', 'desconhecida')} | "
             f"Título/tags: {candidate.get('title', '')} | "
-            f"Descrição: {candidate.get('description', '')}"
+            f"Descrição: {candidate.get('description', '')} | "
+            f"Dimensões: {candidate.get('width', 0)}×{candidate.get('height', 0)} | "
+            f"Proporção: {candidate.get('_nexus_aspect_ratio', 'desconhecida')}"
         )})
         for frame_path in entry.get("frame_paths", []):
             frame = Path(frame_path)
