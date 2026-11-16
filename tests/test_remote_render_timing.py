@@ -1,33 +1,50 @@
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
-from nexus.remote_render_job import _retime_srt
+from nexus.remote_render_job import _fit_narration_to_timeline
 
 
 class RemoteRenderTimingTests(unittest.TestCase):
-    def test_retimes_subtitle_cues_with_audio_factor(self):
+    def test_adjusts_audio_timing_without_creating_or_retiming_subtitles(self):
         with tempfile.TemporaryDirectory() as temp:
-            source = Path(temp) / "captions.srt"
-            target = Path(temp) / "captions_synced.srt"
-            source.write_text(
-                "1\n00:00:01,000 --> 00:00:02,000\nOlá\n",
-                encoding="utf-8",
-            )
-            _retime_srt(source, target, 0.885)
-            result = target.read_text(encoding="utf-8")
-            self.assertIn("00:00:01,130 --> 00:00:02,260", result)
+            audio = Path(temp) / "narration.mp3"
+            adjusted = audio.with_name("narration_synced.mp3")
+            audio.write_bytes(b"original-audio")
+            calls = []
 
-    def test_preserves_multiple_subtitle_timestamps(self):
+            class Result:
+                returncode = 0
+                stderr = ""
+                def __init__(self, stdout=""):
+                    self.stdout = stdout
+
+            def run(command, **kwargs):
+                calls.append(command)
+                if command[0] == "ffprobe":
+                    return Result("52.0\n" if len(calls) == 1 else "50.0\n")
+                adjusted.write_bytes(b"synced-audio")
+                return Result()
+
+            with patch("nexus.remote_render_job.subprocess.run", side_effect=run):
+                duration = _fit_narration_to_timeline(audio, 50.0)
+
+            self.assertEqual(duration, 50.0)
+            self.assertEqual(audio.read_bytes(), b"synced-audio")
+            self.assertFalse(audio.with_suffix(".srt").exists())
+            self.assertEqual(len(calls), 3)
+
+    def test_rejects_large_audio_timing_mismatch(self):
         with tempfile.TemporaryDirectory() as temp:
-            source = Path(temp) / "captions.srt"
-            target = Path(temp) / "captions_synced.srt"
-            source.write_text(
-                "1\n00:00:10,000 --> 00:00:12,000\nCena\n",
-                encoding="utf-8",
-            )
-            _retime_srt(source, target, 0.90)
-            self.assertIn("00:00:11,111 --> 00:00:13,333", target.read_text(encoding="utf-8"))
+            audio = Path(temp) / "narration.mp3"
+            audio.write_bytes(b"audio")
+            class Result:
+                returncode = 0
+                stdout = "60.0\n"
+            with patch("nexus.remote_render_job.subprocess.run", return_value=Result()):
+                with self.assertRaisesRegex(RuntimeError, "excede a faixa segura"):
+                    _fit_narration_to_timeline(audio, 50.0)
 
 
 if __name__ == "__main__":
