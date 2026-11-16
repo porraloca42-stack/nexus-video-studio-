@@ -107,7 +107,7 @@ def generate_fish_preview(api_key, voice_id, *, text=FISH_VOICE_TEXT, session=No
             "reference_id": voice_id,
             "format": "mp3",
             "normalize": True,
-            "language": "pt",
+            "language": "pt-BR",
         },
         timeout=(20, 120),
     )
@@ -131,7 +131,7 @@ def _make_fish_voice(text, output, api_key, voice_id, session=None):
         "sample_rate": 44100,
         "mp3_bitrate": 128,
         "normalize": True,
-        "language": "pt",
+        "language": "pt-BR",
         "temperature": 0.72,
         "top_p": 0.75,
         "chunk_length": 300,
