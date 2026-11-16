@@ -1,4 +1,4 @@
-import base64, json, os, shutil, subprocess, tempfile, inspect
+import base64, json, os, shutil, subprocess, tempfile, inspect, importlib
 from pathlib import Path
 import requests
 import streamlit as st
@@ -223,7 +223,7 @@ div[data-testid="stTextArea"] textarea,div[data-testid="stSelectbox"] div[data-b
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="nexus-hero"><div class="nexus-brand">NEXUS VIDEO STUDIO</div><div class="nexus-tagline">Transforme seu roteiro em vídeo</div></div>', unsafe_allow_html=True)
-st.caption("Versão: NEXUS-2026.11.16-narration-first-selection-2")
+st.caption("Versão: NEXUS-2026.11.16-runtime-review-auth-diagnostics-1")
 
 if "nexus_style" not in st.session_state or st.session_state["nexus_style"] not in STYLE_OPTIONS:
     st.session_state["nexus_style"] = "Cinematográfico realista"
@@ -460,6 +460,10 @@ if "nexus_plan" in st.session_state:
                 media, missing = [], []
                 used_asset_urls = set()
                 progress = st.progress(0, text="Preparando cenas...")
+                # Streamlit workers may retain a previously imported module after
+                # a partial hot reload. Refresh the director before visual review.
+                import nexus.director as director_module
+                director_module = importlib.reload(director_module)
                 for i, scene in enumerate(plan["scenes"]):
                     progress.progress((i + 1) / (len(plan["scenes"]) + 2), text=f"Buscando clipe para a cena {i + 1}/{len(plan['scenes'])}...")
                     style_terms = scene.get("style_search_terms", "")
@@ -538,8 +542,7 @@ if "nexus_plan" in st.session_state:
                         text=f"IA avaliando a correspondência visual da cena {i + 1}/{len(plan['scenes'])}...",
                     )
                     try:
-                        from nexus.director import review_visual_candidates
-                        visual_review = review_visual_candidates(scene, reviewed_candidates, secret)
+                        visual_review = director_module.review_visual_candidates(scene, reviewed_candidates, secret)
                     except Exception as review_error:
                         missing.append({
                             "scene": i + 1,
@@ -602,7 +605,7 @@ if "nexus_plan" in st.session_state:
                             st.markdown(f"**Cena {item['scene']}**")
                             st.caption("Busca de conteúdo: " + item["query"])
                             st.caption("Estilo solicitado: " + (item.get("style") or "não informado"))
-                            st.caption("Bibliotecas consultadas: " + (", ".join(item.get("sources", [])) or "nenhuma"))
+                            st.caption("Bibliotecas configuradas/consultadas: " + (", ".join(item.get("sources") or configured_libraries) or "nenhuma — configure as chaves das APIs"))
                             if item["fallback"]:
                                 st.caption("Busca alternativa: " + item["fallback"])
                             if item["errors"]:
