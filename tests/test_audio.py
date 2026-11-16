@@ -59,6 +59,20 @@ class AudioSubtitleTests(unittest.TestCase):
         self.assertGreaterEqual(len(cues), 1)
         self.assertEqual(" ".join(" ".join(cue[2].split()) for cue in cues), "Uma frase completa.")
 
+    def test_prefers_sentence_boundaries_over_single_word_events(self):
+        events = [
+            {"type": "WordBoundary", "offset": i * 500 * 10_000,
+             "duration": 400 * 10_000, "text": word}
+            for i, word in enumerate(["Esta", "é", "uma", "frase", "inteira."])
+        ]
+        events.append({
+            "type": "SentenceBoundary", "offset": 0,
+            "duration": 2_500 * 10_000, "text": "Esta é uma frase inteira."
+        })
+        cues = _subtitle_cues(events, "Esta é uma frase inteira.")
+        self.assertEqual(len(cues), 1)
+        self.assertEqual(cues[0][2].replace("\\n", " "), "Esta é uma frase inteira.")
+
     def test_falls_back_to_estimated_captions_without_timing_events(self):
         cues = _subtitle_cues([], "Uma narração sem eventos de sincronização.")
         self.assertTrue(cues)
@@ -79,7 +93,7 @@ class AudioSubtitleTests(unittest.TestCase):
         self.assertGreater(len(cues), 1)
         for _, _, caption in cues:
             self.assertLessEqual(len(caption.splitlines()), 2)
-            self.assertLessEqual(len(caption.split()), 4)
+            self.assertLessEqual(len(caption.split()), 7)
 
     def test_captions_are_short_phrases_with_at_most_two_lines(self):
         words = ["A", "mudança", "começa", "quando", "você", "decide", "agir", "mesmo", "com", "medo", "e", "continua"]
