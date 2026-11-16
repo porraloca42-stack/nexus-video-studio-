@@ -1,5 +1,33 @@
+import re
 import requests
 from pathlib import Path
+
+_STOPWORDS = {
+    "a", "an", "the", "and", "or", "of", "to", "in", "on", "at", "by",
+    "with", "from", "for", "over", "under", "into", "through", "during",
+    "person", "people", "man", "woman", "someone", "cinematic", "wide",
+    "shot", "footage", "video", "realistic", "beautiful", "professional",
+    "showing", "shows", "scene", "close", "up"
+}
+
+def build_query_variants(query, max_variants=4):
+    original = re.sub(r"\\s+", " ", str(query or "")).strip()
+    if not original:
+        return []
+    variants = [original]
+    words = re.findall(r"[a-zA-Z0-9]+", original.lower())
+    keywords = [word for word in words if word not in _STOPWORDS and len(word) > 2]
+    compact = " ".join(keywords[:4])
+    if compact and compact.lower() not in {item.lower() for item in variants}:
+        variants.append(compact)
+    # Relax long prompts into concrete adjacent concepts rather than broad generic searches.
+    for index in range(max(0, len(keywords) - 1)):
+        pair = " ".join(keywords[index:index + 2])
+        if pair and pair.lower() not in {item.lower() for item in variants}:
+            variants.append(pair)
+        if len(variants) >= max_variants:
+            break
+    return variants[:max_variants]
 
 def search_coverr_videos(query, api_key, per_page=20):
     response = requests.get('https://api.coverr.co/videos', headers={'x-api-key': api_key}, params={'query': query, 'page': 0, 'page_size': per_page, 'urls': 'true'}, timeout=45)
@@ -34,20 +62,27 @@ def search_pixabay_videos(query, api_key, per_page=20):
 
 def search_video_sources(query, coverr_key='', pixabay_key='', per_page=20):
     errors = []
+    variants = build_query_variants(query)
     if coverr_key:
-        try:
-            results = search_coverr_videos(query, coverr_key, per_page)
-            if results:
-                return results, errors
-        except requests.RequestException as exc:
-            errors.append('Coverr: ' + str(exc))
+        for search_query in variants:
+            try:
+                results = search_coverr_videos(search_query, coverr_key, per_page)
+                if results:
+                    for item in results:
+                        item['matched_query'] = search_query
+                    return results, errors
+            except requests.RequestException as exc:
+                errors.append(f'Coverr ({search_query}): {exc}')
     if pixabay_key:
-        try:
-            results = search_pixabay_videos(query, pixabay_key, per_page)
-            if results:
-                return results, errors
-        except requests.RequestException as exc:
-            errors.append('Pixabay: ' + str(exc))
+        for search_query in variants:
+            try:
+                results = search_pixabay_videos(search_query, pixabay_key, per_page)
+                if results:
+                    for item in results:
+                        item['matched_query'] = search_query
+                    return results, errors
+            except requests.RequestException as exc:
+                errors.append(f'Pixabay ({search_query}): {exc}')
     return [], errors
 
 def download_file(url, destination):
