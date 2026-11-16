@@ -404,3 +404,12 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Build `NEXUS-2026.11.16-narration-first-selection-2`.
 - A atualização documental mais recente (run #156) ainda estava na fila no momento deste registro.
 - Estado operacional: código e testes validados; implantação Streamlit não confirmada; produção e validação de novo MP4 pendentes. O usuário deve atualizar/reabrir o app após o deploy automático do GitHub e confirmar o build visível antes da nova produção.
+
+
+### Diagnóstico de falha real em produção e robustez de runtime — 16/11/2026
+- Evidência do usuário: todas as cenas falharam na revisão visual com `name 'Path' is not defined`; Coverr retornou HTTP 403 Forbidden nas consultas. O painel também mostrava incorretamente “Bibliotecas consultadas: nenhuma”, porque alguns ramos de falha não preenchiam o campo `sources`.
+- Revisão do repositório confirmou que `nexus/director.py` contém `from pathlib import Path`, mas o worker Streamlit em execução não tinha esse símbolo no módulo carregado. A hipótese operacional mais provável é módulo antigo retido em cache/hot reload parcial; a captura não permite provar a causa interna exata.
+- Correção incremental: antes da produção, recarregar explicitamente `nexus.director` no worker e usar o módulo recarregado para a revisão visual; diagnóstico passa a mostrar as bibliotecas configuradas mesmo em falhas de download/revisão.
+- Busca: erros HTTP 401/403 agora interrompem novas variantes na biblioteca afetada, preservam a tentativa nas demais fontes e exibem orientação para verificar chave/permissões, evitando chamadas repetidas inúteis.
+- Build proposto: `NEXUS-2026.11.16-runtime-review-auth-diagnostics-1`.
+- Estado: alterações preparadas para CI; ainda não implantadas nem validadas com nova produção. O HTTP 403 do Coverr permanece dependente de conferir a chave/permissão configurada; não foi possível validar segredo do Streamlit a partir do repositório.
