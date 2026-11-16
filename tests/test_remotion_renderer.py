@@ -40,6 +40,18 @@ class RemotionManifestTests(unittest.TestCase):
             self.assertTrue((public / "jobs/test/narration.mp3").is_file())
             self.assertEqual(json.loads(manifest_path.read_text())["title"], "Teste NEXUS")
 
+    def test_preserves_wav_extension_for_generated_narration(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            audio = root / "voice.wav"
+            audio.write_bytes(b"fake-wav")
+            plan = {"scenes": [{"duration_seconds": 2, "voiceover": "Teste."}]}
+            _, manifest = build_remotion_manifest(
+                plan, [], audio, None, root / "public", job_id="wav"
+            )
+            self.assertEqual(manifest["narrationAudio"], "jobs/wav/narration.wav")
+            self.assertTrue((root / "public/jobs/wav/narration.wav").is_file())
+
     def test_graphic_scene_without_stock_asset(self):
         with tempfile.TemporaryDirectory() as temp:
             plan = {"scenes": [{"duration_seconds": 3, "voiceover": "Ideia."}]}
