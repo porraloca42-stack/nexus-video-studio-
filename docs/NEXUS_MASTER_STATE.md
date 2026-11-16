@@ -48,7 +48,9 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Após a criação de nexus/__init__.py, o usuário confirmou em 2026-11-16 que a aplicação abre normalmente no Streamlit.
 - Captura dos logs mostra atualização do app concluída (Updated app!). A inicialização está confirmada visualmente pelo usuário; não há confirmação independente de execução do pipeline.
 - app.py importa search_video_sources, search_coverr_videos e download_file de nexus.assets.
-- O usuário executou “Testar conexão Coverr” e confirmou em captura que a API respondeu com sucesso e retornou cinco clipes, incluindo um vertical 1080×1920 e quatro horizontais. Portanto, autenticação e busca Coverr estão TESTADAS no ambiente publicado. Isso ainda não valida download, integridade do arquivo nem renderização.
+- O usuário executou o diagnóstico Coverr e confirmou em captura que a API respondeu com sucesso e retornou cinco clipes, incluindo um vertical. Autenticação e busca estão TESTADAS no ambiente publicado.
+- O usuário executou o download interno e confirmou em captura que o servidor recebeu e validou um MP4: H.264, 606×1080, 8 segundos, 4,65 MB. Download servidor→arquivo e leitura FFprobe estão TESTADOS. O arquivo ficou em diretório temporário do servidor e foi descartado ao fim do teste; não houve download para o celular, nem isso era o objetivo do diagnóstico.
+- A interface foi ajustada para explicar explicitamente que o teste baixa o clipe temporariamente no servidor. O NEXUS deve entregar ao usuário apenas o MP4 final renderizado.
 - A busca de diagnóstico usou “nature landscape”, mas um título retornado (“Astonished Crowd Beneath a Giant Hand”) parece pouco relacionado; relevância semântica da busca ainda precisa ser melhorada.
 - A primeira implementação do botão de download ficou inacessível porque os resultados não eram persistidos em session_state após o rerun do Streamlit; o usuário reportou corretamente que não havia botão. Corrigido em 2026-11-16: um único botão “Testar Coverr: buscar e baixar clipe” agora executa busca, escolhe primeiro candidato vertical, baixa internamente em diretório temporário e valida faixa de vídeo, resolução, codec, duração e tamanho via FFprobe. Não solicita download manual ao usuário. Código publicado; aguarda teste real.
 - nexus/assets.py contém search_coverr_videos, search_pixabay_videos, search_video_sources e download_file.
@@ -58,12 +60,13 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 ## Próximas etapas obrigatórias
 1. CONCLUÍDO: usuário confirmou que a interface Streamlit abre normalmente após o commit que adicionou nexus/__init__.py.
 2. CONCLUÍDO: autenticação e busca Coverr testadas com sucesso pelo usuário; cinco resultados retornados.
-3. PRÓXIMO: usuário executar “Testar Coverr: buscar e baixar clipe”; confirmar download interno e metadados via FFprobe.
-4. Se necessário, concluir Pixabay como fallback somente quando a chave estiver disponível; Pexels permanece fora do escopo enquanto a emissão de chaves estiver indisponível.
-5. Criar busca multi-fonte por cena com ranking de candidatos.
-6. Implementar avaliação multimodal dos clipes para verificar correspondência com a narração.
-7. Renderizar primeiro MP4 real de 40–50s, inspecionar qualidade e só então declarar o pipeline validado.
-8. Avaliar MCP oficial do Coverr depois de validar a integração REST básica.
+3. CONCLUÍDO: download interno Coverr e validação FFprobe confirmados pelo usuário (H.264, 606×1080, 8 s, 4,65 MB).
+4. PRÓXIMO: validar o fluxo completo de produção — roteiro, seleção de clipes, narração, legendas, renderização FFmpeg e disponibilização do MP4 final ao usuário.
+5. Melhorar busca semântica e ranking por cena; não selecionar automaticamente o primeiro resultado sem avaliar correspondência.
+6. Implementar avaliação multimodal dos candidatos para verificar correspondência com a narração.
+7. Renderizar o primeiro MP4 real de 40–50s, inspecionar qualidade e validar entrega do arquivo final.
+8. Considerar Pixabay como fallback quando a chave estiver disponível; Pexels permanece fora do escopo enquanto a emissão de chaves estiver indisponível.
+9. Avaliar MCP oficial do Coverr somente se trouxer vantagem após validar a integração REST.
 
 ## Regras para o assistente em novos chats
 - Começar lendo este arquivo e o código relevante no GitHub antes de propor mudanças.
