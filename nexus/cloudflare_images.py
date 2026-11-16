@@ -12,7 +12,8 @@ from pathlib import Path
 import requests
 
 
-DEFAULT_MODEL = "@cf/black-forest-labs/flux-1-schnell"
+DEFAULT_MODEL = "@cf/black-forest-labs/flux-2-klein-4b"
+VERTICAL_MODEL = "@cf/black-forest-labs/flux-2-klein-4b"
 API_URL = "https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/run/{model}"
 
 
@@ -27,7 +28,9 @@ def generate_image(
     account_id=None,
     api_token=None,
     model=None,
-    steps=6,
+    steps=4,
+    width=512,
+    height=910,
     timeout=180,
     session=None,
 ):
@@ -41,17 +44,32 @@ def generate_image(
         )
     if not isinstance(prompt, str) or not prompt.strip():
         raise ValueError("O prompt da imagem não pode ficar vazio.")
-    if not 1 <= int(steps) <= 8:
-        raise ValueError("FLUX.1-schnell aceita de 1 a 8 steps neste adaptador.")
-
     client = session or requests
     url = API_URL.format(account_id=account_id, model=model)
-    response = client.post(
-        url,
-        headers={"Authorization": f"Bearer {api_token}"},
-        json={"prompt": prompt.strip(), "steps": int(steps)},
-        timeout=timeout,
-    )
+    headers = {"Authorization": f"Bearer {api_token}"}
+    if model == VERTICAL_MODEL:
+        if not 256 <= int(width) <= 1920 or not 256 <= int(height) <= 1920:
+            raise ValueError("A resolução de imagem deve ficar entre 256 e 1920 pixels.")
+        # FLUX.2 klein 4B requires multipart/form-data and has a fixed 4-step inference.
+        response = client.post(
+            url,
+            headers=headers,
+            files={
+                "prompt": (None, prompt.strip()),
+                "width": (None, str(int(width))),
+                "height": (None, str(int(height))),
+            },
+            timeout=timeout,
+        )
+    else:
+        if not 1 <= int(steps) <= 8:
+            raise ValueError("FLUX.1-schnell aceita de 1 a 8 steps neste adaptador.")
+        response = client.post(
+            url,
+            headers=headers,
+            json={"prompt": prompt.strip(), "steps": int(steps)},
+            timeout=timeout,
+        )
     if response.status_code >= 400:
         detail = response.text[:1200]
         raise CloudflareAIError(
@@ -93,7 +111,9 @@ def generate_image(
     return {
         "path": str(destination),
         "model": model,
-        "steps": int(steps),
+        "steps": 4 if model == VERTICAL_MODEL else int(steps),
+        "width": int(width) if model == VERTICAL_MODEL else None,
+        "height": int(height) if model == VERTICAL_MODEL else None,
         "bytes": len(image_bytes),
         "content_type": content_type or f"image/{extension.lstrip('.')}",
     }
