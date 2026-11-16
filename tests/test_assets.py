@@ -92,6 +92,17 @@ class AssetRankingTests(unittest.TestCase):
         self.assertGreaterEqual(search.call_count, 1)
 
 
+    def test_9_16_portrait_fit_breaks_semantic_ties(self):
+        candidates = [
+            {**clip("https://example.test/4x5.mp4", "Person writing goals in notebook", vertical=True, width=1080, height=1350), "source": "Pixabay"},
+            {**clip("https://example.test/9x16.mp4", "Person writing goals in notebook", vertical=True, width=1080, height=1920), "source": "Pexels"},
+            {**clip("https://example.test/landscape.mp4", "Person writing goals in notebook", vertical=False, width=1920, height=1080), "source": "Commons"},
+        ]
+        ranked = rank_video_candidates(candidates, "person writing goals in notebook")
+        self.assertEqual(ranked[0]["url"], "https://example.test/9x16.mp4")
+        self.assertEqual(ranked[0]["_nexus_aspect_ratio"], 0.5625)
+        self.assertGreater(ranked[0]["_nexus_aspect_fit"], ranked[1]["_nexus_aspect_fit"])
+
     def test_scene_relevance_beats_resolution(self):
         candidates = [
             clip(
