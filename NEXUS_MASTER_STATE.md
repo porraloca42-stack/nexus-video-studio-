@@ -599,3 +599,21 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Estado: correções gravadas em main; novas execuções CI precisam concluir. Nenhuma destas alterações está validada por nova execução ainda.
 
 - CI adicional: workflow Remotion agora instala dependências de teste Python e executa `pytest` nos adaptadores Cloudflare e Remotion antes dos renders. Últimos commits do workflow: `ffde1e6` e `04617fa`. Aguardar execução e logs antes de marcar testes aprovados.
+
+## Modo Cloudflare Workers AI + Remotion — atualização 16/11/2026
+- Revisão de modelo: FLUX.1 schnell não aceita resolução/aspect ratio como parâmetros; para evitar crop de imagem quadrada no vídeo vertical, selecionado FLUX.2 Klein 4B, que aceita width/height por multipart/form-data e possui inferência fixa de 4 passos.
+- Configuração inicial: 512×910 pixels (proporção praticamente 9:16). Pricing oficial: 26,05 Neurons por tile de saída 512×512; estimativa aproximada de dois tiles por imagem (52,1 Neurons), cerca de 191 imagens/dia dentro dos 10.000 Neurons gratuitos. Teto teórico, não garantia.
+- Criado `nexus/cloudflare_images.py`: autenticação REST, multipart para FLUX.2 Klein, validação de imagem, assinatura real PNG/JPEG/WebP, extensão coerente com o conteúdo e geração por cena.
+- Diretor: prompt de storyboard agora inclui `image_prompt` em inglês, com enquadramento 9:16 e sem texto embutido. Validador exige esse campo.
+- Remotion: manifesto carrega `imagePrompt` e `cameraMotion`; camadas de imagem recebem movimentos individuais (push-in, pull-out e pans).
+- Worker remoto: `.github/workflows/nexus-render-worker.yml` e `nexus/remote_render_job.py` geram imagens, narração Edge TTS, SRT e MP4 no GitHub Actions, validando 720×1280, áudio e duração.
+- App: seletor opcional "Imagens originais · Cloudflare AI + Remotion" chama o worker e recupera o MP4; pipeline FFmpeg atual permanece intacto como padrão/fallback.
+- Privacidade: o repositório é público. Para não expor roteiros/MP4, `nexus/render_crypto.py` usa Fernet com chave derivada do token Cloudflare; manifesto enviado ao workflow_dispatch e MP4/relatório do artefato são criptografados. O artefato não inclui imagens nem MP4 em texto claro.
+- Credenciais necessárias para teste real:
+  - GitHub Actions Secrets: `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` (Workers AI Read).
+  - Streamlit Secrets: `GITHUB_ACTIONS_TOKEN` (fine-grained token, Actions Read/Write + Contents Read) e o mesmo `CLOUDFLARE_API_TOKEN` (chave de criptografia local).
+- CI run #271 (commit `ae27ac6`): compilação e 53 testes passaram, incluindo adaptador Cloudflare, adaptador Remotion, criptografia, GitHub dispatch/artifact mock e render FFmpeg vertical com áudio/legendas. Remotion TypeScript typecheck passou.
+- CI Remotion run #43843799113: typecheck e testes de adaptadores passaram; render gráfico 50s em andamento; integração de áudio/vídeo ainda pendente.
+- Nenhuma chamada real ao Cloudflare Workers AI foi feita, pois credenciais ainda não foram fornecidas/configuradas. O worker remoto está implementado, mas não testado com credenciais nem artefato de produção. Deploy Streamlit não confirmado.
+- Não declarar novo modo concluído/validado até gerar imagens reais, executar worker e inspecionar MP4 final no app publicado.
+
