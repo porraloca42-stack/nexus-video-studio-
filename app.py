@@ -298,10 +298,16 @@ else:
                 key="fish_catalog_scope",
             )
             search_voice = st.text_input("Buscar por nome", placeholder="Ex.: narrador, grave, feminina, storytelling")
+            voice_style = st.selectbox(
+                "Estilo vocal",
+                ["Todos", "narration", "conversational", "documentary", "professional", "calm", "deep", "warm", "storytelling"],
+                format_func=lambda value: "Todos os estilos" if value == "Todos" else value.title(),
+            )
+            voice_gender = st.selectbox("Timbre indicado", ["Todos", "Masculina", "Feminina"])
             voice_page = st.number_input("Página", min_value=1, max_value=100, value=1, step=1, key="fish_voice_page")
             st.form_submit_button("Buscar vozes", use_container_width=True)
         cache_key = (
-            catalog_scope, search_voice.strip().casefold(), int(voice_page),
+            catalog_scope, search_voice.strip().casefold(), voice_style, voice_gender, int(voice_page),
             st.session_state.get("fish_voice_search_nonce", 0),
         )
         if st.session_state.get("fish_voice_catalog_cache_key") != cache_key:
@@ -311,6 +317,7 @@ else:
                     page=int(voice_page),
                     page_size=100,
                     title=search_voice.strip(),
+                    tags=[voice_style] if voice_style != "Todos" else None,
                     language="pt",
                     self_only=(catalog_scope == "Minhas vozes"),
                     licensed_only=(catalog_scope == "Licenciadas pela Fish Audio"),
@@ -326,6 +333,18 @@ else:
             st.error(f"Falha ao consultar a biblioteca Fish Audio: {catalog['error']}")
         else:
             voice_catalog = catalog.get("items", [])
+            if voice_gender != "Todos":
+                gender_terms = {
+                    "Masculina": ("male", "mascul", "man voice", "homem", "masculina"),
+                    "Feminina": ("female", "feminin", "woman voice", "mulher", "feminina"),
+                }[voice_gender]
+                voice_catalog = [
+                    item for item in voice_catalog
+                    if any(term in " ".join([
+                        item.get("title", ""), item.get("description", ""),
+                        " ".join(item.get("tags", [])),
+                    ]).casefold() for term in gender_terms)
+                ]
             st.caption(f"{catalog.get('total', len(voice_catalog)):,} resultado(s) disponíveis · até 100 por página")
             if not voice_catalog:
                 st.info("Nenhuma voz encontrada com esses filtros. Tente outro termo ou página.")
