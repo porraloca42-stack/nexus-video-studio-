@@ -234,7 +234,7 @@ with settings_col2:
     voice = st.selectbox("Voz da narração", ["pt-BR-AntonioNeural", "pt-BR-FranciscaNeural", "pt-BR-ThalitaNeural"], format_func=lambda value: {"pt-BR-AntonioNeural":"Antônio · Masculina", "pt-BR-FranciscaNeural":"Francisca · Feminina", "pt-BR-ThalitaNeural":"Thalita · Feminina"}[value])
 
 with st.expander("Ferramentas avançadas · diagnóstico das bibliotecas de vídeo"):
-    st.caption("Build do aplicativo: NEXUS-2026.11.16-library-diagnostics-1 · confirme esta identificação após a publicação.")
+    st.caption("Build do aplicativo: NEXUS-2026.11.16-srt-newline-1 · confirme esta identificação após a publicação.")
     st.caption("Testa autenticação, busca, download e leitura do MP4 em cada biblioteca que tiver chave configurada. As chaves nunca são exibidas.")
     if st.button("Testar todas as bibliotecas configuradas", type="secondary"):
         providers = [
