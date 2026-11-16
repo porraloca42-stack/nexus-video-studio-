@@ -484,3 +484,10 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Render de MP4 vertical com áudio e legendas permanece coberto por teste automatizado de integração; não equivale a uma geração ponta a ponta no app publicado.
 - Estado: código no GitHub e CI validados; integração real do Commons validada para o candidato testado. Deploy Streamlit, chaves/serviços Pixabay, Pexels e Gemini no ambiente publicado e geração audiovisual ponta a ponta ainda não foram confirmados. Não declarar o estúdio integralmente pronto/implantado.
 - Run: https://github.com/porraloca42-stack/nexus-video-studio-/actions/runs/43829105466
+
+
+### Continuidade de validação operacional — 16/11/2026
+- README atualizado para refletir o estado comprovado: CI #187 aprovado, 36 testes, integração ao vivo Commons com download/FFprobe aprovados; deploy, APIs com Secrets e geração ponta a ponta continuam pendentes.
+- URL de publicação registrada no histórico do projeto: https://htykbebk3hceoen5bvopax.streamlit.app/ . Não há confirmação independente nesta sessão de que o deploy esteja servindo o commit mais recente; tentativa de acesso externo não retornou conteúdo verificável.
+- Commit documental do README: ffef2bd122a4b6457190ce056b9e04da5d103b17. CI #189 (43829849725) disparado por essa atualização está em execução; não marcar a revisão documental como CI validada até concluir.
+- Próximo bloqueio real: executar no Streamlit publicado o painel Ferramentas avançadas → Testar todas as bibliotecas configuradas e depois uma produção curta/real; esse ambiente contém os Secrets Gemini/Pixabay/Pexels que não estão disponíveis ao GitHub Actions. Sem o resultado desse teste, não declarar deploy nem pipeline ponta a ponta validados.
