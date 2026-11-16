@@ -11,7 +11,7 @@ _STOPWORDS = {
 }
 
 def build_query_variants(query, max_variants=4):
-    original = re.sub(r"\\s+", " ", str(query or "")).strip()
+    original = re.sub(r"\s+", " ", str(query or "")).strip()
     if not original:
         return []
     variants = [original]
