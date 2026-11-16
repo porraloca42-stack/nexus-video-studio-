@@ -460,9 +460,10 @@ if "nexus_plan" in st.session_state:
             st.error("O storyboard precisa ser corrigido antes da produção.")
         elif render_mode == "Imagens originais · Cloudflare AI + Remotion":
             github_token = secret("GITHUB_ACTIONS_TOKEN")
-            if not github_token:
-                st.error("Configure GITHUB_ACTIONS_TOKEN nos Secrets do Streamlit para habilitar o trabalhador Remotion.")
-                st.info("O trabalhador também exige CLOUDFLARE_ACCOUNT_ID e CLOUDFLARE_API_TOKEN como Secrets do repositório GitHub.")
+            cloudflare_token = secret("CLOUDFLARE_API_TOKEN")
+            if not github_token or not cloudflare_token:
+                st.error("Configure GITHUB_ACTIONS_TOKEN e CLOUDFLARE_API_TOKEN nos Secrets do Streamlit para habilitar o trabalhador Remotion.")
+                st.info("O repositório GitHub também precisa dos Secrets CLOUDFLARE_ACCOUNT_ID e CLOUDFLARE_API_TOKEN. O manifesto e o MP4 trafegam criptografados.")
             else:
                 progress = st.progress(0.05, text="Enviando storyboard para o trabalhador audiovisual...")
                 try:
@@ -470,7 +471,8 @@ if "nexus_plan" in st.session_state:
                     def update_worker_progress(message):
                         progress.progress(0.55, text=message)
                     result = render_on_github(
-                        plan, voice, github_token, progress_callback=update_worker_progress
+                        plan, voice, github_token, encryption_secret=cloudflare_token,
+                        progress_callback=update_worker_progress
                     )
                     video_bytes = result["video"]
                     report = result.get("report") or {}
