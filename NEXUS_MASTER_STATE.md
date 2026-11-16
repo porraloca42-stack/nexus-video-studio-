@@ -1059,7 +1059,7 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - `nexus/remote_render_job.py`: após gerar e validar as imagens Cloudflare, chama Modal para animar todas as cenas; valida cada MP4 com FFprobe; Remotion recebe os MP4s em vez das imagens. Relatório inclui fonte visual, quantidade de clipes e tempo de inferência.
 - `.github/workflows/nexus-render-worker.yml`: instala o cliente Modal e encaminha `MODAL_TOKEN_ID` e `MODAL_TOKEN_SECRET` a partir dos GitHub Actions Secrets.
 - `.github/workflows/modal-deploy.yml`: workflow manual para implantar `modal_worker.py` depois que os dois secrets estiverem configurados.
-- `app.py`: rótulo e orientação do motor principal atualizados para Cloudflare + Modal I2V + Remotion; a interface lê a fonte visual real do relatório do worker.
+- `app.py`: rótulo e orientação do motor principal atualizados para Cloudflare + Modal I2V + Remotion; a interface lê a fonte visual real do relatório do worker e exibe quantidade de cenas animadas, segundos de vídeo gerado e segundos de inferência GPU (não confundir inferência com tempo total faturado).
 - `tests/test_modal_i2v.py`: testes simulados para prompts, lote, gravação de MP4 e rejeição de durações inválidas.
 - `docs/MODAL_SETUP.md`: passo a passo para criar tokens, guardá-los nos GitHub Actions Secrets, limitar gastos e implantar o worker. O primeiro teste recomendado é um único vídeo completo de 40–50s.
 - `tests/test_remote_render_job.py`: cenário de integração simulado atualizado para 10 cenas animadas antes do Remotion.
@@ -1076,7 +1076,7 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Implementado no GitHub main: integração Modal/LTX e fluxo worker → Modal → Remotion; workflows e testes simulados adicionados.
 - Implantado no Modal: NÃO. Ainda depende de configurar secrets e executar o workflow manual de deploy.
 - Credenciais: `MODAL_TOKEN_ID` e `MODAL_TOKEN_SECRET` ainda NÃO foram fornecidos/configurados no GitHub Actions. Não solicitar que sejam enviados no chat.
-- Teste automatizado: aprovado nos GitHub Actions runs #459, #460, #461, #462, #463 e #464. O run #464 (commit `874ef82`) passou em compilação Python, suíte de regressão, typecheck Remotion e smoke test Commons. Isso valida sintaxe, adaptador simulado e compatibilidade da composição, mas não comprova chamada real ao Modal.
+- Teste automatizado: aprovado nos GitHub Actions runs #459, #460, #461, #462, #463, #464, #465 e #466. Os runs #464 (commit `874ef82`) e #466 (commit `a7825dd`) passaram em compilação Python, suíte de regressão, typecheck Remotion e smoke test Commons. Isso valida sintaxe, adaptador simulado e compatibilidade da composição, mas não comprova chamada real ao Modal.
 - Teste real de GPU, qualidade image-to-video, duração vertical, custo e MP4 editorial: NÃO executado.
 - Nenhuma execução Modal/GPU foi disparada por esta integração durante a implementação; não houve consumo de créditos Modal nesta etapa.
 - Lacuna de consistência de personagem: as imagens-base Cloudflare continuam sendo geradas independentemente por texto; o NEXUS ainda não encaminha uma imagem de referência persistente do personagem entre keyframes. LTX pode preservar a identidade dentro de cada clipe a partir da imagem-base, mas não garante continuidade de Gabriel entre cenas com imagens-base diferentes. Validar e planejar referência persistente antes de afirmar consistência global do personagem.
