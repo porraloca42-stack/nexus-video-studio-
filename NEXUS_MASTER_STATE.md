@@ -21,14 +21,16 @@ Aplicativo pessoal em nuvem para transformar tema ou roteiro em vídeo vertical 
 - Pesquisar em várias bibliotecas, comparar candidatos e futuramente avaliar visualmente os clipes.
 - Alvo inicial: uso pessoal, cerca de 2 vídeos/dia, 50 segundos, 720p, 9:16.
 
-## Arquitetura atual
+## Arquitetura atual — estado do repositório em 16/11/2026
 - Interface: Streamlit (app.py).
-- Diretor: Gemini API (nexus/director.py), lista modelos disponíveis para a chave e seleciona automaticamente; prioriza gemini-3.5-flash-lite quando disponível.
-- Voz/legendas: Edge TTS (nexus/audio.py).
-- Renderização: FFmpeg (nexus/render.py).
-- Busca/baixar mídia: nexus/assets.py.
-- Fontes planejadas: Coverr principal, Pixabay reserva. Pexels fora do fluxo atual por falta de chave.
-- Análise multimodal de candidatos e geração de cenas originais ainda NÃO implementadas.
+- Diretor: Gemini API (nexus/director.py), com failover entre modelos textuais compatíveis; produz roteiro, storyboard semântico e contrato `scene_direction` por cena.
+- Voz/legendas: Edge TTS (nexus/audio.py), com legendas por eventos de frase e fallback por palavras agrupadas.
+- Renderização disponível: FFmpeg (nexus/render.py) como pipeline legado/auxiliar; adaptador Remotion em `nexus/remotion_renderer.py` e projeto isolado em `remotion/`.
+- Worker remoto: workflow GitHub Actions para render Remotion/Cloudflare; o fluxo real depende dos secrets e do deploy Streamlit.
+- Geração de imagens: Cloudflare Workers AI FLUX.2 Klein no worker remoto; gera imagens estáticas, não vídeo.
+- Busca/baixar mídia: nexus/assets.py; fontes implementadas em diferentes níveis de maturidade, com smoke test Wikimedia Commons aprovado. Coverr/Pixabay ainda exigem validação real de API e licença.
+- Remotion já tem composição de demonstração e manifesto, movimento de câmera, efeitos atmosféricos/luminosos e crossfade em desenvolvimento; não presumir parallax real nem animação orgânica de objetos em imagem única.
+- Avaliação visual de candidatos existe para o fluxo de seleção de mídia; auditoria automática do MP4 Cloudflare/Remotion ainda não está integrada ponta a ponta.
 
 ## Segredos
 Nunca armazenar valores de chaves neste arquivo, no GitHub ou em instruções do projeto.
