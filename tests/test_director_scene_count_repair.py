@@ -59,6 +59,29 @@ class SceneCountRepairTests(unittest.TestCase):
         self.assertEqual(request.call_count, 2)
         self.assertIn("NO MÍNIMO 10 cenas", request.call_args.args[0])
 
+    def test_40_seconds_rejects_seven_and_repairs_to_ten(self):
+        short_plan = make_plan(7)
+        repaired_plan = make_plan(10)
+
+        def secret_reader(name, default=None):
+            return "test-key" if name == "GEMINI_API_KEY" else "auto"
+
+        with patch.object(director, "_request", side_effect=[short_plan, repaired_plan]) as request, \\
+             patch.object(director, "_repair_semantic_justifications"), \\
+             patch.object(director, "apply_visual_style_lock", side_effect=lambda plan, style: plan):
+            result = director.create_storyboard(
+                "Uma manhã tranquila na cidade", "Cinematográfico realista", 40, secret_reader
+            )
+
+        self.assertEqual(len(result["scenes"]), 10)
+        self.assertEqual(sum(scene["duration_seconds"] for scene in result["scenes"]), 40)
+        self.assertEqual(request.call_count, 2)
+        self.assertIn("NO MÍNIMO ABSOLUTO 10 CENAS", request.call_args.args[0])
+
+    def test_validator_rejects_six_or_seven_scenes_even_for_40_seconds(self):
+        errors = director.validate_storyboard(make_plan(7), requested_duration=40)
+        self.assertTrue(any("pelo menos 10" in error for error in errors))
+
     def test_keeps_valid_storyboard_without_extra_model_request(self):
         plan = make_plan(10)
 
