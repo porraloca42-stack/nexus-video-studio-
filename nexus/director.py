@@ -43,6 +43,16 @@ CENAS:
 - Respeite rigorosamente o estilo visual selecionado. Traduza-o em fotografia, paleta, luz, textura, lente, movimento e atmosfera em TODAS as cenas. Inclua visual_style e style_search_terms.
 - Toda cena deve ter pelo menos dois microeventos visuais.
 
+DIREÇÃO CINEMATOGRÁFICA EXECUTÁVEL (scene_direction):
+Para cada cena, entregue também um objeto scene_direction estruturado. Não use instruções vagas como "cinematic movement". Ele deve conter:
+  "camera": {"move":"push_in|pull_out|pan_left|pan_right|tilt_up|tilt_down|static","intensity":0.0,"start_scale":1.0,"end_scale":1.0,"focus":"subject|foreground|background"},
+  "depth_layers": {"foreground":"...","subject":"...","background":"...","parallax_strength":0.0},
+  "lighting": {"mood":"...","key_direction":"...","change":"none|subtle_flicker|light_sweep|exposure_ramp"},
+  "atmosphere": {"effect":"none|dust|rain|fog|embers|particles","intensity":0.0},
+  "transition": {"in":"cut|crossfade|match_cut|fade","out":"cut|crossfade|match_cut|fade","duration_frames":0},
+  "beats": [{"at":0.0,"event":"...","visual_target":"..."}]
+Use valores numéricos normalizados entre 0 e 1 para intensity e parallax_strength; start_scale/end_scale entre 1.0 e 1.15. No máximo 3 beats por cena, com at entre 0 e 1. Só escolha efeitos coerentes com o que realmente aparece na cena. Não invente movimento de objetos/pessoas que a mídia de origem não permite executar. Em imagens únicas, descreva movimento de câmera, profundidade e atmosfera; não prometa animação realista de corpo/objeto sem camada separada ou vídeo-fonte. Mantenha fallback seguro: static, none, cut.
+
 Retorne somente JSON válido:
 {
  "topic_interpretation":"...",
@@ -68,6 +78,7 @@ Retorne somente JSON válido:
    "shot_type":"...",
    "camera_motion":"push_in, pull_out, pan_left ou pan_right",
    "motion_events":["microevento 1","microevento 2"],
+   "scene_direction":{"camera":{"move":"push_in","intensity":0.5,"start_scale":1.0,"end_scale":1.08,"focus":"subject"},"depth_layers":{"foreground":"...","subject":"...","background":"...","parallax_strength":0.2},"lighting":{"mood":"...","key_direction":"...","change":"none"},"atmosphere":{"effect":"none","intensity":0.0},"transition":{"in":"cut","out":"cut","duration_frames":0},"beats":[{"at":0.35,"event":"...","visual_target":"..."}]},
    "asset_search_query":"English query with concrete subject and action",
    "fallback_search_query":"different concrete English query"
   }
