@@ -106,6 +106,21 @@ class AssetRankingTests(unittest.TestCase):
         self.assertFalse(errors)
         self.assertEqual(ranked, [])
 
+
+    @patch("nexus.assets.search_coverr_videos")
+    def test_single_keyword_match_is_not_enough_for_detailed_scene(self, search):
+        search.return_value = [
+            clip("https://example.test/weak.mp4", "Writing in a journal", "")
+        ]
+
+        ranked, errors = search_video_sources(
+            "person writing goals in notebook",
+            coverr_key="test-key",
+        )
+
+        self.assertFalse(errors)
+        self.assertEqual(ranked, [])
+
     def test_empty_results_are_safe(self):
         self.assertEqual(rank_video_candidates([], "a scene query"), [])
 
