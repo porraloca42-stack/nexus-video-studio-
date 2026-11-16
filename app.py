@@ -351,6 +351,9 @@ if "nexus_plan" in st.session_state:
                         "camera_motion": scene.get("camera_motion", "push_in"),
                         "source_title": chosen.get("title", ""),
                         "source_url": chosen.get("source_url", ""),
+                        "source": chosen.get("source", "Stock"),
+                        "author": chosen.get("author", ""),
+                        "author_url": chosen.get("author_url", ""),
                         "source_width": video_stream.get("width"),
                         "source_height": video_stream.get("height"),
                     })
@@ -409,6 +412,16 @@ if "nexus_plan" in st.session_state:
                         "audio_codec": final_audio.get("codec_name"),
                         "size_mb": len(video_bytes) / (1024 * 1024),
                         "scene_count": len(media),
+                        "source_credits": [
+                            {
+                                "source": item.get("source", "Stock"),
+                                "title": item.get("source_title", ""),
+                                "url": item.get("source_url", ""),
+                                "author": item.get("author", ""),
+                                "author_url": item.get("author_url", ""),
+                            }
+                            for item in media
+                        ],
                     }
                     progress.progress(1.0, text="Vídeo produzido e validado.")
                     st.success("Vídeo MP4 produzido. Áudio, vídeo e integridade do arquivo foram verificados.")
@@ -424,6 +437,25 @@ if st.session_state.get("nexus_rendered_video"):
     st.subheader("Seu vídeo está pronto")
     st.caption(f"{info.get('scene_count', 0)} cenas · {info.get('duration', 0):.1f}s · {info.get('width', 0)}×{info.get('height', 0)} · {info.get('size_mb', 0):.2f} MB")
     st.video(st.session_state["nexus_rendered_video"])
+    credits = []
+    for credit in info.get("source_credits", []):
+        provider = credit.get("source", "Stock")
+        provider_url = credit.get("url") or {
+            "Coverr": "https://coverr.co/",
+            "Pixabay": "https://pixabay.com/videos/",
+            "Pexels": "https://www.pexels.com/videos/",
+        }.get(provider, "")
+        if not provider_url:
+            continue
+        line = f"[{provider}]({provider_url})"
+        if credit.get("author"):
+            if credit.get("author_url"):
+                line += f" · [ {credit['author']} ]({credit['author_url']})"
+            else:
+                line += f" · {credit['author']}"
+        credits.append(line)
+    if credits:
+        st.markdown("**Créditos das bibliotecas utilizadas**\n\n" + "\n\n".join(credits))
     st.download_button(
         "Baixar vídeo MP4",
         data=st.session_state["nexus_rendered_video"],
