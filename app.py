@@ -103,6 +103,11 @@ st.markdown("""
 .nexus-preview-title {font-weight:750;margin-bottom:4px;}
 .nexus-preview-copy {font-size:.82rem;color:#b8c0cb;line-height:1.4;}
 .nexus-card-label {font-size:.82rem;font-weight:700;margin:.1rem 0 .4rem;color:#e6e9ef;}
+/* Keep the two-column style gallery on narrow phones instead of Streamlit's default vertical stacking. */
+div[data-testid="stHorizontalBlock"] {flex-wrap:nowrap !important; gap:.55rem !important;}
+div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {min-width:0 !important; width:50% !important; flex:1 1 50% !important;}
+div[data-testid="stButton"] button {white-space:normal !important; overflow-wrap:anywhere; font-size:.82rem; line-height:1.2; padding:.35rem .4rem; min-height:2.35rem;}
+
 div[data-testid="stButton"] button {border-radius:12px;min-height:2.65rem;border:1px solid rgba(210,190,155,.24);box-shadow:0 3px 10px rgba(0,0,0,.16);}
 div[data-testid="stButton"] button[kind="primary"] {border-color:rgba(222,190,132,.7);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 5px 15px rgba(194,157,94,.2);font-weight:750;}
 div[data-testid="stTextArea"] textarea,div[data-testid="stSelectbox"] div[data-baseweb="select"] {border-radius:13px;}
@@ -127,7 +132,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 with st.expander("Escolher estilo visual · 24 referências", expanded=False):
-    st.caption("Miniaturas compactas · toque no nome para selecionar.")
+    st.caption("24 estilos em cartões compactos · toque para selecionar.")
     for row_start in range(0, len(STYLE_OPTIONS), 2):
         cols = st.columns(2)
         for offset, col in enumerate(cols):
@@ -137,7 +142,7 @@ with st.expander("Escolher estilo visual · 24 referências", expanded=False):
             option = STYLE_OPTIONS[index]
             with col:
                 is_selected = option == st.session_state["nexus_style"]
-                st.image(style_preview_svg(option), width=220)
+                st.image(style_preview_svg(option), width=150)
                 if st.button(("✓ " if is_selected else "") + option, key="style_" + str(index), type="primary" if is_selected else "secondary", use_container_width=True):
                     st.session_state["nexus_style"] = option
                     st.rerun()
