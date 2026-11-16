@@ -1208,3 +1208,10 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Hipótese técnica: o ambiente Streamlit estava carregando uma versão de `nexus.audio` sem o símbolo obsoleto (cache/atualização parcial) ou houve incompatibilidade transitória de checkout. O traceback da captura está truncado e não permite confirmar o nome exato após `generate_fish...`; portanto, não afirmar causa raiz com certeza.
 - Verificação após commit: relido `app.py` e `nexus/audio.py` no main; import agora contém apenas símbolos efetivamente usados e exportados.
 - Validação pendente: CI disparado por push e reinício do Streamlit. Não declarar resolvido até abrir o app.
+
+## Segundo ajuste de compatibilidade do import Fish Audio — 16/11/2026 17:05 BRT
+- Nova captura do usuário ainda mostrava ImportError na linha do import de `nexus.audio`, mesmo após remoção do símbolo obsoleto. A captura não revela a mensagem completa nem qual nome falhou.
+- Revisão confirmou que ambos os símbolos (`get_fish_voice`, `make_voice`) existem em `nexus/audio.py` no main. Isso reforça hipótese de cache/checkout parcial entre arquivos no Streamlit Cloud, mas não confirma causa.
+- Alteração em `app.py`, commit `a8b5ac9`: substituído import nomeado `from nexus.audio import ...` por import de módulo `import nexus.audio as fish_audio`; chamadas passaram a usar `fish_audio.get_fish_voice(...)` e `fish_audio.make_voice(...)`. Isso elimina falha de import por símbolo ausente em versões antigas do módulo e deixa eventual incompatibilidade localizada na chamada.
+- Pós-commit, leitura do main confirmou: nenhum import nomeado de nexus.audio; import de módulo presente; referências às duas funções qualificadas no módulo.
+- Validação pendente: CI e reload/restart Streamlit. Se continuar falhando, precisamos obter logs completos porque o traceback curto não identifica a exceção raiz; não fazer nova alteração às cegas.
