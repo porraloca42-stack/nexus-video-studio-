@@ -316,3 +316,13 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Teste específico criado em tests/test_professional_director_brief.py.
 - Build indicado na interface: NEXUS-2026.11.16-professional-director-1.
 - CI do novo diretor ainda em execução após os commits mais recentes. Implantação Streamlit e geração MP4 real ainda não confirmadas.
+
+
+### Pontuação expressiva para interpretação vocal — 16/11/2026
+- Requisito do usuário: a narração deve usar pontuação que oriente a entonação do sintetizador e produza cadência mais humana, sem reduzir artificialmente a velocidade da voz.
+- Commit 56f444c: ampliado o SYSTEM do diretor com regras explícitas para vírgulas (continuidade/respiração curta), pontos (fechamento/queda), dois-pontos (preparação de revelação), travessões (aparte/contraste), interrogações e exclamações moderadas, reticências apenas quando semanticamente justificadas.
+- Orientada a variação de frases curtas, médias e longas; leitura mental em voz alta; ênfase lexical sem excesso de caixa alta ou pontuação decorativa.
+- Revisão de duração também recebeu instrução para preservar/refinar pontuação expressiva e nunca inserir pausas artificiais ou apagar sinais relevantes.
+- Commit caea92d: testes cobrem as regras de pontuação e cadência vocal.
+- Commit 5d5f5c0: build identificada como NEXUS-2026.11.16-human-voice-punctuation-1.
+- CI dos commits de pontuação ainda em execução no momento do registro. Deploy Streamlit e qualidade perceptiva da voz ainda dependem de teste real; pontuação orienta a prosódia do TTS, mas não garante interpretação humana perfeita por si só.
