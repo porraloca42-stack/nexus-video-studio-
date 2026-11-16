@@ -22,3 +22,6 @@ A busca Coverr está implementada e foi testada no ambiente publicado: a API aut
 Coverr, Pixabay e Pexels possuem adaptadores no motor de busca. O motor consulta todas as fontes com chave configurada, agrega os candidatos, remove URLs duplicadas e compara a relevância antes de escolher. Coverr está configurado; Pixabay ainda depende de PIXABAY_API_KEY; Pexels depende de PEXELS_API_KEY, e a emissão pública de novas chaves está pausada. A presença do adaptador não significa que a fonte esteja autenticada ou operacional.
 
 A seleção visual multimodal dos clipes ainda não foi implementada. Não considerar o pipeline MP4 validado até renderizar e inspecionar um vídeo real.
+
+
+A seleção multi-fonte preserva os metadados de origem dos clipes e apresenta créditos na interface de prévia quando a produção termina. A seleção visual por modelo multimodal continua sendo uma etapa futura; o ranking atual usa metadados textuais e qualidade técnica.
