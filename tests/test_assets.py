@@ -272,6 +272,16 @@ class AssetRankingTests(unittest.TestCase):
         shortlist = diverse_candidate_shortlist(candidates, limit=3)
         self.assertEqual([item["source"] for item in shortlist], ["Pixabay", "Pexels", "Coverr"])
 
+    def test_shortlist_compares_distinct_libraries_before_repeating_one(self):
+        candidates = [
+            {**clip("https://example.test/pixabay1.mp4", "Person writing goals in notebook"), "source": "Pixabay", "_nexus_relevance": 9},
+            {**clip("https://example.test/pixabay2.mp4", "Person writing journal at desk"), "source": "Pixabay", "_nexus_relevance": 8},
+            {**clip("https://example.test/pexels.mp4", "Person writing goals in notebook"), "source": "Pexels", "_nexus_relevance": 7},
+            {**clip("https://example.test/coverr.mp4", "Person writing goals in notebook"), "source": "Coverr", "_nexus_relevance": 6},
+        ]
+        shortlist = diverse_candidate_shortlist(candidates, limit=3)
+        self.assertEqual([item["source"] for item in shortlist], ["Pixabay", "Pexels", "Coverr"])
+
 
 if __name__ == "__main__":
     unittest.main()
