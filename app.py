@@ -2,7 +2,7 @@ import os, tempfile
 from pathlib import Path
 import streamlit as st
 from nexus.director import create_storyboard, validate_storyboard
-from nexus.assets import search_video_sources, download_file
+from nexus.assets import search_video_sources, search_coverr_videos, download_file
 from nexus.audio import make_voice
 from nexus.render import render_video
 
@@ -22,6 +22,26 @@ with st.sidebar:
     style = st.selectbox("Estilo visual", ["Cinematográfico realista", "Dark cinematográfico", "Documental realista", "Surrealista fotográfico", "Anime cinematográfico", "Graphic novel", "3D conceitual", "Vintage cinematográfico", "Cyberpunk"])
     voice = st.selectbox("Voz", ["pt-BR-AntonioNeural", "pt-BR-FranciscaNeural", "pt-BR-ThalitaNeural"])
     duration = st.selectbox("Duração", [40, 50, 60], index=1)
+    st.divider()
+    st.subheader("Diagnóstico de mídia")
+    if st.button("Testar conexão Coverr", use_container_width=True):
+        coverr_key = secret("COVERR_API_KEY")
+        if not coverr_key:
+            st.error("COVERR_API_KEY não encontrada nos Secrets.")
+        else:
+            with st.spinner("Consultando a API Coverr..."):
+                try:
+                    test_results = search_coverr_videos("nature landscape", coverr_key, per_page=5)
+                    st.success("A API Coverr respondeu com sucesso.")
+                    if test_results:
+                        st.write(f"{len(test_results)} clipes retornados:")
+                        for item in test_results[:5]:
+                            orientation = "vertical" if item.get("vertical") else "horizontal"
+                            st.caption(f"{item.get('title') or 'Sem título'} · {item.get('width')}×{item.get('height')} · {orientation}")
+                    else:
+                        st.warning("A conexão respondeu, mas não retornou clipes com URL MP4. Vamos investigar a resposta da API.")
+                except Exception as exc:
+                    st.error(f"Falha no teste Coverr: {exc}")
 
 topic = st.text_area("Assunto ou roteiro", height=150, placeholder="Digite um assunto ou cole o roteiro completo.")
 if st.button("Planejar vídeo", type="primary", use_container_width=True):
