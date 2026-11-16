@@ -141,7 +141,6 @@ def get_fish_voice(api_key, voice_id, *, session=None):
         "visibility": item.get("visibility", "public"),
         "licensed": bool(item.get("licensed", False)),
         "source": str(item.get("source") or item.get("source_type") or item.get("model_source") or ""),
-        "tags": item.get("tags") or [],
         "gender": item.get("gender") or item.get("voice_gender") or item.get("sex") or "",
         "task_count": int(item.get("task_count") or 0),
     }
