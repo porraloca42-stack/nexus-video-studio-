@@ -75,8 +75,8 @@ class RemotionManifestTests(unittest.TestCase):
             direction = manifest["scenes"][0]["sceneDirection"]
             self.assertEqual(direction["camera"]["move"], "tilt_up")
             self.assertEqual(direction["camera"]["intensity"], 1.0)
-            self.assertEqual(direction["camera"]["startScale"], 1.0)
-            self.assertEqual(direction["camera"]["endScale"], 1.15)
+            self.assertEqual(direction["camera"]["startScale"], 1.02)
+            self.assertEqual(direction["camera"]["endScale"], 1.28)
             self.assertEqual(direction["camera"]["focus"], "subject")
             self.assertEqual(direction["depthLayers"]["parallaxStrength"], 0.0)
             self.assertEqual(direction["lighting"]["change"], "none")
