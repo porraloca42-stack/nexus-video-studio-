@@ -218,7 +218,7 @@ div[data-testid="stTextArea"] textarea,div[data-testid="stSelectbox"] div[data-b
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="nexus-hero"><div class="nexus-brand">NEXUS VIDEO STUDIO</div><div class="nexus-tagline">Transforme seu roteiro em vídeo</div></div>', unsafe_allow_html=True)
-st.caption("Versão: NEXUS-2026.11.16-visual-review-subtitles-1")
+st.caption("Versão: NEXUS-2026.11.16-visual-review-subtitles-2")
 
 if "nexus_style" not in st.session_state or st.session_state["nexus_style"] not in STYLE_OPTIONS:
     st.session_state["nexus_style"] = "Cinematográfico realista"
@@ -432,6 +432,17 @@ if "nexus_plan" in st.session_state:
         coverr_key = secret("COVERR_API_KEY")
         pixabay_key = secret("PIXABAY_API_KEY")
         pexels_key = secret("PEXELS_API_KEY")
+        configured_libraries = [
+            name for name, key in (
+                ("Coverr", coverr_key), ("Pixabay", pixabay_key), ("Pexels", pexels_key)
+            ) if key
+        ]
+        if len(configured_libraries) == 1:
+            st.warning(
+                f"Somente {configured_libraries[0]} está configurada. "
+                "O NEXUS fará revisão visual dos clipes, mas a variedade de bibliotecas "
+                "depende de configurar outras fontes."
+            )
         if st.session_state.get("nexus_errors"):
             st.error("O storyboard precisa ser corrigido antes da produção.")
         elif not coverr_key and not pixabay_key and not pexels_key:
