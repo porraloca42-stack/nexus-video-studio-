@@ -226,7 +226,7 @@ div[data-testid="stTextArea"] textarea,div[data-testid="stSelectbox"] div[data-b
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="nexus-hero"><div class="nexus-brand">NEXUS VIDEO STUDIO</div><div class="nexus-tagline">Transforme seu roteiro em vídeo</div></div>', unsafe_allow_html=True)
-st.caption("Versão: NEXUS-2026.11.16-wikimedia-provider-1")
+st.caption("Versão: NEXUS-2026.11.16-wikimedia-provider-2")
 
 if "nexus_style" not in st.session_state or st.session_state["nexus_style"] not in STYLE_OPTIONS:
     st.session_state["nexus_style"] = "Cinematográfico realista"
@@ -453,8 +453,8 @@ if "nexus_plan" in st.session_state:
             )
         if st.session_state.get("nexus_errors"):
             st.error("O storyboard precisa ser corrigido antes da produção.")
-        elif not pixabay_key and not pexels_key:
-            st.error("Configure PIXABAY_API_KEY ou PEXELS_API_KEY. Wikimedia Commons funciona sem chave, mas não substitui essas fontes de stock.")
+        elif not configured_libraries:
+            st.error("Nenhuma biblioteca de vídeo está disponível para pesquisa.")
         else:
             st.session_state.pop("nexus_rendered_video", None)
             st.session_state.pop("nexus_rendered_info", None)
@@ -492,6 +492,7 @@ if "nexus_plan" in st.session_state:
                             exclude_urls=used_asset_urls,
                             relevance_query=scene.get("fallback_search_query", scene["asset_search_query"]),
                             style_query=style_terms,
+                            wikimedia_enabled=True,
                         )
                         source_errors.extend(retry_errors)
                     if not candidates:
@@ -714,6 +715,10 @@ if "nexus_plan" in st.session_state:
                                 "url": item.get("source_url", ""),
                                 "author": item.get("author", ""),
                                 "author_url": item.get("author_url", ""),
+                                "license": item.get("license", ""),
+                                "license_url": item.get("license_url", ""),
+                                "credit": item.get("credit", ""),
+                                "attribution_required": item.get("attribution_required", False),
                             }
                             for item in media
                         ],
@@ -748,6 +753,7 @@ if st.session_state.get("nexus_rendered_video"):
             "Coverr": "https://coverr.co/",
             "Pixabay": "https://pixabay.com/videos/",
             "Pexels": "https://www.pexels.com/videos/",
+            "Wikimedia Commons": "https://commons.wikimedia.org/",
         }.get(provider, "")
         if not provider_url:
             continue
@@ -757,6 +763,12 @@ if st.session_state.get("nexus_rendered_video"):
                 line += f" · [ {credit['author']} ]({credit['author_url']})"
             else:
                 line += f" · {credit['author']}"
+        if credit.get("license"):
+            license_text = credit["license"]
+            if credit.get("license_url"):
+                line += f" · [Licença {license_text}]({credit['license_url']})"
+            else:
+                line += f" · Licença {license_text}"
         credits.append(line)
     if credits:
         st.markdown("**Créditos das bibliotecas utilizadas**\n\n" + "\n\n".join(credits))
