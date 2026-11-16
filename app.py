@@ -491,7 +491,41 @@ if "nexus_plan" in st.session_state:
                         "visual_reviews": [],
                         "source_credits": [],
                     }
-                    progress.progress(1.0, text="Vídeo produzido pelo Remotion e recuperado do trabalhador.")
+                    # Final editorial QA: inspect one representative frame from every scene.
+                    # This review is advisory and never discards a technically valid render.
+                    try:
+                        from nexus.visual_review import extract_scene_frames, review_scene_frames
+                        visual_key = secret("GEMINI_API_KEY")
+                        if visual_key:
+                            with tempfile.TemporaryDirectory(prefix="nexus_visual_review_") as qa_dir:
+                                qa_video = Path(qa_dir) / "rendered.mp4"
+                                qa_video.write_bytes(video_bytes)
+                                frames = extract_scene_frames(qa_video, plan.get("scenes", []), Path(qa_dir) / "frames")
+                                reviews = review_scene_frames(frames, plan.get("scenes", []), visual_key)
+                            st.session_state["nexus_rendered_info"]["visual_reviews"] = reviews
+                            scored = [item["semantic_score"] for item in reviews]
+                            average = round(sum(scored) / max(1, len(scored)), 1)
+                            st.session_state["nexus_rendered_info"]["visual_review_average"] = average
+                            st.session_state["nexus_rendered_info"]["visual_review_status"] = (
+                                "needs_attention" if any(not item["matches_narration"] or item["semantic_score"] < 6 for item in reviews)
+                                else "reviewed"
+                            )
+                            st.caption(f"Auditoria visual Gemini: média semântica {average}/10 em {len(reviews)} cenas.")
+                            with st.expander("Auditoria visual por cena"):
+                                st.dataframe([
+                                    {"Cena": item["scene_number"], "Aderência": f'{item["semantic_score"]}/10',
+                                     "Corresponde à fala": "Sim" if item["matches_narration"] else "Revisar",
+                                     "Problemas": "; ".join(item["issues"]),
+                                     "Recomendação": item["recommendation"]}
+                                    for item in reviews
+                                ], use_container_width=True, hide_index=True)
+                        else:
+                            st.session_state["nexus_rendered_info"]["visual_review_status"] = "not_configured"
+                            st.warning("MP4 validado tecnicamente; auditoria visual não executada porque GEMINI_API_KEY não está disponível neste ambiente.")
+                    except Exception as review_error:
+                        st.session_state["nexus_rendered_info"]["visual_review_status"] = "failed"
+                        st.warning(f"MP4 produzido, mas a auditoria visual não pôde ser concluída: {review_error}")
+                    progress.progress(1.0, text="Render e verificações concluídos.")
                     st.success("Vídeo MP4 produzido. O trabalhador verificou vídeo, áudio, resolução e duração.")
                 except Exception as exc:
                     progress.empty()
