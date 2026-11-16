@@ -628,3 +628,8 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Inspeção visual detectou fonte serifada por fallback no manifesto. Corrigido em `remotion/src/NexusVideo.tsx` com família sans-serif explícita (commit `3583c6d`); aguardar nova CI para confirmar.
 - CI #277 e #280–#281: suíte principal passou; run #277 confirmou 53 testes e Commons smoke. Run #282 está testando a validação de duração da narração no worker.
 - CI agora mantém o render gráfico de demonstração de 50s apenas para acionamento manual; pushes automáticos priorizam o teste de integração de mídia de 4s. Isso reduz o tempo de feedback.
+
+- **Remotion fonte corrigida e validada:** run #29 (`43844697510`), commit `3583c6d`, typecheck e render de integração passaram. Artefato baixado; quadro extraído confirmou fonte sans-serif na composição por manifesto. MP4 permaneceu H.264 720×1280 com áudio AAC e duração 4,011s.
+- Criado `docs/WORKERS_AI_SETUP.md` com instruções de criação e armazenamento seguro dos Secrets. O modo remoto não será ativado até o usuário configurar os Secrets em GitHub e Streamlit.
+- Adicionada validação de tamanho e resolução 512×910 para cada imagem gerada e bloqueio quando a duração de áudio Edge TTS divergir mais de 10% da meta; essas alterações aguardam a CI dos commits mais recentes.
+- O teste de resposta JSON Base64/JPEG foi adicionado para confirmar extensão de arquivo correta; aguardar execução #290/#291 antes de declarar o teste aprovado.
