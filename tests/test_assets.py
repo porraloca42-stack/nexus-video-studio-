@@ -62,6 +62,22 @@ class AssetRankingTests(unittest.TestCase):
         self.assertTrue(results[0]["attribution_required"])
         self.assertEqual(get.call_args.kwargs["params"]["gsrsearch"], "filetype:video ocean waves")
 
+    @patch("nexus.assets.search_pixabay_videos")
+    @patch("nexus.assets.search_wikimedia_videos")
+    def test_wikimedia_failure_does_not_block_pixabay(self, commons, pixabay):
+        import requests
+        commons.side_effect = requests.RequestException("Commons temporarily unavailable")
+        pixabay.return_value = [
+            clip("https://example.test/pixabay.mp4", "Person writing goals in notebook", "Journal writing")
+        ]
+        ranked, errors = search_video_sources(
+            "person writing goals in notebook",
+            pixabay_key="pixabay-key",
+            wikimedia_enabled=True,
+        )
+        self.assertTrue(errors)
+        self.assertEqual(ranked[0]["source"], "Pixabay")
+
     @patch("nexus.assets.search_wikimedia_videos")
     def test_wikimedia_can_supply_candidates_without_an_api_key(self, search):
         search.return_value = [
