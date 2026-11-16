@@ -23,13 +23,18 @@ const SceneLayer: React.FC<{ scene: NexusScene; index: number; from: number; dur
   );
   const accent = scene.accent || "#e8b66b";
   const drift = Math.sin(local / 32) * 18;
+  const progress = Math.max(0, Math.min(1, local / Math.max(1, duration)));
+  const motion = scene.cameraMotion || "push_in";
+  const imageScale = motion === "pull_out" ? 1.12 - progress * 0.07 : 1.06 + progress * 0.08;
+  const imageX = motion === "pan_left" ? progress * 34 : motion === "pan_right" ? -progress * 34 : 0;
+  const imageY = motion === "push_in" ? -progress * 16 : motion === "pull_out" ? progress * 12 : 0;
 
   return (
     <AbsoluteFill style={{ opacity: fade, overflow: "hidden", background: "#0b111a" }}>
       {scene.visualMode === "video" && scene.asset ? (
         <OffthreadVideo src={staticFile(scene.asset!)} muted style={{ width: "100%", height: "100%", objectFit: "cover" }} />
       ) : scene.visualMode === "image" && scene.asset ? (
-        <Img src={staticFile(scene.asset!)} style={{ width: "100%", height: "100%", objectFit: "cover", transform: `scale(${1.08 + local / Math.max(1, duration) * 0.05})` }} />
+        <Img src={staticFile(scene.asset!)} style={{ width: "100%", height: "100%", objectFit: "cover", transform: `translate(${imageX}px, ${imageY}px) scale(${imageScale})` }} />
       ) : (
         <AbsoluteFill style={{ background: "radial-gradient(ellipse at 70% 30%, #33485d 0%, #172330 36%, #090e15 78%)" }}>
           <div style={{ position: "absolute", width: 680, height: 680, borderRadius: "50%", border: `1px solid ${accent}66`, right: -290 + drift, top: 190, boxShadow: `0 0 100px ${accent}22, inset 0 0 100px ${accent}12` }} />
