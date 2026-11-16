@@ -127,6 +127,9 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Commit `0674f866` em `nexus/assets.py`: além da pontuação, a seleção exige correspondência de pelo menos dois termos distintos da cena quando a consulta contém dois ou mais termos significativos; consultas curtas exigem o único termo disponível. Isso reduz falsos positivos causados por coincidência de uma palavra isolada.
 - Commit `26a50b42` amplia a suíte para sete testes. Reteste local da lógica de assets após essa alteração: `compileall` e os sete testes passaram. O teste local foi executado sobre cópia de verificação dos módulos de busca e testes; não equivale a execução do Streamlit ou ao pipeline com APIs reais.
 
+- Commit `34afbca8` em `nexus/render.py`: o renderizador mede a duração da narração com FFprobe, ajusta pequenas diferenças de velocidade (faixa máxima de ±15%), completa pequenos déficits com padding e limita áudio/vídeo à duração total do storyboard. Diferenças maiores são rejeitadas com mensagem explícita, em vez de cortar silenciosamente a narração ou o vídeo por `-shortest`.
+- Validação local do renderizador com FFmpeg 7.1.5: duas cenas sintéticas foram normalizadas, concatenadas, receberam áudio AAC e legendas SRT; FFprobe confirmou MP4 H.264/AAC, 720×1280 e 4,0s. Testes adicionais com áudio 5% mais curto e 5% mais longo também resultaram em 4,0s; desvio de 20% foi bloqueado com erro explícito. A inspeção de frame confirmou a renderização das legendas. Este é teste técnico sintético do módulo de render, não é o primeiro vídeo real do usuário com mídia Coverr/Gemini/Edge TTS.
+
 ## Regras para o assistente em novos chats
 - Começar lendo este arquivo e o código relevante no GitHub antes de propor mudanças.
 - Tratar este documento como registro de continuidade, mas conferir o estado atual do repositório e deployment; pode ficar desatualizado.
