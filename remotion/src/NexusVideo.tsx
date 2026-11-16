@@ -55,8 +55,8 @@ const SceneLayer: React.FC<{ scene: NexusScene; duration: number; overlapFrames:
   const transitionFrames = clamp(direction?.transition?.durationFrames || overlapFrames || 8, 1, 12);
   const transitionIn = direction?.transition?.in || "cut";
   const transitionOut = direction?.transition?.out || "cut";
-  const fadeIn = transitionIn === "crossfade" || transitionIn === "fade" ? transitionFrames : 0;
-  const fadeOut = transitionOut === "fade" ? transitionFrames : 0;
+  const fadeIn = transitionIn === "crossfade" || transitionIn === "fade" || overlapFrames > 0 ? transitionFrames : 0;
+  const fadeOut = transitionOut === "fade" || transitionOut === "crossfade" ? transitionFrames : 0;
   const fadeInOpacity = fadeIn ? interpolate(frame, [0, fadeIn], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) : 1;
   const fadeOutOpacity = fadeOut ? interpolate(frame, [duration - fadeOut, duration], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) : 1;
   const opacity = Math.min(fadeInOpacity, fadeOutOpacity);
@@ -103,11 +103,11 @@ export const NexusVideo: React.FC<NexusVideoProps> = (props) => {
   let cursor = 0;
   const layers = props.scenes.map((scene, index) => {
     const sceneFrames = Math.max(1, Math.round(scene.durationSeconds * fps));
-    const nextScene = props.scenes[index + 1];
-    const outgoing = scene.sceneDirection?.transition?.out === "crossfade";
-    const incoming = nextScene?.sceneDirection?.transition?.in === "crossfade";
-    const requestedOverlap = outgoing || incoming
-      ? Math.max(scene.sceneDirection?.transition?.durationFrames || 0, nextScene?.sceneDirection?.transition?.durationFrames || 0, 8)
+    const previousScene = props.scenes[index - 1];
+    const incoming = scene.sceneDirection?.transition?.in === "crossfade";
+    const previousOutgoing = previousScene?.sceneDirection?.transition?.out === "crossfade";
+    const requestedOverlap = incoming || previousOutgoing
+      ? Math.max(scene.sceneDirection?.transition?.durationFrames || 0, previousScene?.sceneDirection?.transition?.durationFrames || 0, 8)
       : 0;
     const overlap = index === 0 ? 0 : Math.min(requestedOverlap, Math.max(0, sceneFrames - 1));
     const from = Math.max(0, cursor - overlap);
