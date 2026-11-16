@@ -208,6 +208,17 @@ def main(project_root=None):
         "audio_codec": audio.get("codec_name"),
         "video_codec": video.get("codec_name"),
         "images": generated,
+        "motion_clips": [
+            {key: value for key, value in clip.items() if key != "path"}
+            for clip in motion_clips
+        ],
+        "visual_source": "Cloudflare FLUX.2 Klein + Modal LTX-Video I2V + Remotion",
+        "total_i2v_seconds": round(
+            sum(float(clip.get("duration_seconds") or 0) for clip in motion_clips), 3
+        ),
+        "total_i2v_inference_seconds": round(
+            sum(float(clip.get("inference_seconds") or 0) for clip in motion_clips), 3
+        ),
     }
     report_path = work / "render-report.json"
     report_path.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
