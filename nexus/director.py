@@ -559,6 +559,29 @@ Cada cena deve mostrar ação concreta diretamente ligada à fala, com duas busc
         return [i for i, scene in enumerate(items, 1)
                 if not str(scene.get("voiceover", "") or "").strip()]
 
+    # Gemini occasionally under-segments a valid narration (e.g. 8 scenes for
+    # a 50s video), even when the requested scene range is explicit. Repair
+    # this once automatically instead of making the user press Plan again.
+    if len(scenes) < minimum_scenes:
+        repair_prompt = f"""O storyboard abaixo está incompleto: contém {len(scenes)} cenas, mas a duração de {target}s exige NO MÍNIMO {minimum_scenes} cenas (máximo desejado {preferred_scenes + 3}).
+Não reduza a quantidade. Refaça a divisão visual mantendo integralmente a narração, a ordem narrativa e a ideia de cada trecho. Divida trechos longos em unidades visuais menores e específicas, cada uma com voiceover não vazio, ação filmável própria, image_prompt, semantic_reason com pelo menos 80 caracteres, camera_motion, asset_search_query, fallback_search_query e pelo menos dois motion_events.
+A concatenação de todas as falas deve preservar o roteiro completo sem omissões ou repetições. Retorne no mínimo {minimum_scenes} e no máximo {preferred_scenes + 3} cenas. Tema: {topic}. Duração: {target}s. Estilo: {style}.
+Storyboard a expandir:
+{json.dumps(plan, ensure_ascii=False)}
+Retorne somente o JSON completo no formato do sistema."""
+        repaired = _request(repair_prompt, secret_reader)
+        apply_visual_style_lock(repaired, style)
+        repaired_scenes = repaired.get("scenes", [])
+        if len(repaired_scenes) > len(scenes):
+            plan = repaired
+            scenes = repaired_scenes
+        if len(scenes) < minimum_scenes:
+            raise RuntimeError(
+                f"O diretor retornou {len(scenes)} cenas para {target}s, abaixo do mínimo de "
+                f"{minimum_scenes}. A correção automática tentou reorganizar o storyboard, "
+                "mas a resposta continuou incompleta. Tente novamente em instantes."
+            )
+
     # Ask the model to rewrite the missing narration, rather than accepting a
     # storyboard with silent scenes. Retry twice; duration itself is handled
     # deterministically and never depends on Gemini's duration estimates.
