@@ -46,9 +46,10 @@ O painel avançado testa busca, download e leitura do vídeo. O resultado precis
 
 ## Estado de validação — 16/11/2026
 - **Código no GitHub:** alterações de seleção 9:16, revisão visual, bibliotecas gratuitas e Wikimedia Commons registradas na branch `main`.
-- **CI:** run #187 aprovado; compilação e 36 testes automatizados passaram. O teste de integração de render confirma MP4 vertical 720×1280 com áudio e legendas em ambiente de CI.
+- **CI principal:** run #291 aprovado; compilação e 54 testes automatizados passaram. O teste de render FFmpeg confirma MP4 vertical com áudio/legendas.
+- **Remotion:** runs #26 e #31 aprovados. O adaptador Python gerou manifesto a partir de clipe + WAV + SRT; Remotion renderizou H.264/AAC 720×1280, duração 4,011s; FFprobe e upload do artefato passaram. Demo gráfica 50s também foi validada no run #26. Fonte sans-serif corrigida e inspecionada no artefato do run #29.
 - **Wikimedia Commons ao vivo:** busca e download de um vídeo licenciado foram concluídos; FFprobe confirmou arquivo VP9 válido (1920×1080, 261,16 s, CC BY 3.0). Isso valida o fluxo técnico com o candidato testado, não a relevância editorial de todo resultado.
-- **Ainda pendente:** confirmação de deploy no Streamlit Cloud, teste ao vivo de Pixabay/Pexels/Gemini com os Secrets da aplicação e geração/inspeção de um MP4 completo no app publicado.
+- **Ainda pendente:** configuração dos Secrets Cloudflare/GitHub, geração real de imagens Workers AI, execução do worker de produção com credenciais, confirmação do deploy Streamlit e inspeção de um MP4 final com imagens geradas.
 - **Não declarar produção ponta a ponta validada** até concluir essas verificações no ambiente publicado.
 
 ## Modo experimental: imagens originais + Remotion
