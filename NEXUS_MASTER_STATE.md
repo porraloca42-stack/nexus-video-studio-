@@ -881,3 +881,12 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - O app define explicitamente `camera_motion="preserve"` para mídia de bancos de vídeo. A direção cinematográfica do storyboard continua registrada, mas não força movimentos artificiais sobre filmagens reais.
 - Teste de regressão adicionado para confirmar que o caminho padrão preserva o clipe sem filtro `zoompan`.
 - Estado: código alterado no repositório; aguarda CI e render MP4 real para validar resultado audiovisual. Não afirmar implantação no Streamlit nem qualidade final validada antes dessas verificações.
+
+ 
+## Auditoria temporal do MP4 — 16/11/2026
+- A revisão final anterior analisava apenas um quadro central por cena; isso permitia avaliar semântica e aparência, mas não observar a progressão visual dentro do clipe.
+- `extract_scene_frames()` agora extrai três quadros ordenados por cena (20%, 50% e 80% da duração). A revisão multimodal recebe cada trio agrupado e pode apontar repetição, ausência de ação/movimento significativo, problemas de continuidade e aderência à fala.
+- A função mantém compatibilidade com chamadas que forneçam um único quadro por cena, mas a extração padrão do MP4 passa a fornecer três.
+- Testes adicionados para trio temporal válido e grupos incompletos.
+- Limite: três amostras não equivalem a análise quadro a quadro nem medem optical flow/lip-sync. A revisão segue consultiva e depende da disponibilidade do Gemini.
+- Estado: alteração gravada no GitHub; CI e render real ainda precisam confirmar comportamento e custo/latência da auditoria.
