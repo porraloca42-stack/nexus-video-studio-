@@ -444,3 +444,16 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - CI run #171 (43827784402) encontrou uma expectativa antiga duplicada no teste de shortlist; teste duplicado removido no commit `3c702e8`. Teste adicional garante que falha do Commons não bloqueie Pixabay.
 - CI run #173 (43827844195), commit `d486f57`, ainda em execução no momento deste registro. Não marcar integração como validada até CI verde.
 - Código gravado no GitHub; deploy Streamlit e teste real de busca/download/FFprobe ainda pendentes.
+
+
+
+## Expansão de bibliotecas gratuitas e direção 9:16 — 16/11/2026
+- Implementado em `nexus/assets.py`: o ranking preserva relevância semântica como critério principal e, em caso de equivalência, prioriza vídeo vertical e proporção mais próxima de 9:16 (0,5625), antes da resolução. A proporção e o índice de aderência são registrados no candidato.
+- Implementado em `nexus/director.py`: Gemini Vision recebe dimensões/proporção dos candidatos e considera composição/corte vertical 9:16 como critério técnico terciário, sem sacrificar correspondência com a narração.
+- Implementado em `tests/test_assets.py`: teste para desempate entre 4:5, 9:16 e paisagem, mantendo relevância semântica.
+- Implementado em `app.py`: painel de fontes complementares gratuitas com links e avisos de licença para Mixkit, ISO Republic, Vecteezy, Vidsplay e National Park Service.
+- Política de integração: automação apenas por APIs/documentação permitidas. Mixkit proíbe scraping e bots/download em massa; ISO Republic, Vidsplay e NPS não têm API pública de pesquisa de stock verificada; Vecteezy anuncia API gratuita com até 500 downloads/mês, mas a tabela oficial não inclui metadados de recursos no plano gratuito. Por isso, essas fontes ficam em curadoria manual e não são falsamente apresentadas como busca automática.
+- Fontes automáticas gratuitas atuais: Wikimedia Commons sem chave (somente CC0, domínio público e CC BY), Pixabay (chave gratuita) e Pexels (chave gratuita, se configurada). Coverr permanece desativado no fluxo porque a credencial do plano Demo não autenticou; não exigir upgrade pago.
+- Referências de licença consultadas: Mixkit Free vs Restricted e termos contra scraping; Vecteezy API/pricing e Free License; ISO Republic CC0; NASA excluída da seleção comercial automática por direitos de terceiros e restrições de uso promocional.
+- Commits desta etapa: `0f67aed` (ranking 9:16), `a8259b3` (teste), `31b9b9e` (direção visual), `e5752fe` (painel de fontes), `db290c6` (README).
+- Estado de validação no momento do registro: CI dos commits 175–179 em execução/fila. Ainda não há prova de deploy Streamlit nem de busca externa/download/render real com essas alterações. O MP4 final continua não validado.
