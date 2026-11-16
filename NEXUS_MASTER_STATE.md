@@ -645,3 +645,9 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - O valor do token não deve ser registrado neste arquivo, em commits, issues ou mensagens. O token foi compartilhado na conversa; por prudência, recomenda-se substituí-lo por um novo token antes de uso prolongado, mas a ativação depende do cadastro de Secrets.
 - Próxima etapa: cadastrar `CLOUDFLARE_ACCOUNT_ID` e `CLOUDFLARE_API_TOKEN` em GitHub → Settings → Secrets and variables → Actions. Cadastrar também `CLOUDFLARE_API_TOKEN` em Streamlit Secrets. Ainda não confirmado: nenhum Secret foi gravado por esta sessão e nenhum render real Cloudflare foi executado.
 - A integração do GitHub disponível nesta sessão não expõe operações de escrita/leitura de Actions Secrets; o cadastro precisa ser feito pela interface do GitHub.
+
+
+## GitHub Actions Secrets cadastrados pelo usuário — 16/11/2026
+- Usuário informou que cadastrou no repositório os dois Repository Secrets: `CLOUDFLARE_ACCOUNT_ID` e `CLOUDFLARE_API_TOKEN`.
+- Registro baseado na confirmação do usuário; os valores não foram lidos nem expostos. A existência/validade dos Secrets e a autenticação Cloudflare ainda não foram verificadas por execução do worker.
+- Próxima etapa: cadastrar `CLOUDFLARE_API_TOKEN` em Streamlit Cloud → Manage app → Settings → Secrets, junto de `GITHUB_ACTIONS_TOKEN` (GitHub fine-grained PAT com Actions Read/Write e Contents Read). Depois executar um render real curto e inspecionar o MP4.
