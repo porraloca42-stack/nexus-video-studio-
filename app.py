@@ -130,8 +130,7 @@ st.markdown("""
 :root{color-scheme:dark!important;--nx-bg:#09090B!important;--nx-panel:#121216!important;--nx-line:#27272A!important;--nx-purple:#7C3AED!important;--nx-purple-bright:#8B5CF6!important;--nx-text:#F4F4F5!important;--nx-muted:#A1A1AA!important}
 html,body,.stApp,[data-testid="stAppViewContainer"]{background:radial-gradient(circle at top center,#18122B 0%,#09090B 48%)!important;color:#F4F4F5!important;font-family:'Plus Jakarta Sans',sans-serif!important}
 [data-testid="stAppViewContainer"]{background:radial-gradient(circle at top center,#18122B 0%,#09090B 48%)!important}
-[data-testid="stSidebar"],[data-testid="collapsedControl"],[data-testid="stToolbar"],#MainMenu,footer{display:none!important;visibility:hidden!important}
-header[data-testid="stHeader"]{background:transparent!important;border:0!important}
+[data-testid="stSidebar"],[data-testid="collapsedControl"],[data-testid="stHeader"],[data-testid="stToolbar"],[data-testid="manage-app-button"],#MainMenu,header,footer{display:none!important;visibility:hidden!important}
 .block-container{width:100%!important;max-width:1280px!important;padding:2rem 1.5rem 3rem!important}
 .nx-hero{position:relative!important;overflow:hidden!important;padding:1.7rem 1.8rem!important;border:1px solid rgba(139,92,246,.34)!important;border-radius:24px!important;background:linear-gradient(120deg,rgba(24,18,43,.98),rgba(18,18,22,.96) 65%,rgba(35,22,58,.92))!important;box-shadow:0 20px 55px rgba(0,0,0,.42)!important;margin-bottom:1.25rem!important}
 .nx-hero:after{content:""!important;position:absolute!important;width:300px!important;height:300px!important;right:-110px!important;top:-190px!important;border-radius:50%!important;background:rgba(124,58,237,.22)!important;filter:blur(18px)!important;pointer-events:none!important}
