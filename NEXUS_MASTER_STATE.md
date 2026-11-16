@@ -146,3 +146,12 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Commit a0942be: identificador visual atualizado para `NEXUS-2026.11.16-semantic-repair-1`.
 - Testes locais executados no trecho do reparador: sintaxe Python aprovada; teste de fallback confirmou justificativa acima de 80 caracteres e preservação de fala/ação da cena.
 - Ainda pendente: confirmar o novo identificador no Streamlit publicado e testar uma solicitação real de planejamento. Deploy e validação end-to-end não estão confirmados.
+
+
+## Correção do painel após planejamento — 16/11/2026
+- Evidência do usuário: a interface confirmou "Roteiro criado: 11 cenas · 50s, conforme solicitado" e exibiu o planejamento, mas em seguida lançou `KeyError` ao renderizar a caixa informativa da estimativa.
+- Causa confirmada: `nexus/director.py` grava `duration_adjustment.ai_estimated_seconds`, enquanto `app.py` tentava acessar a chave inexistente `adjustment['original_seconds']`. O storyboard e a soma de 50s já tinham sido produzidos corretamente; a falha era exclusivamente na apresentação do detalhe da estimativa.
+- Commit 44f6918: corrigido o acesso para usar `ai_estimated_seconds`, mantendo fallback compatível com registros antigos que contenham `original_seconds`.
+- Commit 5e545f9: build atualizado para `NEXUS-2026.11.16-plan-ui-keyerror-fix-1`, para facilitar a confirmação da versão no Streamlit.
+- Validação estática: confirmado que o produtor e o consumidor usam agora a mesma chave; o acesso antigo direto foi removido. A mensagem de sucesso e o painel de cenas não foram alterados.
+- Estado: correção gravada no branch main do GitHub. Deploy e reteste na interface Streamlit ainda pendentes; não declarar produção validada até o usuário confirmar a abertura do planejamento sem erro.
