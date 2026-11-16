@@ -40,9 +40,11 @@ class CloudflareImageTests(unittest.TestCase):
                 session=session,
             )
             self.assertEqual((Path(temp) / "scene.png").read_bytes(), PNG)
-            self.assertEqual(result["model"], "@cf/black-forest-labs/flux-1-schnell")
+            self.assertEqual(result["model"], "@cf/black-forest-labs/flux-2-klein-4b")
             self.assertEqual(session.calls[0][1]["headers"]["Authorization"], "Bearer secret")
-            self.assertEqual(session.calls[0][1]["json"]["steps"], 6)
+            self.assertEqual(session.calls[0][1]["files"]["width"], (None, "512"))
+            self.assertEqual(session.calls[0][1]["files"]["height"], (None, "910"))
+            self.assertEqual(result["steps"], 4)
 
     def test_generate_image_rejects_missing_credentials(self):
         with tempfile.TemporaryDirectory() as temp:
