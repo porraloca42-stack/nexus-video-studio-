@@ -344,3 +344,18 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Commit b689070: removida a importação antecipada do calibrador; agora ele é importado no ponto de uso, com mensagem de erro operacional clara caso o worker esteja com módulo antigo. Build: `NEXUS-2026.11.16-import-guard-1`.
 - Commit 1545831: criado teste para garantir que o calibrador não seja importado durante o startup e que a importação tardia esteja protegida.
 - CI run #116 em execução no momento do registro; run #117 enfileirado. Ainda não confirmado deploy Streamlit nem startup real após reinício.
+
+
+### Primeiro MP4 revisado: qualidade visual e legendas — 16/11/2026
+- Primeiro vídeo real recebido: 50s, 720×1280, H.264 + AAC. Revisão visual por amostragem de frames em 0s, 5,4s, 10,9s, 16,3s, 21,8s, 27,2s, 32,7s, 38,1s, 43,6s e 49s.
+- Problemas observados: clipes sem relação visual direta clara com a narração (incluindo água/copo, ambiente tecnológico e paisagens genéricas); seleção parecia depender demais dos metadados da biblioteca. Legendas excessivamente grandes e empilhadas no centro, prejudicando a imagem.
+- Não é possível afirmar apenas pelo MP4 se só a chave Pixabay estava configurada. O pipeline pesquisa todas as bibliotecas que tenham chave nos Secrets; foi incluído aviso visível quando apenas uma fonte estiver configurada.
+- Commit 5cebae6: shortlist de candidatos prioriza comparar pelo menos um resultado de cada biblioteca configurada antes de repetir um provedor.
+- Commit e6e6570: adicionada avaliação visual multimodal Gemini por cena. O NEXUS baixa até 3 candidatos, extrai dois frames representativos de cada clipe e pede ao Gemini comparar imagem real com narração, ação, sujeitos e ambiente. Só aprova com confiança mínima; rejeita todos se nenhum representar a cena. Falha de revisão não cai silenciosamente para escolha aleatória.
+- Commit 9ca4921: integração da revisão visual no pipeline de produção, com tratamento de falhas por candidato e progresso dedicado à avaliação.
+- Commit 142d486: corrigida importação Path usada pela avaliação visual.
+- Commit 98be254: legendas reduzidas de FontSize 17 para 12, contorno menor e posicionamento inferior com margem de segurança (170px).
+- Commits f9488a6, c0752ba, 5762632, f4b9b1c, 449a19e e 864f0a4: agrupamento de legendas em frases curtas de até 4 palavras, máximo de duas linhas, sem empilhar cues; correções de newline real e intervalos de fim de cue.
+- Commit 1777448: shortlist diversificada testada. Commit 8640d6e: testes da avaliação visual Gemini. Commit d7e3eb4: testes de legendas curtas.
+- Commit 0579667: painel passa a mostrar confiança média e justificativa da revisão visual por cena; build `NEXUS-2026.11.16-visual-review-subtitles-4`.
+- CI das alterações finais ainda em execução; primeiras execuções identificaram falhas nos testes de legenda e importação Path, que foram corrigidas nos commits seguintes. Não declarar a nova versão validada até CI verde e nova produção real.
