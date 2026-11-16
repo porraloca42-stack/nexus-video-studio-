@@ -739,3 +739,10 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Run #43870626598 (commit `b67371e`) falhou somente ao importar o teste novo: indentação incorreta no bloco de contexto `with`; a suíte restante passou (59 testes executados).
 - Commit `f4a78b1`: corrigida a indentação do caso de teste de 40s.
 - Aguardar nova regressão; até aprovação, não liberar teste do Streamlit.
+
+
+### Aprovação final do protocolo mínimo de cenas — 16/11/2026
+- Run #43871112101, commit `f4a78b1`: concluída com sucesso. Jobs `unit-tests` e `commons-live-smoke` aprovados.
+- A regra rígida de mínimo `max(10, ceil(duração/5))` está no código e a regressão correspondente passou: 40s = mínimo 10; 50s = mínimo 10; 60s = mínimo 12.
+- O teste inclui cenário de resposta inicial com 7 cenas para 40s, reparo automático para 10, e validação que rejeita 7 cenas.
+- Aprovado em CI; falta confirmação funcional pelo Streamlit publicado. O usuário pode atualizar a página e executar o planejamento de 40s. Ainda não é necessário iniciar render Cloudflare até confirmar que o planejamento entrega pelo menos 10 cenas.
