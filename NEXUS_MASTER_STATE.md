@@ -431,3 +431,16 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Testes de diversidade atualizados para tratar Wikimedia Commons como biblioteca ativa.
 - Build atualizado para `NEXUS-2026.11.16-wikimedia-provider-2`.
 - Estado: CI pendente; ainda não implantado nem validado com chamadas reais ao Commons.
+
+
+### Substituição do Coverr e endurecimento do provedor Wikimedia — 16/11/2026
+- Coverr removido do fluxo ativo de produção; não exigir mais `COVERR_API_KEY`.
+- Wikimedia Commons adicionado como provedor sem chave nas buscas principal e alternativa. O adaptador consulta `filetype:video`, lê `imageinfo/extmetadata`, preserva autor/fonte/licença e filtra para CC0, domínio público e CC BY; exclui licenças NC, ND e BY-SA para reduzir complexidade de redistribuição.
+- Pixabay e Pexels permanecem integrados por chaves existentes. Commons é fonte complementar; não é catálogo de stock tradicional e a cobertura vertical/anime pode ser limitada.
+- Diagnóstico avançado permite testar Commons sem chave, Pixabay e Pexels individualmente. Ajustado o helper para não misturar Commons nas chamadas de diagnóstico isoladas.
+- Créditos finais agora incluem autor, URL da fonte e licença do Commons.
+- README atualizado para refletir fontes e estado reais.
+- Build: `NEXUS-2026.11.16-wikimedia-provider-2`.
+- CI run #171 (43827784402) encontrou uma expectativa antiga duplicada no teste de shortlist; teste duplicado removido no commit `3c702e8`. Teste adicional garante que falha do Commons não bloqueie Pixabay.
+- CI run #173 (43827844195), commit `d486f57`, ainda em execução no momento deste registro. Não marcar integração como validada até CI verde.
+- Código gravado no GitHub; deploy Streamlit e teste real de busca/download/FFprobe ainda pendentes.
