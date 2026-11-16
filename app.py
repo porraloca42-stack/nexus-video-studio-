@@ -269,56 +269,55 @@ if "nexus_fish_voice_id" not in st.session_state:
 if "nexus_fish_voice_name" not in st.session_state:
     st.session_state["nexus_fish_voice_name"] = ""
 
-with st.expander("Voz da narração", expanded=True):
-    if not fish_api_key:
-        st.error("Configure FISH_API_KEY nos Secrets do Streamlit.")
-    else:
-        try:
-            # Keep this call compatible with older Streamlit workers that may
-            # still have a cached audio module without the newer self_only arg.
-            voice_page_data = list_fish_voices(
-                fish_api_key, page=1, page_size=100, language="pt",
-            )
-            voices = [
-                item for item in voice_page_data["items"]
-                if item.get("id") and item.get("visibility", "public") == "public"
-            ]
-            if not voices:
-                st.warning("Nenhuma voz em português disponível na biblioteca Fish Audio.")
-            else:
-                voice_by_id = {item["id"]: item for item in voices}
-                voice_ids = list(voice_by_id)
-                current_voice_id = st.session_state.get("nexus_fish_voice_id", "")
-                selected_index = voice_ids.index(current_voice_id) if current_voice_id in voice_ids else 0
-                select_col, preview_col = st.columns([4, 1], vertical_alignment="bottom")
-                with select_col:
-                    selected_voice_id = st.selectbox(
-                        "Voz da narração",
-                        options=voice_ids,
-                        index=selected_index,
-                        format_func=lambda voice_id: voice_by_id[voice_id]["title"],
-                        key="nexus_fish_voice_select",
-                    )
-                selected_voice = voice_by_id[selected_voice_id]
-                st.session_state["nexus_fish_voice_id"] = selected_voice_id
-                st.session_state["nexus_fish_voice_name"] = selected_voice["title"]
-                with preview_col:
-                    preview_key = f"nexus_fish_preview_{selected_voice_id}"
-                    preview_audio = st.session_state.get(preview_key)
-                    sample_audio = selected_voice.get("sample_audio")
-                    if sample_audio:
-                        st.audio(sample_audio, format="audio/mp3")
-                    elif preview_audio:
-                        st.audio(preview_audio, format="audio/mp3")
-                    elif st.button("▶ Ouvir", key=f"fish_preview_button_{selected_voice_id}", use_container_width=True):
-                        try:
-                            st.session_state[preview_key] = generate_fish_preview(fish_api_key, selected_voice_id)
-                            st.rerun()
-                        except Exception as preview_error:
-                            st.error(f"Prévia indisponível: {preview_error}")
-        except Exception as voice_error:
-            st.error(f"Não foi possível carregar as vozes: {voice_error}")
-            st.caption("A produção ficará bloqueada até que as vozes sejam carregadas corretamente.")
+if not fish_api_key:
+    st.error("Configure FISH_API_KEY nos Secrets do Streamlit.")
+else:
+    try:
+        # Keep this call compatible with older Streamlit workers that may
+        # still have a cached audio module without the newer self_only arg.
+        voice_page_data = list_fish_voices(
+            fish_api_key, page=1, page_size=100, language="pt",
+        )
+        voices = [
+            item for item in voice_page_data["items"]
+            if item.get("id") and item.get("visibility", "public") == "public"
+        ]
+        if not voices:
+            st.warning("Nenhuma voz em português disponível na biblioteca Fish Audio.")
+        else:
+            voice_by_id = {item["id"]: item for item in voices}
+            voice_ids = list(voice_by_id)
+            current_voice_id = st.session_state.get("nexus_fish_voice_id", "")
+            selected_index = voice_ids.index(current_voice_id) if current_voice_id in voice_ids else 0
+            select_col, preview_col = st.columns([4, 1], vertical_alignment="bottom")
+            with select_col:
+                selected_voice_id = st.selectbox(
+                    "Voz da narração",
+                    options=voice_ids,
+                    index=selected_index,
+                    format_func=lambda voice_id: voice_by_id[voice_id]["title"],
+                    key="nexus_fish_voice_select",
+                )
+            selected_voice = voice_by_id[selected_voice_id]
+            st.session_state["nexus_fish_voice_id"] = selected_voice_id
+            st.session_state["nexus_fish_voice_name"] = selected_voice["title"]
+            with preview_col:
+                preview_key = f"nexus_fish_preview_{selected_voice_id}"
+                preview_audio = st.session_state.get(preview_key)
+                sample_audio = selected_voice.get("sample_audio")
+                if sample_audio:
+                    st.audio(sample_audio, format="audio/mp3")
+                elif preview_audio:
+                    st.audio(preview_audio, format="audio/mp3")
+                elif st.button("▶ Ouvir", key=f"fish_preview_button_{selected_voice_id}", use_container_width=True):
+                    try:
+                        st.session_state[preview_key] = generate_fish_preview(fish_api_key, selected_voice_id)
+                        st.rerun()
+                    except Exception as preview_error:
+                        st.error(f"Prévia indisponível: {preview_error}")
+    except Exception as voice_error:
+        st.error(f"Não foi possível carregar as vozes: {voice_error}")
+        st.caption("A produção ficará bloqueada até que as vozes sejam carregadas corretamente.")
 
 voice = st.session_state.get("nexus_fish_voice_id", "")
 
