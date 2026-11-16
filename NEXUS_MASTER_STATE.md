@@ -25,9 +25,9 @@ Aplicativo pessoal em nuvem para transformar tema ou roteiro em vídeo vertical 
 - Interface: Streamlit (app.py).
 - Diretor: Gemini API (nexus/director.py), com failover entre modelos textuais compatíveis; produz roteiro, storyboard semântico e contrato `scene_direction` por cena.
 - Narração: Fish Audio S2.1 Pro Free como primário quando configurado; Edge TTS como fallback (nexus/audio.py). Não há trilha de legendas no pipeline.
-- Renderização principal da opção de bibliotecas: FFmpeg (nexus/render.py). O adaptador Remotion em `nexus/remotion_renderer.py` e o projeto `remotion/` são um fluxo alternativo via worker remoto.
-- Worker remoto: workflow GitHub Actions para render Remotion/Cloudflare; depende dos secrets e do deploy Streamlit.
-- Geração de imagens no fluxo alternativo: Cloudflare Workers AI FLUX.2 Klein; gera imagens estáticas, não vídeo.
+- Motor padrão selecionado na interface: Cloudflare Workers AI FLUX.2 Klein gera imagens originais por cena e o worker GitHub Actions usa Remotion (`nexus/remote_render_job.py`, `nexus/remotion_renderer.py`, `remotion/`) para compor o MP4 vertical. As imagens geradas são estáticas, não vídeo.
+- Modo alternativo: bibliotecas de vídeo com busca multi-fonte e renderização FFmpeg (`nexus/assets.py`, `nexus/render.py`); preservar o movimento nativo dos clipes.
+- O worker padrão depende dos secrets do Streamlit e do repositório GitHub; implantação do Streamlit e credenciais externas precisam ser verificadas separadamente.
 - Busca de mídia: Wikimedia Commons sem chave; Pixabay e Pexels somente quando suas chaves estiverem configuradas. Coverr não é considerado fonte ativa/validada.
 - Busca multi-fonte por cena, ranking semântico, exclusão de URLs já usadas e shortlist que favorece variedade de provedores já existem. A seleção final inspeciona dois quadros dos candidatos com Gemini.
 - Auditoria do MP4 final agora extrai três quadros por cena (início, meio e fim) e os envia agrupados para revisão semântica/temporal. É consultiva; três quadros não equivalem a análise quadro a quadro nem medem optical flow ou lip-sync.
@@ -36,11 +36,16 @@ Aplicativo pessoal em nuvem para transformar tema ou roteiro em vídeo vertical 
 
 ## Segredos
 Nunca armazenar valores de chaves neste arquivo, no GitHub ou em instruções do projeto.
-No Streamlit → Manage app → Settings → Secrets:
-- GEMINI_API_KEY — configurada pelo usuário; não solicitar novamente sem necessidade.
-- GEMINI_MODEL = "auto" — configurado pelo usuário.
-- COVERR_API_KEY — precisa ser validada com teste real de autenticação, busca e download.
-- PIXABAY_API_KEY — ainda não configurada.
+No Streamlit → Manage app → Settings → Secrets, o modo padrão requer:
+- `GITHUB_ACTIONS_TOKEN` — autoriza o dispatch e a leitura do workflow remoto.
+- `CLOUDFLARE_API_TOKEN` — protege o manifesto/MP4 em trânsito e é encaminhado cifrado para o worker.
+- `FISH_API_KEY` — ativa Fish Audio S2.1 Pro Free; sem ela o worker usa Edge TTS como fallback.
+- `FISH_VOICE_ID` — opcional, se a conta exigir/usar uma voz específica.
+- `GEMINI_API_KEY` e `GEMINI_MODEL = "auto"` — direção e storyboard.
+No repositório GitHub → Settings → Secrets and variables → Actions:
+- `CLOUDFLARE_ACCOUNT_ID` e `CLOUDFLARE_API_TOKEN` — necessários ao Cloudflare Workers AI.
+- `CLOUDFLARE_API_TOKEN` também é o segredo de transporte compartilhado com o Streamlit; não registrar seu valor.
+- `COVERR_API_KEY` e `PIXABAY_API_KEY` pertencem ao modo alternativo de bibliotecas, quando habilitados; suas integrações ainda precisam de validação individual.
 Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 
 ## Estado técnico verificado
@@ -975,3 +980,15 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - A correção e a orquestração simulada do worker foram validadas em run #412: 72/72 testes passaram, incluindo o teste integrado que descriptografa as credenciais Fish, confirma que são entregues ao gerador de narração, simula imagem Cloudflare, composição Remotion e valida MP4 vertical de 50s com áudio. MP4 e relatório são gravados cifrados no teste.
 - O app agora inicia com `Imagens originais · Cloudflare AI + Remotion` selecionado; bibliotecas são alternativa. O painel mostra o provedor de narração lido do relatório real do worker.
 - Não houve chamada real ao Cloudflare Workers AI nem Fish Audio nesta validação automatizada; as integrações foram simuladas. Deploy Streamlit não foi confirmado pelo acesso externo nesta sessão. A validação audiovisual final ainda depende de um render real no worker e inspeção do arquivo MP4 produzido.
+
+
+## Correção do teste de integração Remotion e estado atual — 16/11/2026
+- A investigação do workflow Remotion demo #59 (commit antigo `7add395`) encontrou falha real em `scripts/build_remotion_ci_manifest.py`: o script passava seis argumentos posicionais e um caminho SRT para `build_remotion_manifest`, embora a assinatura atual aceite `plan, media, audio_path, public_dir, job_id` e não possua trilha de legendas.
+- Commit `746c86b`: corrigido o script para usar a assinatura atual, produzir manifesto com mídia e narração e não criar/esperar SRT.
+- Commit `0c0436b`: workflow `.github/workflows/remotion-demo.yml` atualizado para remover a criação de legendas do teste sintético e refletir o pipeline sem SRT.
+- GitHub Actions run #60 (`43884194378`), commit `746c86b`: sucesso. O adaptador Python real criou o manifesto; Remotion renderizou o MP4; FFprobe validou vídeo 720×1280, áudio presente e duração de 4 segundos dentro da tolerância. O artefato `nexus-remotion-demos` foi publicado. É uma integração sintética curta, não um render Cloudflare/Fish nem um vídeo editorial real.
+- GitHub Actions run #417 (`43884210872`), commit `0c0436b`: os três jobs de regressão concluíram com sucesso: testes Python, typecheck Remotion e smoke test Commons.
+- Run #61 (`43884210769`), commit `0c0436b`: workflow de demonstração atualizado em execução no momento desta anotação; consultar seu resultado final antes de considerar o CI de demo fechado.
+- A interface do app confirma no código que o modo padrão é `Imagens originais · Cloudflare AI + Remotion`; bibliotecas/FFmpeg ficam como alternativa. Streamlit requer `GITHUB_ACTIONS_TOKEN`, `CLOUDFLARE_API_TOKEN`, `FISH_API_KEY` (opcional `FISH_VOICE_ID`); o repositório requer `CLOUDFLARE_ACCOUNT_ID` e `CLOUDFLARE_API_TOKEN`.
+- Não foi possível confirmar a implantação pública do Streamlit nesta sessão: a URL não ficou acessível pela verificação externa disponível. Não houve execução real do worker com Cloudflare Workers AI ou Fish Audio, nem MP4 de 40–50 segundos do usuário. A validação audiovisual final permanece pendente.
+- Próximo passo: concluir run #61; confirmar no Streamlit o marcador/versão carregada e executar o botão de produção no modo padrão; depois inspecionar o MP4 real e confirmar no relatório se a narração veio de Fish Audio ou Edge TTS.
