@@ -105,7 +105,7 @@ st.markdown("""
 .nexus-card-label {font-size:.82rem;font-weight:700;margin:.1rem 0 .4rem;color:#e6e9ef;}
 /* Use a true two-column grid: Streamlit's flex columns were overflowing on narrow mobile screens. */
 div.st-key-nexus-style-gallery {display:block !important; width:100% !important; max-width:100% !important; min-width:0 !important; overflow-x:hidden !important; box-sizing:border-box !important;}
-div.st-key-nexus-style-gallery div[data-testid="stHorizontalBlock"] {display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr)) !important; width:100% !important; max-width:100% !important; min-width:0 !important; gap:.55rem !important; overflow:hidden !important; box-sizing:border-box !important;}
+div.st-key-nexus-style-gallery div[data-testid="stHorizontalBlock"] {display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr)) !important; width:100% !important; max-width:100% !important; min-width:0 !important; column-gap:.55rem !important; row-gap:.7rem !important; margin-bottom:.7rem !important; overflow:hidden !important; box-sizing:border-box !important;}
 div.st-key-nexus-style-gallery div[data-testid="column"] {display:block !important; width:100% !important; max-width:100% !important; min-width:0 !important; flex:none !important; overflow:hidden !important; box-sizing:border-box !important;}
 div.st-key-nexus-style-gallery div[data-testid="column"] > div {width:100% !important; max-width:100% !important; min-width:0 !important; box-sizing:border-box !important;}
 div.st-key-nexus-style-gallery div[data-testid="stImage"] {display:flex !important; justify-content:center !important; width:100% !important; max-width:100% !important; margin-left:auto !important; margin-right:auto !important;}
