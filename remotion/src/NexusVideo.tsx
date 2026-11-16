@@ -17,7 +17,7 @@ const SceneLayer: React.FC<{ scene: NexusScene; index: number; from: number; dur
   const frame = useCurrentFrame();
   const local = frame - from;
   const fade = Math.min(
-    interpolate(local, [0, 18], [0, 1], { extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) }),
+    interpolate(local, [0, 18], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) }),
     interpolate(local, [duration - 18, duration], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }),
   );
   const accent = scene.accent || "#e8b66b";
