@@ -1037,3 +1037,5 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - GitHub Actions run #439 (`43888932375`): unit-tests e Remotion typecheck concluíram com sucesso após remoção da dependência Edge; o smoke test Commons ainda estava em execução no momento da atualização.
 
 - GitHub Actions run #441 (`43889005293`), commit `01471d2`: workflow completo `success`. Unit tests: 75/75 aprovados; Remotion typecheck: aprovado; smoke test Wikimedia Commons: aprovado. O worker não instala mais `edge-tts`.
+
+- Commit `2c5d06c` e `b278559`: a tela de vozes agora informa que gerar prévia consome uso da API, mostra o ID da voz escolhida e explica como persistir a voz padrão em `FISH_VOICE_ID`. Rótulo de versão da interface atualizado para `NEXUS-2026.11.16-fish-voice-library-2`.
