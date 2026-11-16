@@ -1290,3 +1290,9 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Limitação operacional: conector GitHub disponível não expõe ação para disparar workflow_dispatch. O workflow integrado precisa de um clique manual do usuário. Link: https://github.com/porraloca42-stack/nexus-video-studio-/actions/workflows/nexus-live-pipeline-smoke.yml
 - Após workflow #535 aprovar, usuário precisa executar o workflow acima uma vez. A execução chama Cloudflare Workers AI e Modal H100 e pode gerar custos; confirmar spend limit/créditos antes. O output artifact contém MP4 final e report.
 - Critério de conclusão desta fase: workflow integrado success, MP4 720×1280 H.264 + AAC validado, duração ~2s, e inspeção visual do movimento. Em seguida, rodar vídeo completo de 40–50s somente após verificar custos e qualidade; produção integral requer Fish Audio credentials e manifesto editorial real.
+
+## CI e integração Remotion aprovados — 16/11/2026 17:42 BRT
+- CI regression #535, run ID `43952202569`, commit `75417b1`: completed/success; unit-tests, Remotion typecheck e Commons live smoke aprovados.
+- Remotion demo render #75, run ID `43952157522`, commit `c7b6224`: completed/success. Testes de adapters, criação de mídia sintética, manifesto via adapter Python, render de integração Remotion, validação dos streams/duração e upload de demos passaram.
+- Esses resultados validam o Remotion e o adapter de mídia, mas o demo #75 não chama Cloudflare nem Modal LTX; a integração real completa está no workflow novo `nexus-live-pipeline-smoke.yml`.
+- Estado: código e CI do teste integrado aprovados. A execução Cloudflare→LTX→Remotion ainda aguarda disparo manual.
