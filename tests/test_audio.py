@@ -40,6 +40,9 @@ class AudioSubtitleTests(unittest.TestCase):
             content = subtitle_path.read_text(encoding="utf-8")
             self.assertIn("00:00:00,000 --> 00:00:01,000", content)
             self.assertIn("Olá mundo.", content)
+            self.assertNotIn("\\n", content)
+            self.assertGreaterEqual(len(content.splitlines()), 3)
+            self.assertTrue(content.startswith("1\n"))
             self.assertEqual(subtitle_path.suffix, ".srt")
 
     def test_falls_back_to_sentence_boundaries(self):
