@@ -215,7 +215,7 @@ header[data-testid="stHeader"]{background:rgba(8,11,18,.82)!important;border-bot
 .nx-subtitle{font-size:.94rem;color:#b5c3d7;margin-top:.55rem;max-width:650px}
 .nx-hero-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:1.15rem}
 .nx-chip{display:inline-flex;align-items:center;padding:.36rem .68rem;border:1px solid rgba(130,170,220,.22);border-radius:999px;background:rgba(255,255,255,.045);font-size:.7rem;color:#c8d5e8;letter-spacing:.04em}
-.nx-section-title{font-size:.7rem;font-weight:850;letter-spacing:.16em;text-transform:uppercase;color:#8fa7c8;margin:.25rem 0 .75rem}
+.nexus-kicker{font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:#53d8e8;font-weight:850;margin:.25rem 0 .75rem}.nx-section-title{font-size:.7rem;font-weight:850;letter-spacing:.16em;text-transform:uppercase;color:#8fa7c8;margin:.25rem 0 .75rem}
 .nx-helper{font-size:.82rem;color:var(--nx-muted);line-height:1.5;margin-bottom:.75rem}
 [data-testid="stTabs"]{margin-top:.3rem}
 [data-testid="stTabs"] [data-baseweb="tab-list"]{display:flex;gap:8px;padding:7px;border:1px solid var(--nx-line);border-radius:17px;background:rgba(15,23,42,.86);overflow-x:auto}
@@ -255,6 +255,9 @@ hr{border-color:rgba(139,166,204,.12)!important}
 </style>
 """, unsafe_allow_html=True)
 
+if "nexus_style" not in st.session_state or st.session_state["nexus_style"] not in STYLE_OPTIONS:
+    st.session_state["nexus_style"] = "Cinematográfico realista"
+
 st.markdown("""
 <div class="nx-hero">
   <div class="nx-eyebrow">AI CREATIVE PRODUCTION SYSTEM</div>
@@ -285,8 +288,8 @@ with tab_visual:
     with st.expander("Escolher estilo visual · 24 referências", expanded=False):
         st.caption("Exemplos ilustrativos · toque para selecionar.")
         with st.container(key="nexus-style-gallery"):
-            for row_start in range(0, len(STYLE_OPTIONS), 2):
-                cols = st.columns(2)
+            for row_start in range(0, len(STYLE_OPTIONS), 3):
+                cols = st.columns(3)
                 for offset, col in enumerate(cols):
                     index = row_start + offset
                     if index >= len(STYLE_OPTIONS):
