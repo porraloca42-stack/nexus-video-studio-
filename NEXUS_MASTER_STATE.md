@@ -336,3 +336,11 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Código e testes da orientação de pontuação expressiva validados pelo CI.
 - Build esperado na interface: NEXUS-2026.11.16-human-voice-punctuation-1.
 - Ainda não foi feita avaliação auditiva da voz TTS nem confirmado um MP4 real renderizado com a nova versão. CI verde não equivale a validação perceptiva ou validação de produção.
+
+
+### Correção de inicialização Streamlit após ImportError — 16/11/2026
+- Evidência do usuário: Streamlit não iniciou; traceback aponta para linha 5 de app.py ao importar `revise_narration_for_duration` de `nexus.director`.
+- Verificação no GitHub: a função existe no módulo atual (definida em linha 567); app.py fazia import antecipado no topo. O cenário é compatível com worker Streamlit usando módulo desatualizado durante atualização/reinício.
+- Commit b689070: removida a importação antecipada do calibrador; agora ele é importado no ponto de uso, com mensagem de erro operacional clara caso o worker esteja com módulo antigo. Build: `NEXUS-2026.11.16-import-guard-1`.
+- Commit 1545831: criado teste para garantir que o calibrador não seja importado durante o startup e que a importação tardia esteja protegida.
+- CI run #116 em execução no momento do registro; run #117 enfileirado. Ainda não confirmado deploy Streamlit nem startup real após reinício.
