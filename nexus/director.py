@@ -117,10 +117,10 @@ def _request(prompt, secret_reader):
     candidate = candidates[0]
     finish_reason = candidate.get("finishReason", "desconhecido")
     parts = candidate.get("content", {}).get("parts", [])
-    result = "\\n".join(part.get("text", "") for part in parts if isinstance(part, dict) and part.get("text"))
+    result = "\n".join(part.get("text", "") for part in parts if isinstance(part, dict) and part.get("text"))
     if not result.strip():
         raise RuntimeError("O Gemini retornou uma resposta sem texto (motivo: " + str(finish_reason) + "). Tente novamente.")
-    cleaned = re.sub(r"^\\s*```(?:json)?\\s*|\\s*```\\s*$", "", result.strip(), flags=re.IGNORECASE)
+    cleaned = re.sub(r"^\s*```(?:json)?\s*|\s*```\s*$", "", result.strip(), flags=re.IGNORECASE)
     try:
         plan = json.loads(cleaned)
     except json.JSONDecodeError:
@@ -135,7 +135,7 @@ def _request(prompt, secret_reader):
     if not isinstance(plan, dict) or not isinstance(plan.get("scenes"), list):
         if finish_reason == "MAX_TOKENS":
             raise RuntimeError("O Gemini interrompeu a resposta por limite de saída antes de concluir o storyboard. Tente novamente; a geração agora permite uma resposta maior.")
-        preview = re.sub(r"\\s+", " ", result)[:350]
+        preview = re.sub(r"\s+", " ", result)[:350]
         raise RuntimeError("O Gemini não retornou JSON completo e válido (motivo: " + str(finish_reason) + "). Trecho recebido: " + preview)
     plan["director_model"] = model
     return plan
