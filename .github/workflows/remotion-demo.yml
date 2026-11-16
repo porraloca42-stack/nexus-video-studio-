@@ -1,0 +1,40 @@
+name: NEXUS Remotion demo render
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "remotion/**"
+      - ".github/workflows/remotion-demo.yml"
+
+jobs:
+  render-demo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: remotion/package.json
+
+      - name: Install Remotion project dependencies
+        working-directory: remotion
+        run: npm install --no-audit --no-fund
+
+      - name: Render 50-second vertical demo
+        working-directory: remotion
+        run: npm run render:demo
+
+      - name: Upload MP4 demo
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexus-remotion-demo
+          path: remotion/out/nexus-demo.mp4
+          if-no-files-found: error
+          retention-days: 7
