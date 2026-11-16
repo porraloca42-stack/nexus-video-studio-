@@ -1,3 +1,4 @@
+import base64
 import tempfile
 import unittest
 from pathlib import Path
@@ -45,6 +46,23 @@ class CloudflareImageTests(unittest.TestCase):
             self.assertEqual(session.calls[0][1]["files"]["width"], (None, "512"))
             self.assertEqual(session.calls[0][1]["files"]["height"], (None, "910"))
             self.assertEqual(result["steps"], 4)
+
+    def test_json_base64_jpeg_response_uses_matching_extension(self):
+        with tempfile.TemporaryDirectory() as temp:
+            jpeg = b"\\xff\\xd8\\xff" + b"nexus-jpeg"
+            response = FakeResponse()
+            response.headers = {"content-type": "application/json"}
+            response.content = b""
+            response.json = lambda: {"result": {"image": base64.b64encode(jpeg).decode("ascii")}}
+            result = generate_image(
+                "portrait scene",
+                Path(temp) / "scene.png",
+                account_id="account",
+                api_token="secret",
+                session=FakeSession(response),
+            )
+            self.assertTrue(result["path"].endswith("scene.jpg"))
+            self.assertEqual(Path(result["path"]).read_bytes(), jpeg)
 
     def test_generate_image_rejects_missing_credentials(self):
         with tempfile.TemporaryDirectory() as temp:
