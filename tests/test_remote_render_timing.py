@@ -11,7 +11,7 @@ class RemoteRenderTimingTests(unittest.TestCase):
             source = Path(temp) / "captions.srt"
             target = Path(temp) / "captions_synced.srt"
             source.write_text(
-                "1\\n00:00:01,000 --> 00:00:02,000\\nOlá\\n",
+                "1\n00:00:01,000 --> 00:00:02,000\nOlá\n",
                 encoding="utf-8",
             )
             _retime_srt(source, target, 0.885)
@@ -23,7 +23,7 @@ class RemoteRenderTimingTests(unittest.TestCase):
             source = Path(temp) / "captions.srt"
             target = Path(temp) / "captions_synced.srt"
             source.write_text(
-                "1\\n00:00:10,000 --> 00:00:12,000\\nCena\\n",
+                "1\n00:00:10,000 --> 00:00:12,000\nCena\n",
                 encoding="utf-8",
             )
             _retime_srt(source, target, 0.90)
