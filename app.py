@@ -41,6 +41,7 @@ def _search_stock_compatible(query, coverr_key="", pixabay_key="", pexels_key=""
         supports_style_query = "style_query" in search_parameters
     except (TypeError, ValueError):
         supports_pexels = False
+        supports_style_query = False
 
     if supports_pexels:
         return search_video_sources(
