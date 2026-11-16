@@ -388,3 +388,10 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Testes atualizados para garantir que candidatos da busca semântica cheguem ao revisor visual e que resultados somente estéticos não preencham a cena.
 - Commits: `4172678` (recuperação de candidatos), `e95818f` (ordenação antes do filtro), `3422599` (testes), `ec9574c` (diagnóstico e build).
 - Estado: código gravado no GitHub; CI desta correção aguardando. Não há evidência suficiente para afirmar qual biblioteca ou consulta específica falhou na execução do usuário, pois o painel de detalhes da captura não está expandido. Deploy/refresh Streamlit e MP4 de validação continuam pendentes.
+
+
+### Ajuste dos testes da recuperação de candidatos — 16/11/2026
+- A primeira execução CI da correção detectou dois testes antigos que ainda esperavam rejeição apenas por metadados; esses testes foram substituídos por cobertura do novo contrato: consulta de cena entrega candidatos à inspeção visual e consulta apenas estética não libera clipes sem evidência semântica.
+- A execução seguinte detectou um fixture incompleto no teste de estilo: a função faz duas variantes de consulta de cena antes da consulta de estilo. Fixture corrigido no commit `c7ea142`, com três respostas simuladas na ordem real.
+- CI run #155 (43825816807) estava em execução no momento deste registro; resultado ainda não confirmado.
+- Correção de produção permanece no build `NEXUS-2026.11.16-narration-first-selection-2`. Não declarar validado até CI verde e teste real.
