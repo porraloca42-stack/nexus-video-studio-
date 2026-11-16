@@ -206,7 +206,7 @@ st.markdown("""
 :root{color-scheme:dark}
 html,body,.stApp,[data-testid="stAppViewContainer"]{background:#09090B!important;color:#F4F4F5!important;font-family:'Plus Jakarta Sans',sans-serif!important}
 [data-testid="stAppViewContainer"]{background:radial-gradient(circle at 50% 0%,#18122B 0%,#09090B 46%)!important}
-[data-testid="stSidebar"],[data-testid="collapsedControl"],[data-testid="stHeader"],[data-testid="stToolbar"],[data-testid="manage-app-button"],#MainMenu,header,footer{display:none!important;visibility:hidden!important}
+[data-testid="stSidebar"],[data-testid="collapsedControl"],[data-testid="stHeader"],[data-testid="stToolbar"],[data-testid="manage-app-button"],[data-testid="stFooter"],[data-testid="stBottom"],#MainMenu,header,footer,.stApp>footer,div[class*="viewerBadge"],div[class*="ViewerBadge"],div[class*="viewer-badge"]{display:none!important;visibility:hidden!important;height:0!important;min-height:0!important;padding:0!important;margin:0!important;border:0!important}
 .block-container{padding-top:2rem!important;padding-bottom:3rem!important;max-width:1280px!important}
 .nexus-hero{position:relative;overflow:hidden;padding:1.45rem 1.65rem;border:1px solid #30234d;border-radius:22px;background:linear-gradient(115deg,rgba(24,18,43,.98),rgba(18,18,22,.96) 65%,rgba(30,24,52,.95));box-shadow:0 18px 48px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.06);margin-bottom:1rem}
 .nexus-brand{font-size:clamp(1.35rem,3vw,2rem);font-weight:800;letter-spacing:.12em;color:#f4f4f5}
