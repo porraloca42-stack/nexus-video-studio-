@@ -5,6 +5,7 @@ blocks delivery when the review service is unavailable.
 """
 import base64
 import json
+import subprocess
 from pathlib import Path
 
 import requests
@@ -125,3 +126,37 @@ def review_scene_frames(frame_paths, scenes, api_key, model=None, timeout=180, s
             raise RuntimeError("Gemini retornou JSON inválido na auditoria visual.")
         payload, _ = json.JSONDecoder().raw_decode(text[start:])
     return normalize_review(payload, scenes)
+
+
+def extract_scene_frames(video_path, scenes, output_dir):
+    """Extract one centered JPEG frame per scene from a rendered MP4."""
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    probe = subprocess.run(
+        ["ffprobe", "-v", "error", "-show_entries", "format=duration",
+         "-of", "default=noprint_wrappers=1:nokey=1", str(video_path)],
+        capture_output=True, text=True, timeout=45,
+    )
+    if probe.returncode:
+        raise RuntimeError("Não foi possível medir o MP4 para auditoria visual.")
+    total = float(probe.stdout.strip())
+    durations = [float(scene.get("duration_seconds") or scene.get("duration") or 0) for scene in scenes]
+    if not scenes or any(value <= 0 for value in durations):
+        raise ValueError("Durações de cena inválidas para auditoria visual.")
+    if abs(sum(durations) - total) > 1.5:
+        raise RuntimeError("A linha do tempo do storyboard diverge do MP4; auditoria cancelada.")
+    paths = []
+    cursor = 0.0
+    for index, duration in enumerate(durations, 1):
+        timestamp = min(total - 0.08, cursor + duration / 2)
+        frame = output_dir / f"scene_review_{index:02d}.jpg"
+        result = subprocess.run(
+            ["ffmpeg", "-y", "-ss", f"{timestamp:.3f}", "-i", str(video_path),
+             "-frames:v", "1", "-vf", "scale=512:-2", "-q:v", "7", str(frame)],
+            capture_output=True, text=True, timeout=45,
+        )
+        if result.returncode or not frame.is_file() or frame.stat().st_size < 500:
+            raise RuntimeError(f"Não foi possível extrair o quadro da cena {index}.")
+        paths.append(str(frame))
+        cursor += duration
+    return paths
