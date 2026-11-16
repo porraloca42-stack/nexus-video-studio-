@@ -65,20 +65,21 @@ if st.button("Testar Coverr: buscar e baixar clipe", type="secondary"):
 
 with st.sidebar:
     st.subheader("Produção")
-    style = st.selectbox("Estilo visual das cenas", [
-        "Cinematográfico realista", "Documentário cinematográfico",
-        "Dark cinematográfico", "Filme noir", "Publicidade premium",
-        "Lifestyle realista", "Natureza documental", "Minimalista clean",
-        "Vintage filme 35mm", "VHS retrô", "Cyberpunk neon",
-        "Ficção científica futurista", "Fantasia cinematográfica",
-        "Surrealismo fotográfico", "Anime 2D", "Anime 3D",
-        "Ilustração editorial", "Aquarela artística", "Graphic novel",
-        "3D realista", "3D estilizado", "Stop motion",
-        "Macro e detalhes", "Drone e paisagens aéreas"
-    ], help="O estilo escolhido é enviado ao diretor de IA e influencia a descrição visual e as buscas de clipes de todas as cenas.")
     voice = st.selectbox("Voz", ["pt-BR-AntonioNeural", "pt-BR-FranciscaNeural", "pt-BR-ThalitaNeural"])
     duration = st.selectbox("Duração", [40, 50, 60], index=1)
 
+st.subheader("Direção visual")
+style = st.selectbox("Estilo visual das cenas", [
+    "Cinematográfico realista", "Documentário cinematográfico",
+    "Dark cinematográfico", "Filme noir", "Publicidade premium",
+    "Lifestyle realista", "Natureza documental", "Minimalista clean",
+    "Vintage filme 35mm", "VHS retrô", "Cyberpunk neon",
+    "Ficção científica futurista", "Fantasia cinematográfica",
+    "Surrealismo fotográfico", "Anime 2D", "Anime 3D",
+    "Ilustração editorial", "Aquarela artística", "Graphic novel",
+    "3D realista", "3D estilizado", "Stop motion",
+    "Macro e detalhes", "Drone e paisagens aéreas"
+], help="A escolha será enviada ao diretor de IA e aplicada às buscas de todas as cenas.")
 topic = st.text_area("Assunto ou roteiro", height=150, placeholder="Digite um assunto ou cole o roteiro completo.")
 if st.button("Planejar vídeo", type="primary", use_container_width=True):
     if not topic.strip():
@@ -89,7 +90,22 @@ if st.button("Planejar vídeo", type="primary", use_container_width=True):
         with st.spinner("Analisando o conteúdo e dirigindo as cenas..."):
             try:
                 plan = create_storyboard(topic, style, duration, secret)
-                errors = validate_storyboard(plan, duration)
+                try:
+                    errors = validate_storyboard(plan, duration)
+                except TypeError:
+                    # Compatibility while Streamlit refreshes an older cached module version.
+                    errors = validate_storyboard(plan)
+                    scenes = plan.get("scenes", [])
+                    minimum = max(1, int((float(duration) + 4) // 5))
+                    total = sum(float(scene.get("duration_seconds", 0) or 0) for scene in scenes)
+                    if len(scenes) < minimum:
+                        errors.append(f"O diretor criou {len(scenes)} cenas; são necessárias pelo menos {minimum}.")
+                    if abs(total - float(duration)) > 0.75:
+                        errors.append(f"A soma das cenas é {total:.1f}s; a duração solicitada é {duration}s.")
+                    for scene_index, scene in enumerate(scenes, 1):
+                        for field in ("visual_style", "style_search_terms"):
+                            if not str(scene.get(field, "")).strip():
+                                errors.append(f"Cena {scene_index}: campo {field} vazio.")
                 st.session_state["nexus_plan"] = plan
                 st.session_state["nexus_errors"] = errors
                 st.session_state.pop("nexus_rendered_video", None)
