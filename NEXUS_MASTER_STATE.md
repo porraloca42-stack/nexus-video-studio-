@@ -1379,3 +1379,12 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Commits desta iteração: `e0a3ca1` (layout/CSS e colunas), `6f18c9a` (tema Streamlit), `4aae09e` (CSS logo após page config), `647c470` (remoção das barras nativas).
 - Validação disponível até aqui: leitura pós-commit do código e conferência estática das áreas alteradas. CI/workflow não retornou execução associada aos commits na consulta; não declarar testes automatizados aprovados. Falta validação visual real no app de teste e teste funcional do planejamento até MP4.
 - O preview Streamlit continua sendo uma segunda instância de teste apontada para esta branch; ela permite avaliar sem alterar o app principal. `main` permanece intacta.
+
+
+## Inspeção estática pós-implementação Gemini — 16/11/2026
+- Reabertos `app.py`, `.streamlit/config.toml`, `NEXUS_MASTER_STATE.md` e PR #1 na branch de teste; consultado também o estado atual de `main`.
+- Confirmado: CSS está imediatamente após `st.set_page_config`; tema TOML é coerente com o CSS; as três abas existem; briefing usa colunas 1.5:1; a galeria usa grade desktop de 3 colunas e regra mobile de 2 colunas; não há chamadas `st.sidebar`.
+- Confirmado no código: o painel de prévia usa `style_preview_svg` e declara que a imagem é apenas referência ilustrativa; a lógica de seleção de estilo, voz Fish Audio e motor de produção permanece dentro das respectivas áreas.
+- Inspeção estática não substitui execução Streamlit nem teste visual em viewport mobile. Não foi possível confirmar visualmente o preview nem executar testes automatizados nesta etapa; o wrapper de workflows não retornou runs para o head atual.
+- Estado de branches: `main` está 3 commits à frente do ancestral comum da branch; a branch de teste está 12 commits à frente e 3 atrás, portanto o PR #1 está divergente e marcado como não mergeável no momento. Não fazer merge. Antes de qualquer integração, sincronizar a branch de teste com a main e repetir validações.
+- Próximo passo seguro: conferir a interface na instância Streamlit de teste com captura mobile e desktop; depois sincronizar a branch com a main, resolver divergência preservando a UI atual e executar CI. A aplicação principal não deve receber este redesign sem aprovação visual/funcional.
