@@ -1263,3 +1263,18 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Jobs aprovados: unit-tests, remotion-typecheck e commons-live-smoke. O teste unitário anterior falhava apenas por mensagem esperada desatualizada no teste Fish; expectativa corrigida e suite aprovada.
 - Isso valida sintaxe/compilação e testes automatizados, não executa o workflow Modal Deploy nem GPU.
 - Workflow atualizado de deploy+smoke test está pronto em `.github/workflows/modal-deploy.yml`; aguarda disparo manual pelo usuário. Depois validar artifact e inferência real.
+
+## Primeiro smoke test real do LTX aprovado — 16/11/2026 17:27 BRT
+- GitHub Actions Modal Deploy #2, run ID `43949077365`, commit `0436eae841e406dbe6d0180ec1f1216c64e8b063`: completed/success em 2m53s.
+- Todos os passos passaram: instalação de dependências, deploy do worker, inferência real de uma cena na H100, validação FFprobe e upload do artefato.
+- Log do smoke test confirma:
+  - status success;
+  - modelo `Lightricks/LTX-Video`, revision `a6d59ee37c13c58261aa79027d3e41cd41960925`;
+  - duração 2.041667 s; 49 frames; 24 fps;
+  - inferência informada pelo worker: 7.863 s;
+  - resolução 512×896; codec H.264;
+  - MP4 28,376 bytes.
+- Artefato GitHub Actions `nexus-ltx-smoke-test`, ID `14267146078`, size 28,076 bytes, criado 16/11/2026 20:25:10Z, expira 19/11/2026 20:25:09Z. Inclui MP4 e report JSON. Link: https://github.com/porraloca42-stack/nexus-video-studio-/actions/runs/43949077365/artifacts/14267146078
+- Estado: worker implantado e inferência H100 validada; MP4 exportado e validado tecnicamente. Qualidade editorial/movimento ainda precisa inspeção visual do MP4. Smoke test usou paisagem sintética, não imagem real do NEXUS.
+- Próximo passo: baixar artefato e assistir ao MP4; depois executar render de uma cena real via pipeline NEXUS (Cloudflare base image -> Modal I2V -> Remotion) e validar compatibilidade/duração/qualidade; somente então render de 40–50s.
+- Tempo de inferência 7.863s refere-se ao campo retornado pelo worker para 2s de vídeo; não equivale ao tempo total do job nem a custo faturado. Verificar Modal usage/billing para custo real.
