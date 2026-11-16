@@ -29,27 +29,35 @@ def main():
         )
 
     with tempfile.TemporaryDirectory(prefix="nexus_commons_smoke_") as temp:
-        video_path = download_file(candidates[0]["url"], Path(temp) / "commons_smoke_video")
-        probe = subprocess.run(
-            [
-                "ffprobe", "-v", "error",
-                "-show_entries", "format=duration,size:stream=codec_type,codec_name,width,height",
-                "-of", "json", str(video_path),
-            ],
-            capture_output=True, text=True, timeout=90,
-        )
-        if probe.returncode != 0:
-            raise SystemExit("FAIL: FFprobe could not read the downloaded Commons video: " + probe.stderr[-1000:])
-        metadata = json.loads(probe.stdout)
-        video = next((stream for stream in metadata.get("streams", []) if stream.get("codec_type") == "video"), None)
-        duration = float(metadata.get("format", {}).get("duration") or 0)
-        size = int(metadata.get("format", {}).get("size") or video_path.stat().st_size)
-        if not video or duration <= 0 or size <= 0:
-            raise SystemExit("FAIL: downloaded Commons asset has no valid video stream/duration/size.")
-        print(
-            f"PASS: downloaded and decoded video | {video.get('width')}x{video.get('height')} | "
-            f"{duration:.2f}s | {size} bytes | {video.get('codec_name')}"
-        )
+        failures = []
+        for index, candidate in enumerate(candidates, 1):
+            try:
+                video_path = download_file(candidate["url"], Path(temp) / f"commons_smoke_video_{index}")
+                probe = subprocess.run(
+                    [
+                        "ffprobe", "-v", "error",
+                        "-show_entries", "format=duration,size:stream=codec_type,codec_name,width,height",
+                        "-of", "json", str(video_path),
+                    ],
+                    capture_output=True, text=True, timeout=90,
+                )
+                if probe.returncode != 0:
+                    raise RuntimeError("FFprobe: " + probe.stderr[-600:])
+                metadata = json.loads(probe.stdout)
+                video = next((stream for stream in metadata.get("streams", []) if stream.get("codec_type") == "video"), None)
+                duration = float(metadata.get("format", {}).get("duration") or 0)
+                size = int(metadata.get("format", {}).get("size") or video_path.stat().st_size)
+                if not video or duration <= 0 or size <= 0:
+                    raise RuntimeError("arquivo sem faixa de vídeo, duração ou tamanho válidos")
+                print(
+                    f"PASS: downloaded and decoded video | {video.get('width')}x{video.get('height')} | "
+                    f"{duration:.2f}s | {size} bytes | {video.get('codec_name')} | "
+                    f"{candidate.get('license')}"
+                )
+                return
+            except Exception as exc:
+                failures.append(f"{candidate.get('title')}: {exc}")
+        raise SystemExit("FAIL: no Commons candidate could be downloaded and decoded. " + " | ".join(failures))
 
 
 if __name__ == "__main__":
