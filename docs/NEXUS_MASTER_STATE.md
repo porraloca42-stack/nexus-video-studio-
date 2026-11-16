@@ -113,6 +113,8 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Verificação realizada nesta sessão: inspeção dos arquivos atuais no GitHub; teste isolado da lógica de ranking/exclusão passou. Os testes do repositório e a execução no Streamlit ainda não foram executados; não considerar pipeline validado.
 - Próxima sequência: (1) executar testes automatizados/compilação no repositório; (2) testar storyboard real de 50s com 10–15 cenas e estilo escolhido; (3) testar busca Coverr por cena e revisar títulos/consultas escolhidos, sem repetir clipes; (4) ajustar a busca se houver falsos positivos ou ausência de resultados; (5) gerar o primeiro MP4 completo, validar FFprobe, duração, áudio, legendas e qualidade visual. Pixabay permanece pendente de chave; Pexels permanece fora do escopo até a emissão de chave estar disponível.
 
+- Commit `1d390e2c`: criado workflow GitHub Actions `.github/workflows/tests.yml`, executando compilação sintática (`compileall`) e `unittest discover` em pushes/PRs para `main`. O arquivo foi confirmado no GitHub; o endpoint de status ainda não retornou checks, portanto CI permanece pendente e não deve ser descrita como aprovada.
+
 ## Regras para o assistente em novos chats
 - Começar lendo este arquivo e o código relevante no GitHub antes de propor mudanças.
 - Tratar este documento como registro de continuidade, mas conferir o estado atual do repositório e deployment; pode ficar desatualizado.
