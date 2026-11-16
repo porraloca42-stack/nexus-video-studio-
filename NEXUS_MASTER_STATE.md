@@ -622,3 +622,9 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - CI #271 (commit `ae27ac6`): 53 testes passaram, incluindo geração Cloudflare simulada, criptografia e regressões de render FFmpeg. Typecheck Remotion passou.
 - CI #25 Remotion: render gráfico de 50s e FFmpeg fixture passaram; build do manifesto falhou apenas pela importação Python acima. Não houve render real de manifesto com mídia/áudio nessa execução.
 - Estado atual: código do modo Cloudflare + Remotion no GitHub; testes unitários aprovados. O worker de produção ainda não foi executado porque faltam Secrets do usuário. Deploy Streamlit e render de integração com áudio/vídeo continuam pendentes.
+
+- **Validação Remotion ponta a ponta concluída em CI:** run #26 (`43844202166`), commit `a54e14c`, sucesso. Typecheck, testes de adaptadores, demo 50s, instalação FFmpeg, criação de clipe sintético + WAV + SRT, build do manifesto via adaptador Python, render Remotion, validação FFprobe e upload de artefatos passaram.
+- Artefato `nexus-remotion-demos` baixado e inspecionado: `nexus-adapter-integration.mp4` é H.264 720×1280, AAC, 4,011s; `nexus-demo.mp4` é H.264 720×1280, 50,0s. O teste prova integração de vídeo/áudio/legendas via adaptador em runner GitHub, não Cloudflare real.
+- Inspeção visual detectou fonte serifada por fallback no manifesto. Corrigido em `remotion/src/NexusVideo.tsx` com família sans-serif explícita (commit `3583c6d`); aguardar nova CI para confirmar.
+- CI #277 e #280–#281: suíte principal passou; run #277 confirmou 53 testes e Commons smoke. Run #282 está testando a validação de duração da narração no worker.
+- CI agora mantém o render gráfico de demonstração de 50s apenas para acionamento manual; pushes automáticos priorizam o teste de integração de mídia de 4s. Isso reduz o tempo de feedback.
