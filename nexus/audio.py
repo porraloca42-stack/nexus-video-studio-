@@ -93,6 +93,48 @@ def list_fish_voices(api_key, *, page=1, page_size=6, title="", tags=None, langu
     return {"total": int(total or len(voices)), "items": voices}
 
 
+def get_fish_voice(api_key, voice_id, *, session=None):
+    """Fetch one explicitly curated public Fish voice by stable model ID."""
+    if not voice_id:
+        raise FishAudioError("ID da voz Fish Audio não informado.")
+    client = session or requests
+    response = client.get(
+        f"{FISH_API}/model/{voice_id}",
+        headers=_fish_headers(api_key),
+        timeout=30,
+    )
+    try:
+        response.raise_for_status()
+        payload = response.json()
+    except Exception as exc:
+        detail = getattr(response, "text", "")[:500]
+        raise FishAudioError(f"Não foi possível carregar a voz Fish Audio: {detail or exc}") from exc
+    item = payload.get("data") if isinstance(payload.get("data"), dict) else payload
+    if not isinstance(item, dict):
+        raise FishAudioError("A Fish Audio retornou dados inválidos para a voz selecionada.")
+    if item.get("type") not in (None, "", "tts") or item.get("state") not in (None, "", "trained"):
+        raise FishAudioError("A voz selecionada não está disponível para narração.")
+    if item.get("visibility") not in (None, "", "public"):
+        raise FishAudioError("A voz selecionada não está publicada.")
+    samples = item.get("samples") or []
+    sample = next((entry for entry in samples if isinstance(entry, dict) and entry.get("audio")), {})
+    sample_audio = sample.get("audio") or sample.get("audio_url") or item.get("preview_url") or ""
+    if sample_audio and not sample_audio.startswith(("http://", "https://", "data:")):
+        sample_audio = urljoin(f"{FISH_API}/", sample_audio.lstrip("/"))
+    return {
+        "id": str(item.get("_id") or item.get("id") or voice_id),
+        "title": str(item.get("title") or "Voz sem título"),
+        "description": str(item.get("description") or ""),
+        "languages": item.get("languages") or [],
+        "tags": item.get("tags") or [],
+        "author": (item.get("author") or {}).get("nickname", ""),
+        "sample_audio": sample_audio,
+        "sample_text": sample.get("text") or "",
+        "visibility": item.get("visibility", "public"),
+        "task_count": int(item.get("task_count") or 0),
+    }
+
+
 def _is_natural_brazilian_voice(voice):
     """Keep only human-style Brazilian Portuguese narration/conversation voices."""
     title = (voice.get("title") or "").casefold()
