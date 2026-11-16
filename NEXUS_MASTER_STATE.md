@@ -733,3 +733,9 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - A primeira regressão do commit `a7de9de` identificou apenas uma expectativa antiga no teste de 50s: ele ainda procurava o texto anterior do prompt ("NO MÍNIMO 10 cenas"), enquanto a nova instrução usa "NO MÍNIMO ABSOLUTO 10 CENAS". Não foi falha da regra de produção.
 - Commit `6bc0963`: expectativa do teste atualizada para o protocolo novo.
 - Run #43862094799 está na fila para validar o commit com a correção do teste; aprovação ainda pendente. Não pedir ao usuário para retestar antes de CI verde.
+
+
+### Acompanhamento CI do mínimo de cenas — 16/11/2026
+- Run #43870626598 (commit `b67371e`) falhou somente ao importar o teste novo: indentação incorreta no bloco de contexto `with`; a suíte restante passou (59 testes executados).
+- Commit `f4a78b1`: corrigida a indentação do caso de teste de 40s.
+- Aguardar nova regressão; até aprovação, não liberar teste do Streamlit.
