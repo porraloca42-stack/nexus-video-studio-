@@ -1,18 +1,126 @@
-import asyncio
+"""Fish Audio voice discovery, previews and narration.
+
+NEXUS intentionally has no robotic system-TTS fallback: a Fish Audio failure is
+reported clearly instead of silently changing the selected voice.
+"""
+import base64
+import json
 from pathlib import Path
+from urllib.parse import urljoin
 
-import edge_tts
+import requests
 
 
-def _make_fish_voice(text, output, api_key, voice_id=None, session=None):
-    """Generate Fish S2.1 Pro Free audio and native word alignment via SSE."""
-    import base64
-    import json
-    import requests
+FISH_API = "https://api.fish.audio"
+FISH_TTS_MODEL = "s2.1-pro-free"
+FISH_VOICE_TEXT = "Olá! Esta é uma amostra da minha voz para a narração do seu vídeo. Vamos transformar essa ideia em uma história que prende a atenção."
 
+
+class FishAudioError(RuntimeError):
+    """Raised when Fish Audio cannot list voices or synthesize speech."""
+
+
+def _fish_headers(api_key, model=None):
+    if not api_key:
+        raise FishAudioError("Configure FISH_API_KEY nos Secrets do Streamlit.")
+    headers = {"Authorization": f"Bearer {api_key}"}
+    if model:
+        headers["model"] = model
+    return headers
+
+
+def list_fish_voices(api_key, *, page=1, page_size=6, title="", language="pt", session=None):
+    """List public Fish Audio TTS voices, including their published sample audio."""
+    client = session or requests
+    params = {
+        "page_size": max(1, min(int(page_size), 100)),
+        "page_number": max(1, int(page)),
+        "sort_by": "task_count",
+    }
+    if title and title.strip():
+        params["title"] = title.strip()
+    if language:
+        params["language"] = language
+    response = client.get(
+        f"{FISH_API}/model",
+        headers=_fish_headers(api_key),
+        params=params,
+        timeout=30,
+    )
+    try:
+        response.raise_for_status()
+        payload = response.json()
+    except Exception as exc:
+        detail = getattr(response, "text", "")[:500]
+        raise FishAudioError(f"Não foi possível consultar a biblioteca Fish Audio: {detail or exc}") from exc
+
+    items = payload.get("items") or payload.get("data", {}).get("items") or []
+    voices = []
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        if item.get("type") not in (None, "", "tts"):
+            continue
+        if item.get("state") not in (None, "", "trained"):
+            continue
+        if item.get("visibility") not in (None, "", "public"):
+            continue
+        samples = item.get("samples") or []
+        sample = next((entry for entry in samples if isinstance(entry, dict) and entry.get("audio")), {})
+        sample_audio = sample.get("audio") or sample.get("audio_url") or item.get("preview_url") or ""
+        if sample_audio and not sample_audio.startswith(("http://", "https://", "data:")):
+            sample_audio = urljoin(f"{FISH_API}/", sample_audio.lstrip("/"))
+        voices.append({
+            "id": str(item.get("_id") or item.get("id") or ""),
+            "title": str(item.get("title") or "Voz sem título"),
+            "description": str(item.get("description") or ""),
+            "languages": item.get("languages") or [],
+            "tags": item.get("tags") or [],
+            "author": (item.get("author") or {}).get("nickname", ""),
+            "sample_audio": sample_audio,
+            "sample_text": sample.get("text") or "",
+            "visibility": item.get("visibility", "public"),
+            "task_count": int(item.get("task_count") or 0),
+        })
+    return {"total": int(payload.get("total") or len(voices)), "items": voices}
+
+
+def generate_fish_preview(api_key, voice_id, *, text=FISH_VOICE_TEXT, session=None):
+    """Generate a short preview for a voice model that has no published sample."""
+    if not voice_id:
+        raise FishAudioError("Selecione uma voz Fish Audio antes de gerar a amostra.")
+    client = session or requests
+    response = client.post(
+        f"{FISH_API}/v1/tts",
+        headers={
+            **_fish_headers(api_key, FISH_TTS_MODEL),
+            "Content-Type": "application/json",
+        },
+        json={
+            "text": text,
+            "reference_id": voice_id,
+            "format": "mp3",
+            "normalize": True,
+            "language": "pt",
+        },
+        timeout=(20, 120),
+    )
+    try:
+        response.raise_for_status()
+    except Exception as exc:
+        raise FishAudioError(f"Fish Audio não conseguiu gerar a amostra: {getattr(response, 'text', '')[:500]}") from exc
+    content_type = response.headers.get("content-type", "").lower()
+    if not response.content or "json" in content_type:
+        raise FishAudioError("Fish Audio não retornou um arquivo de áudio MP3 válido para a amostra.")
+    return response.content
+
+
+def _make_fish_voice(text, output, api_key, voice_id, session=None):
+    """Generate Fish S2.1 Pro Free audio and concatenate native timestamped SSE chunks."""
     client = session or requests
     payload = {
         "text": text,
+        "reference_id": voice_id,
         "format": "mp3",
         "sample_rate": 44100,
         "mp3_bitrate": 128,
@@ -23,14 +131,11 @@ def _make_fish_voice(text, output, api_key, voice_id=None, session=None):
         "chunk_length": 300,
         "condition_on_previous_chunks": True,
     }
-    if voice_id:
-        payload["reference_id"] = voice_id
     response = client.post(
-        "https://api.fish.audio/v1/tts/stream/with-timestamp",
+        f"{FISH_API}/v1/tts/stream/with-timestamp",
         headers={
-            "Authorization": f"Bearer {api_key}",
+            **_fish_headers(api_key, FISH_TTS_MODEL),
             "Content-Type": "application/json",
-            "model": "s2.1-pro-free",
         },
         json=payload,
         stream=True,
@@ -55,37 +160,30 @@ def _make_fish_voice(text, output, api_key, voice_id=None, session=None):
         if encoded:
             audio_parts.append(base64.b64decode(encoded))
     if not audio_parts:
-        raise RuntimeError("Fish Audio não retornou segmentos de áudio.")
+        raise FishAudioError("Fish Audio não retornou segmentos de áudio.")
     output.write_bytes(b"".join(audio_parts))
     return output
 
 
 def make_voice(text, voice, output, fish_api_key=None, fish_voice_id=None, session=None, return_provider=False):
-    """Generate narration audio only; captions are intentionally handled in post-production."""
+    """Generate narration only with the selected Fish voice; never fall back to Edge TTS."""
     output = Path(output)
     output.parent.mkdir(parents=True, exist_ok=True)
-
-    if fish_api_key:
-        try:
-            result = _make_fish_voice(
-                text, output, fish_api_key, voice_id=fish_voice_id, session=session
-            )
-            if not output.exists() or output.stat().st_size == 0:
-                raise RuntimeError("Fish Audio retornou um arquivo de áudio vazio.")
-            return (result, "Fish Audio") if return_provider else result
-        except Exception as exc:
-            fish_error = str(exc)[:240]
-            output.unlink(missing_ok=True)
-
-    async def generate():
-        communicate = edge_tts.Communicate(text, voice, rate="+0%")
-        with output.open("wb") as audio_file:
-            async for chunk in communicate.stream():
-                if chunk.get("type") == "audio":
-                    audio_file.write(chunk["data"])
-
-    asyncio.run(generate())
-    if not output.exists() or output.stat().st_size == 0:
-        raise RuntimeError("O sintetizador não gerou um arquivo de áudio válido.")
-    provider = "Edge TTS" + (f" (fallback: {fish_error})" if fish_api_key else "")
-    return (output, provider) if return_provider else output
+    voice_id = fish_voice_id or voice
+    if not fish_api_key:
+        raise FishAudioError("Narração interrompida: FISH_API_KEY não está configurada. Nenhuma voz robótica será usada.")
+    if not voice_id:
+        raise FishAudioError("Selecione uma voz da biblioteca Fish Audio antes de produzir o vídeo.")
+    try:
+        result = _make_fish_voice(text, output, fish_api_key, voice_id=voice_id, session=session)
+        if not output.exists() or output.stat().st_size == 0:
+            raise FishAudioError("Fish Audio retornou um arquivo de áudio vazio.")
+    except Exception as exc:
+        output.unlink(missing_ok=True)
+        if isinstance(exc, FishAudioError):
+            raise
+        raise FishAudioError(
+            f"Fish Audio falhou ao gerar a voz selecionada ({str(exc)[:220]}). "
+            "A produção foi interrompida para não substituir a voz por uma narração robótica."
+        ) from exc
+    return (result, "Fish Audio S2.1 Pro Free") if return_provider else result
