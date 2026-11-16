@@ -360,9 +360,9 @@ voice = st.session_state.get("nexus_fish_voice_id", "")
 
 render_mode = st.selectbox(
     "Motor de produção visual",
-    ["Imagens originais · Cloudflare AI + Remotion", "Bibliotecas de vídeo (alternativo)"],
+    ["Imagens originais · Cloudflare + Modal I2V + Remotion", "Bibliotecas de vídeo (alternativo)"],
     index=0,
-    help="Fluxo principal: Cloudflare Workers AI gera imagens específicas para cada cena e o Remotion compõe o MP4 no trabalhador GitHub Actions. As bibliotecas de vídeo permanecem disponíveis como alternativa.",
+    help="Fluxo principal: Cloudflare gera o keyframe de cada cena, Modal/LTX-Video anima cada keyframe em um clipe MP4 e Remotion monta o vídeo final. Requer MODAL_TOKEN_ID e MODAL_TOKEN_SECRET nos GitHub Actions Secrets e o worker Modal implantado. Bibliotecas de vídeo permanecem como alternativa.",
 )
 
 with st.expander("Ferramentas avançadas · diagnóstico das bibliotecas de vídeo"):
@@ -550,12 +550,12 @@ if "nexus_plan" in st.session_state:
             )
         if st.session_state.get("nexus_errors"):
             st.error("O storyboard precisa ser corrigido antes da produção.")
-        elif render_mode == "Imagens originais · Cloudflare AI + Remotion":
+        elif render_mode == "Imagens originais · Cloudflare + Modal I2V + Remotion":
             github_token = secret("GITHUB_ACTIONS_TOKEN")
             cloudflare_token = secret("CLOUDFLARE_API_TOKEN")
             if not github_token or not cloudflare_token or not fish_api_key or not voice:
                 st.error("Configure GITHUB_ACTIONS_TOKEN, CLOUDFLARE_API_TOKEN e FISH_API_KEY, e selecione uma voz da biblioteca Fish Audio.")
-                st.info("O repositório GitHub também precisa dos Secrets CLOUDFLARE_ACCOUNT_ID e CLOUDFLARE_API_TOKEN. O manifesto e o MP4 trafegam criptografados.")
+                st.info("O repositório GitHub também precisa dos Secrets CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN, MODAL_TOKEN_ID e MODAL_TOKEN_SECRET. O worker Modal deve estar implantado. O manifesto e o MP4 trafegam criptografados.")
             else:
                 progress = st.progress(0.05, text="Enviando storyboard para o trabalhador audiovisual...")
                 try:
@@ -581,7 +581,7 @@ if "nexus_plan" in st.session_state:
                         "narration_provider": report.get("narration_provider", "não informado pelo worker"),
                         "size_mb": len(video_bytes) / (1024 * 1024),
                         "scene_count": len(plan.get("scenes", [])),
-                        "visual_source": "Cloudflare Workers AI + Remotion",
+                        "visual_source": report.get("visual_source", "Cloudflare + Modal I2V + Remotion"),
                         "worker_run_id": result.get("run_id"),
                         "visual_reviews": [],
                         "source_credits": [],
