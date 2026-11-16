@@ -140,15 +140,76 @@ def _request(prompt, secret_reader):
     plan["director_model"] = model
     return plan
 
+def _fit_scene_durations(scenes, requested_duration):
+    """Distribute the requested runtime across existing scenes, keeping clips 2–5s."""
+    target = int(round(float(requested_duration)))
+    count = len(scenes)
+    if not count or target < 2 * count or target > 5 * count:
+        raise ValueError(
+            f"Não é possível distribuir {target}s em {count} cenas mantendo cada clipe entre 2 e 5 segundos."
+        )
+
+    original = [max(0.1, float(scene.get("duration_seconds", 0) or 0)) for scene in scenes]
+    durations = [2] * count
+    remaining = target - sum(durations)
+    capacities = [3] * count
+
+    # Weighted water-filling: preserve the director's relative pacing while
+    # respecting the 2–5 second range for every stock-video clip.
+    while remaining > 0:
+        active = [i for i, capacity in enumerate(capacities) if capacity > 0]
+        if not active:
+            raise ValueError("As cenas não comportam a duração solicitada.")
+        weight_sum = sum(original[i] for i in active)
+        shares = {i: remaining * original[i] / weight_sum for i in active}
+        allocated = 0
+        for i in active:
+            whole = min(capacities[i], int(shares[i]))
+            if whole:
+                durations[i] += whole
+                capacities[i] -= whole
+                allocated += whole
+        remaining -= allocated
+        if remaining <= 0:
+            break
+        ranked = sorted(
+            (i for i in active if capacities[i] > 0),
+            key=lambda i: (shares[i] - int(shares[i]), original[i]),
+            reverse=True,
+        )
+        if not ranked:
+            continue
+        for i in ranked:
+            if remaining <= 0:
+                break
+            durations[i] += 1
+            capacities[i] -= 1
+            remaining -= 1
+
+    for scene, seconds in zip(scenes, durations):
+        scene["duration_seconds"] = seconds
+    return durations
+
+
 def create_storyboard(topic, style, duration, secret_reader):
     prompt = f"""ASSUNTO OU ROTEIRO COMPLETO:
 {topic}
 
 ESTILO VISUAL ESCOLHIDO PELO USUÁRIO (OBRIGATÓRIO EM TODAS AS CENAS): {style}
 DURAÇÃO TOTAL: {duration} segundos.
-Planeje primeiro a narrativa completa. Depois divida em cenas suficientes para cobrir a duração sem lacunas. Use como piso ceil(duração/5) cenas e meta ceil(duração/4) ou mais, com segmentos geralmente de 3–4 segundos. Para 50 segundos, crie 12–15 cenas e nunca menos de 10. A soma exata das durações deve corresponder à duração solicitada. A quantidade e o conteúdo das cenas devem nascer da progressão do roteiro, não de temas predefinidos. Para cada trecho, gere buscas principal e alternativa próprias, específicas e diferentes, em inglês. Cada busca deve conter o assunto/ação da cena e termos visuais compatíveis com o estilo escolhido ({style}). Não reutilize palavras-chave genéricas nem acrescente objetos/ações que a fala não sustenta. Preserve a relação semântica exata entre cada fala e sua imagem. Escreva a narração em português brasileiro natural."""
+Planeje primeiro a narrativa completa. Depois divida em cenas suficientes para cobrir a duração sem lacunas. Use como piso ceil(duração/5) cenas e meta ceil(duração/4) ou mais, com segmentos geralmente de 3–4 segundos. Para 50 segundos, crie 12–15 cenas e nunca menos de 10. A soma exata das durações DEVE ser igual a {duration} segundos (não aproximada). Antes de retornar o JSON, some todos os duration_seconds e confira que o total fecha exatamente em {duration}; distribua o tempo entre as cenas sem ultrapassar 5 segundos por cena. Nunca retorne storyboard incompleto. A quantidade e o conteúdo das cenas devem nascer da progressão do roteiro, não de temas predefinidos. Para cada trecho, gere buscas principal e alternativa próprias, específicas e diferentes, em inglês. Cada busca deve conter o assunto/ação da cena e termos visuais compatíveis com o estilo escolhido ({style}). Não reutilize palavras-chave genéricas nem acrescente objetos/ações que a fala não sustenta. Preserve a relação semântica exata entre cada fala e sua imagem. Escreva a narração em português brasileiro natural."""
     plan = _request(prompt, secret_reader)
     plan["style_lock"] = style
+    scenes = plan.get("scenes", [])
+    if scenes:
+        original_total = sum(float(scene.get("duration_seconds", 0) or 0) for scene in scenes)
+        if abs(original_total - float(duration)) > 0.01:
+            fitted = _fit_scene_durations(scenes, duration)
+            plan["duration_adjustment"] = {
+                "original_seconds": round(original_total, 2),
+                "requested_seconds": int(round(float(duration))),
+                "scene_durations": fitted,
+            }
     return plan
 
 def validate_storyboard(plan, requested_duration=None):
