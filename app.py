@@ -675,7 +675,9 @@ if "nexus_plan" in st.session_state:
                     media.append({
                         "path": str(path),
                         "duration": scene["duration_seconds"],
-                        "camera_motion": scene.get("camera_motion", "push_in"),
+                        # Library footage already contains real camera/subject motion.
+                        # Keep the source movement; do not add a synthetic zoom to every clip.
+                        "camera_motion": "preserve",
                         "source_title": chosen.get("title", ""),
                         "source_url": chosen.get("source_url", ""),
                         "source": chosen.get("source", "Stock"),
