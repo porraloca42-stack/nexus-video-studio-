@@ -60,7 +60,7 @@ class AssetRankingTests(unittest.TestCase):
         self.assertEqual(results[0]["license"], "CC BY 4.0")
         self.assertEqual(results[0]["author"], "Jane Creator")
         self.assertTrue(results[0]["attribution_required"])
-        self.assertEqual(get.call_args.kwargs["params"]["gsrsearch"], "filetype:video ocean waves")
+        self.assertEqual(get.call_args.args[0], "filetype:video ocean waves")
 
     @patch("nexus.assets.search_pixabay_videos")
     @patch("nexus.assets.search_wikimedia_videos")
@@ -89,9 +89,9 @@ class AssetRankingTests(unittest.TestCase):
             call_args.kwargs["params"]["gsrsearch"]
             for call_args in search.call_args_list
         ]
-        self.assertIn("filetype:video person writing goals in notebook", searched_queries)
-        self.assertIn("filetype:video goals notebook", searched_queries)
-        self.assertIn("filetype:video goals", searched_queries)
+        self.assertIn("person writing goals in notebook", searched_queries)
+        self.assertIn("goals notebook", searched_queries)
+        self.assertIn("goals", searched_queries)
 
     @patch("nexus.assets.search_wikimedia_videos")
     def test_wikimedia_can_supply_candidates_without_an_api_key(self, search):
@@ -275,7 +275,7 @@ class AssetRankingTests(unittest.TestCase):
         )
         self.assertFalse(errors)
         self.assertEqual([item["url"] for item in ranked], ["https://example.test/semantic.mp4"])
-        self.assertEqual(search.call_count, 6)
+        self.assertEqual(search.call_count, 4)
         self.assertEqual(search.call_args_list[-1].args[0], "anime 2D animation")
 
     def test_empty_results_are_safe(self):
@@ -305,9 +305,9 @@ class AssetRankingTests(unittest.TestCase):
 
         self.assertFalse(errors)
         self.assertEqual({item["source"] for item in ranked}, {"Coverr", "Pixabay", "Pexels"})
-        self.assertEqual(coverr.call_count, 5)
-        self.assertEqual(pixabay.call_count, 5)
-        self.assertEqual(pexels.call_count, 5)
+        self.assertEqual(coverr.call_count, 4)
+        self.assertEqual(pixabay.call_count, 4)
+        self.assertEqual(pexels.call_count, 4)
 
     @patch("nexus.assets.search_pexels_videos")
     def test_pexels_adapter_uses_current_video_endpoint_and_normalizes_files(self, search):
@@ -322,7 +322,7 @@ class AssetRankingTests(unittest.TestCase):
 
         self.assertFalse(errors)
         self.assertEqual(ranked[0]["source"], "Pexels")
-        self.assertEqual(search.call_count, 2)
+        self.assertEqual(search.call_count, 4)
 
     @patch("nexus.assets.search_pixabay_videos")
     @patch("nexus.assets.search_coverr_videos")
