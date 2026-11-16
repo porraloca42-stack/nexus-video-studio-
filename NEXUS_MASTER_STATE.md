@@ -241,3 +241,11 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Isso confirma divergência entre a versão da função carregada no worker e a chamada feita pelo app; não é evidência de chave API inválida.
 - Commit 3133d3b: adicionado `_search_stock_compatible` no `app.py`. A função inspeciona a assinatura carregada: usa a integração central quando há suporte a `pexels_key`; em workers com assinatura antiga, busca Coverr/Pixabay pela interface legada e consulta Pexels diretamente via API, normalizando os resultados para o esquema interno. O diagnóstico e a produção usam o mesmo adaptador.
 - CI e teste real no Streamlit ainda pendentes. Não declarar correção validada até produção confirmar busca, download e leitura de MP4.
+
+
+## Correção definitiva da geração SRT — 16/11/2026
+- Evidência do usuário: produção chegou à etapa “Gerando narração, legendas e montagem”, mas interrompeu com `'SubMaker' object has no attribute 'generate_subs'`.
+- Causa: a camada de áudio dependia de uma API interna/variável de `edge_tts.SubMaker`; a versão instalada no worker não expunha `generate_subs()`. O código já tentava detectar APIs alternativas, mas o worker executou uma revisão antiga ou incompatível.
+- Correção commit pendente: remover totalmente a dependência de `SubMaker`. `nexus/audio.py` passa a coletar eventos WordBoundary/SentenceBoundary do stream e gerar SRT diretamente, convertendo ticks de 100 ns para timestamps SRT, agrupando palavras em legendas curtas. Se o serviço não emitir eventos de tempo, gera legendas aproximadas para que a produção não pare apenas por falta de metadados de sincronização.
+- Testes adicionados: geração de MP3/SRT sem SubMaker, fallback por SentenceBoundary e fallback sem eventos de tempo.
+- Validação pendente: CI e produção real no Streamlit. A sincronização de fallback sem eventos é estimada, não word-level; a sincronização precisa usa eventos do Edge TTS.
