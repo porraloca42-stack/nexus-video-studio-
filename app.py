@@ -33,10 +33,12 @@ def _extract_visual_review_frames(video_path, output_dir, prefix):
         raise RuntimeError("Não foi possível extrair quadros do clipe candidato.")
     return frames
 
-def _search_stock_compatible(query, coverr_key="", pixabay_key="", pexels_key="", per_page=20, exclude_urls=None, relevance_query=None, min_relevance=1.5):
+def _search_stock_compatible(query, coverr_key="", pixabay_key="", pexels_key="", per_page=20, exclude_urls=None, relevance_query=None, min_relevance=1.5, style_query=""):
     """Search all configured libraries while tolerating an older deployed assets module."""
     try:
-        supports_pexels = "pexels_key" in inspect.signature(search_video_sources).parameters
+        search_parameters = inspect.signature(search_video_sources).parameters
+        supports_pexels = "pexels_key" in search_parameters
+        supports_style_query = "style_query" in search_parameters
     except (TypeError, ValueError):
         supports_pexels = False
 
@@ -45,6 +47,7 @@ def _search_stock_compatible(query, coverr_key="", pixabay_key="", pexels_key=""
             query, coverr_key, pixabay_key, pexels_key=pexels_key,
             per_page=per_page, exclude_urls=exclude_urls,
             relevance_query=relevance_query, min_relevance=min_relevance,
+            **({"style_query": style_query} if supports_style_query else {}),
         )
 
     # Compatibility path for a Streamlit worker that still has the previous
@@ -53,6 +56,7 @@ def _search_stock_compatible(query, coverr_key="", pixabay_key="", pexels_key=""
         query, coverr_key, pixabay_key, per_page=per_page,
         exclude_urls=exclude_urls, relevance_query=relevance_query,
         min_relevance=min_relevance,
+        **({"style_query": style_query} if supports_style_query else {}),
     )
     if pexels_key:
         try:
@@ -218,7 +222,7 @@ div[data-testid="stTextArea"] textarea,div[data-testid="stSelectbox"] div[data-b
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="nexus-hero"><div class="nexus-brand">NEXUS VIDEO STUDIO</div><div class="nexus-tagline">Transforme seu roteiro em vídeo</div></div>', unsafe_allow_html=True)
-st.caption("Versão: NEXUS-2026.11.16-visual-review-subtitles-4")
+st.caption("Versão: NEXUS-2026.11.16-narration-first-selection-1")
 
 if "nexus_style" not in st.session_state or st.session_state["nexus_style"] not in STYLE_OPTIONS:
     st.session_state["nexus_style"] = "Cinematográfico realista"
@@ -458,8 +462,9 @@ if "nexus_plan" in st.session_state:
                 for i, scene in enumerate(plan["scenes"]):
                     progress.progress((i + 1) / (len(plan["scenes"]) + 2), text=f"Buscando clipe para a cena {i + 1}/{len(plan['scenes'])}...")
                     style_terms = scene.get("style_search_terms", "")
-                    primary_query = " ".join(part for part in [scene["asset_search_query"], style_terms] if part).strip()
-                    fallback_query = " ".join(part for part in [scene.get("fallback_search_query", ""), style_terms] if part).strip()
+                    # Keep scene meaning and visual style as separate search signals.
+                    primary_query = scene["asset_search_query"].strip()
+                    fallback_query = str(scene.get("fallback_search_query", "")).strip()
                     candidates, source_errors = _search_stock_compatible(
                         primary_query,
                         coverr_key,
@@ -467,6 +472,7 @@ if "nexus_plan" in st.session_state:
                         pexels_key=pexels_key,
                         exclude_urls=used_asset_urls,
                         relevance_query=scene["asset_search_query"],
+                        style_query=style_terms,
                     )
                     if not candidates and fallback_query:
                         candidates, retry_errors = _search_stock_compatible(
@@ -476,6 +482,7 @@ if "nexus_plan" in st.session_state:
                             pexels_key=pexels_key,
                             exclude_urls=used_asset_urls,
                             relevance_query=scene.get("fallback_search_query", scene["asset_search_query"]),
+                            style_query=style_terms,
                         )
                         source_errors.extend(retry_errors)
                     if not candidates:
@@ -486,7 +493,7 @@ if "nexus_plan" in st.session_state:
                             "errors": source_errors,
                         })
                         continue
-                    shortlist = diverse_candidate_shortlist(candidates, limit=3)
+                    shortlist = diverse_candidate_shortlist(candidates, limit=6)
                     reviewed_candidates = []
                     candidate_errors = []
                     for candidate_index, candidate in enumerate(shortlist, 1):
@@ -571,6 +578,8 @@ if "nexus_plan" in st.session_state:
                         "author": chosen.get("author", ""),
                         "author_url": chosen.get("author_url", ""),
                         "visual_review_confidence": visual_review.get("confidence", 0),
+                        "visual_review_semantic_match": visual_review.get("semantic_match", 0),
+                        "visual_review_style_match": visual_review.get("style_match", 0),
                         "visual_review_reason": visual_review.get("reason", ""),
                         "source_width": video_stream.get("width"),
                         "source_height": video_stream.get("height"),
@@ -670,6 +679,8 @@ if "nexus_plan" in st.session_state:
                                 "scene": index + 1,
                                 "source": item.get("source", "Stock"),
                                 "confidence": item.get("visual_review_confidence", 0),
+                                "semantic_match": item.get("visual_review_semantic_match", 0),
+                                "style_match": item.get("visual_review_style_match", 0),
                                 "reason": item.get("visual_review_reason", ""),
                             }
                             for index, item in enumerate(media)
@@ -704,7 +715,8 @@ if st.session_state.get("nexus_rendered_video"):
         st.caption(f"Revisão visual por IA: {average_confidence:.0f}% de confiança média · {len(reviews)} cenas avaliadas")
         with st.expander("Ver correspondência visual por cena"):
             for item in reviews:
-                st.markdown(f"**Cena {item['scene']} · {item['source']} · {item['confidence']}%**")
+                st.markdown(f"**Cena {item['scene']} · {item['source']} · {item['confidence']}% de correspondência geral**")
+                st.caption(f"Narração/ação: {item.get('semantic_match', 0)}% · Estilo: {item.get('style_match', 0)}%")
                 st.write(item.get("reason", ""))
     st.video(st.session_state["nexus_rendered_video"])
     credits = []
