@@ -347,7 +347,8 @@ with st.expander("Voz da narração · Biblioteca Fish Audio", expanded=True):
             if st.session_state.get("nexus_fish_voice_id"):
                 selected_voice_name = st.session_state.get("nexus_fish_voice_name") or st.session_state["nexus_fish_voice_id"]
                 st.caption(f"Voz selecionada para os próximos vídeos: {selected_voice_name}")
-                st.caption("A lista vem diretamente da Fish Audio. Cada voz mostra sua amostra publicada ou permite gerar uma prévia curta. Para conteúdo monetizado, confirme os direitos de uso das vozes públicas de terceiros.")
+                st.caption(f"ID da voz: {st.session_state['nexus_fish_voice_id']} · a escolha fica nesta sessão; para torná-la padrão entre sessões, defina FISH_VOICE_ID com este ID nos Secrets.")
+                st.caption("A lista vem diretamente da Fish Audio. Cada voz mostra sua amostra publicada ou permite gerar uma prévia curta; gerar prévia consome uso da API. Para conteúdo monetizado, confirme os direitos de uso das vozes públicas de terceiros.")
             else:
                 st.warning("Escolha uma voz antes de produzir o vídeo.")
         except Exception as voice_error:
