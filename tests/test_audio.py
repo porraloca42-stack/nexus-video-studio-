@@ -97,6 +97,7 @@ class AudioOutputTests(unittest.TestCase):
         self.assertEqual(method, "POST")
         self.assertTrue(args[0].endswith("/v1/tts"))
         self.assertEqual(kwargs["json"]["reference_id"], "voice-123")
+        self.assertEqual(kwargs["json"]["language"], "pt-BR")
         self.assertEqual(kwargs["headers"]["model"], "s2.1-pro-free")
 
     def test_fish_audio_generates_selected_voice_and_reports_provider(self):
