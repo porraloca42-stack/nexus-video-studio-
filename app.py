@@ -273,23 +273,36 @@ if not fish_api_key:
     st.error("Configure FISH_API_KEY nos Secrets do Streamlit.")
 else:
     try:
-        voice_page_data = list_fish_voices(
-            fish_api_key, page=1, page_size=100, language="pt",
-        )
+        # Search several pages so the selector is not limited to the first
+        # 100 popular models (which often over-represents meme/character voices).
+        voice_by_id = {}
+        for voice_page in range(1, 4):
+            page_data = list_fish_voices(
+                fish_api_key, page=voice_page, page_size=100, language="pt",
+            )
+            for candidate in page_data["items"]:
+                if candidate.get("id"):
+                    voice_by_id[candidate["id"]] = candidate
+
         excluded_voice_terms = (
             "meme", "anime", "personagem", "character", "lula", "bolsonaro",
-            "celebrity", "celebridade", "ator", "actress", "movie", "filme",
-            "game", "gaming", "jogo", "cartoon", "parody", "paródia",
+            "celebrity", "celebridade", "impersonation", "imitação", "imitacao",
+            "cartoon", "parody", "paródia", "parodia", "fictional character",
+            "video game", "game character", "politician", "político", "politico",
         )
         natural_voice_terms = (
             "narration", "narrador", "narradora", "conversational", "conversacional",
             "documentary", "documentário", "documentario", "professional", "profissional",
             "neutral", "neutro", "natural", "calm", "calmo", "calma", "warm", "acolhedor",
             "soft", "suave", "deep", "grave", "storytelling", "locução", "locucao",
-            "brazilian", "brasileir", "pt-br", "brasil",
+            "voice over", "voiceover", "podcast", "interview", "entrevista",
+        )
+        brazilian_voice_terms = (
+            "brazilian", "brasileir", "português do brasil", "portugues do brasil",
+            "portuguese (brazil)", "pt-br", "brasil",
         )
         curated_voices = []
-        for candidate in voice_page_data["items"]:
+        for candidate in voice_by_id.values():
             metadata = " ".join([
                 candidate.get("title", ""),
                 candidate.get("description", ""),
@@ -298,12 +311,23 @@ else:
             language_data = " ".join(candidate.get("languages") or []).casefold()
             if any(term in metadata for term in excluded_voice_terms):
                 continue
-            if not any(term in language_data for term in ("pt", "portugu")):
+            if language_data and not any(term in language_data for term in ("pt", "portugu")):
                 continue
-            if not any(term in metadata for term in natural_voice_terms):
+            if any(term in metadata for term in ("portugal", "european portuguese", "pt-pt")):
                 continue
+            candidate["_nexus_voice_rank"] = (
+                2 if any(term in metadata for term in brazilian_voice_terms) else 0,
+                1 if any(term in metadata for term in natural_voice_terms) else 0,
+                int(candidate.get("task_count") or 0),
+            )
             curated_voices.append(candidate)
-        voice_page_data["items"] = curated_voices
+
+        # Keep ordinary, unlabelled voices as fallback; prioritize voices whose
+        # public metadata explicitly describes Brazilian and natural narration.
+        curated_voices.sort(
+            key=lambda item: item["_nexus_voice_rank"], reverse=True,
+        )
+        voice_page_data = {"items": curated_voices, "total": len(curated_voices)}
         voices = [
             item for item in voice_page_data["items"]
             if item.get("id") and item.get("visibility", "public") == "public"
