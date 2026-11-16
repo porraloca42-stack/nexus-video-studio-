@@ -546,3 +546,16 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Estado: scaffold e workflow gravados na branch main. A renderização no GitHub Actions ainda precisa concluir; não declarar MP4 validado até inspecionar o artefato e os logs.
 - Próxima etapa: validar CI de Remotion; corrigir falhas de dependências/render; baixar/inspecionar MP4; depois definir contrato JSON para receber cenas do diretor Gemini. Não substituir FFmpeg nem alterar o app publicado antes dessa validação.
 - Licença consultada em 16/11/2026: a Free License cobre indivíduos para uso pessoal ou comercial e permite automações sem pagar por renderizações; custos de infraestrutura de renderização permanecem separados. A elegibilidade muda se o uso passar a ser feito por organização/equipe fora dos critérios gratuitos. Fontes oficiais: https://www.remotion.dev/docs/license/faq e https://www.remotion.dev/docs/terms.
+
+
+## Composição orientada por manifesto — 16/11/2026
+- Criado `remotion/src/types.ts`: contrato TypeScript inicial de projeto, cenas, modos visuais (graphic/image/video), narração, trilha e legendas por frames.
+- Criado `remotion/src/NexusVideo.tsx`: composição genérica com suporte a camadas gráficas, imagens, vídeos, áudio de narração/música e legendas temporizadas.
+- Criado `remotion/src/ManifestRoot.tsx` e `remotion/public/sample-manifest.json`: composição parametrizada `NexusFromManifest` para receber propriedades JSON.
+- `remotion/src/Root.tsx` registra tanto a demonstração quanto a composição baseada em manifesto.
+- `remotion/README.md` documenta instalação, preview e render via CLI.
+- Workflow atualizado para executar TypeScript typecheck, render de demonstração e render da composição por manifesto.
+- Validação confirmada até aqui: instalação npm e typecheck passaram na execução #43840856848. O render completo da composição de demonstração está em andamento; a composição por manifesto e o upload dos dois MP4s ainda aguardam conclusão.
+- Execução anterior #43840460460 concluiu com sucesso e publicou artefato MP4 de 2.541.139 bytes para a composição visual inicial. Esse arquivo ainda não foi inspecionado visualmente; portanto, não declarar qualidade audiovisual validada.
+- Integração com Python/Gemini e Streamlit ainda NÃO implementada. O FFmpeg continua como renderizador ativo do aplicativo.
+- Próximo marco: concluir ambos os renders, inspecionar os artefatos e então criar adaptador Python que converta storyboard para o manifesto JSON e invoque o renderer Node isoladamente.
