@@ -317,10 +317,11 @@ else:
                             is_selected = voice_option["id"] == st.session_state.get("nexus_fish_voice_id", "")
                             st.markdown(f"**{voice_option['title']}**")
                             details = []
+                            source_label = str(voice_option.get("source") or "").casefold()
+                            if "pvc" in source_label:
+                                details.append("Professional Voice Clone")
                             if voice_option.get("licensed"):
                                 details.append("Licenciada pela Fish Audio")
-                            elif voice_option.get("source"):
-                                details.append(voice_option["source"])
                             if voice_option.get("author"):
                                 details.append(voice_option["author"])
                             if details:
