@@ -1041,3 +1041,5 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Commit `2c5d06c` e `b278559`: a tela de vozes agora informa que gerar prévia consome uso da API, mostra o ID da voz escolhida e explica como persistir a voz padrão em `FISH_VOICE_ID`. Rótulo de versão da interface atualizado para `NEXUS-2026.11.16-fish-voice-library-2`.
 
 - Commit `5a45495`: cards de voz Fish ajustados para mobile: player de áudio em largura maior antes do nome/descrição, escolha abaixo do preview; evita player estreito em três colunas. O CI correspondente (#447) estava em execução no momento desta anotação.
+
+- GitHub Actions run #447 (`43889447149`), commit `5a45495`: workflow completo `success` após o ajuste mobile da biblioteca Fish. Compilação Python, 75 testes, typecheck Remotion e smoke test Commons aprovados.
