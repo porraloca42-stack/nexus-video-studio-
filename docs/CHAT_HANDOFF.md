@@ -191,3 +191,17 @@ O usuário ficou frustrado com orientações longas/repetitivas e com uma previs
 - Estado: código gravado e relido no main; CI e validação da lista real no Streamlit ainda pendentes. Não afirmar que a lista está visualmente validada até o usuário conferir.
 - Próximo passo: aguardar Actions e reload do Streamlit; confirmar se aparecem vozes brasileiras normais com amostras audíveis. Se a lista ficar vazia ou curta, investigar metadados/API Fish Audio antes de relaxar filtro.
 - Limitação: “natural” é inferido de descrição/tags; audição das amostras é necessária para validar.
+
+## Retomada mais recente — seletor fixo de vozes brasileiras (16/11/2026 16:45 BRT)
+- Usuário mostrou captura com vozes como "NARRADOR DO TODO MUNDO ODEIA O CHRIS", Neymar, Isabela e Waldo, além de campo editável/teclado do celular. A filtragem por palavras era insuficiente e `st.selectbox` abria busca textual.
+- Pesquisa da biblioteca Fish Audio confirmou quatro vozes oficiais, desenhadas pela Fish (não clones de pessoas reais) e com metadados pt-BR:
+  - Ricardo — `add7bcb8d3c8423bbfa152ca232aad6e`
+  - Rafael (Brasil) — `0ffee1af32254090b3630823baade12b`
+  - Letícia — `b3c060cc41544a7da94a2c487647c902`
+  - Beatriz (Brasil) — `0e26d2df0d0848e3b34099bfb55fd6ea`
+- Mudanças gravadas em main:
+  - `nexus/audio.py` commit `c2c3e7f`: busca uma voz por ID via `GET /model/{id}`, normaliza sample e valida público/TTS/treinado.
+  - `app.py` commit `30f2eab`: substitui selectbox pesquisável por quatro botões de seleção fixos; cada linha tem player de sample ao lado. O teclado/campo digitável foi removido. Não busca vozes da comunidade dinamicamente.
+  - `tests/test_audio.py` commit `362a771`: testes de lookup e rejeição de modelo privado.
+- Próximo passo: verificar GitHub Actions; aguardar Streamlit atualizar; confirmar que só aparecem quatro vozes e os samples tocam. Não declarar validação visual até confirmação do usuário.
+- Fontes oficiais: https://beta.fish.audio/m/add7bcb8d3c8423bbfa152ca232aad6e/ ; https://beta.fish.audio/m/0ffee1af32254090b3630823baade12b/ ; https://beta.fish.audio/m/b3c060cc41544a7da94a2c487647c902/ ; https://beta.fish.audio/m/0e26d2df0d0848e3b34099bfb55fd6ea/ ; https://github.com/fishaudio/fish-audio-go/blob/main/voices.go
