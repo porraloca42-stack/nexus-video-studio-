@@ -53,7 +53,7 @@ class VisualReviewTests(unittest.TestCase):
             self.assertEqual(result["style_match"], 64)
             payload = post.call_args.kwargs["json"]
             prompt_text = payload["contents"][0]["parts"][0]["text"]
-            self.assertIn("maior prioridade", prompt_text)
+            self.assertIn("Priorize a conexão narrativa útil", prompt_text)
             self.assertIn("Estilo visual é critério secundário", prompt_text)
             self.assertTrue(any("inlineData" in part for part in payload["contents"][0]["parts"]))
 
