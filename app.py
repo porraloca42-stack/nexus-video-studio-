@@ -477,6 +477,8 @@ if "nexus_plan" in st.session_state:
                         progress.progress(0.55, text=message)
                     result = render_on_github(
                         plan, voice, github_token, encryption_secret=cloudflare_token,
+                        fish_api_key=secret("FISH_API_KEY"),
+                        fish_voice_id=secret("FISH_VOICE_ID"),
                         progress_callback=update_worker_progress
                     )
                     video_bytes = result["video"]
