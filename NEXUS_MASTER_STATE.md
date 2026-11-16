@@ -845,3 +845,10 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Commit `c22eb61`: testes de Fish Audio e fallback Edge adicionados.
 - A chave Fish publicada pelo usuário não foi inserida no repositório. Configurar uma chave nova em Streamlit Secrets como `FISH_API_KEY`; opcionalmente `FISH_VOICE_ID` para uma voz de referência. Revogar a chave exposta.
 - Pendente: validar a integração com chave real, conferir se o áudio MP3 concatenado é aceito pelo FFprobe, confirmar identidade de voz de referência e aprovar condições comerciais. Até lá, Fish está implementado no código, mas não validado em produção.
+
+
+## Teste de alinhamento Fish Audio em múltiplos blocos — 16/11/2026
+- Commit `b068cea`: adicionado teste unitário que simula dois blocos SSE de áudio e verifica que `chunk_audio_offset_sec` é somado aos timestamps locais do segundo bloco, preservando a linha do tempo global das legendas.
+- A alteração é somente de teste; não altera a integração de produção nem contém credenciais.
+- CI disparado pela atualização do repositório; aprovação ainda pendente.
+- A integração Fish permanece implementada, mas sem validação real de provedor/MP3 até haver credencial configurada no ambiente seguro. Não usar a chave que foi exposta na conversa.
