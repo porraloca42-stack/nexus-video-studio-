@@ -12,10 +12,6 @@ const defaultProps: NexusVideoProps = {
   scenes: [
     { id: "scene-1", durationSeconds: 25, narration: "A mudança começa com uma escolha.", visualMode: "graphic" },
     { id: "scene-2", durationSeconds: 25, narration: "Transforme intenção em atitude.", visualMode: "graphic", accent: "#7cc9d4" }
-  ],
-  captions: [
-    { text: "Toda mudança começa com uma escolha.", startFrame: 0, endFrame: 375 },
-    { text: "Transforme intenção em atitude.", startFrame: 750, endFrame: 1125 }
   ]
 };
 
