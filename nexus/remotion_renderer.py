@@ -87,8 +87,10 @@ def build_remotion_manifest(plan, media, audio_path, subtitles_path, public_dir,
     def copy_audio(path, name):
         if not path or not Path(path).is_file():
             return None
-        destination = job_dir / name
-        shutil.copy2(path, destination)
+        source = Path(path)
+        suffix = source.suffix.lower() or ".mp3"
+        destination = job_dir / (Path(name).stem + suffix)
+        shutil.copy2(source, destination)
         return f"jobs/{job_id}/{destination.name}"
 
     narration_ref = copy_audio(audio_path, "narration.mp3")
