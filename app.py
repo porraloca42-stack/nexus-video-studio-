@@ -280,8 +280,9 @@ else:
             ("Letícia", "b3c060cc41544a7da94a2c487647c902"),
             ("Beatriz (Brasil)", "0e26d2df0d0848e3b34099bfb55fd6ea"),
         )
-        if "nexus_fish_curated_voice_catalog" not in st.session_state:
+        if not st.session_state.get("nexus_fish_curated_voice_catalog"):
             loaded_voices = []
+            voice_load_errors = []
             for voice_name, voice_id in curated_voice_catalog:
                 try:
                     model = fish_audio.get_fish_voice(fish_api_key, voice_id)
@@ -289,13 +290,17 @@ else:
                     if model["id"] == voice_id:
                         model["title"] = voice_name
                         loaded_voices.append(model)
-                except Exception:
-                    continue
+                    else:
+                        voice_load_errors.append(f"{voice_name}: ID retornado diferente")
+                except Exception as exc:
+                    voice_load_errors.append(f"{voice_name}: {str(exc)[:140]}")
             st.session_state["nexus_fish_curated_voice_catalog"] = loaded_voices
 
         voices = st.session_state["nexus_fish_curated_voice_catalog"]
         if not voices:
             st.error("Não foi possível carregar as vozes oficiais brasileiras da Fish Audio.")
+            if voice_load_errors:
+                st.caption("Diagnóstico: " + " | ".join(voice_load_errors))
         else:
             valid_voice_ids = {item["id"] for item in voices}
             current_voice_id = st.session_state.get("nexus_fish_voice_id", "")
