@@ -694,12 +694,12 @@ Os números dos candidatos aparecem imediatamente antes de seus quadros."""
                 continue
             response.raise_for_status()
             payload = response.json()
-            response_text = "\\n".join(
+            response_text = "\n".join(
                 part.get("text", "")
                 for part in payload.get("candidates", [{}])[0].get("content", {}).get("parts", [])
                 if part.get("text")
             )
-            cleaned = re.sub(r"^\\s*```(?:json)?\\s*|\\s*```\\s*$", "", response_text.strip(), flags=re.I)
+            cleaned = re.sub(r"^\s*```(?:json)?\s*|\s*```\s*$", "", response_text.strip(), flags=re.I)
             result = json.loads(cleaned)
             selected = int(result.get("selected_candidate", 0))
             confidence = max(0, min(100, int(result.get("confidence", 0))))
