@@ -205,3 +205,11 @@ O usuário ficou frustrado com orientações longas/repetitivas e com uma previs
   - `tests/test_audio.py` commit `362a771`: testes de lookup e rejeição de modelo privado.
 - Próximo passo: verificar GitHub Actions; aguardar Streamlit atualizar; confirmar que só aparecem quatro vozes e os samples tocam. Não declarar validação visual até confirmação do usuário.
 - Fontes oficiais: https://beta.fish.audio/m/add7bcb8d3c8423bbfa152ca232aad6e/ ; https://beta.fish.audio/m/0ffee1af32254090b3630823baade12b/ ; https://beta.fish.audio/m/b3c060cc41544a7da94a2c487647c902/ ; https://beta.fish.audio/m/0e26d2df0d0848e3b34099bfb55fd6ea/ ; https://github.com/fishaudio/fish-audio-go/blob/main/voices.go
+
+## Último erro e correção — ImportError (16/11/2026 17:00 BRT)
+- Após substituir seletor, usuário recebeu ImportError na inicialização; captura mostra linha `from nexus.audio import generate_fish...`, mas traceback está cortado e não expõe símbolo completo.
+- `app.py` ainda importava `generate_fish_preview`, embora a nova UI use amostras oficiais e não chame essa função. O módulo `nexus/audio.py` no main exporta `get_fish_voice` e `make_voice`.
+- Commit `bd54f26`: removido import obsoleto `generate_fish_preview`; ficaram somente `get_fish_voice, make_voice`.
+- Hipótese de causa: cache/checkout parcial do Streamlit ou símbolo obsoleto indisponível no runtime; não conclusivo devido ao traceback truncado.
+- Pós-commit: arquivos relidos do main e import conferido. CI e reload Streamlit pendentes.
+- Próximo passo: aguardar CI e reload. Se houver novo erro, pedir captura completa/abrir logs Streamlit; não fazer alterações adicionais sem traceback.
