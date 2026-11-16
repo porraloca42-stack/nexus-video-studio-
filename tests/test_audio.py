@@ -28,7 +28,7 @@ class FakeCommunicate:
 
 
 class AudioSubtitleTests(unittest.TestCase):
-    def test_builds_srt_without_submaker_api(self):
+    def test_builds_srt_directly_from_word_boundaries(self):
         with tempfile.TemporaryDirectory(prefix="nexus_audio_test_") as temp:
             output = Path(temp) / "voice.mp3"
             with patch("nexus.audio.edge_tts.Communicate", FakeCommunicate):
