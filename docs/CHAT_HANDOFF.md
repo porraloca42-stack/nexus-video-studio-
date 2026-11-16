@@ -144,3 +144,14 @@ O usuário ficou frustrado com orientações longas/repetitivas e com uma previs
 
 - Revisão final de leitura em `main` às 16:15 BRT confirmou: UI sem busca/filtros/paginação; chamada da lista sem `self_only`; player de prévia ao lado do selectbox; payloads TTS com `pt-BR`; asserts correspondentes nos testes. Último commit de UI: `567ba08`.
 - A verificação foi estática por leitura dos arquivos no GitHub. A suíte automatizada ainda depende do GitHub Actions; o comportamento visual e a integração real com Fish Audio ainda dependem do Streamlit publicado.
+
+## Retomada — curadoria de vozes naturais brasileiras (16/11/2026 16:24 BRT)
+- Usuário pediu adicionar ao app as vozes normais/humanizadas da Fish Audio, sem memes, imitações ou personagens.
+- Código gravado na branch main:
+  - `nexus/audio.py` commit `5105372`: pesquisa vozes por tags narration, conversational, documentary, professional e neutral; inclui buscas por Letícia e Ricardo; mescla IDs; filtra português brasileiro e estilo natural/profissional; exclui metadados com memes/personagens/figuras públicas.
+  - `app.py` commit `322d299`: seletor compacto usa lista curada; player de prévia permanece ao lado.
+  - `tests/test_audio.py` commit `efc5b09`: testes de tags, ordenação e filtros positivos/negativos.
+- Letícia e Ricardo são as duas vozes Fish Official encontradas com sotaque brasileiro explicitamente descrito na página oficial. Tomás/Rafael e outras vozes padrão não foram incluídas por não haver confirmação de sotaque brasileiro nas descrições consultadas.
+- A classificação “natural” depende dos metadados do criador e não substitui ouvir a amostra. Vozes públicas comunitárias podem ter termos/licenças diferentes; verificar direitos comerciais antes de monetizar.
+- Próximo passo: observar CI no GitHub e validar lista real e amostras na interface Streamlit. Não afirmar que todas as vozes passaram em audição; não validar sotaque sem ouvir.
+- Fontes: https://fish.audio/pt/app/voice-library/ ; https://fish.audio/pt/voice-library/narration/ ; https://fish.audio/pt/voice-library/conversational/ ; https://github.com/fishaudio/fish-audio-go/blob/main/voices.go
