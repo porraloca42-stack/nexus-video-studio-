@@ -76,7 +76,7 @@ def main(project_root=None):
     if not scenes:
         raise RuntimeError("O manifesto não contém cenas.")
     job_id = os.environ.get("NEXUS_JOB_ID", "nexus-job")
-    voice = os.environ.get("NEXUS_VOICE", "pt-BR-AntonioNeural")
+    voice = os.environ.get("NEXUS_VOICE", "")
     root = Path(project_root or Path(__file__).resolve().parents[1])
     work = root / "worker_output" / job_id
     work.mkdir(parents=True, exist_ok=True)
