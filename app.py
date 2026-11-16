@@ -286,23 +286,20 @@ if not fish_api_key:
     st.warning("Configure FISH_API_KEY nos Secrets do Streamlit para carregar a biblioteca de vozes.")
 else:
     selected_name = st.session_state.get("nexus_fish_voice_name") or "Nenhuma voz selecionada"
-    st.markdown(
-        f'<div class="nexus-preview"><div style="flex:1"><div style="font-size:.75rem;color:#d7bb87">NARRAÇÃO</div>'
-        f'<div style="font-size:1.02rem;font-weight:700">{selected_name}</div>'
-        f'<div style="font-size:.78rem;color:#aeb5c2">Fish Audio · voz selecionada</div></div></div>',
-        unsafe_allow_html=True,
-    )
+    st.markdown("**NARRAÇÃO**")
+    st.markdown(f"**{selected_name}**")
+    st.caption("Fish Audio · voz selecionada")
     with st.expander("🎙️ Abrir biblioteca de vozes", expanded=False):
         st.caption("Explore vozes em português, ou carregue as vozes privadas que você já criou na sua conta Fish Audio.")
-        catalog_scope = st.selectbox(
-            "Catálogo",
-            ["Licenciadas pela Fish Audio", "Biblioteca pública", "Minhas vozes"],
-            key="fish_catalog_scope",
-        )
-        search_voice = st.text_input("Buscar por nome", placeholder="Ex.: narrador, grave, feminina, storytelling")
-        voice_page = st.number_input("Página", min_value=1, max_value=100, value=1, step=1, key="fish_voice_page")
-        if st.button("Buscar vozes", key="fish_search_voices", use_container_width=True):
-            st.session_state["fish_voice_search_nonce"] = st.session_state.get("fish_voice_search_nonce", 0) + 1
+        with st.form("fish_voice_search_form"):
+            catalog_scope = st.selectbox(
+                "Catálogo",
+                ["Licenciadas pela Fish Audio", "Biblioteca pública", "Minhas vozes"],
+                key="fish_catalog_scope",
+            )
+            search_voice = st.text_input("Buscar por nome", placeholder="Ex.: narrador, grave, feminina, storytelling")
+            voice_page = st.number_input("Página", min_value=1, max_value=100, value=1, step=1, key="fish_voice_page")
+            st.form_submit_button("Buscar vozes", use_container_width=True)
         cache_key = (
             catalog_scope, search_voice.strip().casefold(), int(voice_page),
             st.session_state.get("fish_voice_search_nonce", 0),
