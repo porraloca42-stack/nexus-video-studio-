@@ -9,6 +9,7 @@ on:
       - "nexus/remotion_renderer.py"
       - "scripts/**"
       - "tests/test_remotion_renderer.py"
+      - "tests/test_cloudflare_images.py"
       - ".github/workflows/remotion-demo.yml"
 
 jobs:
