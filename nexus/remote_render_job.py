@@ -7,13 +7,15 @@ from pathlib import Path
 from nexus.audio import make_voice
 from nexus.cloudflare_images import generate_scene_images
 from nexus.remotion_renderer import render_video_remotion
+from nexus.render_crypto import decrypt_text, encrypt_bytes, encrypt_text
 
 
 def main():
-    raw = os.environ.get("NEXUS_MANIFEST_JSON", "")
-    if not raw:
-        raise RuntimeError("NEXUS_MANIFEST_JSON ausente.")
-    plan = json.loads(raw)
+    raw = os.environ.get("NEXUS_MANIFEST_ENCRYPTED", "")
+    encryption_secret = os.environ.get("CLOUDFLARE_API_TOKEN", "")
+    if not raw or not encryption_secret:
+        raise RuntimeError("Manifesto criptografado ou segredo de criptografia ausente.")
+    plan = json.loads(decrypt_text(raw, encryption_secret))
     scenes = plan.get("scenes") or []
     if not scenes:
         raise RuntimeError("O manifesto não contém cenas.")
@@ -83,10 +85,15 @@ def main():
         "video_codec": video.get("codec_name"),
         "images": generated,
     }
-    (work / "render-report.json").write_text(
-        json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8"
+    report_path = work / "render-report.json"
+    report_path.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+    (work / "nexus_video.mp4.enc").write_bytes(encrypt_bytes(output.read_bytes(), encryption_secret))
+    (work / "render-report.json.enc").write_text(
+        encrypt_text(report_path.read_text(encoding="utf-8"), encryption_secret), encoding="ascii"
     )
-    print(json.dumps(summary, ensure_ascii=False))
+    output.unlink(missing_ok=True)
+    report_path.unlink(missing_ok=True)
+    print(json.dumps({key: value for key, value in summary.items() if key != "images"}, ensure_ascii=False))
 
 
 if __name__ == "__main__":
