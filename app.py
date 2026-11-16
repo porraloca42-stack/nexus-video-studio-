@@ -25,83 +25,125 @@ STYLE_OPTIONS = [
     "3D realista", "3D estilizado", "Stop motion",
     "Macro e detalhes", "Drone e paisagens aéreas"
 ]
-
-STYLE_PREVIEWS = {
-    "Cinematográfico realista": ("#182638", "#d59b58", "#526b78", "Luz natural, profundidade e contraste de cinema."),
-    "Documentário cinematográfico": ("#263b35", "#d4bd83", "#758b71", "Textura natural e sensação observacional."),
-    "Dark cinematográfico": ("#101522", "#8b76a8", "#30384f", "Sombras profundas e luz recortada."),
-    "Filme noir": ("#101319", "#d6d1c5", "#454b56", "Preto e branco, sombras dramáticas."),
-    "Publicidade premium": ("#26364b", "#f0c77b", "#8a9da8", "Acabamento limpo, luz controlada e composição elegante."),
-    "Lifestyle realista": ("#b5c7c6", "#f2c78d", "#647f75", "Cores acolhedoras e momentos cotidianos."),
-    "Natureza documental": ("#193b35", "#e6c77b", "#668d62", "Verdes orgânicos e luz ambiente."),
-    "Minimalista clean": ("#dce5e8", "#f2c987", "#9bb1b8", "Poucos elementos e espaço visual."),
-    "Vintage filme 35mm": ("#493a32", "#d6a46c", "#8d7254", "Grão suave e tons analógicos quentes."),
-    "VHS retrô": ("#25234b", "#f0789b", "#3c8292", "Cores deslocadas e estética de fita."),
-    "Cyberpunk neon": ("#171a3b", "#ff4fa3", "#16c8d2", "Neon magenta e ciano em alto contraste."),
-    "Ficção científica futurista": ("#132b43", "#78d8e8", "#5274a5", "Luz tecnológica e atmosfera futurista."),
-    "Fantasia cinematográfica": ("#29264c", "#f0c16e", "#78689d", "Luz mágica, atmosfera épica e cores ricas."),
-    "Surrealismo fotográfico": ("#39405b", "#e9a6b1", "#8b9d9a", "Combinações oníricas com aparência fotográfica."),
-    "Anime 2D": ("#7ab8d5", "#ffdc83", "#e28d83", "Cores ilustradas, contornos e céu expressivo."),
-    "Anime 3D": ("#526b9a", "#f6c77c", "#9a8ac2", "Personagens e cenários estilizados em volume."),
-    "Ilustração editorial": ("#e4d6b9", "#d78b63", "#63818a", "Formas gráficas e paleta editorial."),
-    "Aquarela artística": ("#c4d9d2", "#edc58e", "#8aaeb1", "Pigmentos suaves e bordas orgânicas."),
-    "Graphic novel": ("#252b38", "#e5b44f", "#a94d50", "Contraste forte, blocos de cor e traço marcado."),
-    "3D realista": ("#29465b", "#f2c67b", "#7294a0", "Materiais, volume e iluminação realistas."),
-    "3D estilizado": ("#546c9b", "#ffd27b", "#9c83c5", "Formas tridimensionais com cores estilizadas."),
-    "Stop motion": ("#6e5142", "#e6bd78", "#8b9b72", "Textura artesanal e sensação de miniatura."),
-    "Macro e detalhes": ("#183c43", "#e6b96d", "#6b9b91", "Enquadramentos próximos e foco seletivo."),
-    "Drone e paisagens aéreas": ("#39728a", "#f2cb83", "#6e9d83", "Escala ampla e perspectiva aérea.")
+STYLE_META = {
+    "Cinematográfico realista": ("#182638","#d59b58","#526b78","Luz natural, profundidade e contraste de cinema."),
+    "Documentário cinematográfico": ("#263b35","#d4bd83","#758b71","Textura natural e sensação observacional."),
+    "Dark cinematográfico": ("#101522","#8b76a8","#30384f","Sombras profundas e luz recortada."),
+    "Filme noir": ("#101319","#d6d1c5","#454b56","Preto e branco, sombras dramáticas."),
+    "Publicidade premium": ("#26364b","#f0c77b","#8a9da8","Acabamento elegante e luz controlada."),
+    "Lifestyle realista": ("#b5c7c6","#f2c78d","#647f75","Cenas cotidianas, acolhedoras e naturais."),
+    "Natureza documental": ("#193b35","#e6c77b","#668d62","Verdes orgânicos e luz ambiente."),
+    "Minimalista clean": ("#dce5e8","#f2c987","#9bb1b8","Poucos elementos e espaço visual."),
+    "Vintage filme 35mm": ("#493a32","#d6a46c","#8d7254","Grão suave e tons analógicos quentes."),
+    "VHS retrô": ("#25234b","#f0789b","#3c8292","Cores deslocadas e estética de fita."),
+    "Cyberpunk neon": ("#171a3b","#ff4fa3","#16c8d2","Neon magenta e ciano em alto contraste."),
+    "Ficção científica futurista": ("#132b43","#78d8e8","#5274a5","Luz tecnológica e atmosfera futurista."),
+    "Fantasia cinematográfica": ("#29264c","#f0c16e","#78689d","Luz mágica e atmosfera épica."),
+    "Surrealismo fotográfico": ("#39405b","#e9a6b1","#8b9d9a","Composições oníricas com aparência fotográfica."),
+    "Anime 2D": ("#7ab8d5","#ffdc83","#e28d83","Cores ilustradas e contornos expressivos."),
+    "Anime 3D": ("#526b9a","#f6c77c","#9a8ac2","Personagens e cenários estilizados em volume."),
+    "Ilustração editorial": ("#e4d6b9","#d78b63","#63818a","Formas gráficas e paleta editorial."),
+    "Aquarela artística": ("#c4d9d2","#edc58e","#8aaeb1","Pigmentos suaves e bordas orgânicas."),
+    "Graphic novel": ("#252b38","#e5b44f","#a94d50","Contraste forte, blocos de cor e traço marcado."),
+    "3D realista": ("#29465b","#f2c67b","#7294a0","Materiais, volume e iluminação realistas."),
+    "3D estilizado": ("#546c9b","#ffd27b","#9c83c5","Formas tridimensionais com cores estilizadas."),
+    "Stop motion": ("#6e5142","#e6bd78","#8b9b72","Textura artesanal e sensação de miniatura."),
+    "Macro e detalhes": ("#183c43","#e6b96d","#6b9b91","Enquadramentos próximos e foco seletivo."),
+    "Drone e paisagens aéreas": ("#39728a","#f2cb83","#6e9d83","Escala ampla e perspectiva aérea.")
 }
-
+STYLE_SCENES = [
+    "mountain", "farmer", "silhouette", "detective", "watch", "coffee",
+    "waterfall", "vase", "van", "sunset", "neon_city", "spaceship",
+    "castle", "surreal", "anime_landscape", "anime_portrait", "editorial",
+    "lighthouse", "comic", "car", "character3d", "clay", "droplet", "island"
+]
 def style_preview_svg(style):
-    sky, sun, ground, _ = STYLE_PREVIEWS[style]
-    svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="480" height="270" viewBox="0 0 480 270">
-    <defs>
-      <linearGradient id="sky" x2="0" y2="1"><stop stop-color="{sky}"/><stop offset="1" stop-color="{ground}"/></linearGradient>
-      <radialGradient id="glow"><stop stop-color="{sun}" stop-opacity=".9"/><stop offset="1" stop-color="{sun}" stop-opacity="0"/></radialGradient>
-      <filter id="soft"><feGaussianBlur stdDeviation="15"/></filter>
-    </defs>
-    <rect width="480" height="270" fill="url(#sky)"/>
-    <circle cx="350" cy="83" r="76" fill="url(#glow)"/>
-    <circle cx="350" cy="83" r="27" fill="{sun}" opacity=".92"/>
-    <path d="M0 190 L95 105 L165 177 L255 92 L365 190 L430 130 L480 176 L480 270 L0 270Z" fill="{ground}" opacity=".95"/>
-    <path d="M0 215 Q115 165 220 218 T480 205 L480 270 L0 270Z" fill="#101820" opacity=".48"/>
-    <path d="M0 244 Q110 220 220 244 T480 235 L480 270 L0 270Z" fill="#0b121b" opacity=".58"/>
-    <path d="M0 0 H480 V270 H0Z" fill="none" stroke="{sun}" stroke-opacity=".25" stroke-width="5"/>
-    <circle cx="85" cy="70" r="2" fill="#fff" opacity=".65"/><circle cx="125" cy="48" r="1.5" fill="#fff" opacity=".6"/>
-    <circle cx="425" cy="42" r="2" fill="#fff" opacity=".5"/>
-    </svg>'''
-    return base64.b64encode(svg.encode("utf-8")).decode("ascii")
+    sky, accent, ground, _ = STYLE_META[style]
+    scene = STYLE_SCENES[STYLE_OPTIONS.index(style)]
+    base = f'<defs><linearGradient id="bg" x2="0" y2="1"><stop stop-color="{sky}"/><stop offset="1" stop-color="{ground}"/></linearGradient><radialGradient id="light"><stop stop-color="{accent}" stop-opacity=".9"/><stop offset="1" stop-color="{accent}" stop-opacity="0"/></radialGradient></defs><rect width="480" height="270" fill="url(#bg)"/>'
+    art = {
+      "mountain": f'<circle cx="365" cy="75" r="65" fill="url(#light)"/><circle cx="365" cy="75" r="24" fill="{accent}"/><path d="M0 205L95 95 165 180 260 82 380 200 440 125 480 180V270H0Z" fill="{ground}"/>',
+      "farmer": f'<circle cx="240" cy="76" r="42" fill="{accent}"/><path d="M130 120Q240 60 350 120L385 145H95Z" fill="#bd9560"/><path d="M180 150Q240 118 300 150L340 270H140Z" fill="#526e56"/><path d="M0 220Q150 180 480 220V270H0Z" fill="{ground}"/>',
+      "silhouette": f'<circle cx="350" cy="75" r="70" fill="url(#light)"/><path d="M0 200L120 140 220 205 330 130 480 205V270H0Z" fill="{ground}"/><path d="M205 110Q240 90 265 115L275 175 300 240H180L205 175Z" fill="#080b12"/>',
+      "detective": f'<circle cx="240" cy="105" r="46" fill="#b8b8b8"/><path d="M160 85L240 38 320 85Z" fill="#090b10"/><path d="M180 145Q240 115 300 145L360 270H120Z" fill="#10131b"/><path d="M0 230H480" stroke="{accent}" stroke-width="3"/>',
+      "watch": f'<path d="M200 15H280L292 75H188Z M188 195H292L280 255H200Z" fill="#a68b5c"/><circle cx="240" cy="135" r="76" fill="#111820" stroke="{accent}" stroke-width="12"/><circle cx="240" cy="135" r="6" fill="{accent}"/><path d="M240 135L240 82M240 135L284 154" stroke="{accent}" stroke-width="5"/>',
+      "coffee": f'<circle cx="350" cy="70" r="70" fill="url(#light)"/><path d="M150 130H315L300 215Q230 250 165 215Z" fill="#eee0c9"/><path d="M315 150Q385 135 365 195Q350 220 300 205" fill="none" stroke="#eee0c9" stroke-width="16"/><path d="M210 118Q190 90 215 70M250 118Q230 82 255 58" stroke="#fff" stroke-width="5" fill="none" opacity=".7"/>',
+      "waterfall": f'<path d="M0 0H480V100L390 145 310 90 230 150 120 85 0 140Z" fill="{ground}"/><path d="M200 95Q230 140 210 210L190 270H300L270 190Q250 125 280 95Z" fill="#b8e4e8"/><path d="M0 230Q120 190 240 230T480 220V270H0Z" fill="#1c6870"/>',
+      "vase": f'<rect x="75" y="0" width="330" height="270" fill="#f0e8d8" opacity=".13"/><path d="M225 65H255L260 110Q315 145 285 225Q240 260 195 225Q165 145 220 110Z" fill="#e0d6c5"/><path d="M240 65Q220 35 190 20M240 65Q270 28 300 15" stroke="#8fa77c" stroke-width="8" fill="none"/>',
+      "van": f'<circle cx="370" cy="70" r="60" fill="{accent}"/><path d="M70 150H290L355 190V235H60V185Z" fill="#c18a52"/><circle cx="130" cy="235" r="25" fill="#10151b"/><circle cx="295" cy="235" r="25" fill="#10151b"/><path d="M0 250H480" stroke="#f2d3a0" stroke-width="3"/>',
+      "sunset": f'<circle cx="240" cy="120" r="90" fill="{accent}"/><path d="M0 165Q100 120 220 170T480 150V270H0Z" fill="{ground}"/><path d="M0 210H480M0 230H480M0 250H480" stroke="{sky}" stroke-width="6"/>',
+      "neon_city": f'<path d="M20 100H105V270H20ZM125 35H220V270H125ZM240 85H330V270H240ZM350 55H460V270H350Z" fill="#11152c" stroke="{accent}" stroke-width="4"/><path d="M40 130H90M145 75H200M260 120H310M375 90H435" stroke="#21d7e8" stroke-width="8"/>',
+      "spaceship": f'<circle cx="370" cy="55" r="65" fill="url(#light)"/><path d="M80 150Q240 30 400 150L320 205H160Z" fill="#a9c7d5" stroke="{accent}" stroke-width="6"/><path d="M180 205L140 250M300 205L340 250" stroke="#8cecff" stroke-width="8"/>',
+      "castle": f'<path d="M80 220V120H120V80H160V120H200V55H250V120H300V80H340V120H390V220Z" fill="{ground}" stroke="{accent}" stroke-width="5"/><path d="M220 220V160Q240 125 260 160V220" fill="{sky}"/>',
+      "surreal": f'<circle cx="240" cy="115" r="85" fill="{accent}" opacity=".75"/><path d="M155 170Q240 65 325 170L300 240H180Z" fill="#d7c6bc"/><circle cx="210" cy="130" r="9" fill="#151823"/><circle cx="270" cy="130" r="9" fill="#151823"/><path d="M210 180Q240 200 270 180" stroke="#151823" stroke-width="6" fill="none"/>',
+      "anime_landscape": f'<circle cx="365" cy="70" r="46" fill="{accent}"/><path d="M0 200L100 105 175 180 265 85 380 190 440 120 480 180V270H0Z" fill="{ground}"/><path d="M0 230Q120 200 240 230T480 225" stroke="#e6f4fa" stroke-width="5" fill="none"/>',
+      "anime_portrait": f'<circle cx="240" cy="110" r="75" fill="#f1c5a7"/><path d="M155 115Q140 10 245 28Q350 30 320 145L290 95 260 65 200 95Z" fill="#29344e"/><circle cx="210" cy="120" r="9" fill="#202a43"/><circle cx="270" cy="120" r="9" fill="#202a43"/><path d="M170 185Q240 155 310 185L365 270H115Z" fill="#d58f91"/>',
+      "editorial": f'<circle cx="335" cy="75" r="65" fill="{accent}"/><path d="M120 245L180 60 260 80 320 245Z" fill="#f0d8b0"/><path d="M165 115Q240 30 300 115" stroke="#273344" stroke-width="16" fill="none"/><path d="M0 250H480" stroke="{ground}" stroke-width="20"/>',
+      "lighthouse": f'<path d="M0 210L120 145 230 205 350 135 480 205V270H0Z" fill="{ground}"/><path d="M220 95H270L285 220H205Z" fill="#eee5d0"/><path d="M210 95H280L265 70H225Z" fill="{accent}"/><path d="M0 230Q120 205 240 235T480 225" stroke="#e8f6f5" stroke-width="8" fill="none"/>',
+      "comic": f'<path d="M0 0L480 270M480 0L0 270" stroke="{accent}" stroke-width="7"/><path d="M120 270V100L240 30 360 100V270Z" fill="#151a26" stroke="#f0d15c" stroke-width="6"/><circle cx="240" cy="120" r="40" fill="#f0d15c"/>',
+      "car": f'<path d="M80 165L130 105H330L390 165L430 205H50Z" fill="#b8d1dd" stroke="{accent}" stroke-width="6"/><circle cx="135" cy="210" r="30" fill="#111820"/><circle cx="350" cy="210" r="30" fill="#111820"/><path d="M150 115H310L350 165H110Z" fill="#18283a"/>',
+      "character3d": f'<circle cx="240" cy="95" r="60" fill="#efbf91"/><path d="M180 75Q190 15 250 30Q315 35 300 100L275 70 220 75Z" fill="#493b32"/><circle cx="220" cy="105" r="8" fill="#182333"/><circle cx="265" cy="105" r="8" fill="#182333"/><path d="M150 270Q165 165 240 165Q315 165 330 270Z" fill="{accent}"/>',
+      "clay": f'<circle cx="240" cy="120" r="76" fill="#d7a16e" stroke="#805c47" stroke-width="8"/><circle cx="215" cy="110" r="9" fill="#25252b"/><circle cx="265" cy="110" r="9" fill="#25252b"/><path d="M210 150Q240 175 270 150" stroke="#805c47" stroke-width="7" fill="none"/><path d="M160 210Q240 175 320 210L360 270H120Z" fill="{ground}"/>',
+      "droplet": f'<path d="M240 35Q110 175 240 230Q370 175 240 35Z" fill="#bceaf0" stroke="{accent}" stroke-width="8"/><circle cx="210" cy="150" r="14" fill="#fff" opacity=".85"/><circle cx="270" cy="180" r="7" fill="#fff" opacity=".7"/>',
+      "island": f'<path d="M0 170Q130 130 240 180T480 160V270H0Z" fill="#176e85"/><path d="M80 165Q190 45 340 120Q420 155 395 185Q260 215 80 165Z" fill="#7ea97d"/><path d="M190 125Q240 60 290 125" stroke="#e6d6ae" stroke-width="10" fill="none"/>'
+    }
+    svg = f'<svg xmlns="http://www.w3.org/2000/svg" width="480" height="270" viewBox="0 0 480 270">{base}{art[scene]}<rect x="5" y="5" width="470" height="260" rx="13" fill="none" stroke="{accent}" stroke-opacity=".45" stroke-width="3"/></svg>'
+    return svg.encode("utf-8")
 
 st.markdown("""
 <style>
-.block-container {padding-top: 1.4rem; padding-bottom: 3rem; max-width: 1050px;}
-.nexus-hero {padding: 1.15rem 1.2rem; border: 1px solid rgba(190,160,105,.28); border-radius: 18px; background: linear-gradient(135deg, rgba(190,160,105,.15), rgba(30,39,55,.55)); margin-bottom: 1.1rem;}
-.nexus-kicker {font-size: .76rem; letter-spacing: .16em; text-transform: uppercase; color: #c9aa73; font-weight: 700;}
-.nexus-sub {color: #aab1bd; font-size: .95rem; margin-top: .25rem;}
-.nexus-preview {display:flex; gap:12px; align-items:center; padding:10px; border:1px solid rgba(160,170,185,.2); border-radius:14px; background:rgba(255,255,255,.035); margin:.25rem 0 1rem 0;}
-.nexus-preview img {width:142px; max-width:42%; aspect-ratio:16/9; object-fit:cover; border-radius:9px;}
-.nexus-preview-title {font-weight:700; margin-bottom:4px;}
-.nexus-preview-copy {font-size:.82rem; color:#aab1bd; line-height:1.35;}
-.nexus-step {font-size:.78rem; font-weight:700; color:#c9aa73; letter-spacing:.08em; text-transform:uppercase; margin-bottom:.2rem;}
-div[data-testid="stButton"] button[kind="primary"] {border-radius:12px; min-height:3.1rem; font-weight:700;}
+:root {color-scheme:dark;}
+.block-container {padding-top:1.1rem;padding-bottom:3rem;max-width:980px;}
+.nexus-hero {position:relative;overflow:hidden;padding:1.15rem 1.25rem 1.05rem;border:1px solid rgba(218,190,139,.35);border-radius:20px;background:radial-gradient(ellipse at 88% 8%,rgba(202,166,104,.22),transparent 38%),linear-gradient(145deg,#242a35 0%,#171b24 58%,#202632 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 12px 28px rgba(0,0,0,.28),0 2px 0 rgba(218,190,139,.18);}
+.nexus-brand {font-size:1.32rem;font-weight:850;letter-spacing:.16em;color:#e2c38c;text-shadow:0 2px 12px rgba(218,190,139,.18);}
+.nexus-tagline {font-size:.91rem;color:#d1d5dd;margin-top:.18rem;letter-spacing:.015em;}
+.nexus-kicker {font-size:.75rem;letter-spacing:.13em;text-transform:uppercase;color:#d7bb87;font-weight:750;margin:1.35rem 0 .35rem;}
+.nexus-preview {display:flex;gap:13px;align-items:center;padding:11px;border:1px solid rgba(210,190,155,.28);border-radius:16px;background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.025));box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 7px 18px rgba(0,0,0,.18);margin:.35rem 0 .65rem;}
+.nexus-preview img {width:148px;max-width:42%;aspect-ratio:16/9;object-fit:cover;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,.28);}
+.nexus-preview-title {font-weight:750;margin-bottom:4px;}
+.nexus-preview-copy {font-size:.82rem;color:#b8c0cb;line-height:1.4;}
+.nexus-card-label {font-size:.82rem;font-weight:700;margin:.1rem 0 .4rem;color:#e6e9ef;}
+div[data-testid="stButton"] button {border-radius:12px;min-height:2.65rem;border:1px solid rgba(210,190,155,.24);box-shadow:0 3px 10px rgba(0,0,0,.16);}
+div[data-testid="stButton"] button[kind="primary"] {border-color:rgba(222,190,132,.7);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 5px 15px rgba(194,157,94,.2);font-weight:750;}
+div[data-testid="stTextArea"] textarea,div[data-testid="stSelectbox"] div[data-baseweb="select"] {border-radius:13px;}
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="nexus-hero"><div class="nexus-kicker">NEXUS VIDEO STUDIO</div><h1 style="margin:.25rem 0 0 0;">Transforme seu roteiro em vídeo</h1><div class="nexus-sub">Direção por IA · cenas coerentes · vídeo vertical</div></div>', unsafe_allow_html=True)
-st.markdown('<div class="nexus-step">01 · Conteúdo</div>', unsafe_allow_html=True)
-topic = st.text_area("Assunto ou roteiro", height=155, placeholder="Cole seu roteiro completo ou descreva o vídeo que deseja criar.")
+st.markdown('<div class="nexus-hero"><div class="nexus-brand">NEXUS VIDEO STUDIO</div><div class="nexus-tagline">Transforme seu roteiro em vídeo</div></div>', unsafe_allow_html=True)
 
-st.markdown('<div class="nexus-step">02 · Direção visual</div>', unsafe_allow_html=True)
-style = st.selectbox("Escolha a linguagem visual do vídeo", STYLE_OPTIONS, help="O estilo será enviado ao diretor de IA e aplicado às buscas de clipes de todas as cenas.")
-preview_b64 = style_preview_svg(style)
-preview_copy = STYLE_PREVIEWS[style][3]
+if "nexus_style" not in st.session_state or st.session_state["nexus_style"] not in STYLE_OPTIONS:
+    st.session_state["nexus_style"] = "Cinematográfico realista"
+
+st.markdown('<div class="nexus-kicker">01 · Conteúdo</div>', unsafe_allow_html=True)
+topic = st.text_area("Assunto ou roteiro", height=145, placeholder="Cole seu roteiro completo ou descreva o vídeo que deseja criar.")
+
+st.markdown('<div class="nexus-kicker">02 · Direção visual</div>', unsafe_allow_html=True)
+style = st.session_state["nexus_style"]
+preview_svg = style_preview_svg(style)
+preview_b64 = base64.b64encode(preview_svg).decode("ascii")
+preview_copy = STYLE_META[style][3]
 st.markdown(
-    f'<div class="nexus-preview"><img src="data:image/svg+xml;base64,{preview_b64}" alt="Prévia ilustrativa do estilo {style}"><div><div class="nexus-preview-title">{style}</div><div class="nexus-preview-copy">{preview_copy}<br><span style="opacity:.72">Prévia ilustrativa da linguagem visual</span></div></div></div>',
+    f'<div class="nexus-preview"><img src="data:image/svg+xml;base64,{preview_b64}" alt="Referência visual {style}"><div><div class="nexus-preview-title">{style}</div><div class="nexus-preview-copy">{preview_copy}</div></div></div>',
     unsafe_allow_html=True
 )
+with st.expander("Escolher estilo visual · 24 referências", expanded=False):
+    st.caption("Toque em uma imagem para selecionar a linguagem visual do vídeo.")
+    for row_start in range(0, len(STYLE_OPTIONS), 2):
+        cols = st.columns(2)
+        for offset, col in enumerate(cols):
+            index = row_start + offset
+            if index >= len(STYLE_OPTIONS):
+                continue
+            option = STYLE_OPTIONS[index]
+            with col:
+                st.image(style_preview_svg(option), use_container_width=True)
+                is_selected = option == st.session_state["nexus_style"]
+                if st.button(("✓ " if is_selected else "") + option, key="style_" + str(index), type="primary" if is_selected else "secondary", use_container_width=True):
+                    st.session_state["nexus_style"] = option
+                    st.rerun()
+style = st.session_state["nexus_style"]
 
-st.markdown('<div class="nexus-step">03 · Configurações</div>', unsafe_allow_html=True)
+st.markdown('<div class="nexus-kicker">03 · Configurações</div>', unsafe_allow_html=True)
 settings_col1, settings_col2 = st.columns(2)
 with settings_col1:
     duration = st.selectbox("Duração do vídeo", [40, 50, 60], index=1, format_func=lambda value: f"{value} segundos")
