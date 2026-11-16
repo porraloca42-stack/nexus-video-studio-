@@ -29,10 +29,6 @@ class RenderIntegrationTests(unittest.TestCase):
             "ffmpeg", "-y", "-f", "lavfi", "-i", "sine=frequency=440:sample_rate=44100",
             "-t", "2.9", "-c:a", "libmp3lame", str(self.audio)
         ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        self.subtitles.write_text(
-            "1\n00:00:00,000 --> 00:00:01,500\nNEXUS render test\n",
-            encoding="utf-8"
-        )
         self.media = [
             {"path": str(self.clip_a), "duration": 1.5, "camera_motion": "push_in"},
             {"path": str(self.clip_b), "duration": 1.5, "camera_motion": "pan_left"},
