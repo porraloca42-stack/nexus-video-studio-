@@ -6,6 +6,7 @@ import {
   Img,
   OffthreadVideo,
   interpolate,
+  staticFile,
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
@@ -26,9 +27,9 @@ const SceneLayer: React.FC<{ scene: NexusScene; index: number; from: number; dur
   return (
     <AbsoluteFill style={{ opacity: fade, overflow: "hidden", background: "#0b111a" }}>
       {scene.visualMode === "video" && scene.asset ? (
-        <OffthreadVideo src={scene.asset} muted style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        <OffthreadVideo src={staticFile(scene.asset!)} muted style={{ width: "100%", height: "100%", objectFit: "cover" }} />
       ) : scene.visualMode === "image" && scene.asset ? (
-        <Img src={scene.asset} style={{ width: "100%", height: "100%", objectFit: "cover", transform: `scale(${1.08 + local / Math.max(1, duration) * 0.05})` }} />
+        <Img src={staticFile(scene.asset!)} style={{ width: "100%", height: "100%", objectFit: "cover", transform: `scale(${1.08 + local / Math.max(1, duration) * 0.05})` }} />
       ) : (
         <AbsoluteFill style={{ background: "radial-gradient(ellipse at 70% 30%, #33485d 0%, #172330 36%, #090e15 78%)" }}>
           <div style={{ position: "absolute", width: 680, height: 680, borderRadius: "50%", border: `1px solid ${accent}66`, right: -290 + drift, top: 190, boxShadow: `0 0 100px ${accent}22, inset 0 0 100px ${accent}12` }} />
@@ -79,8 +80,8 @@ export const NexusVideo: React.FC<NexusVideoProps> = (props) => {
       {layers.map((layer) => (
         <SceneLayer key={layer.scene.id} {...layer} />
       ))}
-      {props.narrationAudio ? <Audio src={props.narrationAudio} /> : null}
-      {props.musicAudio ? <Audio src={props.musicAudio} volume={0.12} /> : null}
+      {props.narrationAudio ? <Audio src={staticFile(props.narrationAudio)} /> : null}
+      {props.musicAudio ? <Audio src={staticFile(props.musicAudio)} volume={0.12} /> : null}
       <CaptionLayer captions={props.captions} />
     </AbsoluteFill>
   );
