@@ -378,3 +378,13 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Interface de revisão registra e exibe conexão semântica e aderência ao estilo por cena. Build: `NEXUS-2026.11.16-narration-first-selection-1`.
 - Testes adicionados: relevância semântica vence correspondência apenas estética; busca de estilo é independente e não aceita resultados sem conexão com a cena; avaliação visual expõe a prioridade semântica.
 - Estado: alterações gravadas no GitHub; aguardando CI. Não confundir implementação com deploy no Streamlit nem validação audiovisual com MP4 real.
+
+
+### Correção de recuperação de candidatos: busca semântica antes da revisão visual — 16/11/2026
+- Evidência do usuário: produção percorreu 10/10 cenas e encerrou com "Não encontrei clipes para as cenas [1..10]". Isso indica conclusão do laço de busca, não conclusão da renderização. A tela não mostrava erro de API; a etapa não chegou à montagem/narração/MP4.
+- Revisão do código identificou um gargalo arquitetural: os resultados retornados pela própria busca específica da cena eram descartados quando título/tags da biblioteca não repetiam palavras do briefing. Isso bloqueava candidatos antes da análise dos quadros reais pelo Gemini, especialmente quando metadados usam sinônimos ou outro idioma.
+- Correção em `nexus/assets.py`: candidatos retornados por consultas de conteúdo da cena agora seguem para a avaliação visual; resultados obtidos somente pela consulta estética continuam bloqueados, salvo se metadados também indicarem conexão com a cena. O Gemini permanece responsável por aceitar/rejeitar os quadros reais, mantendo a confiança mínima.
+- `app.py`: detalhes de falha agora mostram consulta de conteúdo, estilo solicitado e bibliotecas efetivamente configuradas; build atualizado para `NEXUS-2026.11.16-narration-first-selection-2`.
+- Testes atualizados para garantir que candidatos da busca semântica cheguem ao revisor visual e que resultados somente estéticos não preencham a cena.
+- Commits: `4172678` (recuperação de candidatos), `e95818f` (ordenação antes do filtro), `3422599` (testes), `ec9574c` (diagnóstico e build).
+- Estado: código gravado no GitHub; CI desta correção aguardando. Não há evidência suficiente para afirmar qual biblioteca ou consulta específica falhou na execução do usuário, pois o painel de detalhes da captura não está expandido. Deploy/refresh Streamlit e MP4 de validação continuam pendentes.
