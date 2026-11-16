@@ -364,7 +364,12 @@ def search_video_sources(
 def download_file(url, destination):
     destination = Path(destination)
     destination.parent.mkdir(parents=True, exist_ok=True)
-    with requests.get(url, stream=True, timeout=120) as response:
+    with requests.get(
+        url,
+        stream=True,
+        timeout=120,
+        headers={"User-Agent": "NEXUSVideoStudio/1.0 (https://github.com/porraloca42-stack/nexus-video-studio-)"},
+    ) as response:
         response.raise_for_status()
         with destination.open('wb') as output:
             for chunk in response.iter_content(1024 * 1024):
