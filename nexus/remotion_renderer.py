@@ -10,6 +10,78 @@ import subprocess
 from pathlib import Path
 
 
+_CAMERA_MOVES = {"push_in", "pull_out", "pan_left", "pan_right", "tilt_up", "tilt_down", "static"}
+_LIGHT_CHANGES = {"none", "subtle_flicker", "light_sweep", "exposure_ramp"}
+_ATMOSPHERE_EFFECTS = {"none", "dust", "rain", "fog", "embers", "particles"}
+_TRANSITIONS = {"cut", "crossfade", "match_cut", "fade"}
+
+
+def _bounded_number(value, default, minimum, maximum):
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        number = default
+    return max(minimum, min(maximum, number))
+
+
+def sanitize_scene_direction(direction, fallback_camera="push_in"):
+    """Whitelist and clamp Gemini's visual plan before it reaches Remotion."""
+    if not isinstance(direction, dict):
+        direction = {}
+    camera = direction.get("camera") if isinstance(direction.get("camera"), dict) else {}
+    depth = direction.get("depth_layers") if isinstance(direction.get("depth_layers"), dict) else {}
+    lighting = direction.get("lighting") if isinstance(direction.get("lighting"), dict) else {}
+    atmosphere = direction.get("atmosphere") if isinstance(direction.get("atmosphere"), dict) else {}
+    transition = direction.get("transition") if isinstance(direction.get("transition"), dict) else {}
+    move = str(camera.get("move") or fallback_camera)
+    if move not in _CAMERA_MOVES:
+        move = fallback_camera if fallback_camera in _CAMERA_MOVES else "push_in"
+    focus = str(camera.get("focus") or "subject")
+    if focus not in {"subject", "foreground", "background"}:
+        focus = "subject"
+    light_change = str(lighting.get("change") or "none")
+    if light_change not in _LIGHT_CHANGES:
+        light_change = "none"
+    effect = str(atmosphere.get("effect") or "none")
+    if effect not in _ATMOSPHERE_EFFECTS:
+        effect = "none"
+    transition_in = str(transition.get("in") or "cut")
+    transition_out = str(transition.get("out") or "cut")
+    if transition_in not in _TRANSITIONS:
+        transition_in = "cut"
+    if transition_out not in _TRANSITIONS:
+        transition_out = "cut"
+    raw_beats = direction.get("beats") if isinstance(direction.get("beats"), list) else []
+    beats = []
+    for beat in raw_beats[:3]:
+        if not isinstance(beat, dict):
+            continue
+        beats.append({
+            "at": _bounded_number(beat.get("at"), 0.5, 0.0, 1.0),
+            "event": str(beat.get("event") or "")[:180],
+            "visualTarget": str(beat.get("visual_target") or "")[:120],
+        })
+    return {
+        "camera": {
+            "move": move,
+            "intensity": _bounded_number(camera.get("intensity"), 0.65, 0.0, 1.0),
+            "startScale": _bounded_number(camera.get("start_scale"), 1.08, 1.0, 1.15),
+            "endScale": _bounded_number(camera.get("end_scale"), 1.15, 1.0, 1.15),
+            "focus": focus,
+        },
+        "depthLayers": {
+            "foreground": str(depth.get("foreground") or "")[:180],
+            "subject": str(depth.get("subject") or "")[:180],
+            "background": str(depth.get("background") or "")[:180],
+            "parallaxStrength": _bounded_number(depth.get("parallax_strength"), 0.0, 0.0, 1.0),
+        },
+        "lighting": {"mood": str(lighting.get("mood") or "")[:100], "keyDirection": str(lighting.get("key_direction") or "")[:100], "change": light_change},
+        "atmosphere": {"effect": effect, "intensity": _bounded_number(atmosphere.get("intensity"), 0.0, 0.0, 1.0)},
+        "transition": {"in": transition_in, "out": transition_out, "durationFrames": int(_bounded_number(transition.get("duration_frames"), 8, 0, 12))},
+        "beats": beats,
+    }
+
+
 _TIMESTAMP = re.compile(
     r"(\d{2}):(\d{2}):(\d{2}),(\d{3})\s+-->\s+"
     r"(\d{2}):(\d{2}):(\d{2}),(\d{3})"
@@ -79,6 +151,7 @@ def build_remotion_manifest(plan, media, audio_path, subtitles_path, public_dir,
             "imagePrompt": str(scene.get("image_prompt") or ""),
             "cameraMotion": str(scene.get("camera_motion") or "push_in"),
             "motionEvents": list(scene.get("motion_events") or []),
+            "sceneDirection": sanitize_scene_direction(scene.get("scene_direction"), scene.get("camera_motion") or "push_in"),
             "accent": str(scene.get("accent") or "#e8b66b"),
         })
 
