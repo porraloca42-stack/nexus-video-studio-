@@ -813,3 +813,12 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Run #43875995037 (commit `7a3909c`): jobs `unit-tests` e `commons-live-smoke` concluídos com sucesso; compilação Python e regressão aprovadas.
 - Limites: a auditoria vê um quadro por cena, não verifica movimento temporal, lip-sync ou continuidade entre todos os frames. Não executa regeneração automática de cenas reprovadas. A chamada Gemini usa a chave já configurada no Streamlit e pode consumir cota da API.
 - Estado: código integrado e CI aprovado. Ainda falta validar no Streamlit publicado com uma geração real Cloudflare/Remotion e inspecionar o MP4 final; não declarar produto ponta a ponta validado.
+
+
+## Auditoria multimodal no MP4 final — atualização 16/11/2026
+- Commit `2b8e2c8`: integrada a auditoria final também ao pipeline de bibliotecas de vídeo, além do pipeline Cloudflare/Remotion.
+- Commit `ebfbe5c`: corrigida a apresentação da auditoria Cloudflare para usar o mesmo campo `final_visual_audit` da interface comum, preservando a estrutura antiga `visual_reviews` usada para avaliações de clipes stock.
+- A interface agora exibe os resultados da auditoria final em uma tabela por cena para os dois motores. A avaliação de candidatos stock permanece separada da avaliação do MP4 final.
+- Run #43876220228 (commit `fc4e3a8`): testes da auditoria visual, compilação Python e smoke test Commons aprovados.
+- Runs #43876350775 (`2b8e2c8`) e #43876416211 (`ebfbe5c`): execução da regressão para as alterações finais do app ainda em andamento no momento desta atualização.
+- Estado: implementação no GitHub; validação da última integração do app depende da conclusão desses workflows. Deploy Streamlit e render real com credenciais ainda não confirmados.
