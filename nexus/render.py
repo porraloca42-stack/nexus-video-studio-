@@ -120,7 +120,7 @@ def render_video(media, audio_path, output, subtitles_path=None):
             adjusted_subtitles = temp_dir / "subtitles_retimed.srt"
             _retime_srt(subtitles_path, adjusted_subtitles, tempo, target_duration)
             subtitle_file = str(adjusted_subtitles.resolve()).replace("\\", "/").replace(":", "\\:")
-            subtitle_filter = f"subtitles='{subtitle_file}':force_style='FontName=Arial,FontSize=17,PrimaryColour=&H00FFFFFF,OutlineColour=&H00101010,BorderStyle=1,Outline=3,Shadow=1,Alignment=2,MarginV=105,Bold=1'"
+            subtitle_filter = f"subtitles='{subtitle_file}':force_style='FontName=Arial,FontSize=12,PrimaryColour=&H00FFFFFF,OutlineColour=&H00101010,BorderStyle=1,Outline=2,Shadow=0,Alignment=2,MarginV=170,Bold=1'"
             command += ["-vf", subtitle_filter]
         audio_filter = (
             f"atempo={tempo:.6f},"
