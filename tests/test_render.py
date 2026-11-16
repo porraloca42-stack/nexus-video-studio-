@@ -57,6 +57,19 @@ class RenderIntegrationTests(unittest.TestCase):
         self.assertAlmostEqual(float(metadata["format"]["duration"]), 3.0, delta=0.1)
         self.assertGreater(int(metadata["format"]["size"]), 0)
 
+    def test_normalize_clip_preserves_native_stock_motion_by_default(self):
+        from unittest.mock import patch
+        from nexus.render import normalize_clip
+
+        with patch("nexus.render.run") as run:
+            normalize_clip(self.clip_a, self.root / "preserved.mp4", 1.5)
+
+        command = run.call_args.args[0]
+        filter_graph = command[command.index("-vf") + 1]
+        self.assertIn("fps=30", filter_graph)
+        self.assertNotIn("zoompan", filter_graph)
+        self.assertIn("crop=900:1600", filter_graph)
+
     def test_large_narration_timing_mismatch_is_rejected(self):
         short_audio = self.root / "short.mp3"
         subprocess.run([
