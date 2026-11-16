@@ -71,6 +71,8 @@ class Inference:
             revision=MODEL_REVISION,
             torch_dtype=torch.bfloat16,
         ).to("cuda")
+        # Modal Volumes require an explicit commit to persist newly downloaded weights.
+        model_cache.commit()
 
     @modal.method()
     def run_batch(self, scenes):
@@ -102,7 +104,9 @@ class Inference:
                 width=WIDTH,
                 height=HEIGHT,
                 num_frames=frame_count,
+                frame_rate=FPS,
                 num_inference_steps=50,
+                guidance_scale=3.0,
             ).frames[0]
 
             output_path = Path(f"/tmp/nexus-scene-{index:02d}-{seed}.mp4")
