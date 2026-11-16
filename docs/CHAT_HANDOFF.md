@@ -141,3 +141,6 @@ O usuário ficou frustrado com orientações longas/repetitivas e com uma previs
 - Prévia usa sample publicado, se existir; sem sample, aparece botão `▶ Ouvir` que gera áudio curto sob demanda e consome uso da Fish API.
 - Estado: código e testes gravados, blocos conferidos por leitura no GitHub. CI e atualização do Streamlit ainda pendentes de confirmação. Não declarar correção implantada até o usuário atualizar/abrir a aplicação e confirmar a tela.
 - Próximo passo: observar GitHub Actions automático dos commits e aguardar o Streamlit atualizar; depois pedir ao usuário uma única confirmação visual da seleção compacta e do preview, sem erro vermelho.
+
+- Revisão final de leitura em `main` às 16:15 BRT confirmou: UI sem busca/filtros/paginação; chamada da lista sem `self_only`; player de prévia ao lado do selectbox; payloads TTS com `pt-BR`; asserts correspondentes nos testes. Último commit de UI: `567ba08`.
+- A verificação foi estática por leitura dos arquivos no GitHub. A suíte automatizada ainda depende do GitHub Actions; o comportamento visual e a integração real com Fish Audio ainda dependem do Streamlit publicado.
