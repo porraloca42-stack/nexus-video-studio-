@@ -487,6 +487,47 @@ Não altere narração, ordem das cenas, duração, estilo geral nem qualquer ce
         )
 
 
+STYLE_SEARCH_TERMS = {
+    "Cinematográfico realista": "cinematic realistic film, natural light, shallow depth of field, 35mm lens",
+    "Documentário cinematográfico": "cinematic documentary, observational camera, natural texture, available light",
+    "Dark cinematográfico": "dark cinematic lighting, deep shadows, dramatic rim light",
+    "Filme noir": "film noir, black and white, hard light, dramatic shadows",
+    "Publicidade premium": "premium commercial cinematography, polished production, controlled studio lighting",
+    "Lifestyle realista": "realistic lifestyle footage, natural everyday moments, warm natural light",
+    "Natureza documental": "nature documentary footage, organic colors, natural ambient light",
+    "Minimalista clean": "minimalist clean composition, uncluttered frame, soft neutral light",
+    "Vintage filme 35mm": "vintage 35mm film look, subtle film grain, warm analog colors",
+    "VHS retrô": "retro VHS aesthetic, analog tape texture, chromatic aberration",
+    "Cyberpunk neon": "cyberpunk neon lighting, magenta and cyan, futuristic urban atmosphere",
+    "Ficção científica futurista": "futuristic science fiction visuals, technological lighting, cool tones",
+    "Fantasia cinematográfica": "cinematic fantasy visuals, magical atmosphere, epic soft glow",
+    "Surrealismo fotográfico": "photorealistic surrealism, dreamlike composition, unusual visual metaphors",
+    "Anime 2D": "2D anime style, hand-drawn animation, expressive line art, cel shading",
+    "Anime 3D": "3D anime style, stylized characters, volumetric animated environments",
+    "Ilustração editorial": "editorial illustration, graphic shapes, sophisticated limited color palette",
+    "Aquarela artística": "artistic watercolor illustration, organic pigment texture, soft edges",
+    "Graphic novel": "graphic novel illustration, bold ink lines, dramatic panels, high contrast",
+    "3D realista": "photorealistic 3D render, realistic materials, cinematic 3D lighting",
+    "3D estilizado": "stylized 3D animation, expressive shapes, colorful dimensional environments",
+    "Stop motion": "stop motion animation, handcrafted miniature sets, tactile materials",
+    "Macro e detalhes": "macro cinematography, extreme close-up, shallow depth of field, fine details",
+    "Drone e paisagens aéreas": "aerial drone cinematography, sweeping landscape views, high angle perspective",
+}
+
+
+def apply_visual_style_lock(plan, style):
+    """Enforce the selected global visual style on every scene, independent of LLM compliance."""
+    plan["style_lock"] = style
+    style_terms = STYLE_SEARCH_TERMS.get(
+        style,
+        f"{style}, consistent visual style, cohesive cinematography",
+    )
+    for scene in plan.get("scenes", []):
+        scene["visual_style"] = style
+        scene["style_search_terms"] = style_terms
+    return plan
+
+
 def create_storyboard(topic, style, duration, secret_reader):
     target = int(round(float(duration)))
     minimum_scenes = max(1, (target + 4) // 5)
@@ -508,7 +549,7 @@ As durações de cena são estimativas; NÃO tente fechar a soma matemática. O 
 Cada cena deve mostrar ação concreta diretamente ligada à fala, com duas buscas visuais diferentes e específicas em inglês, estilo aplicado e pelo menos dois microeventos. Garanta hook, retenção, CTA e SEO preenchidos e coerentes com a narração. Retorne o JSON completo conforme o esquema do sistema."""
 
     plan = _request(prompt, secret_reader)
-    plan["style_lock"] = style
+    apply_visual_style_lock(plan, style)
     scenes = plan.get("scenes", [])
     if not scenes:
         raise RuntimeError("O diretor não criou nenhuma cena. Tente planejar novamente.")
@@ -533,7 +574,7 @@ Storyboard a corrigir:
 {json.dumps(plan, ensure_ascii=False)}
 Retorne somente JSON válido no formato do sistema."""
         plan = _request(repair_prompt, secret_reader)
-        plan["style_lock"] = style
+        apply_visual_style_lock(plan, style)
         scenes = plan.get("scenes", [])
         if not scenes:
             raise RuntimeError("O diretor não retornou cenas na correção do roteiro.")
@@ -549,6 +590,7 @@ Retorne somente JSON válido no formato do sistema."""
     # Repair weak scene-to-narration links before final validation.
     # Keep approved narration, scene order and timing independent.
     _repair_semantic_justifications(plan, topic, style, target, secret_reader)
+    apply_visual_style_lock(plan, style)
 
     # The AI creates the script and narrative structure; code owns exact timing.
     original_total = sum(float(scene.get("duration_seconds", 0) or 0) for scene in scenes)
