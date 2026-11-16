@@ -1,7 +1,6 @@
-"""Build a full generated-image video on an isolated GitHub Actions worker."""
+"""Build a Cloudflare-image/Remotion video on an isolated GitHub Actions worker."""
 import json
 import os
-import re
 import subprocess
 from pathlib import Path
 
@@ -11,25 +10,20 @@ from nexus.remotion_renderer import render_video_remotion
 from nexus.render_crypto import decrypt_text, encrypt_bytes, encrypt_text
 
 
-def _retime_srt(source: Path, destination: Path, factor: float) -> None:
-    """Scale SRT timestamps by the same factor used for audio time-stretching."""
-    timestamp = re.compile(r"(\d{2}):(\d{2}):(\d{2}),(\d{3})")
-
-    def scale(match):
-        hours, minutes, seconds, millis = map(int, match.groups())
-        total_ms = ((hours * 3600 + minutes * 60 + seconds) * 1000) + millis
-        total_ms = int(round(total_ms / factor))
-        h, remainder = divmod(total_ms, 3_600_000)
-        m, remainder = divmod(remainder, 60_000)
-        s, ms = divmod(remainder, 1000)
-        return f"{h:02d}:{m:02d}:{s:02d},{ms:03d}"
-
-    text = source.read_text(encoding="utf-8")
-    destination.write_text(timestamp.sub(scale, text), encoding="utf-8")
+def generate_worker_narration(text, voice, output_path, fish_api_key="", fish_voice_id=""):
+    """Use Fish Audio on the worker when credentials are provided; Edge TTS is fallback."""
+    return make_voice(
+        text,
+        voice,
+        output_path,
+        fish_api_key=fish_api_key or None,
+        fish_voice_id=fish_voice_id or None,
+        return_provider=True,
+    )
 
 
-def _fit_narration_to_timeline(audio_path: Path, subtitles_path: Path, target: float) -> float:
-    """Gently time-stretch small TTS duration drift and keep subtitles synchronized."""
+def _fit_narration_to_timeline(audio_path: Path, target: float) -> float:
+    """Gently time-stretch narration audio to the Remotion timeline; no captions are produced."""
     probe = subprocess.run(
         ["ffprobe", "-v", "error", "-show_entries", "format=duration",
          "-of", "default=noprint_wrappers=1:nokey=1", str(audio_path)],
@@ -49,17 +43,15 @@ def _fit_narration_to_timeline(audio_path: Path, subtitles_path: Path, target: f
             "e excede a faixa segura de ajuste de 15%. Revise o texto narrado."
         )
     adjusted_audio = audio_path.with_name(f"{audio_path.stem}_synced{audio_path.suffix}")
-    tempo = ratio
-    command = ["ffmpeg", "-y", "-i", str(audio_path), "-filter:a", f"atempo={tempo:.6f}",
-               "-vn", str(adjusted_audio)]
-    result = subprocess.run(command, capture_output=True, text=True, timeout=120)
+    result = subprocess.run(
+        ["ffmpeg", "-y", "-i", str(audio_path), "-filter:a", f"atempo={ratio:.6f}",
+         "-vn", str(adjusted_audio)],
+        capture_output=True, text=True, timeout=120,
+    )
     if result.returncode or not adjusted_audio.exists():
         raise RuntimeError("Falha ao sincronizar a duração da narração: " + result.stderr[-1200:])
     audio_path.unlink(missing_ok=True)
     adjusted_audio.replace(audio_path)
-    if subtitles_path.exists():
-        _retime_srt(subtitles_path, subtitles_path.with_name(f"{subtitles_path.stem}_synced.srt"), ratio)
-        subtitles_path.with_name(f"{subtitles_path.stem}_synced.srt").replace(subtitles_path)
     final_probe = subprocess.run(
         ["ffprobe", "-v", "error", "-show_entries", "format=duration",
          "-of", "default=noprint_wrappers=1:nokey=1", str(audio_path)],
@@ -72,10 +64,14 @@ def _fit_narration_to_timeline(audio_path: Path, subtitles_path: Path, target: f
 
 def main():
     raw = os.environ.get("NEXUS_MANIFEST_ENCRYPTED", "")
+    encrypted_fish = os.environ.get("NEXUS_FISH_CREDENTIALS_ENCRYPTED", "")
     encryption_secret = os.environ.get("CLOUDFLARE_API_TOKEN", "")
     if not raw or not encryption_secret:
         raise RuntimeError("Manifesto criptografado ou segredo de criptografia ausente.")
     plan = json.loads(decrypt_text(raw, encryption_secret))
+    fish_credentials = {"api_key": "", "voice_id": ""}
+    if encrypted_fish:
+        fish_credentials.update(json.loads(decrypt_text(encrypted_fish, encryption_secret)))
     scenes = plan.get("scenes") or []
     if not scenes:
         raise RuntimeError("O manifesto não contém cenas.")
@@ -107,11 +103,7 @@ def main():
         width = int(image_size.get("width") or 0)
         height = int(image_size.get("height") or 0)
         if width < 1 or height < 1:
-            raise RuntimeError(
-                f"Imagem da cena {item.get('scene_index')} não informou dimensões válidas."
-            )
-        # FLUX.2 Klein pode arredondar a altura solicitada para múltiplos internos
-        # (ex.: 512×896). Normalize para o canvas vertical do manifesto antes do Remotion.
+            raise RuntimeError(f"Imagem da cena {item.get('scene_index')} não informou dimensões válidas.")
         if width != 512 or height != 910:
             normalized_path = image_path.with_name(f"{image_path.stem}_vertical{image_path.suffix}")
             normalize = subprocess.run(
@@ -130,11 +122,18 @@ def main():
     narration = " ".join(str(scene.get("voiceover", "")).strip() for scene in scenes).strip()
     if not narration:
         raise RuntimeError("Narração vazia.")
-    audio_path, subtitles_path = make_voice(narration, voice, work / "narration.mp3")
-    expected_duration = sum(float(scene.get("duration_seconds") or scene.get("duration") or 0) for scene in scenes)
-    narration_duration = _fit_narration_to_timeline(
-        Path(audio_path), Path(subtitles_path), expected_duration
+    audio_path, narration_provider = generate_worker_narration(
+        narration,
+        voice,
+        work / "narration.mp3",
+        fish_api_key=fish_credentials.get("api_key", ""),
+        fish_voice_id=fish_credentials.get("voice_id", ""),
     )
+    expected_duration = sum(
+        float(scene.get("duration_seconds") or scene.get("duration") or 0)
+        for scene in scenes
+    )
+    narration_duration = _fit_narration_to_timeline(Path(audio_path), expected_duration)
 
     output = work / "nexus_video.mp4"
     render_video_remotion(
@@ -142,20 +141,15 @@ def main():
         audio_path,
         output,
         plan,
-        subtitles_path=subtitles_path,
         project_dir=root / "remotion",
         job_id=job_id,
     )
 
     probe = subprocess.run(
-        [
-            "ffprobe", "-v", "error", "-show_entries",
-            "format=duration,size:stream=codec_name,codec_type,width,height",
-            "-of", "json", str(output),
-        ],
-        capture_output=True,
-        text=True,
-        timeout=90,
+        ["ffprobe", "-v", "error", "-show_entries",
+         "format=duration,size:stream=codec_name,codec_type,width,height",
+         "-of", "json", str(output)],
+        capture_output=True, text=True, timeout=90,
     )
     if probe.returncode:
         raise RuntimeError("FFprobe não conseguiu ler o MP4: " + probe.stderr[-2000:])
@@ -164,13 +158,12 @@ def main():
     video = next((item for item in streams if item.get("codec_type") == "video"), None)
     audio = next((item for item in streams if item.get("codec_type") == "audio"), None)
     duration = float(metadata.get("format", {}).get("duration") or 0)
-    expected = expected_duration
     if not video or video.get("width") != 720 or video.get("height") != 1280:
         raise RuntimeError("MP4 não contém vídeo vertical 720x1280.")
     if not audio:
         raise RuntimeError("MP4 final não contém áudio.")
-    if abs(duration - expected) > 0.75:
-        raise RuntimeError(f"Duração final {duration:.2f}s diverge da meta {expected:.2f}s.")
+    if abs(duration - expected_duration) > 0.75:
+        raise RuntimeError(f"Duração final {duration:.2f}s diverge da meta {expected_duration:.2f}s.")
     if output.stat().st_size == 0:
         raise RuntimeError("MP4 final vazio.")
 
@@ -179,6 +172,7 @@ def main():
         "output": str(output),
         "duration": duration,
         "narration_duration": narration_duration,
+        "narration_provider": narration_provider,
         "width": video["width"],
         "height": video["height"],
         "audio_codec": audio.get("codec_name"),
