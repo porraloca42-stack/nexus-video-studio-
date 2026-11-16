@@ -139,5 +139,65 @@ class AssetRankingTests(unittest.TestCase):
         self.assertEqual(rank_video_candidates([], "a scene query"), [])
 
 
+    @patch("nexus.assets.search_pexels_videos")
+    @patch("nexus.assets.search_pixabay_videos")
+    @patch("nexus.assets.search_coverr_videos")
+    def test_searches_every_enabled_provider_and_combines_candidates(self, coverr, pixabay, pexels):
+        coverr.return_value = [
+            clip("https://example.test/coverr.mp4", "Person walking through a city", "Urban street")
+        ]
+        pixabay.return_value = [
+            clip("https://example.test/pixabay.mp4", "Person walking through city street", "Urban walk")
+        ]
+        pexels.return_value = [
+            clip("https://example.test/pexels.mp4", "Person walking through a city", "Walking downtown")
+        ]
+
+        ranked, errors = search_video_sources(
+            "person walking through a city",
+            coverr_key="coverr-key",
+            pixabay_key="pixabay-key",
+            pexels_key="pexels-key",
+        )
+
+        self.assertFalse(errors)
+        self.assertEqual({item["source"] for item in ranked}, {"Coverr", "Pixabay", "Pexels"})
+        self.assertEqual(coverr.call_count, 2)
+        self.assertEqual(pixabay.call_count, 2)
+        self.assertEqual(pexels.call_count, 2)
+
+    @patch("nexus.assets.search_pexels_videos")
+    def test_pexels_adapter_uses_current_video_endpoint_and_normalizes_files(self, search):
+        search.return_value = [
+            clip("https://example.test/pexels.mp4", "Person writing in a journal", "Writing")
+        ]
+
+        ranked, errors = search_video_sources(
+            "person writing in a journal",
+            pexels_key="pexels-key",
+        )
+
+        self.assertFalse(errors)
+        self.assertEqual(ranked[0]["source"], "Pexels")
+        self.assertEqual(search.call_count, 2)
+
+    @patch("nexus.assets.search_pixabay_videos")
+    @patch("nexus.assets.search_coverr_videos")
+    def test_provider_failure_does_not_block_other_libraries(self, coverr, pixabay):
+        coverr.side_effect = __import__("requests").RequestException("Coverr unavailable")
+        pixabay.return_value = [
+            clip("https://example.test/pixabay.mp4", "Person writing goals in notebook", "Journal writing")
+        ]
+
+        ranked, errors = search_video_sources(
+            "person writing goals in notebook",
+            coverr_key="coverr-key",
+            pixabay_key="pixabay-key",
+        )
+
+        self.assertTrue(errors)
+        self.assertEqual(ranked[0]["source"], "Pixabay")
+
+
 if __name__ == "__main__":
     unittest.main()
