@@ -238,3 +238,12 @@ O usuário ficou frustrado com orientações longas/repetitivas e com uma previs
 - Commit `ea7fa5a` em `app.py`: recarrega explicitamente o módulo com `importlib.reload(fish_audio)` após import; verifica a existência de `get_fish_voice`; se faltar, mostra caminho real do módulo em erro explícito.
 - Verificação pós-commit: app.py relido de main; reload, guard e chamada confirmados. A consulta de workflow runs não retornou runs porque o wrapper só lista runs disparadas por pull request; CI geral não validado.
 - Próximo passo: aguardar Streamlit sincronizar e verificar se as quatro vozes carregam. Se não, usar o caminho do módulo exposto no erro para identificar import path/checkout divergente; não alterar mais a API Fish ou IDs sem evidência.
+
+## Última atualização — Modal LTX worker deploy confirmado (16/11/2026 17:15 BRT)
+- Usuário informou que deploy LTX terminou. Conferido via GitHub Actions.
+- Modal deploy workflow #1 ID `43909635680`, commit `82ab49d7fe50c8e16d78c4a3e3b08c40ae8a1a5b`: completed/success. Job #133447708054, todos steps success.
+- Logs finais confirmam container images construídas, função `Inference.*` criada e `App deployed in 95.955s`. Modal app: https://modal.com/apps/porraloca42-stack/main/deployed/nexus-video-i2v
+- Implementado e implantado: worker LTX em Modal.
+- Ainda não testado: inferência GPU H100, download dos pesos LTX, primeira geração I2V e qualidade do clipe. Deploy sozinho não dispara inferência.
+- Renders #6 e #7 passaram e produziram artifacts, mas são anteriores ao deploy Modal, então não provam LTX I2V.
+- Próximo passo: teste controlado de uma cena/curta duração, checando custo e logs, após confirmar créditos/spend limit; depois vídeo integral.
