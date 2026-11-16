@@ -18,7 +18,7 @@ st.caption("Direção contextual por IA · Vídeos verticais")
 st.info("O diretor interpreta o assunto completo, planeja cenas ligadas à narração e mantém o estilo visual escolhido em todo o vídeo.")
 
 st.subheader("Teste da biblioteca Coverr")
-st.caption("O NEXUS fará a busca e o download internamente. Você não precisa baixar nenhum clipe manualmente.")
+st.caption("Este diagnóstico baixa o clipe temporariamente no servidor do NEXUS para testar a fonte. Nada é baixado no seu celular; o produto final será um único MP4 gerado pelo estúdio.")
 if st.button("Testar Coverr: buscar e baixar clipe", type="secondary"):
     coverr_key = secret("COVERR_API_KEY")
     if not coverr_key:
@@ -55,7 +55,7 @@ if st.button("Testar Coverr: buscar e baixar clipe", type="secondary"):
                         size_bytes = int(metadata.get("format", {}).get("size") or clip_path.stat().st_size)
                         if duration_seconds <= 0 or size_bytes <= 0:
                             raise RuntimeError("O arquivo baixado não apresentou duração ou tamanho válidos.")
-                        st.success("Download interno e integridade do vídeo confirmados.")
+                        st.success("Download no servidor e integridade do arquivo confirmados. Nenhum arquivo foi enviado ao celular.")
                         st.write(f"**Resolução:** {video.get('width')} × {video.get('height')}")
                         st.write(f"**Codec:** {video.get('codec_name', 'não identificado')}")
                         st.write(f"**Duração:** {duration_seconds:.2f} segundos")
