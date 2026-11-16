@@ -29,8 +29,8 @@ Aplicativo pessoal em nuvem para transformar tema ou roteiro em vídeo vertical 
 - Worker remoto: workflow GitHub Actions para render Remotion/Cloudflare; o fluxo real depende dos secrets e do deploy Streamlit.
 - Geração de imagens: Cloudflare Workers AI FLUX.2 Klein no worker remoto; gera imagens estáticas, não vídeo.
 - Busca/baixar mídia: nexus/assets.py; fontes implementadas em diferentes níveis de maturidade, com smoke test Wikimedia Commons aprovado. Coverr/Pixabay ainda exigem validação real de API e licença.
-- Remotion já tem composição de demonstração e manifesto, movimento de câmera, efeitos atmosféricos/luminosos e crossfade em desenvolvimento; não presumir parallax real nem animação orgânica de objetos em imagem única.
-- Avaliação visual de candidatos existe para o fluxo de seleção de mídia; auditoria automática do MP4 Cloudflare/Remotion ainda não está integrada ponta a ponta.
+- Remotion já tem composição, manifesto, movimento de câmera, efeitos atmosféricos/luminosos e crossfade; a auditoria visual Gemini foi integrada ao retorno do MP4 Cloudflare/Remotion. Não presumir parallax real nem animação orgânica de objetos em imagem única.
+- Avaliação visual de candidatos existe no fluxo de seleção de mídia; após o render Cloudflare/Remotion, o app extrai um quadro por cena e solicita revisão multimodal Gemini (aderência à narração, qualidade, artefatos e estilo). A revisão é consultiva e não bloqueia a entrega.
 
 ## Segredos
 Nunca armazenar valores de chaves neste arquivo, no GitHub ou em instruções do projeto.
@@ -801,3 +801,15 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Limites conhecidos: camadas de profundidade são transportadas, mas parallax verdadeiro ainda não é executado porque as imagens não vêm segmentadas em planos; não há animação orgânica de pessoas/objetos. Beats atualmente produzem uma ênfase sutil de câmera, não animação semântica do alvo descrito.
 - Run de regressão #43875070412 e demo Remotion #43875070449 iniciados após os commits; status pendente no momento do registro. Não marcar a etapa como aprovada até conclusão de ambos.
 - Estado: código implementado no GitHub; typecheck/render de demonstração e testes Python pendentes; Streamlit deploy e MP4 real ainda não validados.
+
+
+## Auditoria visual final por cena — 16/11/2026
+- Commit `840f515`: criado `nexus/visual_review.py` para normalizar a avaliação visual por cena.
+- Commit `92ef47f`: corrigido o formato multimodal Gemini e adicionada seleção dinâmica de modelos compatíveis via `discover_models`.
+- Commit `fd3a1d1`: extração de um quadro JPEG central por cena do MP4, com verificação de duração da timeline.
+- Commit `1e05f31`: integração no fluxo Streamlit Cloudflare + Remotion; a revisão é executada após recuperar o MP4, armazenada no diagnóstico do vídeo e exibida por cena. Falha de auditoria não apaga nem invalida o MP4 tecnicamente renderizado.
+- Commit `7e614c6`: testes unittest para normalização, pontuação limitada, cenas ausentes e payload multimodal.
+- Commit `7a3909c`: corrigido erro de sintaxe no prompt da auditoria.
+- Run #43875995037 (commit `7a3909c`): jobs `unit-tests` e `commons-live-smoke` concluídos com sucesso; compilação Python e regressão aprovadas.
+- Limites: a auditoria vê um quadro por cena, não verifica movimento temporal, lip-sync ou continuidade entre todos os frames. Não executa regeneração automática de cenas reprovadas. A chamada Gemini usa a chave já configurada no Streamlit e pode consumir cota da API.
+- Estado: código integrado e CI aprovado. Ainda falta validar no Streamlit publicado com uma geração real Cloudflare/Remotion e inspecionar o MP4 final; não declarar produto ponta a ponta validado.
