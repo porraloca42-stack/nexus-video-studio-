@@ -60,6 +60,7 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - nexus/render.py usa stream_loop para preencher o segmento quando o clipe-fonte for mais curto, evitando quadros vazios. Isso é uma proteção técnica, não substitui a seleção de clipes longos e variados.
 - Corrigido tratamento de resposta do Gemini em nexus/director.py: agrega todos os blocos de texto, remove cercas de código, tenta decodificação JSON direta e extração do primeiro objeto; informa bloqueio, resposta vazia ou MAX_TOKENS com diagnóstico específico. Limite de saída elevado para 8192 tokens.
 - app.py oferece 24 estilos visuais selecionáveis (cinematográfico, documentário, noir, publicidade premium, lifestyle, natureza, minimalista, vintage, VHS, cyberpunk, sci-fi, fantasia, surrealismo, anime 2D/3D, ilustração, aquarela, graphic novel, 3D, stop motion, macro e drone). O estilo é passado ao diretor, exibido no storyboard e anexado às buscas por cena. Em 2026-11-16, após usuário reportar que o seletor não estava visível no celular, foi movido da sidebar para a área principal, acima do roteiro.
+- Redesign mobile-first publicado em app.py: hierarquia em etapas (conteúdo, direção visual, configurações), painel principal com controles de voz/duração, cartão compacto de prévia visual ilustrativa SVG para cada um dos 24 estilos e CSS de acabamento. O teste Coverr foi removido da tela inicial e movido para expander de ferramentas avançadas; não é necessário para uso normal. Commit 308504c; interface ainda aguarda confirmação visual do usuário. As prévias são ilustrações vetoriais de referência, não frames reais de stock.
 - validate_storyboard exige visual_style e style_search_terms em cada cena. Código publicado; ainda aguarda novo teste no Streamlit.
 - Usuário reportou erro em runtime: `validate_storyboard() takes 1 positional argument but 2 were given`, indicando divergência entre versões de app.py e módulo director.py carregadas no deployment/cache. app.py foi atualizado com fallback compatível: tenta assinatura com duração e, se detectar módulo antigo, usa assinatura de um argumento e aplica verificações locais de quantidade/duração/estilo. O seletor visual foi movido para o corpo principal para ficar visível em mobile, em vez da sidebar recolhida. Commit 2fcd82e; exige reboot/refresh do app para carregar versão nova. Não testado ainda pelo usuário.
 - O usuário executou o download interno e confirmou em captura que o servidor recebeu e validou um MP4: H.264, 606×1080, 8 segundos, 4,65 MB. Download servidor→arquivo e leitura FFprobe estão TESTADOS. O arquivo ficou em diretório temporário do servidor e foi descartado ao fim do teste; não houve download para o celular, nem isso era o objetivo do diagnóstico.
@@ -79,9 +80,9 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 5. PRÓXIMO: testar a correção do JSON do Gemini no Streamlit; verificar se o storyboard gera 10+ cenas, soma correta e se cada cena contém visual_style/style_search_terms.
 6. Confirmar que o estilo selecionado aparece nas consultas de busca de cada cena.
 7. Retestar a busca por cena e validar relevância, variedade e duração dos clipes antes de renderizar.
-7. Implementar ranking semântico e avaliação multimodal dos candidatos.
+9. Implementar ranking semântico e avaliação multimodal dos candidatos.
 
-8. Renderizar o primeiro MP4 real de 40–50s, inspecionar qualidade e validar entrega do arquivo final.
+10. Renderizar o primeiro MP4 real de 40–50s, inspecionar qualidade e validar entrega do arquivo final.
 9. Considerar Pixabay como fallback quando a chave estiver disponível; Pexels permanece fora do escopo enquanto a emissão de chaves estiver indisponível.
 10. Avaliar MCP oficial do Coverr somente se trouxer vantagem após validar a integração REST.
 
