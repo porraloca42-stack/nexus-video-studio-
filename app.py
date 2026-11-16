@@ -111,11 +111,11 @@ div.st-key-nexus-style-gallery div[data-testid="column"] > div {width:100% !impo
 div.st-key-nexus-style-gallery div[data-testid="stImage"] {display:flex !important; justify-content:center !important; width:100% !important; max-width:100% !important; margin-left:auto !important; margin-right:auto !important;}
 div.st-key-nexus-style-gallery div[data-testid="stImage"] img {max-width:100% !important; height:auto !important; margin-left:auto !important; margin-right:auto !important;}
 div.st-key-nexus-style-gallery div[data-testid="stButton"] {display:flex !important; justify-content:center !important; width:100% !important; max-width:100% !important; min-width:0 !important;}
-div.st-key-nexus-style-gallery div[data-testid="stButton"] button {display:flex !important; align-items:center !important; justify-content:center !important; width:88% !important; max-width:185px !important; min-width:0 !important; margin-left:auto !important; margin-right:auto !important; height:auto !important; min-height:2.05rem !important; padding:.28rem .32rem !important; white-space:normal !important; overflow:visible !important; text-overflow:clip !important; overflow-wrap:break-word !important; word-break:normal !important; font-size:.68rem; line-height:1.18; box-sizing:border-box !important;}
+div.st-key-nexus-style-gallery div[data-testid="stButton"] button {display:flex !important; align-items:center !important; justify-content:center !important; width:78% !important; max-width:155px !important; min-width:0 !important; margin-left:auto !important; margin-right:auto !important; height:auto !important; min-height:1.8rem !important; padding:.2rem .25rem !important; white-space:normal !important; overflow:visible !important; text-overflow:clip !important; overflow-wrap:break-word !important; word-break:normal !important; font-size:.62rem !important; line-height:1.1 !important; box-sizing:border-box !important;}
 div.st-key-nexus-style-gallery div[data-testid="stButton"] button *,
 div.st-key-nexus-style-gallery div[data-testid="stButton"] button div,
 div.st-key-nexus-style-gallery div[data-testid="stButton"] button p,
-div.st-key-nexus-style-gallery div[data-testid="stButton"] button span {display:block !important; width:100% !important; max-width:100% !important; min-width:0 !important; height:auto !important; max-height:none !important; white-space:normal !important; overflow:visible !important; text-overflow:clip !important; overflow-wrap:break-word !important; word-break:normal !important;}
+div.st-key-nexus-style-gallery div[data-testid="stButton"] button span {display:block !important; width:100% !important; max-width:100% !important; min-width:0 !important; height:auto !important; max-height:none !important; margin:0 !important; padding:0 !important; font-size:.62rem !important; line-height:1.1 !important; white-space:normal !important; overflow:visible !important; text-overflow:clip !important; overflow-wrap:break-word !important; word-break:normal !important;}
 
 div[data-testid="stButton"] button {border-radius:12px;min-height:2.65rem;border:1px solid rgba(210,190,155,.24);box-shadow:0 3px 10px rgba(0,0,0,.16);}
 div[data-testid="stButton"] button[kind="primary"] {border-color:rgba(222,190,132,.7);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 5px 15px rgba(194,157,94,.2);font-weight:750;}
@@ -152,7 +152,7 @@ with st.expander("Escolher estilo visual · 24 referências", expanded=False):
                 option = STYLE_OPTIONS[index]
                 with col:
                     is_selected = option == st.session_state["nexus_style"]
-                    st.image(style_preview_svg(option), width=75)
+                    st.image(style_preview_svg(option), width=85)
                     if st.button(("✓ " if is_selected else "") + option, key="style_" + str(index), type="primary" if is_selected else "secondary", use_container_width=True):
                         st.session_state["nexus_style"] = option
                         st.rerun()
