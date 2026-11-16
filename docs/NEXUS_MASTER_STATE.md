@@ -98,6 +98,8 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 9. Considerar Pixabay como fallback quando a chave estiver disponível; Pexels permanece fora do escopo enquanto a emissão de chaves estiver indisponível.
 10. Avaliar MCP oficial do Coverr somente se trouxer vantagem após validar a integração REST.
 
+- Ajuste de espaçamento da galeria (commit `f8afaad4`): grid responsivo mantém duas colunas, com `column-gap` de 0,55 rem, `row-gap` de 0,7 rem e margem inferior de 0,7 rem em cada linha de cartões para separar visualmente imagem/botão do próximo estilo. Publicado no GitHub; aguarda reboot e conferência visual em dispositivo móvel.
+
 ## Regras para o assistente em novos chats
 - Começar lendo este arquivo e o código relevante no GitHub antes de propor mudanças.
 - Tratar este documento como registro de continuidade, mas conferir o estado atual do repositório e deployment; pode ficar desatualizado.
