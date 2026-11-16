@@ -8,8 +8,8 @@ on:
         description: Unique render job identifier
         required: true
         type: string
-      manifest_json:
-        description: NEXUS storyboard JSON
+      manifest_encrypted:
+        description: Encrypted NEXUS storyboard JSON
         required: true
         type: string
       voice:
@@ -46,7 +46,7 @@ jobs:
           sudo apt-get install -y ffmpeg
 
       - name: Install Python dependencies
-        run: python -m pip install requests edge-tts
+        run: python -m pip install requests edge-tts cryptography
 
       - name: Install Remotion dependencies
         working-directory: remotion
@@ -59,7 +59,7 @@ jobs:
       - name: Generate images, narration and render MP4
         env:
           NEXUS_JOB_ID: ${{ inputs.job_id }}
-          NEXUS_MANIFEST_JSON: ${{ inputs.manifest_json }}
+          NEXUS_MANIFEST_ENCRYPTED: ${{ inputs.manifest_encrypted }}
           NEXUS_VOICE: ${{ inputs.voice }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -72,8 +72,7 @@ jobs:
         with:
           name: nexus-render-${{ inputs.job_id }}
           path: |
-            worker_output/${{ inputs.job_id }}/nexus_video.mp4
-            worker_output/${{ inputs.job_id }}/render-report.json
-            worker_output/${{ inputs.job_id }}/images/*
+            worker_output/${{ inputs.job_id }}/nexus_video.mp4.enc
+            worker_output/${{ inputs.job_id }}/render-report.json.enc
           if-no-files-found: error
           retention-days: 3
