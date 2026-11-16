@@ -13,30 +13,7 @@ _STOPWORDS = {
 }
 
 # Stock libraries index simple subjects and actions more reliably than full cinematic prompts.
-_QUERY_ALIASES = {
-    "alarm": ["alarm clock", "waking up", "bedroom"],
-    "clock": ["alarm clock", "waking up"],
-    "writing": ["writing", "journal", "notebook"],
-    "notebook": ["notebook", "journal", "writing"],
-    "goals": ["planning", "writing goals"],
-    "barbell": ["gym", "weightlifting", "workout"],
-    "athlete": ["gym", "weightlifting", "workout"],
-    "lifting": ["weightlifting", "gym", "workout"],
-    "workout": ["gym", "fitness", "weightlifting"],
-    "book": ["reading", "books", "studying"],
-    "reading": ["reading", "books", "studying"],
-    "study": ["studying", "reading", "books"],
-    "page": ["book", "reading"],
-    "typing": ["typing", "computer", "keyboard"],
-    "keyboard": ["typing", "computer"],
-    "computer": ["computer", "office work", "typing"],
-    "laptop": ["laptop", "computer", "office work"],
-    "city": ["city skyline", "city lights", "night city"],
-    "window": ["window", "city lights", "night city"],
-    "night": ["city lights", "night city"],
-}
-
-def build_query_variants(query, max_variants=8):
+def build_query_variants(query, max_variants=6):
     original = re.sub(r"\s+", " ", str(query or "")).strip()
     if not original:
         return []
@@ -53,12 +30,11 @@ def build_query_variants(query, max_variants=8):
     add(original)
     words = re.findall(r"[a-zA-Z0-9]+", original.lower())
     keywords = [word for word in words if word not in _STOPWORDS and len(word) > 2]
-    # Keep a concise multi-term query, then relax to individual searchable subjects.
-    add(" ".join(keywords[:3]))
+    # Search variants come only from the director's scene-specific query.
+    # No fixed topic dictionary or hardcoded visual themes.
+    add(" ".join(keywords[:4]))
     for word in keywords:
         add(word)
-        for alias in _QUERY_ALIASES.get(word, []):
-            add(alias)
         if len(variants) >= max_variants:
             break
     return variants
