@@ -5,6 +5,7 @@ reported clearly instead of silently changing the selected voice.
 """
 import base64
 import json
+import re
 from pathlib import Path
 from urllib.parse import urljoin
 
@@ -223,15 +224,12 @@ def _is_human_narrator_voice(voice, gender):
     )
     if any(token in metadata for token in excluded):
         return False
-    if gender == "male" and "female" in metadata:
-        return False
-    if gender == "female" and any(term in metadata for term in ("male", "mascul")):
-        return False
+    metadata_words = re.findall(r"[a-záéíóúãõç]+", metadata)
     gender_terms = {
         "male": ("male", "mascul", "homem", "man"),
         "female": ("female", "feminin", "mulher", "woman"),
     }[gender]
-    if not any(term in metadata for term in gender_terms):
+    if not any(word.startswith(term) for word in metadata_words for term in gender_terms):
         return False
     return "narration" in tags or any(
         term in metadata for term in (
