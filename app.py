@@ -1,10 +1,77 @@
-import base64, json, os, shutil, subprocess, tempfile
+import base64, json, os, shutil, subprocess, tempfile, inspect
 from pathlib import Path
+import requests
 import streamlit as st
 from nexus.director import create_storyboard, validate_storyboard
 from nexus.assets import search_video_sources, search_coverr_videos, download_file
 from nexus.audio import make_voice
 from nexus.render import render_video
+
+def _search_stock_compatible(query, coverr_key="", pixabay_key="", pexels_key="", per_page=20, exclude_urls=None, relevance_query=None, min_relevance=1.5):
+    """Search all configured libraries while tolerating an older deployed assets module."""
+    try:
+        supports_pexels = "pexels_key" in inspect.signature(search_video_sources).parameters
+    except (TypeError, ValueError):
+        supports_pexels = False
+
+    if supports_pexels:
+        return search_video_sources(
+            query, coverr_key, pixabay_key, pexels_key=pexels_key,
+            per_page=per_page, exclude_urls=exclude_urls,
+            relevance_query=relevance_query, min_relevance=min_relevance,
+        )
+
+    # Compatibility path for a Streamlit worker that still has the previous
+    # search_video_sources signature loaded in memory.
+    candidates, errors = search_video_sources(
+        query, coverr_key, pixabay_key, per_page=per_page,
+        exclude_urls=exclude_urls, relevance_query=relevance_query,
+        min_relevance=min_relevance,
+    )
+    if pexels_key:
+        try:
+            response = requests.get(
+                "https://api.pexels.com/v1/videos/search",
+                headers={"Authorization": pexels_key},
+                params={"query": query, "orientation": "portrait", "locale": "pt-BR", "per_page": min(int(per_page), 80)},
+                timeout=45,
+            )
+            response.raise_for_status()
+            for item in response.json().get("videos", []):
+                files = [
+                    vf for vf in item.get("video_files", [])
+                    if vf.get("link") and vf.get("file_type") == "video/mp4"
+                    and int(vf.get("width") or 0) >= 480 and int(vf.get("height") or 0) >= 700
+                ]
+                if not files:
+                    continue
+                files.sort(key=lambda vf: (str(vf.get("quality", "")).lower() in {"hd", "uhd"}, int(vf.get("width") or 0) * int(vf.get("height") or 0)), reverse=True)
+                chosen = files[0]
+                user = item.get("user") or {}
+                candidates.append({
+                    "url": chosen["link"], "width": int(chosen.get("width") or 0),
+                    "height": int(chosen.get("height") or 0),
+                    "vertical": int(chosen.get("height") or 0) > int(chosen.get("width") or 0),
+                    "title": item.get("alt") or "", "description": item.get("alt") or "",
+                    "source": "Pexels", "source_url": item.get("url") or "https://www.pexels.com/videos/",
+                    "author": user.get("name") or "", "author_url": user.get("url") or "",
+                })
+        except Exception as exc:
+            errors.append(f"Pexels: {exc}")
+
+    # Preserve scene relevance when combining fallback Pexels results.
+    terms = {word.lower() for word in str(relevance_query or query).split() if len(word) > 2}
+    def relevance(item):
+        text = (str(item.get("title", "")) + " " + str(item.get("description", ""))).lower()
+        matches = sum(1 for term in terms if term in text)
+        return (matches, bool(item.get("vertical")), int(item.get("height") or 0), int(item.get("width") or 0))
+    deduped = {}
+    for item in candidates:
+        url = item.get("url")
+        if url and url not in set(exclude_urls or []):
+            deduped.setdefault(url, item)
+    return sorted(deduped.values(), key=relevance, reverse=True), errors
+
 
 def secret(name, default=""):
     try:
@@ -170,9 +237,6 @@ with st.expander("Ferramentas avançadas · diagnóstico das bibliotecas de víd
     st.caption("Build do aplicativo: NEXUS-2026.11.16-library-diagnostics-1 · confirme esta identificação após a publicação.")
     st.caption("Testa autenticação, busca, download e leitura do MP4 em cada biblioteca que tiver chave configurada. As chaves nunca são exibidas.")
     if st.button("Testar todas as bibliotecas configuradas", type="secondary"):
-        # Use the established multi-source entry point rather than importing
-        # provider adapters directly in app.py. This keeps deployment imports
-        # compatible with previously deployed package revisions.
         providers = [
             ("Coverr", secret("COVERR_API_KEY"), {"coverr_key": secret("COVERR_API_KEY")}),
             ("Pixabay", secret("PIXABAY_API_KEY"), {"pixabay_key": secret("PIXABAY_API_KEY")}),
@@ -187,7 +251,7 @@ with st.expander("Ferramentas avançadas · diagnóstico das bibliotecas de víd
                 tested += 1
                 try:
                     with st.spinner(f"Testando {provider_name}: autenticação, busca e download..."):
-                        results, source_errors = search_video_sources(
+                        results, source_errors = _search_stock_compatible(
                             "nature landscape",
                             per_page=5,
                             relevance_query="nature landscape",
@@ -338,7 +402,7 @@ if "nexus_plan" in st.session_state:
                     style_terms = scene.get("style_search_terms", "")
                     primary_query = " ".join(part for part in [scene["asset_search_query"], style_terms] if part).strip()
                     fallback_query = " ".join(part for part in [scene.get("fallback_search_query", ""), style_terms] if part).strip()
-                    candidates, source_errors = search_video_sources(
+                    candidates, source_errors = _search_stock_compatible(
                         primary_query,
                         coverr_key,
                         pixabay_key,
@@ -347,7 +411,7 @@ if "nexus_plan" in st.session_state:
                         relevance_query=scene["asset_search_query"],
                     )
                     if not candidates and fallback_query:
-                        candidates, retry_errors = search_video_sources(
+                        candidates, retry_errors = _search_stock_compatible(
                             fallback_query,
                             coverr_key,
                             pixabay_key,
