@@ -1,3 +1,4 @@
+import base64
 import json
 import re
 import time
@@ -37,7 +38,7 @@ CENAS:
 - Cada cena deve representar exatamente o trecho narrado com ação, objeto, pessoa, ambiente ou processo diretamente relacionado. Não use cenas genéricas só porque combinam com a emoção.
 - Leia e compreenda o roteiro inteiro antes de planejar cenas. Identifique ideia central, progressão, afirmações, exemplos e emoção de cada trecho.
 - Priorize ações filmáveis e específicas. Evite slideshows, colagens, infográficos escolares, imagens abstratas sem função e repetição de enquadramentos.
-- Cada cena precisa de busca visual própria, derivada da ação, objeto, ambiente e significado EXATOS daquele trecho. Nunca reutilize conjunto fixo de palavras-chave nem force objetos que não estejam no roteiro. Buscas principal e alternativa devem ser distintas, concretas, em inglês.
+- Cada cena precisa de busca visual própria, derivada da ação, objeto, ambiente e significado EXATOS daquele trecho. Nunca reutilize conjunto fixo de palavras-chave nem force objetos que não estejam no roteiro. Buscas principal e alternativa devem ser distintas, concretas, em inglês. A consulta deve descrever o que a câmera verá literalmente (sujeito + ação + objeto/ambiente), nunca conceitos abstratos como sucesso, mudança, motivação ou medo isolados. Se a fala for abstrata, crie uma ação humana específica que demonstre a ideia, sem usar paisagens genéricas como substituto.
 - Respeite rigorosamente o estilo visual selecionado. Traduza-o em fotografia, paleta, luz, textura, lente, movimento e atmosfera em TODAS as cenas. Inclua visual_style e style_search_terms.
 - Toda cena deve ter pelo menos dois microeventos visuais.
 
@@ -627,6 +628,93 @@ Contexto das cenas:
         "estimated_target_word_count": target_words,
     }
     return plan
+
+
+def review_visual_candidates(scene, candidates_with_frames, secret_reader, minimum_confidence=70):
+    """Use Gemini vision to reject stock clips that do not depict the planned scene."""
+    if not candidates_with_frames:
+        return {"selected_candidate": 0, "confidence": 0, "reason": "Nenhum candidato visual disponível."}
+    key = secret_reader("GEMINI_API_KEY")
+    requested = secret_reader("GEMINI_MODEL", "auto")
+    if not key:
+        raise RuntimeError("A avaliação visual exige GEMINI_API_KEY.")
+    models = discover_models(key, requested)
+    prompt = f"""Você é o supervisor de continuidade visual de uma produtora audiovisual.
+Avalie os quadros reais dos clipes candidatos e escolha somente um que represente DIRETAMENTE a cena planejada.
+Trecho exato da narração: {scene.get('voiceover', '')}
+Ação visual planejada: {scene.get('visual_action', '')}
+Sujeitos: {scene.get('subjects', '')}
+Ambiente: {scene.get('setting', '')}
+Justificativa semântica: {scene.get('semantic_reason', '')}
+Busca visual solicitada: {scene.get('asset_search_query', '')}
+
+Compare o que realmente aparece nos quadros com a fala e a ação planejada. Priorize correspondência concreta de pessoas, objetos, gestos, ambiente e processo. Não aceite apenas semelhança de cor, clima, emoção ou estética. Natureza genérica, água, paisagem, copos, prédios ou pessoas aleatórias NÃO representam automaticamente conceitos abstratos. Um clipe pode ser bonito, mas deve ser rejeitado se não materializar a fala. Considere todos os quadros de cada candidato. Se nenhum tiver relação visual direta, selecione 0. Não invente correspondência. Dê confiança de 0 a 100 e aprove somente com confiança mínima de {int(minimum_confidence)}.
+Retorne somente JSON: {{"selected_candidate":1,"confidence":85,"reason":"..."}}.
+Os números dos candidatos aparecem imediatamente antes de seus quadros."""
+
+    parts = [{"text": prompt}]
+    for index, entry in enumerate(candidates_with_frames, 1):
+        candidate = entry.get("candidate", {})
+        parts.append({"text": (
+            f"CANDIDATO {index} | Biblioteca: {candidate.get('source', 'desconhecida')} | "
+            f"Título/tags: {candidate.get('title', '')} | "
+            f"Descrição: {candidate.get('description', '')}"
+        )})
+        for frame_path in entry.get("frame_paths", []):
+            frame = Path(frame_path)
+            if frame.exists() and frame.stat().st_size:
+                parts.append({
+                    "inlineData": {
+                        "mimeType": "image/jpeg",
+                        "data": base64.b64encode(frame.read_bytes()).decode("ascii"),
+                    }
+                })
+    if not any("inlineData" in part for part in parts):
+        raise RuntimeError("Não foi possível extrair quadros para avaliação visual.")
+
+    last_error = None
+    for model in models[:3]:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+        try:
+            response = requests.post(
+                url,
+                params={"key": key},
+                json={
+                    "contents": [{"role": "user", "parts": parts}],
+                    "generationConfig": {
+                        "temperature": 0.1,
+                        "responseMimeType": "application/json",
+                        "maxOutputTokens": 1024,
+                    },
+                },
+                timeout=120,
+            )
+            if response.status_code in (404, 429, 500, 502, 503, 504):
+                last_error = f"{model}: HTTP {response.status_code}"
+                continue
+            response.raise_for_status()
+            payload = response.json()
+            response_text = "\\n".join(
+                part.get("text", "")
+                for part in payload.get("candidates", [{}])[0].get("content", {}).get("parts", [])
+                if part.get("text")
+            )
+            cleaned = re.sub(r"^\\s*```(?:json)?\\s*|\\s*```\\s*$", "", response_text.strip(), flags=re.I)
+            result = json.loads(cleaned)
+            selected = int(result.get("selected_candidate", 0))
+            confidence = max(0, min(100, int(result.get("confidence", 0))))
+            reason = str(result.get("reason", "")).strip()
+            if selected < 1 or selected > len(candidates_with_frames) or confidence < int(minimum_confidence):
+                return {
+                    "selected_candidate": 0,
+                    "confidence": confidence,
+                    "reason": reason or "Nenhum clipe atingiu a confiança visual mínima.",
+                }
+            return {"selected_candidate": selected, "confidence": confidence, "reason": reason}
+        except (requests.RequestException, ValueError, TypeError, KeyError, IndexError) as exc:
+            last_error = str(exc)[:400]
+            continue
+    raise RuntimeError("A avaliação visual do Gemini falhou: " + (last_error or "nenhum modelo respondeu."))
 
 def validate_storyboard(plan, requested_duration=None):
     errors = []
