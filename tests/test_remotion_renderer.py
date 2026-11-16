@@ -15,10 +15,6 @@ class RemotionManifestTests(unittest.TestCase):
             audio = root / "voice.mp3"
             clip.write_bytes(b"fake-video")
             audio.write_bytes(b"fake-audio")
-            srt.write_text(
-                "1\n00:00:00,000 --> 00:00:02,000\nPrimeira frase.\n",
-                encoding="utf-8",
-            )
             plan = {
                 "seo": {"title": "Teste NEXUS"},
                 "scenes": [{
@@ -117,23 +113,10 @@ class RemotionManifestTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             with self.assertRaises(ValueError):
                 build_remotion_manifest(
-                    {"scenes": [{"duration_seconds": 0}]}, [], None, None,
+                    {"scenes": [{"duration_seconds": 0}]}, [], None,
                     Path(temp), job_id="invalid"
                 )
 
-    def test_parse_srt_captions(self):
-        with tempfile.TemporaryDirectory() as temp:
-            srt = Path(temp) / "captions.srt"
-            srt.write_text(
-                "1\n00:00:01,000 --> 00:00:02,500\nUma legenda\ncom duas linhas\n",
-                encoding="utf-8",
-            )
-            captions = parse_srt_captions(srt, fps=30)
-            self.assertEqual(captions, [{
-                "text": "Uma legenda com duas linhas",
-                "startFrame": 30,
-                "endFrame": 75,
-            }])
 
 
 if __name__ == "__main__":
