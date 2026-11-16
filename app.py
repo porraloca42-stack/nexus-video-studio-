@@ -4,7 +4,7 @@ import requests
 import streamlit as st
 from nexus.director import create_storyboard, validate_storyboard
 from nexus.assets import search_video_sources, download_file, diverse_candidate_shortlist
-from nexus.audio import generate_fish_preview, list_fish_voices, make_voice
+from nexus.audio import generate_fish_preview, list_fish_natural_brazilian_voices, make_voice
 from nexus.render import render_video
 
 
@@ -273,9 +273,7 @@ if not fish_api_key:
     st.error("Configure FISH_API_KEY nos Secrets do Streamlit.")
 else:
     try:
-        voice_page_data = list_fish_voices(
-            fish_api_key, page=1, page_size=100, language="pt",
-        )
+        voice_page_data = list_fish_natural_brazilian_voices(fish_api_key)
         voices = [
             item for item in voice_page_data["items"]
             if item.get("id") and item.get("visibility", "public") == "public"
