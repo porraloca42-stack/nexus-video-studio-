@@ -50,7 +50,8 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - app.py importa search_video_sources, search_coverr_videos e download_file de nexus.assets.
 - O usuário executou o diagnóstico Coverr e confirmou em captura que a API respondeu com sucesso e retornou cinco clipes, incluindo um vertical. Autenticação e busca estão TESTADAS no ambiente publicado.
 - O usuário executou o download interno e confirmou em captura que o servidor recebeu e validou um MP4: H.264, 606×1080, 8 segundos, 4,65 MB. Download servidor→arquivo e leitura FFprobe estão TESTADOS. O arquivo ficou em diretório temporário do servidor e foi descartado ao fim do teste; não houve download para o celular, nem isso era o objetivo do diagnóstico.
-- A interface foi ajustada para explicar explicitamente que o teste baixa o clipe temporariamente no servidor. O NEXUS deve entregar ao usuário apenas o MP4 final renderizado.
+- A interface explica que o diagnóstico Coverr baixa o clipe temporariamente no servidor; o usuário não deve receber arquivos-fonte individuais.
+- Em 2026-11-16 foi publicado um fluxo de produção atualizado: botão “Produzir vídeo completo”; validação FFprobe de cada clipe baixado; geração de narração/legendas; render FFmpeg; validação do MP4 final com faixas de vídeo e áudio; armazenamento dos bytes do MP4 em session_state para manter prévia e botão de download após reruns. O código foi publicado, mas ainda NÃO foi executado pelo usuário nem validado com um MP4 real.
 - A busca de diagnóstico usou “nature landscape”, mas um título retornado (“Astonished Crowd Beneath a Giant Hand”) parece pouco relacionado; relevância semântica da busca ainda precisa ser melhorada.
 - A primeira implementação do botão de download ficou inacessível porque os resultados não eram persistidos em session_state após o rerun do Streamlit; o usuário reportou corretamente que não havia botão. Corrigido em 2026-11-16: um único botão “Testar Coverr: buscar e baixar clipe” agora executa busca, escolhe primeiro candidato vertical, baixa internamente em diretório temporário e valida faixa de vídeo, resolução, codec, duração e tamanho via FFprobe. Não solicita download manual ao usuário. Código publicado; aguarda teste real.
 - nexus/assets.py contém search_coverr_videos, search_pixabay_videos, search_video_sources e download_file.
@@ -61,7 +62,7 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 1. CONCLUÍDO: usuário confirmou que a interface Streamlit abre normalmente após o commit que adicionou nexus/__init__.py.
 2. CONCLUÍDO: autenticação e busca Coverr testadas com sucesso pelo usuário; cinco resultados retornados.
 3. CONCLUÍDO: download interno Coverr e validação FFprobe confirmados pelo usuário (H.264, 606×1080, 8 s, 4,65 MB).
-4. PRÓXIMO: validar o fluxo completo de produção — roteiro, seleção de clipes, narração, legendas, renderização FFmpeg e disponibilização do MP4 final ao usuário.
+4. IMPLEMENTADO, AGUARDANDO TESTE: fluxo completo de produção com validação dos clipes, render FFmpeg, verificação do MP4 e entrega persistente na interface. Próxima ação: usuário gerar um storyboard e acionar “Produzir vídeo completo”; registrar qualquer erro sem presumir sucesso.
 5. Melhorar busca semântica e ranking por cena; não selecionar automaticamente o primeiro resultado sem avaliar correspondência.
 6. Implementar avaliação multimodal dos candidatos para verificar correspondência com a narração.
 7. Renderizar o primeiro MP4 real de 40–50s, inspecionar qualidade e validar entrega do arquivo final.
