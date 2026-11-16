@@ -90,7 +90,7 @@ class AssetRankingTests(unittest.TestCase):
             for call_args in search.call_args_list
         ]
         self.assertIn("person writing goals in notebook", searched_queries)
-        self.assertIn("goals notebook", searched_queries)
+        self.assertIn("writing goals notebook", searched_queries)
         self.assertIn("goals", searched_queries)
 
     @patch("nexus.assets.search_wikimedia_videos")
