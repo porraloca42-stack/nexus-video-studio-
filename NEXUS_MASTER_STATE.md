@@ -475,3 +475,12 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Commits: `5bf3df5` (User-Agent em downloads), `ea08012` (fallback entre candidatos). Run #186 (commit `ea08012`) ainda está executando o smoke test real no momento deste registro.
 - Os testes unitários/compilação do commit `3a0d728` passaram; não declarar download Commons validado até concluir run #186.
 - Pixabay/Pexels/Gemini não puderam ser testados ao vivo pelo GitHub Actions porque as chaves estão guardadas no Streamlit Secrets e não foram disponibilizadas ao workflow. Deploy/diagnóstico do app publicado também não foram confirmados.
+
+
+### Validação CI e Wikimedia Commons concluída — 16/11/2026
+- Run #187 (43829105466), commit 8e6a65738fde9c076f261e0692f2c92a22965055: workflow concluído com sucesso; jobs unit-tests e commons-live-smoke concluídos com sucesso.
+- Testes automatizados: 36 executados, todos aprovados (OK); compilação dos módulos também passou.
+- Teste real do Wikimedia Commons: API retornou 2 candidatos com licenças aceitas (CC BY 3.0 e CC0); download real concluído com sucesso após envio de User-Agent; FFprobe identificou vídeo VP9 1920x1080, duração 261,16 s, arquivo 64.018.936 bytes, licença CC BY 3.0. O teste valida busca, download e leitura do arquivo, não a adequação editorial de todos os resultados.
+- Render de MP4 vertical com áudio e legendas permanece coberto por teste automatizado de integração; não equivale a uma geração ponta a ponta no app publicado.
+- Estado: código no GitHub e CI validados; integração real do Commons validada para o candidato testado. Deploy Streamlit, chaves/serviços Pixabay, Pexels e Gemini no ambiente publicado e geração audiovisual ponta a ponta ainda não foram confirmados. Não declarar o estúdio integralmente pronto/implantado.
+- Run: https://github.com/porraloca42-stack/nexus-video-studio-/actions/runs/43829105466
