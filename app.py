@@ -203,38 +203,43 @@ with st.expander("Ferramentas avançadas · diagnóstico da biblioteca Coverr"):
                     st.error(f"Falha no teste Coverr: {exc}")
 
 if st.button("Planejar vídeo", type="primary", use_container_width=True):
+    # Remove any previous result first: a failed new request must never leave
+    # an old 44s storyboard visible as if it were the latest response.
+    st.session_state.pop("nexus_plan", None)
+    st.session_state.pop("nexus_errors", None)
+    st.session_state.pop("nexus_rendered_video", None)
+    st.session_state.pop("nexus_rendered_info", None)
+
     if not topic.strip():
         st.error("Informe um assunto ou roteiro.")
     elif not secret("GEMINI_API_KEY"):
         st.error("O serviço de direção ainda não está conectado.")
     else:
-        with st.spinner("Analisando o conteúdo e dirigindo as cenas..."):
+        with st.spinner(
+            f"Escrevendo o roteiro para {duration}s, criando as cenas e ajustando a linha do tempo..."
+        ):
             try:
                 plan = create_storyboard(topic, style, duration, secret)
-                try:
-                    errors = validate_storyboard(plan, duration)
-                except TypeError:
-                    # Compatibility while Streamlit refreshes an older cached module version.
-                    errors = validate_storyboard(plan)
-                    scenes = plan.get("scenes", [])
-                    minimum = max(1, int((float(duration) + 4) // 5))
-                    total = sum(float(scene.get("duration_seconds", 0) or 0) for scene in scenes)
-                    if len(scenes) < minimum:
-                        errors.append(f"O diretor criou {len(scenes)} cenas; são necessárias pelo menos {minimum}.")
-                    if abs(total - float(duration)) > 0.75:
-                        errors.append(f"A soma das cenas é {total:.1f}s; a duração solicitada é {duration}s.")
-                    for scene_index, scene in enumerate(scenes, 1):
-                        for field in ("visual_style", "style_search_terms"):
-                            if not str(scene.get(field, "")).strip():
-                                errors.append(f"Cena {scene_index}: campo {field} vazio.")
-                st.session_state["nexus_plan"] = plan
-                st.session_state["nexus_errors"] = errors
-                st.session_state.pop("nexus_rendered_video", None)
-                st.session_state.pop("nexus_rendered_info", None)
+                errors = validate_storyboard(plan, duration)
+                actual_duration = sum(
+                    float(scene.get("duration_seconds", 0) or 0)
+                    for scene in plan.get("scenes", [])
+                )
+                if abs(actual_duration - float(duration)) > 0.001:
+                    errors.append(
+                        f"Falha interna de duração: foram atribuídos {actual_duration:.1f}s "
+                        f"para uma solicitação de {duration}s."
+                    )
                 if errors:
-                    st.warning("O planejamento precisa de revisão: " + " ".join(errors))
-                else:
-                    st.success("Planejamento concluído.")
+                    raise RuntimeError(
+                        "O diretor não entregou um roteiro válido: " + " ".join(errors)
+                    )
+                st.session_state["nexus_plan"] = plan
+                st.session_state["nexus_errors"] = []
+                st.success(
+                    f"Roteiro criado: {len(plan['scenes'])} cenas · "
+                    f"{actual_duration:.0f}s, conforme solicitado."
+                )
             except Exception as exc:
                 st.error(str(exc))
 
