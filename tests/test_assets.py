@@ -135,6 +135,41 @@ class AssetRankingTests(unittest.TestCase):
         self.assertFalse(errors)
         self.assertEqual(ranked, [])
 
+    def test_style_match_is_secondary_to_scene_semantics(self):
+        candidates = [
+            {
+                **clip("https://example.test/semantic.mp4", "Person writing goals in notebook", "Writing in a journal"),
+                "source": "Pixabay",
+            },
+            {
+                **clip("https://example.test/style-only.mp4", "Anime fantasy landscape", "Japanese anime scenery"),
+                "source": "Pexels",
+            },
+        ]
+        ranked = rank_video_candidates(
+            candidates,
+            "person writing goals in notebook",
+            style_query="anime 2D Japanese animation",
+        )
+        self.assertEqual(ranked[0]["url"], "https://example.test/semantic.mp4")
+        self.assertGreater(ranked[0]["_nexus_relevance"], ranked[1]["_nexus_relevance"])
+
+    @patch("nexus.assets.search_coverr_videos")
+    def test_style_query_is_searched_separately_but_does_not_admit_style_only_results(self, search):
+        search.side_effect = [
+            [clip("https://example.test/semantic.mp4", "Person writing goals in notebook", "Writing in journal")],
+            [clip("https://example.test/anime-only.mp4", "Anime landscape", "Japanese animation scenery")],
+        ]
+        ranked, errors = search_video_sources(
+            "person writing goals in notebook",
+            coverr_key="test-key",
+            relevance_query="person writing goals in notebook",
+            style_query="anime 2D animation",
+        )
+        self.assertFalse(errors)
+        self.assertEqual([item["url"] for item in ranked], ["https://example.test/semantic.mp4"])
+        self.assertEqual(search.call_count, 3)
+
     def test_empty_results_are_safe(self):
         self.assertEqual(rank_video_candidates([], "a scene query"), [])
 
