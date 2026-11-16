@@ -37,6 +37,7 @@ CENAS:
 - Decida a quantidade a partir da duração e da progressão narrativa. Use pelo menos ceil(duração/5) cenas e prefira ceil(duração/4) ou mais: 50s normalmente 12–15 cenas; 40s 10–12; 60s 15–18.
 - Cada cena representa uma unidade narrativa e uma ação concreta. As durações são apenas estimativas: o sistema atribuirá a duração final exata depois. Não sacrifique a narrativa para tentar fazer a soma matemática.
 - Cada cena deve representar exatamente o trecho narrado com ação, objeto, pessoa, ambiente ou processo diretamente relacionado. Não use cenas genéricas só porque combinam com a emoção.
+- Para image-to-video, gere também `video_motion_prompt` em inglês: uma única tomada contínua de 2–5 segundos, com 1–3 movimentos físicos concretos e observáveis, indicando quem/o que se move, direção e ritmo. Preserve a identidade, o rosto, a roupa, o cenário e a composição da imagem-base; não introduza novos sujeitos, objetos, cortes ou mudanças de cena. Evite instruções abstratas como "make it cinematic".
 - Leia e compreenda o roteiro inteiro antes de planejar cenas. Identifique ideia central, progressão, afirmações, exemplos e emoção de cada trecho.
 - Priorize ações filmáveis e específicas. Evite slideshows, colagens, infográficos escolares, imagens abstratas sem função e repetição de enquadramentos.
 - Cada cena precisa de busca visual própria, derivada da ação, objeto, ambiente e significado EXATOS daquele trecho. Nunca reutilize conjunto fixo de palavras-chave nem force objetos que não estejam no roteiro. Buscas principal e alternativa devem ser distintas, concretas, em inglês. A consulta deve descrever o que a câmera verá literalmente (sujeito + ação + objeto/ambiente), nunca conceitos abstratos como sucesso, mudança, motivação ou medo isolados. Se a fala for abstrata, crie uma ação humana específica que demonstre a ideia, sem usar paisagens genéricas como substituto.
@@ -70,6 +71,7 @@ Retorne somente JSON válido:
    "voiceover":"trecho contínuo do roteiro integral",
    "visual_action":"ação específica e observável, em sequência",
    "image_prompt":"English image-generation prompt, concrete cinematic scene, 9:16 vertical composition, no text or typography, preserve the global visual style",
+   "video_motion_prompt":"English image-to-video prompt for one continuous 2–5 second shot, with specific natural physical movement and camera motion, preserving the exact subject identity and scene",
    "visual_style":"estilo visual aplicado nesta cena",
    "style_search_terms":"English visual-style terms to append to the scene search",
    "semantic_reason":"relação direta entre a fala e a imagem",
