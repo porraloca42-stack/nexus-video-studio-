@@ -390,7 +390,19 @@ else:
                     if voice_option.get("sample_audio"):
                         st.audio(voice_option["sample_audio"], format="audio/mp3")
                     else:
-                        st.caption("Amostra publicada indisponível")
+                        preview_key = f"fish_voice_preview_{voice_option['id']}"
+                        if st.button("Gerar prévia", key=f"fish_preview_button_{voice_option['id']}", use_container_width=True):
+                            try:
+                                with st.spinner("Gerando uma amostra desta voz..."):
+                                    st.session_state[preview_key] = fish_audio.generate_fish_preview(
+                                        fish_api_key, voice_option["id"]
+                                    )
+                            except Exception as preview_error:
+                                st.error(f"Não foi possível gerar a prévia: {preview_error}")
+                        if st.session_state.get(preview_key):
+                            st.audio(st.session_state[preview_key], format="audio/mp3")
+                        else:
+                            st.caption("Sem amostra publicada · gere uma prévia para ouvir antes de escolher")
 
 voice = st.session_state.get("nexus_fish_voice_id", "")
 
