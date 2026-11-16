@@ -1353,3 +1353,34 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Smoke test integrado #2 validou a cadeia visual e muxagem de áudio sintético em 2s. Não confundir esse teste com a validação de uma produção editorial de 40–50s com narração Fish Audio.
 - O app aceita cenas de 2–5s; o adaptador Modal rejeita durações fora dessa faixa e processa todas as cenas num único batch. O worker de produção gera imagens, anima todas as cenas, sintetiza Fish Audio, ajusta áudio dentro de tolerância máxima de 15% e valida o MP4 final via FFprobe.
 - Próximo critério de liberação: um vídeo real de 40–50s, com voz Fish Audio selecionada, todas as cenas animadas e coerência audiovisual revisada. Registrar duração, custo, codecs, resolução e inspeção visual antes de declarar finalizado.
+
+
+## Redesign visual Studio Workspace v2 — 16/11/2026
+- Usuário esclareceu que o objetivo é exclusivamente mudar a aparência visual do aplicativo, mantendo as funcionalidades atuais; a tentativa anterior de CSS roxo não atendia ao pedido.
+- Criada branch limpa `redesign/studio-workspace-v2` diretamente da `main` atual (base `ef7793c`), sem reaproveitar a branch antiga divergente `feat/mobile-premium-ui`.
+- Nova identidade visual aplicada em `app.py`: azul-noite, painéis azul-petróleo, ciano e azul; cabeçalho editorial; indicador de estado; trilha visual de três etapas; novos estilos para cartões, campos, botões, métricas, preview, áudio/vídeo e estados interativos; regras responsivas desktop/mobile.
+- `.streamlit/config.toml` alinhado à paleta azul/ciano.
+- Alterações limitadas a `app.py` e `.streamlit/config.toml`; nenhuma lógica de storyboard, seleção de voz, pesquisa de bibliotecas, renderização ou exportação foi intencionalmente alterada.
+- PR #2 aberto em draft: https://github.com/porraloca42-stack/nexus-video-studio-/pull/2
+- Comparação Git em 16/11/2026: branch 3 commits à frente e 0 atrás da `main`; a versão oficial permanece intacta.
+- CI no HEAD `3e9138cbc0fc58391bf320e4cbc582f8a771609f`: workflow `NEXUS regression tests` run #599, ID `43974674493`, concluído com `success`.
+- O diff contém apenas `app.py` (CSS/cabeçalho), `.streamlit/config.toml` (tema) e este registro. A CI passou, mas não substitui inspeção visual do Streamlit.
+- Deploy/preview Streamlit desta branch e inspeção visual real desktop/mobile continuam pendentes. Não declarar publicado ou aprovado.
+- Não integrar à `main` até obter preview visual verificável e aprovação do usuário.
+- Não integrar à `main` até obter preview visual verificável e aprovação do usuário.
+
+
+## Redesign visual — atualização de validação e preview (16/11/2026)
+- CI regression #600, run ID `43975334482`, no HEAD `a1094431affa273f986d4b0f8c50b039c292d214`: `completed/success`.
+- PR #2 continua aberto, draft, mergeable, sem merge; branch `redesign/studio-workspace-v2` está 4 commits à frente e 0 atrás da `main`.
+- O usuário confirmou que já criou o app secundário no Streamlit Community Cloud. Não solicitar nova criação. A URL desse app e a configuração de branch/arquivo ainda não estão registradas no repositório nem disponíveis nesta conexão; portanto, não afirmar que o preview está apontando para o redesign.
+- A documentação oficial do Streamlit confirma que um app existente pode ser administrado por suas configurações e que as coordenadas GitHub (owner/repository/branch/entrypoint) definem o código publicado. A integração disponível aqui não expõe o painel/conta Streamlit para alterar essas coordenadas diretamente.
+- Estado: código do redesign implementado; CI testada e aprovada; implantação do app secundário e inspeção visual ainda não verificadas. A `main` permanece preservada.
+
+
+## URL do app secundário Streamlit — 16/11/2026
+- O usuário forneceu a URL do segundo app: https://frgapwhgughgdgqnkqdscj.streamlit.app/
+- Esse endereço fica registrado como o preview destinado à validação do redesign Studio Workspace v2.
+- O código do redesign está na branch `redesign/studio-workspace-v2`, entrypoint `app.py`; PR #2 permanece aberto, draft e sem merge.
+- A URL foi recebida, mas a conexão atual não oferece acesso ao painel/configurações do Streamlit nem execução de navegador para inspecionar o app publicado. A tentativa de abrir o endereço nesta sessão não retornou conteúdo verificável. Portanto, ainda NÃO está confirmado que o app aponta para o repositório correto, branch `redesign/studio-workspace-v2` e arquivo `app.py`, nem que o redesign está implantado.
+- Próxima verificação necessária: confirmar as coordenadas do app no Streamlit Community Cloud e então inspecionar visualmente desktop/mobile. Não alterar a `main` nem fazer merge do PR sem aprovação explícita.

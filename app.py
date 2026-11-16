@@ -124,6 +124,76 @@ def secret(name, default=""):
 
 st.set_page_config(page_title="NEXUS VIDEO STUDIO", page_icon="🎬", layout="wide", initial_sidebar_state="collapsed")
 
+
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+:root{color-scheme:dark;--nx-bg:#080d13;--nx-panel:#101923;--nx-panel2:#131f2b;--nx-line:#253747;--nx-text:#edf4f8;--nx-muted:#91a4b3;--nx-cyan:#49d7e8;--nx-blue:#3887ff}
+html,body,.stApp,[data-testid="stAppViewContainer"]{background:#080d13!important;color:var(--nx-text)!important;font-family:'DM Sans',sans-serif!important}
+[data-testid="stAppViewContainer"]{background:radial-gradient(ellipse at 65% -15%,rgba(29,105,135,.22),transparent 42%),radial-gradient(ellipse at 0% 40%,rgba(36,77,123,.12),transparent 35%),#080d13!important}
+[data-testid="stSidebar"],[data-testid="collapsedControl"],[data-testid="stHeader"],[data-testid="stToolbar"],[data-testid="manage-app-button"],#MainMenu,header,footer{display:none!important;visibility:hidden!important}
+.block-container{max-width:1440px!important;padding:1.65rem 2.3rem 4rem!important}
+.nexus-hero{position:relative!important;overflow:hidden!important;display:flex!important;align-items:flex-end!important;justify-content:space-between!important;gap:2rem!important;padding:2rem 2.15rem!important;margin:0 0 1.2rem!important;border:1px solid #284252!important;border-radius:22px!important;background:linear-gradient(112deg,#122330 0%,#101923 55%,#102a36 100%)!important;box-shadow:0 24px 65px rgba(0,0,0,.34),inset 0 1px rgba(255,255,255,.04)!important}
+.nexus-hero:before{content:""!important;position:absolute!important;width:390px!important;height:390px!important;right:7%!important;top:-290px!important;border-radius:50%!important;background:rgba(73,215,232,.2)!important;filter:blur(20px)!important;pointer-events:none!important}
+.nexus-hero:after{content:"N"!important;position:absolute!important;right:7%!important;bottom:-100px!important;font:700 19rem/1 'Space Grotesk',sans-serif!important;color:rgba(73,215,232,.035)!important;pointer-events:none!important}
+.nexus-brand{position:relative!important;z-index:1!important;font:700 clamp(2rem,4vw,3.15rem)/1.02 'Space Grotesk',sans-serif!important;letter-spacing:-.065em!important;color:#f4fbff!important}
+.nexus-brand:after{content:" / VIDEO STUDIO"!important;color:var(--nx-cyan)!important;font-size:.48em!important;letter-spacing:.015em!important;white-space:nowrap!important}
+.nexus-tagline{position:relative!important;z-index:1!important;max-width:650px!important;font-size:.96rem!important;line-height:1.6!important;color:#a9bdca!important;margin-top:.8rem!important}
+.nexus-hero .nexus-kicker{color:var(--nx-cyan)!important}
+.nx-hero-side{position:relative!important;z-index:2!important;min-width:180px!important;text-align:right!important}
+.nx-live{display:inline-flex!important;align-items:center!important;gap:8px!important;padding:9px 13px!important;border:1px solid rgba(73,215,232,.25)!important;border-radius:999px!important;background:rgba(7,17,25,.45)!important;color:#c6f7fa!important;font-size:.72rem!important;font-weight:700!important;letter-spacing:.12em!important;text-transform:uppercase!important}
+.nx-live:before{content:""!important;width:7px!important;height:7px!important;border-radius:50%!important;background:#48d9a2!important;box-shadow:0 0 12px #48d9a2!important}
+.nx-workflow{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:10px!important;margin:0 0 1.35rem!important}
+.nx-step{display:flex!important;align-items:center!important;gap:12px!important;padding:13px 16px!important;border:1px solid #223746!important;border-radius:14px!important;background:linear-gradient(120deg,rgba(17,29,40,.95),rgba(13,22,31,.95))!important}
+.nx-step-num{display:grid!important;place-items:center!important;flex:0 0 30px!important;width:30px!important;height:30px!important;border:1px solid rgba(73,215,232,.32)!important;border-radius:9px!important;background:rgba(73,215,232,.09)!important;color:var(--nx-cyan)!important;font:700 .78rem 'Space Grotesk',sans-serif!important}
+.nx-step-title{font-size:.82rem!important;font-weight:700!important;color:#eaf5f8!important}
+.nx-step-sub{font-size:.68rem!important;color:#8198a8!important;margin-top:2px!important}
+.nexus-kicker,.nx-section-title{font:700 .69rem 'DM Sans',sans-serif!important;letter-spacing:.15em!important;text-transform:uppercase!important;color:var(--nx-cyan)!important;margin:0 0 .9rem!important}
+.nexus-preview{display:flex!important;gap:15px!important;align-items:center!important;padding:14px!important;border:1px solid #2a4556!important;border-radius:15px!important;background:linear-gradient(125deg,rgba(27,66,83,.42),rgba(14,25,35,.85))!important;margin:.45rem 0 1rem!important}
+.nexus-preview img{width:150px!important;max-width:42%!important;aspect-ratio:16/9!important;object-fit:cover!important;border-radius:10px!important;border:1px solid #385568!important}
+.nexus-preview-title{font:700 1rem 'Space Grotesk',sans-serif!important;color:#f2fbff!important;margin-bottom:5px!important}
+.nexus-preview-copy{font-size:.8rem!important;color:#9bb0bd!important;line-height:1.5!important}
+[data-testid="stVerticalBlockBorderWrapper"]>div{background:linear-gradient(145deg,rgba(18,30,42,.98),rgba(13,22,31,.98))!important;border:1px solid #263b4b!important;border-radius:18px!important;padding:1.25rem!important;box-shadow:0 14px 34px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.025)!important}
+[data-testid="stTextInput"] input,[data-testid="stTextArea"] textarea,[data-testid="stSelectbox"] div[data-baseweb="select"],[data-testid="stMultiSelect"] div[data-baseweb="select"]{background:#0b141d!important;border:1px solid #2a4050!important;border-radius:11px!important;color:#edf7fb!important;box-shadow:none!important;transition:border-color .18s ease,box-shadow .18s ease!important}
+[data-testid="stTextInput"] input:focus,[data-testid="stTextArea"] textarea:focus,[data-testid="stSelectbox"] div[data-baseweb="select"]:focus-within,[data-testid="stMultiSelect"] div[data-baseweb="select"]:focus-within{border-color:var(--nx-cyan)!important;box-shadow:0 0 0 1px rgba(73,215,232,.42)!important}
+[data-testid="stTextArea"] textarea{line-height:1.65!important;min-height:195px!important;padding:1rem!important}
+[data-testid="stWidgetLabel"] p,label,[data-testid="stMarkdownContainer"] strong{color:#e7f0f5!important}
+[data-testid="stCaptionContainer"],.stCaption{color:#91a4b3!important}
+div[data-testid="stButton"] button,div[data-testid="stDownloadButton"] button{background:#172632!important;color:#dcebf1!important;border:1px solid #30495a!important;border-radius:11px!important;min-height:2.8rem!important;font-weight:700!important;box-shadow:none!important;transition:all .18s ease!important}
+div[data-testid="stButton"] button:hover,div[data-testid="stDownloadButton"] button:hover{border-color:var(--nx-cyan)!important;color:#fff!important;transform:translateY(-1px)!important}
+div[data-testid="stButton"] button[kind="primary"],div[data-testid="stDownloadButton"] button[kind="primary"]{background:linear-gradient(105deg,#147e9a,#2775cb)!important;color:white!important;border:1px solid #42bcd0!important;border-radius:12px!important;font-weight:800!important;box-shadow:0 8px 22px rgba(17,128,165,.23)!important}
+div[data-testid="stButton"] button[kind="primary"]:hover{box-shadow:0 10px 28px rgba(17,160,190,.32)!important}
+[data-testid="stExpander"]{border:1px solid #263d4d!important;border-radius:14px!important;background:rgba(13,24,34,.85)!important;overflow:hidden!important}
+[data-testid="stExpander"] summary{color:#e7f0f5!important;font-weight:700!important;padding:.85rem 1rem!important}
+[data-testid="stAudio"]{border-radius:12px!important;overflow:hidden!important}
+[data-testid="stVideo"]{max-width:340px!important;margin:0 auto!important;border-radius:18px!important;overflow:hidden!important;border:1px solid #345265!important;box-shadow:0 18px 45px rgba(0,0,0,.55)!important}
+[data-testid="stAlert"]{border-radius:13px!important;border:1px solid #2c4656!important}
+[data-testid="stProgress"]>div>div{background:linear-gradient(90deg,#147e9a,#49d7e8)!important}
+[data-testid="stMetric"]{padding:.85rem!important;border:1px solid #263d4d!important;border-radius:13px!important;background:rgba(11,21,30,.75)!important}
+[data-testid="stMetricLabel"]{color:#91a4b3!important}
+div.st-key-nexus-style-gallery div[data-testid="stHorizontalBlock"]{gap:.8rem!important}
+div.st-key-nexus-style-gallery div[data-testid="stImage"] img{border-radius:10px!important;border:1px solid #2b4657!important}
+hr{border-color:#243847!important}
+@media(max-width:850px){
+.block-container{padding:1rem .8rem 3rem!important}
+.nexus-hero{display:block!important;padding:1.35rem!important;border-radius:17px!important}
+.nexus-brand{font-size:2rem!important}
+.nx-hero-side{margin-top:1rem!important;text-align:left!important}
+.nx-workflow{gap:6px!important}
+.nx-step{padding:10px 8px!important;gap:7px!important}
+.nx-step-num{width:25px!important;height:25px!important;flex-basis:25px!important}
+.nx-step-title{font-size:.7rem!important}
+.nx-step-sub{font-size:.61rem!important}
+[data-testid="stHorizontalBlock"]{gap:.65rem!important}
+[data-testid="stVerticalBlockBorderWrapper"]>div{padding:.9rem!important}
+.nexus-preview img{width:112px!important}
+}
+@media(max-width:600px){.nx-workflow{grid-template-columns:1fr!important}.nx-step{padding:9px 12px!important}.nx-step-sub{font-size:.68rem!important}.nexus-brand{font-size:1.7rem!important}}
+</style>
+""", unsafe_allow_html=True)
+
+
+
 STYLE_OPTIONS = [
     "Cinematográfico realista", "Documentário cinematográfico",
     "Dark cinematográfico", "Filme noir", "Publicidade premium",
@@ -237,8 +307,22 @@ hr{border-color:#27272A!important}
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="nexus-hero"><div class="nexus-brand">NEXUS VIDEO STUDIO</div><div class="nexus-tagline">Transforme seu roteiro em vídeo</div></div>', unsafe_allow_html=True)
-st.caption("Versão: NEXUS-2026.11.16-fish-voice-library-2")
+st.markdown("""
+<div class="nexus-hero">
+  <div>
+    <div class="nexus-kicker">AI CREATIVE PRODUCTION SYSTEM · WORKSPACE</div>
+    <div class="nexus-brand">NEXUS</div>
+    <div class="nexus-tagline">Um estúdio de produção audiovisual. Do conceito à direção, da narração à renderização final.</div>
+  </div>
+  <div class="nx-hero-side"><span class="nx-live">Studio online</span></div>
+</div>
+<div class="nx-workflow">
+  <div class="nx-step"><span class="nx-step-num">01</span><div><div class="nx-step-title">Briefing & roteiro</div><div class="nx-step-sub">Defina o conteúdo e a duração</div></div></div>
+  <div class="nx-step"><span class="nx-step-num">02</span><div><div class="nx-step-title">Direção visual</div><div class="nx-step-sub">Escolha a linguagem cinematográfica</div></div></div>
+  <div class="nx-step"><span class="nx-step-num">03</span><div><div class="nx-step-title">Voz & produção</div><div class="nx-step-sub">Configure a narração e o motor</div></div></div>
+</div>
+""", unsafe_allow_html=True)
+st.caption("NEXUS VIDEO STUDIO · WORKSPACE PREVIEW")
 
 if "nexus_style" not in st.session_state or st.session_state["nexus_style"] not in STYLE_OPTIONS:
     st.session_state["nexus_style"] = "Cinematográfico realista"
