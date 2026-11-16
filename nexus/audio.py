@@ -112,7 +112,7 @@ def make_voice(text, voice, output):
     subtitles = output.with_suffix(".srt")
 
     async def generate():
-        communicate = edge_tts.Communicate(text, voice)
+        communicate = edge_tts.Communicate(text, voice, rate="-25%")
         boundary_events = []
         with output.open("wb") as audio_file:
             async for chunk in communicate.stream():
