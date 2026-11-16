@@ -5,6 +5,15 @@ import streamlit as st
 from nexus.director import create_storyboard, validate_storyboard
 from nexus.assets import search_video_sources, download_file, diverse_candidate_shortlist
 import nexus.audio as fish_audio
+
+# Streamlit Cloud can retain a stale imported module across source syncs.
+# Reload the checked-out module before accessing helpers added in later commits.
+fish_audio = importlib.reload(fish_audio)
+if not hasattr(fish_audio, "get_fish_voice"):
+    raise RuntimeError(
+        "Módulo de áudio desatualizado no ambiente. "
+        f"Arquivo carregado: {getattr(fish_audio, '__file__', 'desconhecido')}"
+    )
 from nexus.render import render_video
 
 
