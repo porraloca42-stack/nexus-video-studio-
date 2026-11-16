@@ -1,4 +1,4 @@
-import json, os, subprocess, tempfile
+import base64, json, os, subprocess, tempfile
 from pathlib import Path
 import streamlit as st
 from nexus.director import create_storyboard, validate_storyboard
@@ -13,63 +13,8 @@ def secret(name, default=""):
         return os.getenv(name, default)
 
 st.set_page_config(page_title="NEXUS VIDEO STUDIO", page_icon="🎬", layout="wide")
-st.title("NEXUS VIDEO STUDIO")
-st.caption("Direção contextual por IA · Vídeos verticais")
-st.info("O diretor interpreta o assunto completo, planeja cenas ligadas à narração e mantém o estilo visual escolhido em todo o vídeo.")
 
-st.subheader("Teste da biblioteca Coverr")
-st.caption("Este diagnóstico baixa o clipe temporariamente no servidor do NEXUS para testar a fonte. Nada é baixado no seu celular; o produto final será um único MP4 gerado pelo estúdio.")
-if st.button("Testar Coverr: buscar e baixar clipe", type="secondary"):
-    coverr_key = secret("COVERR_API_KEY")
-    if not coverr_key:
-        st.error("COVERR_API_KEY não encontrada nos Secrets.")
-    else:
-        with st.spinner("Buscando clipes na Coverr..."):
-            try:
-                test_results = search_coverr_videos("nature landscape", coverr_key, per_page=5)
-                if not test_results:
-                    st.warning("A API respondeu, mas não retornou clipes com URL MP4.")
-                else:
-                    st.success(f"Busca concluída: {len(test_results)} clipes encontrados.")
-                    for item in test_results[:5]:
-                        orientation = "vertical" if item.get("vertical") else "horizontal"
-                        st.caption(f"{item.get('title') or 'Sem título'} · {item.get('width')}×{item.get('height')} · {orientation}")
-                    chosen = next((item for item in test_results if item.get("vertical")), test_results[0])
-                    st.info(f"Validando download interno: {chosen.get('title') or 'clipe Coverr'}")
-                    with tempfile.TemporaryDirectory(prefix="nexus_coverr_test_") as temp_dir:
-                        clip_path = download_file(chosen["url"], Path(temp_dir) / "coverr_test.mp4")
-                        probe = subprocess.run(
-                            ["ffprobe", "-v", "error", "-show_entries",
-                             "format=duration,size:stream=codec_name,codec_type,width,height",
-                             "-of", "json", str(clip_path)],
-                            capture_output=True, text=True, timeout=60
-                        )
-                        if probe.returncode != 0:
-                            raise RuntimeError(probe.stderr[-1500:] or "FFprobe não conseguiu ler o arquivo baixado.")
-                        metadata = json.loads(probe.stdout)
-                        streams = metadata.get("streams", [])
-                        video = next((stream for stream in streams if stream.get("codec_type") == "video"), None)
-                        if not video:
-                            raise RuntimeError("O arquivo baixado não contém uma faixa de vídeo.")
-                        duration_seconds = float(metadata.get("format", {}).get("duration") or 0)
-                        size_bytes = int(metadata.get("format", {}).get("size") or clip_path.stat().st_size)
-                        if duration_seconds <= 0 or size_bytes <= 0:
-                            raise RuntimeError("O arquivo baixado não apresentou duração ou tamanho válidos.")
-                        st.success("Download no servidor e integridade do arquivo confirmados. Nenhum arquivo foi enviado ao celular.")
-                        st.write(f"**Resolução:** {video.get('width')} × {video.get('height')}")
-                        st.write(f"**Codec:** {video.get('codec_name', 'não identificado')}")
-                        st.write(f"**Duração:** {duration_seconds:.2f} segundos")
-                        st.write(f"**Tamanho:** {size_bytes / (1024 * 1024):.2f} MB")
-            except Exception as exc:
-                st.error(f"Falha na busca ou validação do download Coverr: {exc}")
-
-with st.sidebar:
-    st.subheader("Produção")
-    voice = st.selectbox("Voz", ["pt-BR-AntonioNeural", "pt-BR-FranciscaNeural", "pt-BR-ThalitaNeural"])
-    duration = st.selectbox("Duração", [40, 50, 60], index=1)
-
-st.subheader("Direção visual")
-style = st.selectbox("Estilo visual das cenas", [
+STYLE_OPTIONS = [
     "Cinematográfico realista", "Documentário cinematográfico",
     "Dark cinematográfico", "Filme noir", "Publicidade premium",
     "Lifestyle realista", "Natureza documental", "Minimalista clean",
@@ -79,8 +24,126 @@ style = st.selectbox("Estilo visual das cenas", [
     "Ilustração editorial", "Aquarela artística", "Graphic novel",
     "3D realista", "3D estilizado", "Stop motion",
     "Macro e detalhes", "Drone e paisagens aéreas"
-], help="A escolha será enviada ao diretor de IA e aplicada às buscas de todas as cenas.")
-topic = st.text_area("Assunto ou roteiro", height=150, placeholder="Digite um assunto ou cole o roteiro completo.")
+]
+
+STYLE_PREVIEWS = {
+    "Cinematográfico realista": ("#182638", "#d59b58", "#526b78", "Luz natural, profundidade e contraste de cinema."),
+    "Documentário cinematográfico": ("#263b35", "#d4bd83", "#758b71", "Textura natural e sensação observacional."),
+    "Dark cinematográfico": ("#101522", "#8b76a8", "#30384f", "Sombras profundas e luz recortada."),
+    "Filme noir": ("#101319", "#d6d1c5", "#454b56", "Preto e branco, sombras dramáticas."),
+    "Publicidade premium": ("#26364b", "#f0c77b", "#8a9da8", "Acabamento limpo, luz controlada e composição elegante."),
+    "Lifestyle realista": ("#b5c7c6", "#f2c78d", "#647f75", "Cores acolhedoras e momentos cotidianos."),
+    "Natureza documental": ("#193b35", "#e6c77b", "#668d62", "Verdes orgânicos e luz ambiente."),
+    "Minimalista clean": ("#dce5e8", "#f2c987", "#9bb1b8", "Poucos elementos e espaço visual."),
+    "Vintage filme 35mm": ("#493a32", "#d6a46c", "#8d7254", "Grão suave e tons analógicos quentes."),
+    "VHS retrô": ("#25234b", "#f0789b", "#3c8292", "Cores deslocadas e estética de fita."),
+    "Cyberpunk neon": ("#171a3b", "#ff4fa3", "#16c8d2", "Neon magenta e ciano em alto contraste."),
+    "Ficção científica futurista": ("#132b43", "#78d8e8", "#5274a5", "Luz tecnológica e atmosfera futurista."),
+    "Fantasia cinematográfica": ("#29264c", "#f0c16e", "#78689d", "Luz mágica, atmosfera épica e cores ricas."),
+    "Surrealismo fotográfico": ("#39405b", "#e9a6b1", "#8b9d9a", "Combinações oníricas com aparência fotográfica."),
+    "Anime 2D": ("#7ab8d5", "#ffdc83", "#e28d83", "Cores ilustradas, contornos e céu expressivo."),
+    "Anime 3D": ("#526b9a", "#f6c77c", "#9a8ac2", "Personagens e cenários estilizados em volume."),
+    "Ilustração editorial": ("#e4d6b9", "#d78b63", "#63818a", "Formas gráficas e paleta editorial."),
+    "Aquarela artística": ("#c4d9d2", "#edc58e", "#8aaeb1", "Pigmentos suaves e bordas orgânicas."),
+    "Graphic novel": ("#252b38", "#e5b44f", "#a94d50", "Contraste forte, blocos de cor e traço marcado."),
+    "3D realista": ("#29465b", "#f2c67b", "#7294a0", "Materiais, volume e iluminação realistas."),
+    "3D estilizado": ("#546c9b", "#ffd27b", "#9c83c5", "Formas tridimensionais com cores estilizadas."),
+    "Stop motion": ("#6e5142", "#e6bd78", "#8b9b72", "Textura artesanal e sensação de miniatura."),
+    "Macro e detalhes": ("#183c43", "#e6b96d", "#6b9b91", "Enquadramentos próximos e foco seletivo."),
+    "Drone e paisagens aéreas": ("#39728a", "#f2cb83", "#6e9d83", "Escala ampla e perspectiva aérea.")
+}
+
+def style_preview_svg(style):
+    sky, sun, ground, _ = STYLE_PREVIEWS[style]
+    svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="480" height="270" viewBox="0 0 480 270">
+    <defs>
+      <linearGradient id="sky" x2="0" y2="1"><stop stop-color="{sky}"/><stop offset="1" stop-color="{ground}"/></linearGradient>
+      <radialGradient id="glow"><stop stop-color="{sun}" stop-opacity=".9"/><stop offset="1" stop-color="{sun}" stop-opacity="0"/></radialGradient>
+      <filter id="soft"><feGaussianBlur stdDeviation="15"/></filter>
+    </defs>
+    <rect width="480" height="270" fill="url(#sky)"/>
+    <circle cx="350" cy="83" r="76" fill="url(#glow)"/>
+    <circle cx="350" cy="83" r="27" fill="{sun}" opacity=".92"/>
+    <path d="M0 190 L95 105 L165 177 L255 92 L365 190 L430 130 L480 176 L480 270 L0 270Z" fill="{ground}" opacity=".95"/>
+    <path d="M0 215 Q115 165 220 218 T480 205 L480 270 L0 270Z" fill="#101820" opacity=".48"/>
+    <path d="M0 244 Q110 220 220 244 T480 235 L480 270 L0 270Z" fill="#0b121b" opacity=".58"/>
+    <path d="M0 0 H480 V270 H0Z" fill="none" stroke="{sun}" stroke-opacity=".25" stroke-width="5"/>
+    <circle cx="85" cy="70" r="2" fill="#fff" opacity=".65"/><circle cx="125" cy="48" r="1.5" fill="#fff" opacity=".6"/>
+    <circle cx="425" cy="42" r="2" fill="#fff" opacity=".5"/>
+    </svg>'''
+    return base64.b64encode(svg.encode("utf-8")).decode("ascii")
+
+st.markdown("""
+<style>
+.block-container {padding-top: 1.4rem; padding-bottom: 3rem; max-width: 1050px;}
+.nexus-hero {padding: 1.15rem 1.2rem; border: 1px solid rgba(190,160,105,.28); border-radius: 18px; background: linear-gradient(135deg, rgba(190,160,105,.15), rgba(30,39,55,.55)); margin-bottom: 1.1rem;}
+.nexus-kicker {font-size: .76rem; letter-spacing: .16em; text-transform: uppercase; color: #c9aa73; font-weight: 700;}
+.nexus-sub {color: #aab1bd; font-size: .95rem; margin-top: .25rem;}
+.nexus-preview {display:flex; gap:12px; align-items:center; padding:10px; border:1px solid rgba(160,170,185,.2); border-radius:14px; background:rgba(255,255,255,.035); margin:.25rem 0 1rem 0;}
+.nexus-preview img {width:142px; max-width:42%; aspect-ratio:16/9; object-fit:cover; border-radius:9px;}
+.nexus-preview-title {font-weight:700; margin-bottom:4px;}
+.nexus-preview-copy {font-size:.82rem; color:#aab1bd; line-height:1.35;}
+.nexus-step {font-size:.78rem; font-weight:700; color:#c9aa73; letter-spacing:.08em; text-transform:uppercase; margin-bottom:.2rem;}
+div[data-testid="stButton"] button[kind="primary"] {border-radius:12px; min-height:3.1rem; font-weight:700;}
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown('<div class="nexus-hero"><div class="nexus-kicker">NEXUS VIDEO STUDIO</div><h1 style="margin:.25rem 0 0 0;">Transforme seu roteiro em vídeo</h1><div class="nexus-sub">Direção por IA · cenas coerentes · vídeo vertical</div></div>', unsafe_allow_html=True)
+st.markdown('<div class="nexus-step">01 · Conteúdo</div>', unsafe_allow_html=True)
+topic = st.text_area("Assunto ou roteiro", height=155, placeholder="Cole seu roteiro completo ou descreva o vídeo que deseja criar.")
+
+st.markdown('<div class="nexus-step">02 · Direção visual</div>', unsafe_allow_html=True)
+style = st.selectbox("Escolha a linguagem visual do vídeo", STYLE_OPTIONS, help="O estilo será enviado ao diretor de IA e aplicado às buscas de clipes de todas as cenas.")
+preview_b64 = style_preview_svg(style)
+preview_copy = STYLE_PREVIEWS[style][3]
+st.markdown(
+    f'<div class="nexus-preview"><img src="data:image/svg+xml;base64,{preview_b64}" alt="Prévia ilustrativa do estilo {style}"><div><div class="nexus-preview-title">{style}</div><div class="nexus-preview-copy">{preview_copy}<br><span style="opacity:.72">Prévia ilustrativa da linguagem visual</span></div></div></div>',
+    unsafe_allow_html=True
+)
+
+st.markdown('<div class="nexus-step">03 · Configurações</div>', unsafe_allow_html=True)
+settings_col1, settings_col2 = st.columns(2)
+with settings_col1:
+    duration = st.selectbox("Duração do vídeo", [40, 50, 60], index=1, format_func=lambda value: f"{value} segundos")
+with settings_col2:
+    voice = st.selectbox("Voz da narração", ["pt-BR-AntonioNeural", "pt-BR-FranciscaNeural", "pt-BR-ThalitaNeural"], format_func=lambda value: {"pt-BR-AntonioNeural":"Antônio · Masculina", "pt-BR-FranciscaNeural":"Francisca · Feminina", "pt-BR-ThalitaNeural":"Thalita · Feminina"}[value])
+
+with st.expander("Ferramentas avançadas · diagnóstico da biblioteca Coverr"):
+    st.caption("Ferramenta técnica para verificar a conexão e o download interno. Não é necessária para planejar ou produzir um vídeo.")
+    if st.button("Testar conexão e download Coverr", type="secondary"):
+        coverr_key = secret("COVERR_API_KEY")
+        if not coverr_key:
+            st.error("COVERR_API_KEY não encontrada nos Secrets.")
+        else:
+            with st.spinner("Verificando a biblioteca Coverr..."):
+                try:
+                    test_results = search_coverr_videos("nature landscape", coverr_key, per_page=5)
+                    if not test_results:
+                        st.warning("A API respondeu, mas não retornou clipes com URL MP4.")
+                    else:
+                        chosen = next((item for item in test_results if item.get("vertical")), test_results[0])
+                        with tempfile.TemporaryDirectory(prefix="nexus_coverr_test_") as temp_dir:
+                            clip_path = download_file(chosen["url"], Path(temp_dir) / "coverr_test.mp4")
+                            probe = subprocess.run(
+                                ["ffprobe", "-v", "error", "-show_entries", "format=duration,size:stream=codec_name,codec_type,width,height", "-of", "json", str(clip_path)],
+                                capture_output=True, text=True, timeout=60
+                            )
+                            if probe.returncode != 0:
+                                raise RuntimeError(probe.stderr[-1500:] or "FFprobe não conseguiu ler o arquivo.")
+                            metadata = json.loads(probe.stdout)
+                            streams = metadata.get("streams", [])
+                            video = next((stream for stream in streams if stream.get("codec_type") == "video"), None)
+                            if not video:
+                                raise RuntimeError("O arquivo não contém uma faixa de vídeo.")
+                            duration_seconds = float(metadata.get("format", {}).get("duration") or 0)
+                            size_bytes = int(metadata.get("format", {}).get("size") or clip_path.stat().st_size)
+                            if duration_seconds <= 0 or size_bytes <= 0:
+                                raise RuntimeError("O arquivo baixado não apresentou duração ou tamanho válidos.")
+                            st.success(f"Coverr respondeu e o download interno foi validado: {len(test_results)} clipes encontrados.")
+                            st.caption(f"{chosen.get('title') or 'Clipe Coverr'} · {video.get('width')}×{video.get('height')} · {duration_seconds:.1f}s · {video.get('codec_name', 'codec desconhecido')}")
+                except Exception as exc:
+                    st.error(f"Falha no teste Coverr: {exc}")
+
 if st.button("Planejar vídeo", type="primary", use_container_width=True):
     if not topic.strip():
         st.error("Informe um assunto ou roteiro.")
