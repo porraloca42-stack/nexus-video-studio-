@@ -270,3 +270,5 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Commit `2b63e5b`: corrigidas as quebras de linha na escrita dos blocos SRT e nas legendas multilinha.
 - Commit `7ee0182`: teste de áudio reforçado para exigir que o arquivo tenha quebras de linha reais e não contenha sequências literais `\\n`.
 - Estado: correção e teste gravados na branch main. Ainda aguardam execução CI e nova produção real no Streamlit. O MP4 final ainda não está validado.
+
+- Commit `edebc82`: identificador visual do app atualizado para `NEXUS-2026.11.16-srt-newline-1`, para confirmar que o worker Streamlit carregou a revisão com a correção.
