@@ -227,3 +227,10 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - Ação ainda necessária no ambiente Streamlit: cadastrar as chaves recebidas nos Secrets com os nomes `PIXABAY_API_KEY` e `PEXELS_API_KEY`. Não há ferramenta conectada nesta sessão para gravar diretamente os Secrets privados do Streamlit.
 - Após salvar os Secrets, executar no app: Ferramentas avançadas → Testar todas as bibliotecas configuradas. Só marcar Pixabay/Pexels como operacionais depois de confirmar busca, download e leitura MP4.
 - Recomenda-se revogar e gerar novas chaves depois de concluir a configuração, pois as credenciais foram compartilhadas em uma conversa. Nunca armazenar valores de chaves no repositório.
+
+
+## Correção de ImportError no Streamlit — 16/11/2026
+- Após publicar o diagnóstico multi-biblioteca, o app apresentou ImportError na linha de importação de `nexus.assets` (captura do usuário).
+- A captura não mostra a mensagem-raiz completa; a hipótese mais provável é incompatibilidade temporária entre a revisão do app e a revisão do pacote durante a implantação, pois o app passou a importar diretamente três adaptadores específicos.
+- Correção preventiva commit b97318e: removidos os imports diretos dos adaptadores Pixabay/Pexels no `app.py`. O diagnóstico agora chama o ponto de entrada já estabelecido `search_video_sources`, isolando uma fonte por chamada. A importação original e estável de `search_video_sources`, `search_coverr_videos` e `download_file` foi preservada.
+- O workflow de CI deve concluir para b97318e antes de considerar a correção testada. A implantação Streamlit e o teste real no navegador ainda precisam de confirmação.
