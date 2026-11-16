@@ -666,3 +666,12 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - A primeira imagem retornou em 512×896; o worker exigia exatamente 512×910 e interrompeu antes da narração/render. Isso confirma resposta de geração do Workers AI, mas ainda não comprova todas as cenas nem MP4.
 - Correção commit `102c5f9`: o worker agora aceita dimensões positivas retornadas pelo modelo e normaliza imagens fora de 512×910 via FFmpeg para o canvas vertical esperado antes de entregar ao Remotion.
 - Estado da correção: commit gravado em main; CI disparado automaticamente, ainda aguardando resultado. Novo teste real do worker e MP4 final ainda pendentes.
+
+
+## Tratamento de bloqueio de moderação Workers AI — 16/11/2026
+- Execução real #43855056751 confirmou que o erro anterior de resolução foi ultrapassado; a geração chegou à primeira cena e o modelo retornou HTTP 400, código 3030 ("output has been flagged").
+- Commit `a3a81a8`: em `nexus/cloudflare_images.py`, a geração de cada cena agora reconhece exclusivamente o código 3030 e faz uma única nova tentativa com enquadramento editorial conservador (não gráfico, não sexual, personagens fictícios, sem nudez/ferimentos explícitos/logos/texto), preservando cenário, sujeito e ação benigna da descrição original. Outros erros HTTP não são repetidos.
+- Se a segunda tentativa também for bloqueada, o erro informa o número da cena e orienta revisar o prompt visual; não tenta contornar bloqueios repetidamente.
+- Commit `f673d92`: adicionados testes unitários para a nova tentativa moderada e para garantir que erros não relacionados a moderação não sejam repetidos.
+- CI dos commits `a3a81a8` e `f673d92` está em execução (runs #43855578370, #43855578442, #43855616814 e #43855616779); ainda sem resultado final nesta atualização.
+- Não houve nova execução real do worker após esta correção. MP4 final e fluxo de ponta a ponta continuam não validados.
