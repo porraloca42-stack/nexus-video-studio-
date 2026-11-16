@@ -61,6 +61,39 @@ class RemotionManifestTests(unittest.TestCase):
             self.assertNotIn("visualDescription", scene)
             self.assertNotIn("headline", scene)
 
+    def test_scene_direction_is_whitelisted_clamped_and_passed_to_manifest(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            image = root / "scene.png"
+            image.write_bytes(b"fake-image")
+            plan = {"scenes": [{
+                "duration_seconds": 4, "camera_motion": "push_in",
+                "scene_direction": {
+                    "camera": {"move": "tilt_up", "intensity": 9, "start_scale": 0.2, "end_scale": 2, "focus": "invalid"},
+                    "depth_layers": {"parallax_strength": -4},
+                    "lighting": {"change": "run arbitrary code"},
+                    "atmosphere": {"effect": "explosion", "intensity": 4},
+                    "transition": {"in": "crossfade", "out": "unknown", "duration_frames": 90},
+                    "beats": [{"at": 3, "event": "A luz pulsa", "visual_target": "fundo"}] * 5,
+                },
+            }]}
+            _, manifest = build_remotion_manifest(plan, [{"path": str(image)}], None, None, root / "public", job_id="direction")
+            direction = manifest["scenes"][0]["sceneDirection"]
+            self.assertEqual(direction["camera"]["move"], "tilt_up")
+            self.assertEqual(direction["camera"]["intensity"], 1.0)
+            self.assertEqual(direction["camera"]["startScale"], 1.0)
+            self.assertEqual(direction["camera"]["endScale"], 1.15)
+            self.assertEqual(direction["camera"]["focus"], "subject")
+            self.assertEqual(direction["depthLayers"]["parallaxStrength"], 0.0)
+            self.assertEqual(direction["lighting"]["change"], "none")
+            self.assertEqual(direction["atmosphere"]["effect"], "none")
+            self.assertEqual(direction["atmosphere"]["intensity"], 1.0)
+            self.assertEqual(direction["transition"]["in"], "crossfade")
+            self.assertEqual(direction["transition"]["out"], "cut")
+            self.assertEqual(direction["transition"]["durationFrames"], 12)
+            self.assertEqual(len(direction["beats"]), 3)
+            self.assertEqual(direction["beats"][0]["at"], 1.0)
+
     def test_preserves_wav_extension_for_generated_narration(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
