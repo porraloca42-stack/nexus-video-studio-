@@ -147,6 +147,7 @@ class AssetRankingTests(unittest.TestCase):
         search.side_effect = [
             [clip("https://example.test/unrelated.mp4", "Crowd beneath giant hand", "Concert crowd")],
             [clip("https://example.test/relevant.mp4", "Writing goals in notebook", "Hand writing in journal")],
+            [], [], [],
         ]
 
         ranked, errors = search_video_sources(
@@ -227,8 +228,7 @@ class AssetRankingTests(unittest.TestCase):
     @patch("nexus.assets.search_coverr_videos")
     def test_style_only_result_without_scene_metadata_is_rejected(self, search):
         search.side_effect = [
-            [],
-            [],
+            [], [], [], [], [],
             [clip("https://example.test/anime.mp4", "Anime fantasy landscape", "Japanese animation")],
         ]
 
@@ -264,7 +264,7 @@ class AssetRankingTests(unittest.TestCase):
     def test_style_query_is_searched_separately_but_does_not_admit_style_only_results(self, search):
         search.side_effect = [
             [clip("https://example.test/semantic.mp4", "Person writing goals in notebook", "Writing in journal")],
-            [],
+            [], [], [], [],
             [clip("https://example.test/anime-only.mp4", "Anime landscape", "Japanese animation scenery")],
         ]
         ranked, errors = search_video_sources(
@@ -275,7 +275,7 @@ class AssetRankingTests(unittest.TestCase):
         )
         self.assertFalse(errors)
         self.assertEqual([item["url"] for item in ranked], ["https://example.test/semantic.mp4"])
-        self.assertEqual(search.call_count, 3)
+        self.assertEqual(search.call_count, 6)
         self.assertEqual(search.call_args_list[-1].args[0], "anime 2D animation")
 
     def test_empty_results_are_safe(self):
@@ -305,9 +305,9 @@ class AssetRankingTests(unittest.TestCase):
 
         self.assertFalse(errors)
         self.assertEqual({item["source"] for item in ranked}, {"Coverr", "Pixabay", "Pexels"})
-        self.assertEqual(coverr.call_count, 2)
-        self.assertEqual(pixabay.call_count, 2)
-        self.assertEqual(pexels.call_count, 2)
+        self.assertEqual(coverr.call_count, 5)
+        self.assertEqual(pixabay.call_count, 5)
+        self.assertEqual(pexels.call_count, 5)
 
     @patch("nexus.assets.search_pexels_videos")
     def test_pexels_adapter_uses_current_video_endpoint_and_normalizes_files(self, search):
