@@ -57,7 +57,7 @@ class SceneCountRepairTests(unittest.TestCase):
         self.assertEqual(len(result["scenes"]), 10)
         self.assertEqual(sum(scene["duration_seconds"] for scene in result["scenes"]), 50)
         self.assertEqual(request.call_count, 2)
-        self.assertIn("NO MÍNIMO 10 cenas", request.call_args.args[0])
+        self.assertIn("NO MÍNIMO ABSOLUTO 10 CENAS", request.call_args.args[0])
 
     def test_40_seconds_rejects_seven_and_repairs_to_ten(self):
         short_plan = make_plan(7)
