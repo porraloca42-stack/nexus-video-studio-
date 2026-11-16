@@ -162,7 +162,7 @@ def validate_storyboard(plan, requested_duration=None):
         errors.append(f"O diretor criou {len(scenes)} cenas, mas são necessárias pelo menos {minimum_scenes} para cobrir {requested_duration}s sem segmentos longos.")
     for index, scene in enumerate(scenes, 1):
         total += float(scene.get("duration_seconds", 0) or 0)
-        for field in ("voiceover", "visual_action", "semantic_reason", "camera_motion", "asset_search_query"):
+        for field in ("voiceover", "visual_action", "semantic_reason", "camera_motion", "asset_search_query", "visual_style", "style_search_terms"):
             if not str(scene.get(field, "")).strip():
                 errors.append(f"Cena {index}: campo {field} vazio.")
         if len(scene.get("semantic_reason", "")) < 35:
