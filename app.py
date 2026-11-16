@@ -491,6 +491,7 @@ if "nexus_plan" in st.session_state:
                         "height": int(report.get("height") or 1280),
                         "video_codec": report.get("video_codec", "h264"),
                         "audio_codec": report.get("audio_codec", ""),
+                        "narration_provider": report.get("narration_provider", "não informado pelo worker"),
                         "size_mb": len(video_bytes) / (1024 * 1024),
                         "scene_count": len(plan.get("scenes", [])),
                         "visual_source": "Cloudflare Workers AI + Remotion",
@@ -853,6 +854,8 @@ if st.session_state.get("nexus_rendered_video"):
     st.caption(f"{info.get('scene_count', 0)} cenas · {info.get('duration', 0):.1f}s · {info.get('width', 0)}×{info.get('height', 0)} · {info.get('size_mb', 0):.2f} MB")
     if info.get("visual_source"):
         st.caption("Direção visual: " + info["visual_source"])
+    if info.get("narration_provider"):
+        st.caption("Narração: " + info["narration_provider"])
     if info.get("worker_run_id"):
         st.caption(f"[Ver execução do render no GitHub Actions](https://github.com/porraloca42-stack/nexus-video-studio-/actions/runs/{info['worker_run_id']})")
     reviews = info.get("visual_reviews", [])
