@@ -234,3 +234,10 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 - A captura não mostra a mensagem-raiz completa; a hipótese mais provável é incompatibilidade temporária entre a revisão do app e a revisão do pacote durante a implantação, pois o app passou a importar diretamente três adaptadores específicos.
 - Correção preventiva commit b97318e: removidos os imports diretos dos adaptadores Pixabay/Pexels no `app.py`. O diagnóstico agora chama o ponto de entrada já estabelecido `search_video_sources`, isolando uma fonte por chamada. A importação original e estável de `search_video_sources`, `search_coverr_videos` e `download_file` foi preservada.
 - O workflow de CI deve concluir para b97318e antes de considerar a correção testada. A implantação Streamlit e o teste real no navegador ainda precisam de confirmação.
+
+
+## Compatibilidade de assinatura na busca Pexels — 16/11/2026
+- O teste real no Streamlit revelou `search_video_sources() got an unexpected keyword argument 'pexels_key'`, apesar de o arquivo atual `nexus/assets.py` já declarar esse parâmetro.
+- Isso confirma divergência entre a versão da função carregada no worker e a chamada feita pelo app; não é evidência de chave API inválida.
+- Commit 3133d3b: adicionado `_search_stock_compatible` no `app.py`. A função inspeciona a assinatura carregada: usa a integração central quando há suporte a `pexels_key`; em workers com assinatura antiga, busca Coverr/Pixabay pela interface legada e consulta Pexels diretamente via API, normalizando os resultados para o esquema interno. O diagnóstico e a produção usam o mesmo adaptador.
+- CI e teste real no Streamlit ainda pendentes. Não declarar correção validada até produção confirmar busca, download e leitura de MP4.
