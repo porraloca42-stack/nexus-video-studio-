@@ -1,0 +1,21 @@
+{
+  "name": "nexus-remotion-engine",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Isolated Remotion proof of concept for NEXUS VIDEO STUDIO",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "render:demo": "remotion render src/index.ts NexusDemo out/nexus-demo.mp4 --codec=h264 --pixel-format=yuv420p"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.543",
+    "remotion": "4.0.543",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.20",
+    "@types/react-dom": "18.3.6",
+    "typescript": "5.8.3"
+  }
+}
