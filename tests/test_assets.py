@@ -108,9 +108,23 @@ class AssetRankingTests(unittest.TestCase):
 
 
     @patch("nexus.assets.search_coverr_videos")
-    def test_single_keyword_match_is_not_enough_for_detailed_scene(self, search):
+    def test_single_scene_term_match_is_used_only_as_last_resort(self, search):
         search.return_value = [
             clip("https://example.test/weak.mp4", "Writing in a journal", "")
+        ]
+
+        ranked, errors = search_video_sources(
+            "person writing goals in notebook",
+            coverr_key="test-key",
+        )
+
+        self.assertFalse(errors)
+        self.assertEqual([item["url"] for item in ranked], ["https://example.test/weak.mp4"])
+
+    @patch("nexus.assets.search_coverr_videos")
+    def test_unrelated_stock_is_still_rejected_by_semantic_fallback(self, search):
+        search.return_value = [
+            clip("https://example.test/unrelated.mp4", "Crowd beneath giant hand", "Concert crowd")
         ]
 
         ranked, errors = search_video_sources(
