@@ -16,6 +16,66 @@ def clip(url, title, description="", vertical=True, width=1080, height=1920):
 
 
 class AssetRankingTests(unittest.TestCase):
+    @patch("nexus.assets.requests.get")
+    def test_wikimedia_search_keeps_only_commercially_reusable_video_licenses(self, get):
+        get.return_value.json.return_value = {
+            "query": {
+                "pages": [
+                    {
+                        "title": "File:CC-BY clip.webm",
+                        "imageinfo": [{
+                            "url": "https://upload.wikimedia.org/cc-by.webm",
+                            "descriptionurl": "https://commons.wikimedia.org/wiki/File:CC-BY_clip.webm",
+                            "mime": "video/webm", "width": 1280, "height": 720,
+                            "extmetadata": {
+                                "LicenseShortName": {"value": "CC BY 4.0"},
+                                "LicenseUrl": {"value": "https://creativecommons.org/licenses/by/4.0/"},
+                                "Artist": {"value": "Jane Creator"},
+                            },
+                        }],
+                    },
+                    {
+                        "title": "File:NC clip.webm",
+                        "imageinfo": [{
+                            "url": "https://upload.wikimedia.org/nc.webm",
+                            "mime": "video/webm", "width": 1280, "height": 720,
+                            "extmetadata": {"LicenseShortName": {"value": "CC BY-NC 4.0"}},
+                        }],
+                    },
+                    {
+                        "title": "File:SA clip.webm",
+                        "imageinfo": [{
+                            "url": "https://upload.wikimedia.org/sa.webm",
+                            "mime": "video/webm", "width": 1280, "height": 720,
+                            "extmetadata": {"LicenseShortName": {"value": "CC BY-SA 4.0"}},
+                        }],
+                    },
+                ]
+            }
+        }
+        from nexus.assets import search_wikimedia_videos
+        results = search_wikimedia_videos("ocean waves", per_page=5)
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]["source"], "Wikimedia Commons")
+        self.assertEqual(results[0]["license"], "CC BY 4.0")
+        self.assertEqual(results[0]["author"], "Jane Creator")
+        self.assertTrue(results[0]["attribution_required"])
+        self.assertEqual(get.call_args.kwargs["params"]["gsrsearch"], "filetype:video ocean waves")
+
+    @patch("nexus.assets.search_wikimedia_videos")
+    def test_wikimedia_can_supply_candidates_without_an_api_key(self, search):
+        search.return_value = [
+            {**clip("https://example.test/commons.webm", "Person writing goals in notebook"), "source": "Wikimedia Commons"}
+        ]
+        ranked, errors = search_video_sources(
+            "person writing goals in notebook",
+            wikimedia_enabled=True,
+        )
+        self.assertFalse(errors)
+        self.assertEqual(ranked[0]["source"], "Wikimedia Commons")
+        self.assertGreaterEqual(search.call_count, 1)
+
+
     def test_scene_relevance_beats_resolution(self):
         candidates = [
             clip(
