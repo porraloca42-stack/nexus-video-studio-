@@ -50,7 +50,7 @@ def _retime_srt(source, destination, tempo, target_duration):
     import re
 
     timestamp_pattern = re.compile(
-        r"(\\d{2}:\\d{2}:\\d{2},\\d{3})\\s+-->\\s+(\\d{2}:\\d{2}:\\d{2},\\d{3})"
+        r"(\d{2}:\d{2}:\d{2},\d{3})\s+-->\s+(\d{2}:\d{2}:\d{2},\d{3})"
     )
 
     def to_ms(value):
@@ -82,7 +82,7 @@ def _retime_srt(source, destination, tempo, target_duration):
             line[:match.start(1)] + to_timestamp(start) + " --> " +
             to_timestamp(end) + line[match.end(2):]
         )
-    Path(destination).write_text("\\n".join(adjusted) + "\\n", encoding="utf-8")
+    Path(destination).write_text("\n".join(adjusted) + "\n", encoding="utf-8")
     return Path(destination)
 
 
