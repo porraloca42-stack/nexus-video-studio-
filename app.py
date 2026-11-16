@@ -4,7 +4,7 @@ import requests
 import streamlit as st
 from nexus.director import create_storyboard, validate_storyboard
 from nexus.assets import search_video_sources, download_file, diverse_candidate_shortlist
-from nexus.audio import make_voice
+from nexus.audio import generate_fish_preview, list_fish_voices, make_voice
 from nexus.render import render_video
 
 
@@ -226,7 +226,7 @@ div[data-testid="stTextArea"] textarea,div[data-testid="stSelectbox"] div[data-b
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="nexus-hero"><div class="nexus-brand">NEXUS VIDEO STUDIO</div><div class="nexus-tagline">Transforme seu roteiro em vídeo</div></div>', unsafe_allow_html=True)
-st.caption("Versão: NEXUS-2026.11.16-audio-only-1")
+st.caption("Versão: NEXUS-2026.11.16-fish-voice-library-1")
 
 if "nexus_style" not in st.session_state or st.session_state["nexus_style"] not in STYLE_OPTIONS:
     st.session_state["nexus_style"] = "Cinematográfico realista"
@@ -262,15 +262,97 @@ with st.expander("Escolher estilo visual · 24 referências", expanded=False):
 style = st.session_state["nexus_style"]
 
 st.markdown('<div class="nexus-kicker">03 · Configurações</div>', unsafe_allow_html=True)
-settings_col1, settings_col2 = st.columns(2)
-with settings_col1:
-    duration = st.selectbox("Duração do vídeo", [40, 50, 60], index=1, format_func=lambda value: f"{value} segundos")
-with settings_col2:
-    voice = st.selectbox("Voz de fallback (Edge TTS)", ["pt-BR-AntonioNeural", "pt-BR-FranciscaNeural", "pt-BR-ThalitaNeural"], format_func=lambda value: {"pt-BR-AntonioNeural":"Antônio · Masculina", "pt-BR-FranciscaNeural":"Francisca · Feminina", "pt-BR-ThalitaNeural":"Thalita · Feminina"}[value])
-if secret("FISH_API_KEY"):
-    st.caption("Narração: Fish Audio S2.1 Pro Free · fallback automático para Edge TTS")
-else:
-    st.caption("Narração: Edge TTS · configure FISH_API_KEY nos Secrets para ativar Fish Audio")
+duration = st.selectbox("Duração do vídeo", [40, 50, 60], index=1, format_func=lambda value: f"{value} segundos")
+fish_api_key = secret("FISH_API_KEY")
+if "nexus_fish_voice_id" not in st.session_state:
+    st.session_state["nexus_fish_voice_id"] = secret("FISH_VOICE_ID")
+if "nexus_fish_voice_name" not in st.session_state:
+    st.session_state["nexus_fish_voice_name"] = ""
+
+with st.expander("Voz da narração · Biblioteca Fish Audio", expanded=True):
+    if not fish_api_key:
+        st.error("Configure FISH_API_KEY nos Secrets do Streamlit. O NEXUS não usa mais vozes robóticas de fallback.")
+    else:
+        voice_search_col, voice_language_col = st.columns([2, 1])
+        with voice_search_col:
+            voice_search = st.text_input("Buscar voz pelo nome", placeholder="Ex.: male, narrator, warm...", key="nexus_fish_voice_search")
+        with voice_language_col:
+            voice_language_label = st.selectbox("Idioma da voz", ["Português", "Todos"], index=0, key="nexus_fish_voice_language")
+        voice_language = "pt" if voice_language_label == "Português" else None
+        voices_per_page = 6
+        try:
+            first_voice_page = list_fish_voices(
+                fish_api_key, page=1, page_size=voices_per_page,
+                title=voice_search, language=voice_language,
+            )
+            total_voice_pages = max(1, (first_voice_page["total"] + voices_per_page - 1) // voices_per_page)
+            voice_page = st.selectbox(
+                "Página de vozes",
+                list(range(1, total_voice_pages + 1)),
+                format_func=lambda page: f"{page} de {total_voice_pages}",
+                key="nexus_fish_voice_page",
+            )
+            voice_page_data = first_voice_page if voice_page == 1 else list_fish_voices(
+                fish_api_key, page=voice_page, page_size=voices_per_page,
+                title=voice_search, language=voice_language,
+            )
+            voices = voice_page_data["items"]
+            if not voices:
+                st.info("Nenhuma voz encontrada com esse filtro. Experimente buscar outro nome ou selecionar Todos.")
+            for fish_voice in voices:
+                voice_id = fish_voice["id"]
+                if not voice_id:
+                    continue
+                audio_col, details_col, select_col = st.columns([1.45, 4.8, 1.2])
+                with audio_col:
+                    preview_key = f"nexus_fish_preview_{voice_id}"
+                    cached_preview = st.session_state.get(preview_key)
+                    if fish_voice.get("sample_audio"):
+                        st.audio(fish_voice["sample_audio"], format="audio/mp3")
+                    elif cached_preview:
+                        st.audio(cached_preview, format="audio/mp3")
+                    elif st.button("Gerar áudio", key=f"fish_preview_button_{voice_id}", use_container_width=True):
+                        try:
+                            st.session_state[preview_key] = generate_fish_preview(fish_api_key, voice_id)
+                            st.rerun()
+                        except Exception as preview_error:
+                            st.error(f"Não foi possível gerar a amostra: {preview_error}")
+                with details_col:
+                    st.markdown(f"**{fish_voice['title']}**")
+                    metadata = []
+                    if fish_voice.get("author"):
+                        metadata.append(f"por {fish_voice['author']}")
+                    if fish_voice.get("languages"):
+                        metadata.append(", ".join(fish_voice["languages"][:4]))
+                    if fish_voice.get("tags"):
+                        metadata.append(", ".join(fish_voice["tags"][:4]))
+                    if metadata:
+                        st.caption(" · ".join(metadata))
+                    if fish_voice.get("description"):
+                        st.caption(fish_voice["description"][:180])
+                    if fish_voice.get("sample_text"):
+                        st.caption(f"Amostra original: {fish_voice['sample_text'][:120]}")
+                with select_col:
+                    if voice_id == st.session_state.get("nexus_fish_voice_id"):
+                        st.success("Em uso")
+                    elif st.button("Escolher", key=f"fish_select_{voice_id}", use_container_width=True):
+                        st.session_state["nexus_fish_voice_id"] = voice_id
+                        st.session_state["nexus_fish_voice_name"] = fish_voice["title"]
+                        st.rerun()
+            if not st.session_state.get("nexus_fish_voice_id") and voices:
+                st.session_state["nexus_fish_voice_id"] = voices[0]["id"]
+                st.session_state["nexus_fish_voice_name"] = voices[0]["title"]
+            if st.session_state.get("nexus_fish_voice_id"):
+                selected_voice_name = st.session_state.get("nexus_fish_voice_name") or st.session_state["nexus_fish_voice_id"]
+                st.caption(f"Voz selecionada para os próximos vídeos: {selected_voice_name}")
+                st.caption("A lista é consultada diretamente na biblioteca Fish Audio. As amostras publicadas são reproduzidas aqui; quando não há amostra, você pode gerar uma prévia curta.")
+            else:
+                st.warning("Escolha uma voz antes de produzir o vídeo.")
+        except Exception as voice_error:
+            st.error(f"Não foi possível carregar a biblioteca Fish Audio: {voice_error}")
+            st.caption("A produção ficará bloqueada até que a biblioteca e uma voz sejam carregadas corretamente.")
+
+voice = st.session_state.get("nexus_fish_voice_id", "")
 
 render_mode = st.selectbox(
     "Motor de produção visual",
@@ -467,8 +549,8 @@ if "nexus_plan" in st.session_state:
         elif render_mode == "Imagens originais · Cloudflare AI + Remotion":
             github_token = secret("GITHUB_ACTIONS_TOKEN")
             cloudflare_token = secret("CLOUDFLARE_API_TOKEN")
-            if not github_token or not cloudflare_token:
-                st.error("Configure GITHUB_ACTIONS_TOKEN e CLOUDFLARE_API_TOKEN nos Secrets do Streamlit para habilitar o trabalhador Remotion.")
+            if not github_token or not cloudflare_token or not fish_api_key or not voice:
+                st.error("Configure GITHUB_ACTIONS_TOKEN, CLOUDFLARE_API_TOKEN e FISH_API_KEY, e selecione uma voz da biblioteca Fish Audio.")
                 st.info("O repositório GitHub também precisa dos Secrets CLOUDFLARE_ACCOUNT_ID e CLOUDFLARE_API_TOKEN. O manifesto e o MP4 trafegam criptografados.")
             else:
                 progress = st.progress(0.05, text="Enviando storyboard para o trabalhador audiovisual...")
@@ -478,8 +560,8 @@ if "nexus_plan" in st.session_state:
                         progress.progress(0.55, text=message)
                     result = render_on_github(
                         plan, voice, github_token, encryption_secret=cloudflare_token,
-                        fish_api_key=secret("FISH_API_KEY"),
-                        fish_voice_id=secret("FISH_VOICE_ID"),
+                        fish_api_key=fish_api_key,
+                        fish_voice_id=voice,
                         progress_callback=update_worker_progress
                     )
                     video_bytes = result["video"]
