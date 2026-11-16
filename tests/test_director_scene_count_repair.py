@@ -69,9 +69,9 @@ class SceneCountRepairTests(unittest.TestCase):
         with patch.object(director, "_request", side_effect=[short_plan, repaired_plan]) as request:
             with patch.object(director, "_repair_semantic_justifications"):
                 with patch.object(director, "apply_visual_style_lock", side_effect=lambda plan, style: plan):
-                result = director.create_storyboard(
-                    "Uma manhã tranquila na cidade", "Cinematográfico realista", 40, secret_reader
-                )
+                    result = director.create_storyboard(
+                        "Uma manhã tranquila na cidade", "Cinematográfico realista", 40, secret_reader
+                    )
 
         self.assertEqual(len(result["scenes"]), 10)
         self.assertEqual(sum(scene["duration_seconds"] for scene in result["scenes"]), 40)
