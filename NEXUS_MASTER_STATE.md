@@ -198,3 +198,15 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
   2. `nexus/render.py` tinha o padrão regex de timestamps SRT com escapes duplicados e escrevia separadores `\\n` literais, não quebras de linha; commit de correção de renderização antecedente ao teste removeu os escapes duplicados. A fixture do teste também escrevia `\\n` literal; commit 6e209d6 corrigiu a fixture.
 - A falha FFmpeg ao abrir `subtitles_retimed.srt` era compatível com a geração de SRT inválido; agora o parser reconhece timestamps SRT e o arquivo retimado é gravado com linhas reais.
 - A suíte ainda precisa concluir novamente após esses commits. Nenhuma renderização MP4 real do usuário foi validada.
+
+
+## Motor multi-biblioteca de clipes — 16/11/2026
+- Evidência do usuário: duas tentativas de produção interromperam com várias cenas sem clipes, apesar do storyboard válido. A captura mais recente mostra 10 cenas/50s e ausência de resultados em 8 cenas.
+- Causa arquitetural confirmada no código: `search_video_sources()` retornava imediatamente ao encontrar resultados estritos na primeira fonte, sem comparar os candidatos das outras bibliotecas. A implementação tinha Coverr e Pixabay, mas Pixabay dependia de uma chave ainda não configurada. Não havia adaptador Pexels.
+- Commit 9cfd951: busca multi-fonte agrega resultados de todas as bibliotecas habilitadas, deduplica URLs e só então classifica o conjunto completo. Uma falha isolada de uma API não impede o uso das demais. A busca foi limitada a duas consultas por fonte/cena para equilibrar cobertura e limites de requisição.
+- Commit 9cfd951: criado adaptador Pexels usando o endpoint oficial atual `/v1/videos/search`, orientação portrait, locale pt-BR e seleção de arquivo MP4 com dimensões utilizáveis.
+- Commit 88301a7: app lê opcionalmente `PEXELS_API_KEY`, encaminha a chave para as buscas principal e alternativa e aceita qualquer uma das três fontes configuradas. Novo identificador visual: `NEXUS-2026.11.16-multi-source-1`.
+- Commit a454780: testes de agregação entre Coverr/Pixabay/Pexels e tolerância a falha isolada de fornecedor.
+- Estado de credenciais confirmado no registro: Coverr configurado; Pixabay ainda sem chave; Pexels sem integração anterior e emissão pública de novas chaves pausada conforme página oficial consultada. O adaptador Pexels está pronto no código, mas não operacional até existir uma chave válida.
+- Regras de licença: validar os termos do plano/API de cada fornecedor e mostrar créditos exigidos. Não tratar um clipe como liberado para uso comercial só por ser retornado pela API.
+- Pendente: resultado do GitHub Actions para estes commits, implantação Streamlit, configurar/validar Pixabay ou Pexels quando possível e executar uma nova produção real. Não afirmar que a cobertura de todas as cenas ou MP4 está garantida.
