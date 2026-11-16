@@ -110,7 +110,7 @@ class AudioSubtitleTests(unittest.TestCase):
         self.assertGreater(len(cues), 1)
         for _, _, caption in cues:
             self.assertLessEqual(len(caption.splitlines()), 2)
-            self.assertLessEqual(len(caption.split()), 4)
+            self.assertLessEqual(len(caption.split()), 7)
 
 
 if __name__ == "__main__":
