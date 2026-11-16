@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from nexus.cloudflare_images import CloudflareAIError, generate_image
+from nexus.cloudflare_images import CloudflareAIError, generate_image, generate_scene_images
 
 
 PNG = b"\x89PNG\r\n\x1a\n" + b"nexus-test-image"
@@ -92,6 +92,47 @@ class CloudflareImageTests(unittest.TestCase):
                     api_token="secret",
                     session=FakeSession(),
                 )
+
+
+    def test_scene_retries_once_with_safe_framing_after_moderation_3030(self):
+        class QueueSession:
+            def __init__(self):
+                self.calls = []
+                self.responses = [
+                    type('Blocked', (), {'status_code': 400, 'text': '{"errors":[{"message":"output flagged","code":3030}]}', 'headers': {'content-type': 'application/json'}, 'content': b''})(),
+                    FakeResponse(),
+                ]
+
+            def post(self, url, **kwargs):
+                self.calls.append((url, kwargs))
+                return self.responses.pop(0)
+
+        with tempfile.TemporaryDirectory() as temp:
+            session = QueueSession()
+            result = generate_scene_images(
+                [{'image_prompt': 'A fictional traveler walking through a rainy city'}],
+                temp, account_id='account', api_token='secret', session=session,
+            )
+            self.assertEqual(len(session.calls), 2)
+            retry_prompt = session.calls[1][1]['files']['prompt'][1]
+            self.assertIn('non-graphic, non-sexual', retry_prompt)
+            self.assertIn('fictional traveler', retry_prompt)
+            self.assertTrue(result[0]['moderation_retry'])
+            self.assertEqual(result[0]['scene_index'], 1)
+
+    def test_scene_does_not_retry_non_moderation_cloudflare_errors(self):
+        class ErrorSession:
+            def __init__(self):
+                self.calls = 0
+            def post(self, url, **kwargs):
+                self.calls += 1
+                return type('Failure', (), {'status_code': 500, 'text': 'temporary server error', 'headers': {'content-type': 'application/json'}, 'content': b''})()
+
+        with tempfile.TemporaryDirectory() as temp:
+            session = ErrorSession()
+            with self.assertRaisesRegex(CloudflareAIError, 'HTTP 500'):
+                generate_scene_images([{'image_prompt': 'A quiet city street'}], temp, account_id='account', api_token='secret', session=session)
+            self.assertEqual(session.calls, 1)
 
 
 if __name__ == "__main__":
