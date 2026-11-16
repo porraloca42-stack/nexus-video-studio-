@@ -104,6 +104,15 @@ Nunca copiar chaves para arquivos do repositório, logs ou mensagens públicas.
 
 - Correção da galeria após validação visual (commit `99449eaa`): restaurada a miniatura em 85 px reais (largura/min/max fixados em 85 px no CSS e `st.image(..., width=85)` preservado). O contêiner da imagem volta a ocupar 100% da coluna; a própria imagem usa `left:50%` + `translateX(-50%)` para centralização inequívoca sobre o botão, sem reduzir a miniatura para a largura do botão. Publicado no GitHub; aguarda reboot e validação visual.
 
+
+## Continuidade técnica — 2026-11-16
+- Próxima frente retomada após pausar ajustes visuais: confiabilidade da seleção de mídia e produção end-to-end.
+- Commit `0ffb8464` em `nexus/assets.py`: adicionada pontuação lexical dos candidatos com base nos termos do roteiro/cena (título e descrição), priorizando relevância textual antes de orientação e resolução. Mantido o comportamento de fallback progressivo entre variantes de busca; resultados sem URL e URLs já usadas são descartados.
+- Commit `df5d9970` em `app.py`: o pipeline mantém um conjunto de URLs já utilizadas e passa a excluir esses clipes nas buscas seguintes, reduzindo repetição entre cenas do mesmo vídeo.
+- Commit `8aa5c5bc`: adicionados testes unitários em `tests/test_assets.py` para garantir que relevância da cena vença resolução quando os metadados sustentam isso e que clipes já usados sejam excluídos.
+- Verificação realizada nesta sessão: inspeção dos arquivos atuais no GitHub; teste isolado da lógica de ranking/exclusão passou. Os testes do repositório e a execução no Streamlit ainda não foram executados; não considerar pipeline validado.
+- Próxima sequência: (1) executar testes automatizados/compilação no repositório; (2) testar storyboard real de 50s com 10–15 cenas e estilo escolhido; (3) testar busca Coverr por cena e revisar títulos/consultas escolhidos, sem repetir clipes; (4) ajustar a busca se houver falsos positivos ou ausência de resultados; (5) gerar o primeiro MP4 completo, validar FFprobe, duração, áudio, legendas e qualidade visual. Pixabay permanece pendente de chave; Pexels permanece fora do escopo até a emissão de chave estar disponível.
+
 ## Regras para o assistente em novos chats
 - Começar lendo este arquivo e o código relevante no GitHub antes de propor mudanças.
 - Tratar este documento como registro de continuidade, mas conferir o estado atual do repositório e deployment; pode ficar desatualizado.
