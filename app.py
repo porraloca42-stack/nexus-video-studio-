@@ -226,31 +226,7 @@ div[data-testid="stTextArea"] textarea,div[data-testid="stSelectbox"] div[data-b
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="nexus-hero"><div class="nexus-brand">NEXUS VIDEO STUDIO</div><div class="nexus-tagline">Transforme seu roteiro em vídeo</div></div>', unsafe_allow_html=True)
-st.caption("Versão: NEXUS-2026.11.16-free-stock-director-1")
-
-with st.expander("Bancos gratuitos complementares · pesquisa manual", expanded=False):
-    st.caption(
-        "O NEXUS automatiza a busca nas APIs gratuitas configuradas. Estes bancos também têm material útil, "
-        "mas não oferecem uma API pública de pesquisa/download que possamos usar com segurança; por isso, "
-        "não fazemos scraping nem downloads automatizados deles."
-    )
-    st.markdown(
-        "- [Mixkit — vídeos verticais e B-roll](https://mixkit.co/free-vertical-videos/) · "
-        "use somente clipes marcados com **Free License**; a licença Restricted não serve para conteúdo comercial.\n"
-        "- [ISO Republic — vídeos CC0](https://isorepublic.com/) · "
-        "uso comercial permitido sob CC0; confira a página do item.\n"
-        "- [Vecteezy — vídeos gratuitos](https://www.vecteezy.com/free-videos) · "
-        "licença gratuita exige atribuição e tem limites de uso; o plano API gratuito não expõe metadados de recursos.\n"
-        "- [Vidsplay — vídeos gratuitos](https://www.vidsplay.com/) · "
-        "exige crédito/link visível conforme os termos.\n"
-        "- [National Park Service — B-roll](https://www.nps.gov/media/multimedia-search.htm) · "
-        "acervo útil para natureza e parques; confirme direitos e créditos por arquivo."
-    )
-    st.info(
-        "Esses bancos são fontes de descoberta/curadoria, não fontes automáticas do render. "
-        "Para a busca automática, o NEXUS usa Pixabay, Pexels (quando a chave gratuita estiver configurada) "
-        "e Wikimedia Commons com filtro de licença."
-    )
+st.caption("Versão: NEXUS-2026.11.16-stock-search-recovery-1")
 
 if "nexus_style" not in st.session_state or st.session_state["nexus_style"] not in STYLE_OPTIONS:
     st.session_state["nexus_style"] = "Cinematográfico realista"
