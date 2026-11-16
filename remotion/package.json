@@ -5,7 +5,9 @@
   "description": "Isolated Remotion proof of concept for NEXUS VIDEO STUDIO",
   "scripts": {
     "studio": "remotion studio src/index.ts",
-    "render:demo": "remotion render src/index.ts NexusDemo out/nexus-demo.mp4 --codec=h264 --pixel-format=yuv420p"
+    "render:demo": "remotion render src/index.ts NexusDemo out/nexus-demo.mp4 --codec=h264 --pixel-format=yuv420p",
+    "render:manifest": "remotion render src/index.ts NexusFromManifest out/nexus-manifest.mp4 --props=public/sample-manifest.json --codec=h264 --pixel-format=yuv420p",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@remotion/cli": "4.0.543",
