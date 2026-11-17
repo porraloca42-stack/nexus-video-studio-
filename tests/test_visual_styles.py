@@ -53,7 +53,7 @@ class VisualStyleLibraryTests(unittest.TestCase):
         plan = {"scenes": [{"voiceover": "Cena um"}, {"voiceover": "Cena dois"}]}
         result = apply_visual_style_lock(plan, "Quântico & Cósmico")
         self.assertEqual(result["style_lock"], "Quântico & Cósmico")
-        self.assertEqual(result["style_profile_version"], "1.0")
+        self.assertEqual(result["style_profile_version"], "2.0")
         self.assertIn("geometric", result["style_directive"].lower())
         for scene in result["scenes"]:
             self.assertEqual(scene["visual_style"], "Quântico & Cósmico")
