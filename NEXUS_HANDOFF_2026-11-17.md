@@ -560,3 +560,13 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - Confirmação de leitura do estado anterior: os três documentos foram consultados diretamente na main; SHAs antes desta atualização: master `465714c25013b41e4c1451640854a225403bd75a`, handoff `0d150d61349e2a892019b4cb47300006a4654a49`, bootstrap `9dd8880cd531171150bce4ba0e5da8d554e71bf0`.
 - Commits de protocolo já gravados antes desta regra estrita: `82d7f52` (master), `3a8a0fa` (handoff), `0fd6ae7` (bootstrap).
 - Estado: regra estrita sendo persistida nesta etapa; não houve alteração de código de produção nem execução paga.
+
+
+## Checkpoint de execução da regra absoluta — 17/11/2026, 14:08:32 (America/Sao_Paulo)
+- A ordem do usuário foi reforçada para exigir registro imediato após **todo processo/unidade de trabalho**, sem limitar a “etapas significativas”. Inclui consultas, análises, decisões, alterações, testes, workflows, revisões, correções e bloqueios.
+- Tentativa inicial de atualização do bootstrap falhou por ausência do SHA no argumento da operação; a falha foi identificada e corrigida consultando novamente o arquivo na main e atualizando com SHA atual. Não foi ocultada.
+- Bootstrap atualizado no commit `292218e008ef7f73e8a1d22bdcb80b6c3584b4bf`.
+- Master state e handoff receberam a regra estrita nesta sequência; confirmar SHAs atuais por leitura direta.
+- Nenhum código de produção, deploy, API paga, GPU ou render foi executado.
+- Próxima ação: verificar os três arquivos na main e o CI dos commits documentais; depois reportar evidências e o ponto exato de retomada.
+- Timestamp do checkpoint: 2026-11-17T14:08:32-03:00 (UTC−03:00).
