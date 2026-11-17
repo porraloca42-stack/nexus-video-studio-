@@ -23,7 +23,7 @@ def _bounded_number(value, default, minimum, maximum):
     return max(minimum, min(maximum, number))
 
 
-def sanitize_scene_direction(direction, fallback_camera="push_in"):
+def sanitize_scene_direction(direction, fallback_camera="static"):
     """Whitelist and clamp Gemini's visual plan before it reaches Remotion."""
     if not isinstance(direction, dict):
         direction = {}
@@ -34,7 +34,7 @@ def sanitize_scene_direction(direction, fallback_camera="push_in"):
     transition = direction.get("transition") if isinstance(direction.get("transition"), dict) else {}
     move = str(camera.get("move") or fallback_camera)
     if move not in _CAMERA_MOVES:
-        move = fallback_camera if fallback_camera in _CAMERA_MOVES else "push_in"
+        move = fallback_camera if fallback_camera in _CAMERA_MOVES else "static"
     focus = str(camera.get("focus") or "subject")
     if focus not in {"subject", "foreground", "background"}:
         focus = "subject"
@@ -60,12 +60,14 @@ def sanitize_scene_direction(direction, fallback_camera="push_in"):
             "event": str(beat.get("event") or "")[:180],
             "visualTarget": str(beat.get("visual_target") or "")[:120],
         })
+    default_start = 1.08 if move == "pull_out" else (1.06 if move in {"pan_left", "pan_right", "tilt_up", "tilt_down"} else 1.0)
+    default_end = 1.08 if move == "push_in" else (1.0 if move in {"pull_out", "static"} else 1.06)
     return {
         "camera": {
             "move": move,
-            "intensity": _bounded_number(camera.get("intensity"), 0.65, 0.0, 1.0),
-            "startScale": _bounded_number(camera.get("start_scale"), 1.04, 1.02, 1.28),
-            "endScale": _bounded_number(camera.get("end_scale"), 1.22, 1.02, 1.28),
+            "intensity": _bounded_number(camera.get("intensity"), 0.45, 0.0, 1.0),
+            "startScale": _bounded_number(camera.get("start_scale"), default_start, 1.0, 1.18),
+            "endScale": _bounded_number(camera.get("end_scale"), default_end, 1.0, 1.18),
             "focus": focus,
         },
         "depthLayers": {
@@ -113,9 +115,9 @@ def build_remotion_manifest(plan, media, audio_path, public_dir, job_id="nexus-j
             "asset": asset_ref,
             # Descriptive copy and image prompts remain metadata, never on-screen text.
             "imagePrompt": str(scene.get("image_prompt") or ""),
-            "cameraMotion": str(scene.get("camera_motion") or "push_in"),
+            "cameraMotion": str(scene.get("camera_motion") or "static"),
             "motionEvents": list(scene.get("motion_events") or []),
-            "sceneDirection": sanitize_scene_direction(scene.get("scene_direction"), scene.get("camera_motion") or "push_in"),
+            "sceneDirection": sanitize_scene_direction(scene.get("scene_direction"), scene.get("camera_motion") or "static"),
             "accent": str(scene.get("accent") or "#e8b66b"),
         })
 
