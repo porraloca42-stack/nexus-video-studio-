@@ -501,3 +501,17 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - Commit `72f4721f77d02ad22f5203c8f54c5a243e062797`, CI #1068 aprovado: 209 testes, compileall, typecheck e Commons smoke.
 - Tela de resultado apresenta status Brain 4 conforme report criptografado do worker. Render sintético skipped (alteração de UI).
 - Integração Gemini continua opt-in e sem teste real de API/produção.
+
+
+
+## Continuidade — smoke test isolado Brain 4 Gemini — 17/11/2026
+- Releitura obrigatória feita no início desta etapa: master state e este handoff diretamente da branch main, além do bootstrap, commits recentes e Actions.
+- Runs mais recentes antes da implementação: #1069–#1074, todos concluídos com sucesso. Integração Gemini opt-in já estava em CI, mas nunca tinha sido exercitada com chamada Gemini real.
+- Criado `nexus/brain4_smoke_test.py`: fixture de 4s, duas cenas, oito timestamps word-level sintéticos e adaptação para `run_brain4_for_storyboard()`. Sem chamadas ao importar; a função faz somente uma geração quando invocada. A resposta passa pelo mesmo validador e pelas mesmas proteções de precisão/timestamps usadas pelo worker.
+- Criado `tests/test_brain4_smoke_test.py` com testes offline para callable único, saída contratualmente válida, rejeição de timestamps alterados e ausência de chave.
+- Em `app.py`, adicionado botão **“Testar Brain 4 — sem produzir vídeo”** junto ao checkbox de opt-in. O botão é separado de “Produzir vídeo completo”; não despacha worker, não chama Fish/Cloudflare/Modal, não gera imagens e não renderiza MP4. Requer clique explícito e GEMINI_API_KEY. A geração fica limitada a um modelo e uma tentativa, sem retry/failover.
+- Commits: `12315a240f80a0d431425c32bc7d512684d4887c`, `eb3c2d30b892625e703b72eb2200a4a233b3918e`, `49da8bebd94b38d79075acd824f271ca4a0ae4a2`.
+- CI #1075 (helper), #1076 (testes) e #1077 (UI) foi encontrado no Actions; na hora do registro, #1075 e #1076 estavam em execução e #1077 aguardava fila. Confirmar os três resultados e ler logs se algum falhar.
+- Nenhuma chamada Gemini real, produção, deploy, GPU ou serviço de mídia foi acionado. Deploy Streamlit não verificado.
+- Próxima ação: confirmar CI. Depois, o usuário pode acionar o botão no Streamlit para uma geração controlada com fixture sintético; não presumir que o app já recebeu deploy. Analisar o resultado e só então planejar primeiro render completo com orçamento explícito.
+- Limite: sucesso nesse smoke test valida o contrato do Brain 4 com entrada sintética, não qualidade de áudio real, edição perceptual, qualidade visual ou equivalência competitiva.
