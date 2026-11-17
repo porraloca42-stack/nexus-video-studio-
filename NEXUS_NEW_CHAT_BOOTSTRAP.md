@@ -145,3 +145,10 @@ Este bootstrap reduz perda de continuidade, mas não garante que a plataforma ca
 ## Validação do adapter Remotion — 17/11/2026
 - Workflow #119 passou: manifest gerado pelo adapter Python real, render Remotion validado por FFprobe (H.264 720×1280, AAC, 4.011s). Artifact #14344496316.
 - Render 50s manual skipped. Teste 4s sintético não representa produção real nem timeline Brain 4.
+
+
+## Última validação — Brain 4 timing + Remotion adapter — 17/11/2026
+- CI #1022: 203 testes Python, typecheck e Commons smoke passaram. Brain 4 está protegido contra drift de timestamps Fish, precisão fonética inventada e legendas fora dos tempos verificados.
+- Workflow #119: MP4 sintético 4.011s via adapter Python real validado por FFprobe (H.264/AAC, 720×1280); artifact #14344496316.
+- Brain 4 permanece opt-in/mockado; Gemini real desativado.
+- Próxima ação: teste offline Brain4 timeline → `build_remotion_manifest()` com captions, SFX e ducking.
