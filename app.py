@@ -434,20 +434,6 @@ if active_view == "Criar":
     # are populated here instead of appearing far below the preview.
     status_slot = st.empty()
 
-    with st.container(key="nexus-video-stage"):
-        if st.session_state.get("nexus_rendered_video"):
-            st.video(st.session_state["nexus_rendered_video"])
-        else:
-            st.markdown("""
-            <div class="nexus-preview-stage">
-              <svg viewBox="0 0 120 230" role="img" aria-label="Prévia vertical do vídeo">
-                <rect x="2" y="2" width="116" height="226" rx="18" fill="none" stroke="#66616f" stroke-width="3"/>
-                <path d="M48 84 L48 146 Q48 152 54 148 L82 121 Q87 116 82 111 L54 82 Q48 78 48 84Z" fill="#aaa5b4"/>
-              </svg>
-              <div class="nexus-preview-caption">SEU VÍDEO GERADO<br/>APARECERÁ AQUI (9:16)</div>
-            </div>
-            """, unsafe_allow_html=True)
-
     if generate_requested:
 
         # Remove any previous result first: a failed new request must never leave
@@ -684,8 +670,8 @@ if active_view == "Criar":
                         status_detail.caption("Concluído · MP4 recuperado e verificações técnicas finalizadas.")
                         st.success("Vídeo MP4 produzido. O trabalhador verificou vídeo, áudio, resolução e duração.")
                     except Exception as exc:
-                        with status_slot.container():
-                            st.error(f"Produção Cloudflare + Remotion interrompida: {exc}")
+                        progress.empty()
+                        status_detail.error(f"Produção Cloudflare + Remotion interrompida: {exc}")
             elif not configured_libraries:
                 st.error("Nenhuma biblioteca de vídeo está disponível para pesquisa.")
             else:
@@ -1067,6 +1053,21 @@ if active_view == "Criar":
             use_container_width=True,
         )
     
+
+    with st.container(key="nexus-video-stage"):
+        if st.session_state.get("nexus_rendered_video"):
+            st.video(st.session_state["nexus_rendered_video"])
+        else:
+            st.markdown("""
+            <div class="nexus-preview-stage">
+              <svg viewBox="0 0 120 230" role="img" aria-label="Prévia vertical do vídeo">
+                <rect x="2" y="2" width="116" height="226" rx="18" fill="none" stroke="#66616f" stroke-width="3"/>
+                <path d="M48 84 L48 146 Q48 152 54 148 L82 121 Q87 116 82 111 L54 82 Q48 78 48 84Z" fill="#aaa5b4"/>
+              </svg>
+              <div class="nexus-preview-caption">SEU VÍDEO GERADO<br/>APARECERÁ AQUI (9:16)</div>
+            </div>
+            """, unsafe_allow_html=True)
+
 
 elif active_view == "Biblioteca":
     st.markdown('<div class="nexus-kicker">SEUS PROJETOS</div>', unsafe_allow_html=True)
