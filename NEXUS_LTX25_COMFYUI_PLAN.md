@@ -118,3 +118,10 @@ A proposta anterior de “protótipo isolado” não significa projeto paralelo 
 - O manifesto fixa os requisitos NEXUS: 9:16, 2–5s, Fish Audio como voz oficial, áudio LTX descartado e Remotion como compositor final.
 - Testes do manifesto em `tests/test_ltx25_workflow_manifest.py`. Commits: `dbbaf1b` e `71d5a61`.
 - Estado: fonte fixada e estrutura verificada; API prompt, bindings, worker e GPU ainda não implementados/testados.
+
+
+## 12. Correção da suíte e validação CI — 17/11/2026
+- Um teste antigo da auditoria visual foi atualizado para refletir o contrato multimodal atual: três quadros temporais por cena e os campos `motion_progression_score`, `action_observed`, `continuity_score` e `temporal_progression`. O código de produção não foi alterado nesta correção.
+- Commit final: `6731ed3`. CI #878 / run `44091549701` no commit `6731ed34867b08b1c63f62354167c200f854811b`: 148 testes Python aprovados, Remotion typecheck aprovado e Commons live smoke aprovado.
+- A implementação oficial do ComfyUI frontend `graphToPrompt` (revisão `196dd85cde3314dffdc33b41caa3e5d9be432ffb`) gera o API prompt expandindo subgrafos por `ExecutableNodeDTO.getInnerNodes()`, resolvendo conexões e widgets e emitindo `class_type` + `inputs`. Isso reforça que o workflow visual pinado não pode ser enviado diretamente a `POST /prompt` nem convertido com uma substituição superficial.
+- Próxima etapa técnica: definir como gerar/exportar o API prompt com expansão correta dos seis subgrafos (preferencialmente pelo conversor oficial ou export real do ComfyUI), versionar o resultado e testar estrutura, links e bindings antes de criar o adaptador LTX-2.5.
