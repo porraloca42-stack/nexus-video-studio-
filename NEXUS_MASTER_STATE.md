@@ -1452,3 +1452,10 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 ## Ajuste final do teste de gramática cósmica — 17/11/2026
 - A primeira execução após remover exemplos aprovou 98 de 99 testes; a única falha era uma expectativa antiga que exigia a palavra “geometric”, removida intencionalmente para não transformar um motivo visual em parte obrigatória do estilo. O teste agora verifica “luminous contrast”, característica formal preservada no perfil.
 - Commit do ajuste: `3cfbaeb`. Novo ciclo de CI acionado; resultado pendente.
+
+
+## Validação CI concluída — 17/11/2026
+- GitHub Actions run `43989261776` (commit `3cfbaeb`) concluiu com sucesso: `unit-tests`, `remotion-typecheck` e `commons-live-smoke` todos em `success`.
+- A suíte Python executou 99 testes e terminou `OK`; inclui os testes de gramática sem motivos fixos, compatibilidade legada oculta, direção completa anexada ao prompt efetivamente consumido pelo worker e idempotência.
+- O typecheck da composição Remotion passou. O smoke de Wikimedia Commons concluiu busca, download e inspeção de um vídeo licenciado.
+- Estado: implementação e CI validados no GitHub. Ainda não declarar deploy Streamlit visualmente validado nem pipeline de vídeo integral validado por este ciclo; a saída MP4 de teste registrada pelo job remoto confirma artefato de teste, não uma sessão real do usuário com os novos estilos.
