@@ -192,8 +192,24 @@ Retorne SOMENTE JSON válido no contrato:
       "sfx":null
     }}
   ],
-  "caption_events":[],
-  "audio_mix_events":[]
+  "caption_events":[
+    {
+      "id":"caption-1",
+      "start_seconds":0.0,
+      "end_seconds":2.5,
+      "text":"...",
+      "position":"bottom",
+      "words":[
+        {"text":"...","start_seconds":0.0,"end_seconds":0.4,"emphasis":false}
+      ]
+    }
+  ],
+  "sfx_events":[
+    {"id":"sfx-1","asset_path":"...","start_seconds":1.2,"duration_seconds":0.8,"volume":0.25}
+  ],
+  "audio_mix_events":[
+    {"start_seconds":0.0,"end_seconds":2.5,"music_volume":0.06}
+  ]
 }}
 
 ROTEIRO:
