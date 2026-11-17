@@ -20,6 +20,7 @@ if str(ROOT) not in sys.path:
 from PIL import Image
 
 from nexus.remotion_renderer import build_remotion_manifest
+from nexus.editorial_executors import run_brain4_for_storyboard
 
 
 REMOTION = ROOT / "remotion"
@@ -100,42 +101,67 @@ def main():
         write_tone(sfx, 3000, 0.22, 0.6)
 
         plan = {
-            "seo": {"title": "NEXUS synthetic multitrack validation"},
+            "seo": {"title": "NEXUS synthetic Brain 4 multitrack validation"},
             "music_audio_path": str(music),
             "music_volume": 0.35,
             "scenes": [{
                 "id": "synthetic-scene",
                 "duration_seconds": DURATION,
                 "voiceover": "NEXUS valida legendas, efeitos e mixagem.",
+                "image_prompt": "A clean cinematic synthetic validation scene.",
             }],
-            "edit_timeline": {
-                "caption_events": [{
-                    "id": "caption-validation",
-                    "start_seconds": 0.5,
-                    "end_seconds": 2.1,
-                    "text": "NEXUS valida",
-                    "position": "bottom",
-                    "words": [
-                        {"text": "NEXUS", "start_seconds": 0.5, "end_seconds": 1.2},
-                        {"text": "valida", "start_seconds": 1.2, "end_seconds": 2.0},
-                    ],
-                }],
-                "sfx_events": [{
-                    "id": "sfx-validation",
-                    "asset_path": str(sfx),
-                    "start_seconds": 1.0,
-                    "duration_seconds": 0.6,
-                    "volume": 0.5,
-                }],
-                "audio_mix_events": [{
-                    "start_seconds": 0.8,
-                    "end_seconds": 2.2,
-                    "music_volume": 0.05,
-                    "fade_in_seconds": 0.2,
-                    "fade_out_seconds": 0.2,
-                }],
-            },
         }
+        provider_word_timestamps = [
+            {"text": "NEXUS", "start_seconds": 0.5, "end_seconds": 1.2},
+            {"text": "valida", "start_seconds": 1.2, "end_seconds": 2.0},
+        ]
+        # Deterministic Brain 4 response: exercises the real adapter, contract
+        # validation and renderer path without a paid model/API call.
+        brain4_timeline = {
+            "contract_version": "1.0",
+            "audio_asset_id": str(narration),
+            "alignment_method": "synthetic Fish Audio word timestamp fixture",
+            "alignment_level": "word",
+            "audio_duration_seconds": DURATION,
+            "word_timestamps": provider_word_timestamps,
+            "character_timestamps": [],
+            "phoneme_timestamps": [],
+            "edit_anchors": [],
+            "caption_events": [{
+                "id": "caption-validation",
+                "start_seconds": 0.5,
+                "end_seconds": 2.1,
+                "text": "NEXUS valida",
+                "position": "bottom",
+                "words": [
+                    {"text": "NEXUS", "start_seconds": 0.5, "end_seconds": 1.2},
+                    {"text": "valida", "start_seconds": 1.2, "end_seconds": 2.0},
+                ],
+            }],
+            "sfx_events": [{
+                "id": "sfx-validation",
+                "asset_path": str(sfx),
+                "start_seconds": 1.0,
+                "duration_seconds": 0.6,
+                "volume": 0.5,
+            }],
+            "audio_mix_events": [{
+                "start_seconds": 0.8,
+                "end_seconds": 2.2,
+                "music_volume": 0.05,
+                "fade_in_seconds": 0.2,
+                "fade_out_seconds": 0.2,
+            }],
+        }
+        plan = run_brain4_for_storyboard(
+            plan,
+            narration_audio={
+                "audio_asset_id": str(narration),
+                "duration_seconds": DURATION,
+            },
+            word_timestamps=provider_word_timestamps,
+            model_call=lambda prompt: brain4_timeline,
+        )
         manifest_path, manifest = build_remotion_manifest(
             plan, [], narration, REMOTION / "public", job_id=JOB_ID
         )
