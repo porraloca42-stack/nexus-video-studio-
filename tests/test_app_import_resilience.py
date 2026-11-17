@@ -47,19 +47,21 @@ class AppImportResilienceTests(unittest.TestCase):
         self.assertNotIn('st.selectbox(', dialog)
         self.assertNotIn('Usar esta voz', dialog)
 
-    def test_voice_picker_has_compact_preview_controls_next_to_each_voice(self):
+    def test_voice_picker_has_inline_toggle_and_single_shared_audio_player(self):
         source = Path("app.py").read_text(encoding="utf-8")
         start = source.index('@st.dialog("Escolher narração"')
         end = source.index('@st.dialog("Duração do vídeo"', start)
         dialog = source[start:end]
         self.assertIn('name_col, play_col = st.columns([0.86, 0.14]', dialog)
-        self.assertIn('def render_preview_player(audio_source):', dialog)
-        self.assertIn('components.html(player_html, height=42, width=52, scrolling=False)', dialog)
-        self.assertIn('item.get("sample_audio")', dialog)
+        self.assertIn('"⏸" if is_previewing else "▶"', dialog)
+        self.assertIn('if is_previewing:', dialog)
+        self.assertIn('st.session_state.pop("nexus_active_voice_preview_source", None)', dialog)
+        self.assertIn('st.audio(active_preview_source, format="audio/mp3", autoplay=True)', dialog)
         self.assertIn('fish_audio.generate_fish_preview(api_key, voice_id)', dialog)
-        self.assertIn('nexus_voice_preview_audio_', dialog)
-        self.assertIn('aria-label="Ouvir amostra"', dialog)
-        self.assertIn('Use ▶ para ouvir uma amostra.', dialog)
+        self.assertIn('st.session_state["nexus_active_voice_preview_source"] = preview_source', dialog)
+        self.assertNotIn('components.html(', dialog)
+        self.assertNotIn('<audio id=', dialog)
+        self.assertEqual(dialog.count('st.audio('), 1)
 
     def test_header_uses_centered_user_supplied_nexus_mark(self):
         source = Path("app.py").read_text(encoding="utf-8")
