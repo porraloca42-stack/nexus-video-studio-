@@ -844,7 +844,7 @@ def build_storyboard_preflight(plan):
     }
 
     def normalized(value):
-        words = re.findall(r"[a-z0-9]+", str(value or "").lower())
+        words = re.findall(r"[^\\W_]+", str(value or "").lower(), flags=re.UNICODE)
         return " ".join(words)
 
     def informative_tokens(value):
