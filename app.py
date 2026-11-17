@@ -1397,4 +1397,3 @@ elif active_view == "Perfil":
         "IA original usa créditos variáveis; custo do vídeo completo ainda não foi validado."
     )
     st.markdown("[Abrir o repositório do NEXUS](https://github.com/porraloca42-stack/nexus-video-studio-)")
-
