@@ -89,6 +89,8 @@ def animate_scene_images(generated_images, scenes, output_dir, *, modal_cls=None
             "modal_call_wall_seconds": modal_call_wall_seconds,
             "gpu_name": result.get("gpu_name"),
             "num_inference_steps": result.get("num_inference_steps"),
+            "estimated_gpu_cost_usd": result.get("estimated_gpu_cost_usd"),
+            "gpu_cost_budget_usd": result.get("gpu_cost_budget_usd"),
         })
         if progress_callback:
             progress_callback(f"Cena {index}/{len(results)} animada e recebida do Modal.")
