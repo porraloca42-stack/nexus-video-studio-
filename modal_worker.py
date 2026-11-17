@@ -93,23 +93,43 @@ class Inference:
         gpu_identity = validate_gpu_identity(GPU_TYPE, actual_gpu_name)
         self.gpu_name = actual_gpu_name
         from huggingface_hub import hf_hub_download
+        from huggingface_hub.errors import LocalEntryNotFoundError
+        from nexus.hf_cache import download_with_cache_metrics
         from ltx_video.inference import create_latent_upsampler, create_ltx_video_pipeline
         from ltx_video.pipelines.pipeline_ltx_video import LTXMultiScalePipeline
         from ltx_video.utils.skip_layer_strategy import SkipLayerStrategy
 
         self.torch = torch
-        checkpoint_path = hf_hub_download(
+        checkpoint_metrics = download_with_cache_metrics(
+            hf_hub_download,
+            LocalEntryNotFoundError,
             repo_id=MODEL_ID,
             filename=MODEL_CHECKPOINT,
             revision=MODEL_REVISION,
             cache_dir=MODEL_CACHE,
         )
-        upscaler_path = hf_hub_download(
+        upscaler_metrics = download_with_cache_metrics(
+            hf_hub_download,
+            LocalEntryNotFoundError,
             repo_id=MODEL_ID,
             filename=SPATIAL_UPSCALER,
             revision=MODEL_REVISION,
             cache_dir=MODEL_CACHE,
         )
+        checkpoint_path = checkpoint_metrics["path"]
+        upscaler_path = upscaler_metrics["path"]
+        self.model_cache_metrics = {
+            "checkpoint": {key: value for key, value in checkpoint_metrics.items() if key != "path"},
+            "upscaler": {key: value for key, value in upscaler_metrics.items() if key != "path"},
+            "cache_hit_count": int(checkpoint_metrics["cache_hit"]) + int(upscaler_metrics["cache_hit"]),
+            "cache_miss_count": int(not checkpoint_metrics["cache_hit"]) + int(not upscaler_metrics["cache_hit"]),
+            "total_download_seconds": round(
+                checkpoint_metrics["download_seconds"] + upscaler_metrics["download_seconds"], 3
+            ),
+            "total_cache_lookup_seconds": round(
+                checkpoint_metrics["cache_lookup_seconds"] + upscaler_metrics["cache_lookup_seconds"], 3
+            ),
+        }
         config = build_pipeline_config()
         stg_mode = config.pop("stg_mode", "attention_values")
         self.pipeline_config = config
@@ -148,6 +168,7 @@ class Inference:
             "model_revision": MODEL_REVISION,
             "model_code_revision": MODEL_CODE_REVISION,
             "model_load_seconds": self.model_load_seconds,
+            "model_cache_metrics": self.model_cache_metrics,
             "gpu_name": self.gpu_name,
             "requested_gpu_type": GPU_TYPE,
             "gpu_identity_verified": gpu_identity["gpu_identity_verified"],
@@ -269,6 +290,7 @@ class Inference:
                 "width": WIDTH,
                 "height": HEIGHT,
                 "model_load_seconds": self.model_load_seconds,
+                "model_cache_metrics": self.model_cache_metrics,
                 "batch_wall_seconds": round(time.monotonic() - batch_started, 3),
                 "gpu_name": self.gpu_name,
                 "requested_gpu_type": GPU_TYPE,
