@@ -360,6 +360,68 @@ class AudioOutputTests(unittest.TestCase):
         self.assertEqual(kwargs["json"]["reference_id"], "voice-123")
         self.assertEqual(kwargs["json"]["language"], "pt-BR")
 
+    def test_fish_timestamp_stream_preserves_latest_chunk_alignment_and_global_offsets(self):
+        import base64
+        import json
+
+        class TimestampResponse(FakeFishResponse):
+            def iter_lines(self, decode_unicode=True):
+                events = [
+                    {
+                        "audio_base64": base64.b64encode(b"audio-a").decode("ascii"),
+                        "chunk_seq": 0,
+                        "chunk_audio_offset_sec": 0.0,
+                        "alignment": {"segments": [{"text": "Olá", "start": 0.0, "end": 0.18}]},
+                    },
+                    {
+                        "audio_base64": base64.b64encode(b"audio-b").decode("ascii"),
+                        "chunk_seq": 1,
+                        "chunk_audio_offset_sec": 0.5,
+                        "alignment": {"segments": [{"text": "mundo!", "start": 0.0, "end": 0.24}]},
+                    },
+                    {
+                        "audio_base64": base64.b64encode(b"audio-c").decode("ascii"),
+                        "chunk_seq": 0,
+                        "chunk_audio_offset_sec": 0.0,
+                        "alignment": {"segments": [{"text": "Olá", "start": 0.0, "end": 0.22}]},
+                    },
+                    {
+                        "audio_base64": base64.b64encode(b"audio-d").decode("ascii"),
+                        "chunk_seq": 1,
+                        "chunk_audio_offset_sec": 0.5,
+                        "alignment": None,
+                    },
+                ]
+                for event in events:
+                    yield "data: " + json.dumps(event)
+                yield "data: [DONE]"
+
+        class TimestampSession(FakeFishSession):
+            def post(self, *args, **kwargs):
+                self.calls.append(("POST", args, kwargs))
+                return TimestampResponse()
+
+        session = TimestampSession()
+        with tempfile.TemporaryDirectory(prefix="nexus_fish_alignment_") as temp:
+            output = Path(temp) / "voice.mp3"
+            audio_path, provider, segments = make_voice(
+                "Olá mundo!", "voice-123", output,
+                fish_api_key="test-key", fish_voice_id="voice-123",
+                session=session, return_provider=True, return_alignment=True,
+            )
+            self.assertEqual(audio_path.read_bytes(), b"audio-aaudio-baudio-caudio-d")
+            self.assertEqual(provider, "Fish Audio S2.1 Pro Free")
+            self.assertEqual(segments, [
+                {
+                    "text": "Olá", "start_seconds": 0.0,
+                    "end_seconds": 0.22, "chunk_seq": 0,
+                },
+                {
+                    "text": "mundo!", "start_seconds": 0.5,
+                    "end_seconds": 0.74, "chunk_seq": 1,
+                },
+            ])
+
     def test_narration_requires_fish_credentials_and_never_uses_edge_tts(self):
         with tempfile.TemporaryDirectory(prefix="nexus_fish_required_") as temp:
             output = Path(temp) / "voice.mp3"
