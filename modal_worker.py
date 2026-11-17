@@ -1,48 +1,65 @@
 """Serverless LTX image-to-video worker deployed on Modal.
 
-Deploy with: modal deploy modal_worker.py
-The GPU is loaded once per container and scaled to zero after 5 seconds idle.
+Uses the official LTX-Video 0.9.8 distilled multi-scale pipeline:
+7-step low-resolution pass, 2x latent upscaler, 3-step refinement.
 """
 import io
 import random
+import tempfile
 import time
 from pathlib import Path
 
 import modal
 
+from nexus.ltx_config import (
+    DECODE_NOISE_SCALE,
+    DECODE_TIMESTEP,
+    FPS,
+    GPU_TYPE,
+    HEIGHT,
+    IMAGE_COND_NOISE_SCALE,
+    INFERENCE_STEP_COUNT,
+    MODEL_CHECKPOINT,
+    MODEL_CODE_REVISION,
+    MODEL_ID,
+    MODEL_NAME,
+    MODEL_REVISION,
+    SPATIAL_UPSCALER,
+    WIDTH,
+    build_pipeline_config,
+)
+
 APP_NAME = "nexus-video-i2v"
-MODEL_ID = "Lightricks/LTX-Video"
-MODEL_REVISION = "a6d59ee37c13c58261aa79027d3e41cd41960925"
 MODEL_CACHE = "/models"
 model_cache = modal.Volume.from_name("nexus-ltx-model-cache", create_if_missing=True)
 
 image = (
     modal.Image.debian_slim(python_version="3.12")
-    .apt_install("python3-opencv")
+    .apt_install("git", "ffmpeg")
     .uv_pip_install(
         "accelerate==1.4.0",
+        "av==14.2.0",
         "diffusers==0.32.2",
-        "huggingface-hub==0.36.0",
-        "imageio==2.37.0",
-        "imageio-ffmpeg==0.6.0",
-        "opencv-python==4.11.0.86",
+        "einops==0.8.1",
+        "huggingface-hub==0.30.2",
+        "imageio[ffmpeg]==2.37.0",
+        "numpy==2.2.3",
         "pillow==11.1.0",
+        "pyyaml==6.0.2",
+        "safetensors==0.5.3",
         "sentencepiece==0.2.0",
+        "timm==1.0.15",
         "torch==2.6.0",
         "torchvision==0.21.0",
         "transformers==4.49.0",
+    )
+    .uv_pip_install(
+        f"git+https://github.com/Lightricks/LTX-Video.git@{MODEL_CODE_REVISION}"
     )
     .env({"HF_XET_HIGH_PERFORMANCE": "1", "HF_HUB_CACHE": MODEL_CACHE})
 )
 
 MINUTES = 60
-FPS = 24
-WIDTH = 512
-HEIGHT = 896
-INFERENCE_STEPS = 50
-GUIDANCE_SCALE = 5.0
-DECODE_TIMESTEP = 0.05
-IMAGE_COND_NOISE_SCALE = 0.025
 
 
 def frames_for_duration(seconds):
@@ -57,7 +74,7 @@ app = modal.App(APP_NAME)
 
 @app.cls(
     image=image,
-    gpu="H100",
+    gpu=GPU_TYPE,
     timeout=45 * MINUTES,
     scaledown_window=5,
     volumes={MODEL_CACHE: model_cache},
@@ -67,30 +84,80 @@ class Inference:
     def load_pipeline(self):
         load_started = time.monotonic()
         import torch
-        import diffusers
+        from huggingface_hub import hf_hub_download
+        from ltx_video.inference import create_latent_upsampler, create_ltx_video_pipeline
+        from ltx_video.pipelines.pipeline_ltx_video import LTXMultiScalePipeline
+        from ltx_video.utils.skip_layer_strategy import SkipLayerStrategy
 
         self.torch = torch
-        self.diffusers = diffusers
-        self.pipe = diffusers.LTXImageToVideoPipeline.from_pretrained(
-            MODEL_ID,
+        checkpoint_path = hf_hub_download(
+            repo_id=MODEL_ID,
+            filename=MODEL_CHECKPOINT,
             revision=MODEL_REVISION,
-            torch_dtype=torch.bfloat16,
-        ).to("cuda")
+            cache_dir=MODEL_CACHE,
+        )
+        upscaler_path = hf_hub_download(
+            repo_id=MODEL_ID,
+            filename=SPATIAL_UPSCALER,
+            revision=MODEL_REVISION,
+            cache_dir=MODEL_CACHE,
+        )
+        config = build_pipeline_config()
+        stg_mode = config.pop("stg_mode", "attention_values")
+        self.pipeline_config = config
+        self.skip_layer_strategy = SkipLayerStrategy.AttentionValues
+        if stg_mode != "attention_values":
+            raise ValueError(f"Perfil LTX contém stg_mode inesperado: {stg_mode}")
+
+        base_pipeline = create_ltx_video_pipeline(
+            ckpt_path=checkpoint_path,
+            precision="bfloat16",
+            text_encoder_model_name_or_path="PixArt-alpha/PixArt-XL-2-1024-MS",
+            sampler="from_checkpoint",
+            device="cuda",
+            enhance_prompt=False,
+        )
+        latent_upsampler = create_latent_upsampler(
+            latent_upsampler_model_path=upscaler_path,
+            device=base_pipeline.device,
+        )
+        self.pipe = LTXMultiScalePipeline(
+            base_pipeline,
+            latent_upsampler=latent_upsampler,
+        )
         # Modal Volumes require an explicit commit to persist newly downloaded weights.
         model_cache.commit()
         self.model_load_seconds = round(time.monotonic() - load_started, 3)
         self.gpu_name = torch.cuda.get_device_name(0) if torch.cuda.is_available() else "unknown"
-        print({"event": "ltx_model_ready", "model": MODEL_ID, "revision": MODEL_REVISION,
-               "model_load_seconds": self.model_load_seconds, "gpu_name": self.gpu_name,
-               "width": WIDTH, "height": HEIGHT, "fps": FPS})
+        print({
+            "event": "ltx_model_ready",
+            "model": MODEL_NAME,
+            "model_revision": MODEL_REVISION,
+            "model_code_revision": MODEL_CODE_REVISION,
+            "model_load_seconds": self.model_load_seconds,
+            "gpu_name": self.gpu_name,
+            "width": WIDTH,
+            "height": HEIGHT,
+            "fps": FPS,
+            "first_pass_steps": 7,
+            "second_pass_steps": 3,
+            "prompt_enhancement": False,
+        })
 
     @modal.method()
     def run_batch(self, scenes):
-        """Animate a batch of approved scene keyframes; returns MP4 bytes per scene."""
+        """Animate approved keyframes using the official LTX multi-scale I2V pipeline."""
+        import imageio.v2 as imageio
+        import numpy as np
         from PIL import Image, ImageOps
+        from ltx_video.inference import calculate_padding, prepare_conditioning
 
         results = []
         batch_started = time.monotonic()
+        height_padded = ((HEIGHT - 1) // 32 + 1) * 32
+        width_padded = ((WIDTH - 1) // 32 + 1) * 32
+        padding = calculate_padding(HEIGHT, WIDTH, height_padded, width_padded)
+
         for index, item in enumerate(scenes, start=1):
             image_bytes = item.get("image_bytes")
             prompt = str(item.get("prompt") or "").strip()
@@ -101,50 +168,87 @@ class Inference:
             source = ImageOps.fit(source, (WIDTH, HEIGHT), method=Image.Resampling.LANCZOS)
             duration = max(2.0, min(5.0, float(item.get("duration_seconds") or 3.0)))
             frame_count = frames_for_duration(duration)
+            frame_count_padded = ((frame_count - 2) // 8 + 1) * 8 + 1
             seed = int(item.get("seed") or random.randint(1, 2**31 - 1))
-            self.torch.manual_seed(seed)
-            started = time.monotonic()
 
-            frames = self.pipe(
-                image=source,
-                prompt=prompt,
-                negative_prompt=(
-                    "worst quality, inconsistent motion, blurry, jittery, distorted, "
-                    "morphing face, extra limbs, changing identity, flicker, text, watermark"
-                ),
-                width=WIDTH,
-                height=HEIGHT,
-                num_frames=frame_count,
-                frame_rate=FPS,
-                num_inference_steps=INFERENCE_STEPS,
-                guidance_scale=GUIDANCE_SCALE,
-                decode_timestep=DECODE_TIMESTEP,
-                image_cond_noise_scale=IMAGE_COND_NOISE_SCALE,
-            ).frames[0]
+            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as handle:
+                conditioning_path = Path(handle.name)
+            source.save(conditioning_path)
+            try:
+                conditioning_items = prepare_conditioning(
+                    conditioning_media_paths=[str(conditioning_path)],
+                    conditioning_strengths=[1.0],
+                    conditioning_start_frames=[0],
+                    height=HEIGHT,
+                    width=WIDTH,
+                    num_frames=frame_count_padded,
+                    padding=padding,
+                    pipeline=self.pipe,
+                )
+                generator = self.torch.Generator(device="cuda").manual_seed(seed)
+                started = time.monotonic()
+                output = self.pipe(
+                    **self.pipeline_config,
+                    skip_layer_strategy=self.skip_layer_strategy,
+                    generator=generator,
+                    output_type="pt",
+                    callback_on_step_end=None,
+                    height=height_padded,
+                    width=width_padded,
+                    num_frames=frame_count_padded,
+                    frame_rate=FPS,
+                    prompt=prompt,
+                    negative_prompt=(
+                        "worst quality, inconsistent motion, blurry, jittery, distorted, "
+                        "morphing face, extra limbs, changing identity, flicker, text, watermark"
+                    ),
+                    media_items=None,
+                    conditioning_items=conditioning_items,
+                    is_video=True,
+                    vae_per_channel_normalize=True,
+                    image_cond_noise_scale=IMAGE_COND_NOISE_SCALE,
+                    mixed_precision=False,
+                    offload_to_cpu=False,
+                    device="cuda",
+                    enhance_prompt=False,
+                ).images
+                inference_seconds = round(time.monotonic() - started, 3)
+            finally:
+                conditioning_path.unlink(missing_ok=True)
 
+            video_frames = output[0].permute(1, 2, 3, 0).cpu().float().numpy()
+            video_frames = np.clip(video_frames * 255.0, 0, 255).astype(np.uint8)
             output_path = Path(f"/tmp/nexus-scene-{index:02d}-{seed}.mp4")
-            self.diffusers.utils.export_to_video(frames, str(output_path), fps=FPS)
+            with imageio.get_writer(str(output_path), fps=FPS, codec="libx264") as writer:
+                for frame in video_frames:
+                    writer.append_data(frame)
             video_bytes = output_path.read_bytes()
             output_path.unlink(missing_ok=True)
+
             results.append({
                 "scene_index": index,
                 "video_bytes": video_bytes,
-                "frames": frame_count,
+                "frames": frame_count_padded,
                 "fps": FPS,
-                "duration_seconds": frame_count / FPS,
-                "inference_seconds": round(time.monotonic() - started, 3),
+                "duration_seconds": frame_count_padded / FPS,
+                "inference_seconds": inference_seconds,
                 "seed": seed,
-                "model": MODEL_ID,
+                "model": MODEL_NAME,
                 "model_revision": MODEL_REVISION,
+                "model_code_revision": MODEL_CODE_REVISION,
                 "width": WIDTH,
                 "height": HEIGHT,
                 "model_load_seconds": self.model_load_seconds,
                 "batch_wall_seconds": round(time.monotonic() - batch_started, 3),
                 "gpu_name": self.gpu_name,
-                "num_inference_steps": INFERENCE_STEPS,
-                "guidance_scale": GUIDANCE_SCALE,
+                "num_inference_steps": INFERENCE_STEP_COUNT,
+                "first_pass_steps": 7,
+                "second_pass_steps": 3,
+                "guidance_scale": 1.0,
                 "decode_timestep": DECODE_TIMESTEP,
+                "decode_noise_scale": DECODE_NOISE_SCALE,
                 "image_cond_noise_scale": IMAGE_COND_NOISE_SCALE,
+                "pipeline_type": "multi-scale",
             })
             self.torch.cuda.empty_cache()
         return results
