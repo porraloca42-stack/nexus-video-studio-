@@ -304,6 +304,12 @@ def main(project_root=None):
         ),
         "gpu_name": next((clip.get("gpu_name") for clip in motion_clips if clip.get("gpu_name")), None),
         "ltx_inference_steps": next((clip.get("num_inference_steps") for clip in motion_clips if clip.get("num_inference_steps")), None),
+        "estimated_ltx_gpu_cost_usd": max(
+            (float(clip.get("estimated_gpu_cost_usd") or 0) for clip in motion_clips), default=0
+        ),
+        "ltx_gpu_cost_budget_usd": next(
+            (clip.get("gpu_cost_budget_usd") for clip in motion_clips if clip.get("gpu_cost_budget_usd")), None
+        ),
     }
     report_path = work / "render-report.json"
     report_path.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
