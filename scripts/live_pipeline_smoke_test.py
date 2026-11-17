@@ -43,11 +43,9 @@ def main():
             "high detail, no text, no logos, no watermark."
         ),
         "video_motion_prompt": (
-            "The cloud layers drift slowly from left to right, tiny stars shimmer subtly, "
-            "the luminous nebula gently expands and pulses with restrained natural light, "
-            "the person's coat moves slightly in the mountain breeze, and the camera makes "
-            "a very slow forward push. Preserve the silhouette, mountain geometry and "
-            "composition. Physically plausible, elegant organic motion, no cuts."
+            "Only the thin cloud layer drifts slowly from left to right across the sky. "
+            "Keep the person, mountain, stars and camera completely still. "
+            "One simple, continuous, physically plausible movement. No cuts."
         ),
         "scene_direction": {
             "camera": {"move": "push_in", "intensity": 0.35},
@@ -67,8 +65,8 @@ def main():
     clip = Path(clips[0]["path"])
     clip_meta = probe(clip)
     video_stream = next((s for s in clip_meta["streams"] if s["codec_type"] == "video"), None)
-    if not video_stream or video_stream.get("width") != 512 or video_stream.get("height") != 896:
-        raise RuntimeError(f"LTX clip has invalid video stream: {clip_meta}")
+    if not video_stream or video_stream.get("width") != 384 or video_stream.get("height") != 672:
+        raise RuntimeError(f"LTX low-cost clip has invalid video stream: {clip_meta}")
 
     # A neutral tone track exercises Remotion's audio muxing without requiring a voice API key.
     audio = OUT / "validation-tone.wav"
