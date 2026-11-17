@@ -588,6 +588,45 @@ if active_view == "Criar":
                     "Pode gerar custo de API. Desativado por padrão."
                 ),
             )
+            st.caption(
+                "Antes de uma produção, você pode testar o Brain 4 isoladamente. "
+                "O teste usa roteiro e timestamps sintéticos, faz uma geração Gemini "
+                "e não inicia Fish Audio, Cloudflare, Modal ou renderização."
+            )
+            if st.button("Testar Brain 4 — sem produzir vídeo", use_container_width=True):
+                smoke_key = secret("GEMINI_API_KEY")
+                if not smoke_key:
+                    st.error("Configure GEMINI_API_KEY antes do teste. Nenhuma chamada foi feita.")
+                else:
+                    try:
+                        with st.spinner("Executando uma geração Gemini e validando o contrato Brain 4..."):
+                            smoke_module = importlib.import_module("nexus.brain4_smoke_test")
+                            smoke_module = importlib.reload(smoke_module)
+                            smoke_result = smoke_module.run_brain4_live_smoke_test(
+                                smoke_key,
+                                requested_model=secret("GEMINI_MODEL") or "auto",
+                            )
+                        st.session_state["nexus_brain4_smoke_result"] = smoke_result
+                        st.session_state.pop("nexus_brain4_smoke_error", None)
+                    except Exception as smoke_error:
+                        st.session_state.pop("nexus_brain4_smoke_result", None)
+                        st.session_state["nexus_brain4_smoke_error"] = str(smoke_error)
+            smoke_result = st.session_state.get("nexus_brain4_smoke_result")
+            if smoke_result:
+                st.success("Brain 4 respondeu e a timeline passou pela validação contratual.")
+                c1, c2, c3, c4 = st.columns(4)
+                c1.metric("Alinhamento", smoke_result["alignment_level"])
+                c2.metric("Legendas", smoke_result["caption_event_count"])
+                c3.metric("Âncoras", smoke_result["edit_anchor_count"])
+                c4.metric("Mixagem", smoke_result["audio_mix_event_count"])
+                st.caption(
+                    f"Fixture sintético de {smoke_result['audio_duration_seconds']:.1f}s · "
+                    f"{smoke_result['sfx_event_count']} efeitos sonoros · "
+                    "nenhum vídeo foi produzido."
+                )
+            smoke_error = st.session_state.get("nexus_brain4_smoke_error")
+            if smoke_error:
+                st.error("O teste Brain 4 não foi aprovado: " + smoke_error)
         else:
             brain4_enabled = False
         if st.button("Produzir vídeo completo", type="primary", use_container_width=True):
