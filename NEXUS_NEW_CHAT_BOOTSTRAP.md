@@ -201,3 +201,9 @@ Este bootstrap reduz perda de continuidade, mas não garante que a plataforma ca
 - Gemini Brain 4: helper dedicado com 1 modelo/1 geração por vídeo; worker lê flag criptografada; checkbox app desmarcado por padrão; exige chave quando habilitado.
 - Testes de contrato JSON, uma única chamada, default-off, chave ausente e transporte criptografado aprovados.
 - Nenhuma chamada Gemini real nem render de produção ocorreu. Próxima ação: regressão sintética Remotion, depois teste controlado com autorização explícita do uso da chave.
+
+
+## Regressão aprovada — Brain 4 opt-in — 17/11/2026
+- CI #1067 aprovado integralmente: 209 testes Python, compileall, typecheck, Commons smoke e MP4 sintético Remotion #14345002405 (4.011s). Captions, word highlight, ducking e SFX validados.
+- App agora exibe status editorial retornado pelo worker. Commit UI `72f4721f77d02ad22f5203c8f54c5a243e062797`; conferir CI desse commit.
+- Integração Gemini real ainda não chamada; checkbox opt-in permanece default-off.
