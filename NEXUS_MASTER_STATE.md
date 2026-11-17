@@ -2,9 +2,9 @@
 
 # STATUS OPERACIONAL VIGENTE — SOBRESCREVE CHECKPOINTS HISTÓRICOS
 
-Atualizado em: 2026-11-17T17:01:49-03:00 (America/Sao_Paulo)
-HEAD da branch main no início desta atualização: 1912d74df55661a375f590b843dffb2d601be82c
-Último commit de main antes desta atualização documental: 1912d74df55661a375f590b843dffb2d601be82c.
+Atualizado em: 2026-11-17T17:03:58-03:00 (America/Sao_Paulo)
+HEAD da branch main no início desta atualização: b37a8919e27219634dbd9e3d29b138713c8932b2
+Último commit de main antes desta atualização documental: b37a8919e27219634dbd9e3d29b138713c8932b2.
 
 **REGRA DE LEITURA:** este bloco é a fonte prioritária para o estado atual. Os registros cronológicos abaixo são histórico. Nunca retomar uma “próxima ação” antiga sem confrontá-la com este bloco e com o HEAD atual. Em especial, NÃO tratar tarefas do dia 16/11 nem checkpoints antigos sobre integração Brain 4/Remotion como pendências atuais.
 
@@ -17,12 +17,12 @@ HEAD da branch main no início desta atualização: 1912d74df55661a375f590b843df
 - PR #9 (feat/ltx-low-cost-simple-motion) permanece aberta, não mergeada e não implantada. CI #1135/run 44159676828 passou nos testes Python, Commons smoke e Remotion typecheck; render sintético foi skipped. Não inferir GPU, custo ou qualidade por CI.
 - Modal: painel informado pelo usuário mostrou US$1.50 acumulados, majoritariamente H100. Código versionado declara L40S, mas deployment ativo/GPU real permanecem não identificados. Deploy é manual; não fazer deploy/inferência paga sem autorização. A PR #10 remove a estimativa de custo do smoke baseada em taxa L40S hardcoded e tempo de parede; até integração, a correção existe somente na branch da PR.
 - Build indicator Streamlit: PR #6 integrada; Perfil deve mostrar SHA/origem ou “não identificado”. A leitura na instância publicada ainda não foi confirmada.
-- PR #10 aberta: Verify Modal GPU identity and remove misleading smoke cost estimate. Branch fix/modal-gpu-identity-and-cost-report, head 92f2f3dae72604f9a20087af5780827680615afc. CI #1143 / run 44164137648 concluído: unit-tests success, remotion-typecheck success, commons-live-smoke success; remotion-synthetic-render skipped pela condição do workflow. CI dos jobs aplicáveis está verde, mas isso não valida deploy, GPU real, billing ou MP4. PR continua aberta, não mergeada e não implantada.
+- PR #10 aberta: Verify Modal GPU identity and remove misleading smoke cost estimate. Branch fix/modal-gpu-identity-and-cost-report, head eb7269bfa339dc13ff0704e6b5fa91c2fb8fbba7. CI #1143 e #1144 passaram nos jobs executados antes da revisão final. A revisão encontrou risco de confundir A10 com A100; o validador foi ajustado para tokens exatos e teste A10G/A100 adicionado. CI #1154 falhou por NameError em commit intermediário (variável markers após renomeação); corrigido em eb7269b. CI #1155 / run 44165173593 está em andamento: Remotion typecheck success; unit-tests e Commons live smoke pendentes; render sintético skipped. Não declarar branch validada até #1155 concluir.
 
 ## Próxima ação sem custo
-1. Revisar o diff completo da PR #10 e sua compatibilidade com o código-base atual; corrigir somente se a revisão encontrar defeitos concretos.
-2. Manter PR #10 aberta para decisão explícita de merge; não implantar automaticamente.
-3. Planejar a auditoria do deployment Modal apenas por evidência disponível sem iniciar deploy/inferência; para confirmar runtime ativo pode ser necessário acesso ao painel/uma execução autorizada.
+1. Aguardar CI #1155; inspecionar logs se algum job falhar e corrigir a PR incrementalmente.
+2. Após CI verde, revisar o diff final e manter PR #10 aberta até solicitação explícita de merge.
+3. Planejar auditoria do deployment Modal sem iniciar deploy/inferência; confirmar runtime pode exigir acesso ao painel ou uma execução autorizada.
 4. Manter produção completa bloqueada até confirmação do deployment e autorização explícita de custos.
 
 ## Separação de estados
