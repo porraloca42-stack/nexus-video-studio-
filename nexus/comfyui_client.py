@@ -58,6 +58,50 @@ def patch_api_workflow(
     return patched
 
 
+def validate_api_workflow(workflow: dict[str, Any]) -> bool:
+    """Validate the structural contract of a ComfyUI API prompt graph.
+
+    ComfyUI API links are two-item arrays [source_node_id, output_slot].
+    Widget arrays must be wrapped by the official exporter and therefore are
+    not accepted as raw lists here.
+    """
+    if not isinstance(workflow, dict) or not workflow:
+        raise ComfyUIError("O workflow API está vazio ou não é um objeto.")
+
+    for node_id, node in workflow.items():
+        if not isinstance(node_id, str) or not node_id.strip():
+            raise ComfyUIError("O workflow API contém um ID de nó inválido.")
+        if not isinstance(node, dict):
+            raise ComfyUIError(f"O nó API {node_id} não é um objeto.")
+        class_type = node.get("class_type")
+        if not isinstance(class_type, str) or not class_type.strip():
+            raise ComfyUIError(f"O nó API {node_id} não informa class_type.")
+        if not isinstance(node.get("inputs"), dict):
+            raise ComfyUIError(f"O nó API {node_id} não contém inputs válidos.")
+
+    for node_id, node in workflow.items():
+        for input_name, value in node["inputs"].items():
+            if not isinstance(value, list):
+                continue
+            if (
+                len(value) != 2
+                or not isinstance(value[0], (str, int))
+                or isinstance(value[0], bool)
+                or not isinstance(value[1], int)
+                or isinstance(value[1], bool)
+                or value[1] < 0
+            ):
+                raise ComfyUIError(
+                    f"Conexão inválida em {node_id}.{input_name}: esperado [node_id, output_slot]."
+                )
+            source_id = str(value[0])
+            if source_id not in workflow:
+                raise ComfyUIError(
+                    f"Conexão {node_id}.{input_name} referencia nó ausente {source_id}."
+                )
+    return True
+
+
 class ComfyUIClient:
     def __init__(
         self,
