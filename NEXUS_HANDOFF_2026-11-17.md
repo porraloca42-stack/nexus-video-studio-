@@ -495,3 +495,9 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - CI #1067 passou: 209 testes, compileall, typecheck, Commons smoke e Remotion synthetic MP4. Artifact #14345002405; 4.011s H.264/AAC, word highlight, captions, ducking e SFX aprovados.
 - UI mostra status Brain 4 no detalhe do vídeo. Commit `72f4721f77d02ad22f5203c8f54c5a243e062797`; conferir CI subsequente.
 - Ainda sem chamada Gemini real ou render de produção.
+
+
+## Status Brain 4 na UI — CI aprovado — 17/11/2026
+- Commit `72f4721f77d02ad22f5203c8f54c5a243e062797`, CI #1068 aprovado: 209 testes, compileall, typecheck e Commons smoke.
+- Tela de resultado apresenta status Brain 4 conforme report criptografado do worker. Render sintético skipped (alteração de UI).
+- Integração Gemini continua opt-in e sem teste real de API/produção.
