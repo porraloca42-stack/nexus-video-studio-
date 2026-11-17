@@ -5,6 +5,7 @@ import subprocess
 from pathlib import Path
 
 from nexus.audio import make_voice
+from nexus.editorial_pipeline import provider_segments_to_word_timestamps
 from nexus.director import revise_narration_for_duration, _fit_scene_durations
 from nexus.cloudflare_images import generate_scene_images
 from nexus.video_engine import get_video_engine
@@ -188,6 +189,27 @@ def main(project_root=None):
     expected_duration = actual_audio_duration
     narration_duration = actual_audio_duration
 
+    word_timestamps = []
+    alignment_warning = None
+    if narration_alignment_segments:
+        try:
+            word_timestamps = provider_segments_to_word_timestamps(narration_alignment_segments)
+        except ValueError as exc:
+            alignment_warning = str(exc)
+    alignment_granularity = (
+        "word" if word_timestamps
+        else "provider_segments" if narration_alignment_segments
+        else "unavailable"
+    )
+    plan["narration_alignment"] = {
+        "provider": "Fish Audio",
+        "method": "fish_audio_tts_stream_with_timestamp",
+        "granularity": alignment_granularity,
+        "segments": narration_alignment_segments,
+        "word_timestamps": word_timestamps,
+        "warning": alignment_warning,
+    }
+
     generated = generate_scene_images(
         scenes,
         work / "images",
@@ -316,9 +338,12 @@ def main(project_root=None):
         "narration_alignment": {
             "provider": "Fish Audio",
             "method": "fish_audio_tts_stream_with_timestamp",
-            "granularity": "provider_segments",
+            "granularity": alignment_granularity,
             "segment_count": len(narration_alignment_segments),
+            "word_timestamp_count": len(word_timestamps),
             "segments": narration_alignment_segments,
+            "word_timestamps": word_timestamps,
+            "warning": alignment_warning,
         },
         "width": video["width"],
         "height": video["height"],
