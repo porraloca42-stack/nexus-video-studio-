@@ -8,7 +8,6 @@ import modal
 from PIL import Image, ImageDraw
 
 APP_NAME = "nexus-video-i2v"
-L40S_RATE_USD_PER_SECOND = 0.000542
 SCALEDOWN_WINDOW_SECONDS = 5
 OUTPUT = Path("modal-smoke-output")
 OUTPUT.mkdir(exist_ok=True)
@@ -81,22 +80,22 @@ def main():
         )
         frame_paths[label] = str(frame_path)
 
-    estimated_gpu_only_cost = round(
-        (modal_call_wall_seconds + SCALEDOWN_WINDOW_SECONDS) * L40S_RATE_USD_PER_SECOND, 4
-    )
     report = {
         "status": "success",
         "model": results[0].get("model"),
         "model_revision": results[0].get("model_revision"),
         "model_code_revision": results[0].get("model_code_revision"),
         "gpu_name": results[0].get("gpu_name"),
+        "requested_gpu_type": results[0].get("requested_gpu_type"),
+        "gpu_identity_verified": results[0].get("gpu_identity_verified", False),
         "duration_seconds": duration,
         "inference_seconds": results[0].get("inference_seconds"),
         "model_load_seconds": results[0].get("model_load_seconds"),
+        "model_cache_metrics": results[0].get("model_cache_metrics"),
         "batch_wall_seconds": results[0].get("batch_wall_seconds"),
         "modal_call_wall_seconds": modal_call_wall_seconds,
-        "estimated_gpu_only_cost_usd": estimated_gpu_only_cost,
-        "gpu_rate_usd_per_second": L40S_RATE_USD_PER_SECOND,
+        "estimated_gpu_only_cost_usd": None,
+        "gpu_cost_estimate_status": "unavailable: Modal billing duration and deployed GPU price are not exposed by this smoke test",
         "frames": results[0].get("frames"),
         "fps": results[0].get("fps"),
         "first_pass_steps": results[0].get("first_pass_steps"),
@@ -110,7 +109,7 @@ def main():
         "codec": video_stream.get("codec_name"),
         "file_size_bytes": mp4.stat().st_size,
         "sample_frames": frame_paths,
-        "note": "One-scene technical and motion sample. GPU cost is an estimate only; CPU and memory charges are additional. Human review is still required.",
+        "note": "One-scene technical and motion sample. This report does not estimate or represent billed cost. Confirm GPU identity and actual charges in Modal Dashboard. Human motion review is still required.",
     }
     (OUTPUT / "report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
     print(json.dumps(report, indent=2))
