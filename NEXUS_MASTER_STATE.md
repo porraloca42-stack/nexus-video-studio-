@@ -2170,3 +2170,11 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Worker monta o callable apenas quando `brain4_enabled=true` no payload criptografado. Flag false/ausente mantém disabled; flag true sem chave interrompe antes de gerar imagens.
 - UI adiciona checkbox opt-in, desmarcado por padrão, apenas no modo Cloudflare + Modal I2V + Remotion; exige GEMINI_API_KEY quando marcado.
 - Nenhuma chamada Gemini real ou produção foi executada. Próximo: regressão sintética Remotion após as alterações; depois validação real controlada por usuário.
+
+
+## Regressão pós-integração Brain 4 — 17/11/2026
+- CI #1067 / run `44121219305`, commit `091df9c39463e0ceafae2681cdf8e1916a1a9cc4`: sucesso integral — 209 testes Python, compileall, Remotion typecheck, Commons smoke e render sintético.
+- MP4 sintético 4.011s; word highlights 2249/1773 pixels, caption off 0, ducking e SFX passaram. Artifact #14345002405.
+- UI agora também mostra o estado retornado pelo worker: Brain 4 validado ou não executado.
+- Commit UI `72f4721f77d02ad22f5203c8f54c5a243e062797`; CI deste último commit ainda precisa ser conferido.
+- Nenhuma chamada Gemini real ou render de produção ocorreu. A integração está pronta para opt-in, mas ainda não foi validada com resposta Gemini real.
