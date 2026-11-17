@@ -927,3 +927,12 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - Comparação atual `main...safety/separate-modal-deploy-smoke`: branch 4 commits à frente e 3 atrás; GitHub reporta `mergeable=false`. O diff funcional continua restrito aos workflows Modal e ao registro Master State. A PR permanece aberta e não mergeada.
 - Não integrar enquanto o estado de merge estiver falso. Antes de uma futura integração, sincronizar novamente a branch com a main, repetir CI no novo head e só então aguardar autorização explícita para merge.
 - Nenhum deploy Modal, inferência GPU ou serviço pago foi acionado.
+
+## PR #11 — sincronização final e CI #1190 aprovados — 2026-11-17T18:16:51-03:00 (America/Sao_Paulo)
+- HEAD da main antes deste checkpoint documental: `e93fbe5a171f9d1cc3c19dc8796c4e3d343f1252`. Head da branch da PR: `a2b5d2c3a668cf36db0ee891854d3bb457ad8534`.
+- A branch foi sincronizada com a main por merge commit `a2b5d2c3a668cf36db0ee891854d3bb457ad8534`. A comparação `main...safety/separate-modal-deploy-smoke` imediatamente após a sincronização mostrou 5 commits à frente e 0 atrás; o diff ficou restrito aos dois workflows Modal.
+- CI #1190 / run `44177875187`, no head `a2b5d2c3a668cf36db0ee891854d3bb457ad8534`: `unit-tests` success, `commons-live-smoke` success, `remotion-typecheck` success; `remotion-synthetic-render` skipped. Resultado final do run: completed/success.
+- O CI #1182 também passou nos três jobs executados no head intermediário. O #1190 é a validação mais recente e substitui #1182 como referência do head atual.
+- Revisão estática sem defeito impeditivo. O deploy permanece sem chamada ao smoke; o workflow de inferência é manual e separado. O CI não executa deploy Modal, inferência GPU ou render de produção.
+- Estado: PR aberta, não mergeada e não implantada. Nenhum deploy Modal, smoke de inferência, GPU, Cloudflare, Fish Audio, Gemini ou render foi iniciado; custo variável adicional US$0.
+- Próxima ação: aguardar autorização explícita para merge. Antes de integrar, conferir novamente a base e os checks caso a main avance.
