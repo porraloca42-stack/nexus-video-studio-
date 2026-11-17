@@ -21,6 +21,16 @@ class FakeResponse:
         }
 
 
+class FakeErrorResponse:
+    def __init__(self, status_code, message):
+        self.status_code = status_code
+        self.ok = False
+        self._message = message
+
+    def json(self):
+        return {"error": {"message": self._message}}
+
+
 class GeminiJsonRecoveryTests(unittest.TestCase):
     def test_brain4_gemini_call_is_single_request_and_accepts_timeline_contract(self):
         timeline = {
@@ -54,6 +64,25 @@ class GeminiJsonRecoveryTests(unittest.TestCase):
         self.assertEqual(
             payload["contents"][0]["parts"][0]["text"], "BRAIN 4 prompt"
         )
+
+
+    def test_brain4_single_call_503_message_does_not_claim_retry_or_failover(self):
+        with patch.object(
+            director, "discover_models", return_value=["gemini-3.5-flash-lite"]
+        ), patch.object(
+            director.requests, "post",
+            return_value=FakeErrorResponse(503, "Model overloaded"),
+        ) as post:
+            with self.assertRaisesRegex(
+                RuntimeError, "faz uma única chamada.*não tentou outros modelos"
+            ) as error:
+                director.generate_editorial_json(
+                    "BRAIN 4 prompt", "private-test-key", "auto"
+                )
+
+        post.assert_called_once()
+        self.assertIn("gemini-3.5-flash-lite (HTTP 503)", str(error.exception))
+        self.assertNotIn("Tentei novamente", str(error.exception))
 
     def test_retries_malformed_json_then_fails_over_to_next_model(self):
         valid_plan = {
