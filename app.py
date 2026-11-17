@@ -400,21 +400,21 @@ if active_view == "Criar":
         horizontal=True,
         key="nexus_render_mode",
         help=(
-            "O modo de IA original prioriza visuais exclusivos e envia cenas para geração e animação. "
-            "Para evitar esses créditos, escolha bibliotecas de vídeo; isso pode reduzir a exclusividade visual. "
-            "Gemini e Fish Audio seguem sujeitos às cotas e planos das respectivas contas."
+            "O modo econômico usa bibliotecas de vídeo e evita Cloudflare/Modal. "
+            "Gemini e Fish Audio continuam sujeitos às cotas e planos das respectivas contas. "
+            "O modo de IA original envia cenas para geração e animação e consome créditos."
         ),
     )
     if mode_uses_modal(render_mode):
         st.warning(
-            "Modo de qualidade selecionado: cenas originais usam créditos Cloudflare e Modal. "
-            "Meta de planejamento: 22 vídeos/mês. O custo total por vídeo ainda precisa ser "
-            "medido; o limite interno do worker não limita o gasto mensal do Workspace."
+            "IA original usa créditos da Cloudflare e da Modal. O custo total de um vídeo "
+            "de 40–50s ainda não foi validado; o limite interno do worker não representa "
+            "uma garantia de cobrança máxima do Workspace."
         )
     else:
         st.caption(
-            "Modo Bibliotecas: evita geração Cloudflare e GPU Modal, mas pode reduzir a exclusividade "
-            "das imagens. Chamadas Gemini/Fish Audio seguem sujeitas às cotas das suas contas."
+            "Modo econômico selecionado: não aciona geração Cloudflare nem GPU Modal. "
+            "Chamadas Gemini/Fish Audio ainda dependem das cotas das suas contas."
         )
     with st.container(border=True):
         topic = st.text_area(
@@ -746,9 +746,6 @@ if active_view == "Criar":
                             "low_motion_scene_count": int(report.get("low_motion_scene_count") or 0),
                             "total_i2v_seconds": float(report.get("total_i2v_seconds") or 0),
                             "total_i2v_inference_seconds": float(report.get("total_i2v_inference_seconds") or 0),
-                            "estimated_ltx_gpu_cost_usd": report.get("estimated_ltx_gpu_cost_usd"),
-                            "ltx_gpu_cost_budget_usd": report.get("ltx_gpu_cost_budget_usd"),
-                            "gpu_name": report.get("gpu_name"),
                             "visual_source": report.get("visual_source", "Cloudflare + Modal I2V + Remotion"),
                             "worker_run_id": result.get("run_id"),
                             "visual_reviews": [],
@@ -1169,10 +1166,22 @@ if active_view == "Criar":
         if info.get("narration_provider"):
             st.caption("Narração: " + info["narration_provider"])
         editorial_status = (info.get("editorial_pipeline") or {}).get("status")
+        captioning = info.get("captioning") or {}
         if editorial_status == "brain4_validated":
             st.success("Brain 4 executado: edição sincronizada validada.")
         elif editorial_status == "disabled":
             st.caption("Brain 4 não foi executado neste vídeo.")
+        if captioning.get("status") == "provider_alignment":
+            st.caption(
+                f"Legendas sincronizadas pela Fish Audio · "
+                f"{captioning.get('event_count', 0)} blocos · "
+                f"alinhamento {captioning.get('alignment_level', 'não informado')}."
+            )
+        elif captioning.get("status") == "unavailable":
+            st.warning(
+                "O MP4 foi renderizado sem legendas sincronizadas: "
+                + str(captioning.get("warning") or "timestamps da narração indisponíveis.")
+            )
         if info.get("motion_clip_count"):
             st.caption(
                 f"Animação LTX: {info['motion_clip_count']} cenas · "
@@ -1180,20 +1189,6 @@ if active_view == "Criar":
                 f"{info.get('total_i2v_inference_seconds', 0):.1f}s de inferência GPU "
                 "(tempo de inferência, não o total faturado)"
             )
-            gpu_estimate = info.get("estimated_ltx_gpu_cost_usd")
-            if gpu_estimate is not None:
-                monthly_gpu_projection = float(gpu_estimate) * 22
-                st.caption(
-                    f"GPU Modal estimada por vídeo: US$ {float(gpu_estimate):.3f} · "
-                    f"projeção para 22 vídeos: US$ {monthly_gpu_projection:.2f} somente GPU. "
-                    "Não inclui CPU, memória, Cloudflare, Gemini ou Fish Audio; "
-                    "é uma estimativa técnica, não uma fatura."
-                )
-            else:
-                st.caption(
-                    "Estimativa de GPU Modal indisponível neste relatório. "
-                    "O custo completo deve ser conferido no painel Modal."
-                )
         if info.get("worker_run_id"):
             st.caption(f"[Ver execução do render no GitHub Actions](https://github.com/porraloca42-stack/nexus-video-studio-/actions/runs/{info['worker_run_id']})")
         reviews = info.get("visual_reviews", [])
@@ -1329,8 +1324,8 @@ elif active_view == "Perfil":
     with st.expander("Configurações avançadas de produção", expanded=False):
         st.markdown('<div class="nexus-kicker">PRODUÇÃO</div>', unsafe_allow_html=True)
         st.caption(
-            "O modo visual é escolhido na tela Criar. IA original prioriza cenas exclusivas e usa "
-            "créditos Cloudflare e Modal; bibliotecas evitam esses créditos com menor exclusividade visual."
+            "O modo visual é escolhido na tela Criar. O modo econômico evita GPU Modal; "
+            "IA original usa créditos Cloudflare e Modal."
         )
         with st.expander("Ferramentas avançadas · diagnóstico das bibliotecas de vídeo"):
             st.caption("Testa busca, licença, download e leitura do vídeo no Wikimedia Commons, Pixabay e Pexels. As chaves nunca são exibidas.")
@@ -1414,3 +1409,4 @@ elif active_view == "Perfil":
         "IA original usa créditos variáveis; custo do vídeo completo ainda não foi validado."
     )
     st.markdown("[Abrir o repositório do NEXUS](https://github.com/porraloca42-stack/nexus-video-studio-)")
+
