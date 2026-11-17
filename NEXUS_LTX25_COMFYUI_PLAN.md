@@ -89,3 +89,11 @@ Após autorização específica:
 - Deploy: não feito.
 - GPU/inferência/benchmark: não executados.
 - Custo variável nesta pesquisa: US$0.
+
+
+## 9. Base HTTP client — implementação sem GPU (17/11/2026)
+- Criado `nexus/comfyui_client.py`: cliente HTTP mockável para upload de keyframe, submissão de workflow API, leitura de histórico, espera por conclusão, detecção de erro e download de arquivo.
+- Criado `tests/test_comfyui_client.py`: testes com sessão HTTP falsa para upload, fila, node_errors, sucesso, erro de execução, timeout sem reenvio automático, extração/download de MP4 e validação de URL.
+- O módulo não inicia ComfyUI, não baixa pesos, não usa Modal, não importa Torch e não faz chamadas de rede durante importação. Só opera se for instanciado e chamado por um futuro worker.
+- Ainda não existe workflow API exportado, mapeamento de nós, worker Modal ComfyUI ou integração ao fluxo de produção. O cliente genérico não significa que o LTX-2.5 já esteja integrado.
+- Estado: código e testes gravados na branch main; execução automatizada ainda não confirmada. Nenhuma inferência, GPU, download de pesos ou deploy foi realizado; custo variável adicional US$0.
