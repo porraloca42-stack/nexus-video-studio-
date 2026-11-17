@@ -376,3 +376,13 @@ Timestamp da atualização: 2026-11-17T14:08:19-03:00 (UTC−03:00).
 - PR #3 permanece aberto. Próxima ação: verificar que a PR recebeu o novo head, aguardar novo workflow `pull_request`, ler logs do job Python e confirmar também `commons-live-smoke`.
 - Nenhuma chamada Gemini, deploy, GPU ou render de produção.
 - Timestamp: `2026-11-17T14:27:43-03:00` (UTC−03:00). Atualização documental `[skip ci]`.
+
+
+## Checkpoint — regressão corrigida; Python e Remotion aprovados — 2026-11-17T14:28:32-03:00 (America/Sao_Paulo)
+- PR #3 / workflow #1110 / run `44137245208`, head `445322eda04549ac745f568b7739585ca277747a`.
+- `unit-tests` **success**: logs confirm `Ran 213 tests in 3.074s` / `OK`; novo teste `test_live_smoke_reloads_cached_director_before_resolving_generator` passou. `remotion-typecheck` **success**. `remotion-synthetic-render` **skipped** corretamente.
+- `commons-live-smoke` ainda `in_progress` no momento do checkpoint; não declarar CI integralmente aprovado até terminar.
+- Evidência: job unit-tests ID `134230022210`; typecheck ID `134230021978`; Commons job ID `134230022537`. Run: https://github.com/porraloca42-stack/nexus-video-studio-/actions/runs/44137245208 .
+- PR #3 continua aberto; nenhum merge/deploy. Nenhuma chamada Gemini real, produção, GPU ou render foi iniciada.
+- Próxima ação: aguardar conclusão de `commons-live-smoke`, depois revisar estado de merge da PR e decidir merge seguro.
+- Timestamp: `2026-11-17T14:28:32-03:00` (UTC−03:00). Atualização documental `[skip ci]`.
