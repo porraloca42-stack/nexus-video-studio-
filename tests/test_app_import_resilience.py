@@ -31,8 +31,20 @@ class AppImportResilienceTests(unittest.TestCase):
 
     def test_header_uses_centered_user_supplied_nexus_mark(self):
         source = Path("app.py").read_text(encoding="utf-8")
-        self.assertIn('header_left, header_brand, header_settings = st.columns([1, 4, 1]', source)
-        self.assertIn('aria-label="Símbolo N NEXUS"', source)
+        self.assertIn('with st.container(key="nexus-header"):', source)
+        self.assertIn('assets" / "nexus-mark.svg', source)
+        self.assertIn('NEXUS_MARK_SVG}', source)
+        self.assertNotIn('header_left, header_brand, header_settings = st.columns', source)
+
+    def test_duration_dialog_applies_choice_with_one_tap(self):
+        source = Path("app.py").read_text(encoding="utf-8")
+        start = source.index('@st.dialog("Duração do vídeo"')
+        end = source.index('def style_preview_svg', start)
+        dialog = source[start:end]
+        self.assertIn('for row in ((40, 45), (50, 60)):', dialog)
+        self.assertIn('st.session_state["nexus_duration"] = seconds', dialog)
+        self.assertNotIn('st.selectbox(', dialog)
+        self.assertNotIn('Confirmar duração', dialog)
 
     def test_calibrator_import_is_lazy_and_guarded(self):
         source = Path("app.py").read_text(encoding="utf-8")
