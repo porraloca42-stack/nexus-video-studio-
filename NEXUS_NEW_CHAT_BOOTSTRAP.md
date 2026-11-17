@@ -120,3 +120,9 @@ Este bootstrap reduz perda de continuidade, mas não garante que a plataforma ca
 - CI #991: 193 testes Python passaram; typecheck e Commons smoke passaram. Render sintético não foi acionado nesta alteração.
 - Segmentos são mantidos como `provider_segments`; não inventar confidence nem declarar palavra/fonema sem validação. Brain 4 ainda não está conectado a esses segmentos.
 - Próximo: ajustar contrato Brain 4 para a evidência real do provedor e testar com executores simulados. Não executar chamada Gemini adicional sem autorização de custo.
+
+
+## Último checkpoint — ponte Brain 4 — 17/11/2026
+- Fish provider segments são preservados e promovidos a word timestamps apenas quando cada segmento é um token individual. Frases não são rotuladas como palavras; confidence não é inventada.
+- Contrato e prompt Brain 4 ajustados para confidence opcional e granularidade comprovada. CI #1002: 198 testes Python, typecheck e Commons smoke passaram; render sintético skipped.
+- Próxima ação: implementar executor Brain 4 no worker com mocks e sem chamada externa; manter Gemini real desabilitado até autorização explícita de custo. `edit_timeline` ainda não chega aos renders de produção.
