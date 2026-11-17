@@ -1491,3 +1491,10 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Validação do código de interface: GitHub Actions run `43991099437`, commit de aplicação `42a2eea`, concluiu com sucesso nos três jobs (`unit-tests`, `remotion-typecheck`, `commons-live-smoke`). A suíte unitária passou; typecheck e smoke também passaram.
 - O run `43991135448`, disparado pelo commit de documentação `53a4a5c`, também concluiu com sucesso os três jobs: unit-tests, Remotion typecheck e Commons smoke. O código de aplicação validado é o mesmo commit `42a2eea`.
 - Limite de validação: CI confirma regressões automatizadas e sintaxe exercitada pela suíte, não confirma a aparência publicada nem o comportamento real dos widgets no navegador móvel. Aguardando confirmação visual no Streamlit após sincronização.
+
+## Refinamento mobile: carrossel e controles compactos — 17/11/2026
+- Evidência recebida em novas capturas: os estilos apareciam em várias linhas e os controles de narração/duração eram cartões altos empilhados, apesar da intenção anterior de duas colunas. Isso criava rolagem excessiva e afastava as ações principais do alcance do polegar.
+- Commit `988ab9a`: seletor de estilos encapsulado em `nexus-style-carousel`, com CSS direcionado para uma única faixa flexível, sem quebra de linha e com rolagem horizontal; o objetivo é manter todos os estilos acessíveis por gesto lateral.
+- Narração e duração substituem os cartões por dois gatilhos compactos de `st.popover` em uma linha de colunas forçada a não quebrar no mobile. A escolha da voz e o catálogo curado continuam disponíveis dentro do popover; a duração oferece 40, 45, 50 e 60 segundos, com 45s como padrão novo, preservando valores de sessão válidos.
+- O restante do fluxo de storyboard, seleção de estilo, voz Fish Audio, renderização e prévia não foi substituído.
+- Estado: implementação gravada em `main`. GitHub Actions run `43991873374` está em execução; ainda não declarar CI aprovado. A eficácia visual do CSS do carrossel e a interação dos popovers precisam de confirmação em captura real do Streamlit mobile após o deploy.
