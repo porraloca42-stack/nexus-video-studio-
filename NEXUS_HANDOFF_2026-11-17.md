@@ -794,3 +794,11 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - `tests/test_build_info.py`: quatro casos unitários cobrindo checkout, fallback, valor inválido e ausência do Git.
 - Não houve chamadas externas pagas, produção, deploy ou GPU. CI ainda precisa executar; a alteração ainda não foi integrada nem observada no Streamlit.
 - Próxima ação: abrir PR, aguardar CI, corrigir eventuais falhas e integrar apenas com checks aprovados. Depois da sincronização automática do Streamlit, conferir o SHA no Perfil.
+
+
+### Resultado da integração — identificador de build — 17/11/2026
+- PR #6 integrada por squash em `aeda3d42e42c5285a1e625aef16dcbe7d1241639`: https://github.com/porraloca42-stack/nexus-video-studio-/pull/6 .
+- CI da PR #6, run `44150058257`: `unit-tests` success, `remotion-typecheck` success, `commons-live-smoke` success; `remotion-synthetic-render` skipped conforme configuração. Os quatro testes novos passaram e o job de compilação da aplicação passou.
+- Main conferida após merge: `app.py` importa o helper e Perfil exibe o SHA/origem/link ou aviso explícito de não identificado; `nexus/build_info.py` e `tests/test_build_info.py` presentes.
+- Estado: implementado, integrado e CI da PR aprovado. Deploy/sync do Streamlit e leitura do SHA no app publicado ainda não foram confirmados. Não houve chamada paga, GPU, render ou produção.
+- Próxima ação: após sincronização do Streamlit, abrir Perfil e conferir o commit. Se aparecer “não identificado”, usar os logs/ambiente do runtime para descobrir se o checkout não contém `.git` nem variável de SHA; não usar HEAD remoto como aproximação.
