@@ -1498,3 +1498,6 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Narração e duração substituem os cartões por dois gatilhos compactos de `st.popover` em uma linha de colunas forçada a não quebrar no mobile. A escolha da voz e o catálogo curado continuam disponíveis dentro do popover; a duração oferece 40, 45, 50 e 60 segundos, com 45s como padrão novo, preservando valores de sessão válidos.
 - O restante do fluxo de storyboard, seleção de estilo, voz Fish Audio, renderização e prévia não foi substituído.
 - Estado: implementação gravada em `main`. GitHub Actions run `43991873374` está em execução; ainda não declarar CI aprovado. A eficácia visual do CSS do carrossel e a interação dos popovers precisam de confirmação em captura real do Streamlit mobile após o deploy.
+
+- Validação CI: GitHub Actions run `43991873374` do commit `988ab9a` concluiu com sucesso nos três jobs. `unit-tests` passou em 99 testes (`Ran 99 tests ... OK`), `remotion-typecheck` e `commons-live-smoke` também passaram.
+- Isso valida regressões automatizadas e a compilação/testes do repositório; não comprova que os seletores CSS renderizem como carrossel no navegador móvel nem que os popovers tenham a ergonomia visual desejada. A confirmação visual permanece pendente.
