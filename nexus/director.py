@@ -48,7 +48,9 @@ CENAS:
 - O estilo é uma GRAMÁTICA VISUAL, nunca um catálogo de temas ou cenas. Não deduza personagem, objeto, cenário, profissão, época ou ação a partir do nome do estilo.
 - Não repita exemplos, motivos, metáforas, sujeitos ou composições como fórmulas. Não existe cena-padrão para nenhum estilo; referências conceituais descrevem possibilidades, não instruções de conteúdo.
 - Para cada cena, determine primeiro a intenção semântica do trecho, a ação observável mais adequada e o contexto narrativo. Só então aplique a gramática visual do estilo escolhido.
-- Planeje o vídeo como uma sequência completa: varie sujeitos, ambientes, distâncias, ações, composição e metáforas. Evite repetir o mesmo motivo visual ou protagonista sem justificativa narrativa.
+- CONTINUIDADE VISUAL: antes de dividir as cenas, defina um conceito visual único e um arco visual que evolua junto com a narração. Quando houver um exemplo ou jornada individual, escolha um protagonista principal e mantenha a mesma identidade, rosto, cabelo, idade aparente, tom de pele e figurino-base nas cenas relacionadas. Varie enquadramentos, lentes, ângulos, distâncias e inserts de mãos/objetos; NÃO troque de ator a cada cena apenas para criar variedade. Só mude de protagonista quando o roteiro realmente apresentar outra pessoa ou múltiplos exemplos.
+- Crie `visual_continuity` no nível do vídeo com `visual_arc`, `lead_character` e `character_reference_prompt`. Se o vídeo tiver protagonista recorrente, `character_reference_prompt` deve ser um prompt em inglês para um retrato de referência 1:1, corpo/rosto claramente visíveis, pose neutra, fundo simples, aparência e figurino descritos com precisão, no mesmo estilo visual do vídeo, sem texto. Se não houver protagonista recorrente, use `lead_character: "none"` e `character_reference_prompt: ""`.
+- O `image_prompt` de cada cena deve usar o protagonista descrito em `visual_continuity` quando aplicável, preservando a identidade; altere pose, ação, enquadramento e ambiente conforme a progressão. A diversidade deve vir da fotografia e da evolução da ação, não de pessoas aleatórias sem continuidade.
 - style_search_terms deve conter somente características formais do estilo (meio, fotografia, cor, luz, textura e linguagem visual), nunca impor objetos, pessoas ou cenários. A busca principal e a alternativa continuam sendo específicas ao conteúdo da cena.
 - Toda cena deve ter pelo menos dois microeventos visuais.
 
@@ -71,6 +73,7 @@ Retorne somente JSON válido:
  "cta":"...",
  "seo":{"primary_keyword":"...","secondary_keywords":["..."],"title":"...","description":"...","hashtags":["..."]},
  "style_lock":"...",
+ "visual_continuity":{"visual_arc":"...","lead_character":"descrição consistente do protagonista ou none","character_reference_prompt":"English square character identity reference prompt, or empty when no recurring protagonist"},
  "full_narration":"roteiro narrado integral em português brasileiro",
  "scenes":[
   {
@@ -838,6 +841,11 @@ def validate_storyboard(plan, requested_duration=None):
     minimum_scenes = max(10, int((maximum_duration + 4) // 5)) if maximum_duration else 10
     if len(scenes) < minimum_scenes:
         errors.append(f"O diretor criou {len(scenes)} cenas, mas são necessárias pelo menos {minimum_scenes} para cobrir {requested_duration}s sem segmentos longos.")
+    continuity = plan.get("visual_continuity")
+    if not isinstance(continuity, dict) or not str(continuity.get("visual_arc", "")).strip():
+        errors.append("O diretor não definiu o arco de continuidade visual do vídeo.")
+    elif str(continuity.get("lead_character", "")).strip().lower() not in {"none", "nenhum"} and len(str(continuity.get("character_reference_prompt", "")).strip()) < 40:
+        errors.append("O protagonista recorrente não possui prompt de referência visual suficiente.")
     for index, scene in enumerate(scenes, 1):
         total += float(scene.get("duration_seconds", 0) or 0)
         for field in ("voiceover", "visual_action", "image_prompt", "video_motion_prompt", "semantic_reason", "camera_motion", "asset_search_query", "visual_style", "style_search_terms"):
