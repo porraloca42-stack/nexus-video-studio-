@@ -657,6 +657,7 @@ Retorne somente JSON válido no formato do sistema."""
         "scene_durations": fitted,
         "timing_source": "word_count_estimate_then_measured_tts",
     }
+    plan["preflight_report"] = build_storyboard_preflight(plan)
     return plan
 
 
@@ -830,6 +831,52 @@ Os números dos candidatos aparecem imediatamente antes de seus quadros."""
             last_error = str(exc)[:400]
             continue
     raise RuntimeError("A avaliação visual do Gemini falhou: " + (last_error or "nenhum modelo respondeu."))
+
+def build_storyboard_preflight(plan):
+    """Cheap deterministic diagnostics for coverage and visual variety; never calls an API."""
+    scenes = plan.get("scenes", []) if isinstance(plan, dict) else []
+
+    def normalized(value):
+        words = re.findall(r"[a-z0-9]+", str(value or "").lower())
+        return " ".join(words)
+
+    def uniqueness(field):
+        values = [normalized(scene.get(field, "")) for scene in scenes]
+        values = [value for value in values if value]
+        return round(len(set(values)) / len(values), 3) if values else 0.0
+
+    actions = [normalized(scene.get("visual_action", "")) for scene in scenes]
+    queries = [normalized(scene.get("asset_search_query", "")) for scene in scenes]
+    shot_types = [normalized(scene.get("shot_type", "")) for scene in scenes]
+    settings = [normalized(scene.get("setting", "")) for scene in scenes]
+    warnings = []
+    for label, values in (("ação visual", actions), ("busca principal", queries)):
+        seen = {}
+        for index, value in enumerate(values, 1):
+            if not value:
+                continue
+            if value in seen:
+                warnings.append(f"Cenas {seen[value]} e {index}: {label} repetida literalmente.")
+            else:
+                seen[value] = index
+
+    nonempty_shots = [value for value in shot_types if value]
+    if len(scenes) >= 6 and len(set(nonempty_shots)) <= 2:
+        warnings.append("Pouca variedade de enquadramentos: revisar a gramática de planos.")
+    nonempty_settings = [value for value in settings if value]
+    if len(scenes) >= 6 and nonempty_settings and len(set(nonempty_settings)) / len(nonempty_settings) < 0.5:
+        warnings.append("Mais da metade das cenas compartilha ambientes idênticos; verificar repetição visual.")
+
+    return {
+        "scene_count": len(scenes),
+        "unique_action_ratio": uniqueness("visual_action"),
+        "unique_search_ratio": uniqueness("asset_search_query"),
+        "unique_shot_types": len(set(nonempty_shots)),
+        "unique_settings": len(set(nonempty_settings)),
+        "warnings": warnings,
+        "method": "deterministic_text_checks_no_external_calls",
+    }
+
 
 def validate_storyboard(plan, requested_duration=None):
     errors = []
