@@ -674,20 +674,47 @@ if active_view == "Criar":
                                     frames = extract_scene_frames(qa_video, plan.get("scenes", []), Path(qa_dir) / "frames")
                                     reviews = review_scene_frames(frames, plan.get("scenes", []), visual_key)
                                 st.session_state["nexus_rendered_info"]["final_visual_audit"] = reviews
-                                scored = [item["semantic_score"] for item in reviews]
-                                average = round(sum(scored) / max(1, len(scored)), 1)
-                                st.session_state["nexus_rendered_info"]["final_visual_review_average"] = average
-                                st.session_state["nexus_rendered_info"]["visual_review_status"] = (
-                                    "needs_attention" if any(not item["matches_narration"] or item["semantic_score"] < 6 for item in reviews)
-                                    else "reviewed"
+                                semantic_avg = round(sum(item["semantic_score"] for item in reviews) / max(1, len(reviews)), 1)
+                                motion_avg = round(sum(item["motion_progression_score"] for item in reviews) / max(1, len(reviews)), 1)
+                                continuity_avg = round(sum(item["continuity_score"] for item in reviews) / max(1, len(reviews)), 1)
+                                editorial_score = round(semantic_avg * 0.40 + motion_avg * 0.35 + continuity_avg * 0.25, 1)
+                                critical_count = sum(len(item["critical_issues"]) for item in reviews)
+                                needs_attention = any(
+                                    not item["matches_narration"]
+                                    or not item["action_observed"]
+                                    or item["semantic_score"] < 7
+                                    or item["motion_progression_score"] < 7
+                                    or item["continuity_score"] < 7
+                                    or item["critical_issues"]
+                                    for item in reviews
                                 )
-                                st.caption(f"Auditoria visual Gemini: média semântica {average}/10 em {len(reviews)} cenas.")
-                                with st.expander("Auditoria visual por cena"):
+                                st.session_state["nexus_rendered_info"]["final_visual_review_average"] = semantic_avg
+                                st.session_state["nexus_rendered_info"]["final_editorial_quality_score"] = editorial_score
+                                st.session_state["nexus_rendered_info"]["visual_review_status"] = (
+                                    "needs_attention" if needs_attention else "reviewed"
+                                )
+                                st.caption(
+                                    f"Auditoria editorial Gemini: {editorial_score}/10 "
+                                    f"(aderência {semantic_avg}, movimento {motion_avg}, continuidade {continuity_avg}); "
+                                    f"{len(reviews)} cenas avaliadas."
+                                )
+                                if needs_attention:
+                                    st.warning(
+                                        f"Revisão editorial necessária: {sum(1 for item in reviews if not item['matches_narration'] or not item['action_observed'] or item['semantic_score'] < 7 or item['motion_progression_score'] < 7 or item['continuity_score'] < 7 or item['critical_issues'])} cena(s) "
+                                        f"abaixo do padrão e {critical_count} falha(s) crítica(s). Não considere o vídeo aprovado sem revisão."
+                                    )
+                                with st.expander("Auditoria editorial detalhada por cena"):
                                     st.dataframe([
-                                        {"Cena": item["scene_number"], "Aderência": f'{item["semantic_score"]}/10',
-                                         "Corresponde à fala": "Sim" if item["matches_narration"] else "Revisar",
-                                         "Problemas": "; ".join(item["issues"]),
-                                         "Recomendação": item["recommendation"]}
+                                        {
+                                            "Cena": item["scene_number"],
+                                            "Aderência": f'{item["semantic_score"]}/10',
+                                            "Movimento real": f'{item["motion_progression_score"]}/10',
+                                            "Ação observável": "Sim" if item["action_observed"] else "Não",
+                                            "Continuidade": f'{item["continuity_score"]}/10',
+                                            "Progressão temporal": item["temporal_progression"],
+                                            "Problemas": "; ".join(item["issues"] + item["critical_issues"]),
+                                            "Recomendação": item["recommendation"],
+                                        }
                                         for item in reviews
                                     ], use_container_width=True, hide_index=True)
                             else:
@@ -698,7 +725,7 @@ if active_view == "Criar":
                             st.warning(f"MP4 produzido, mas a auditoria visual não pôde ser concluída: {review_error}")
                         progress.progress(1.0, text="100% · Render e verificações concluídos.")
                         status_detail.caption("Concluído · MP4 recuperado e verificações técnicas finalizadas.")
-                        st.success("Vídeo MP4 produzido. O trabalhador verificou vídeo, áudio, resolução e duração.")
+                        st.success("MP4 produzido e verificações técnicas concluídas. A aprovação editorial depende do resultado da auditoria visual.")
                     except Exception as exc:
                         progress.empty()
                         status_detail.error(f"Produção Cloudflare + Remotion interrompida: {exc}")
