@@ -91,6 +91,70 @@ class EditorialExecutorAdapterTests(unittest.TestCase):
         self.assertEqual(updated["editorial_pipeline"]["status"], "brain4_validated")
         self.assertNotIn("edit_timeline", plan)
 
+    def test_brain4_cannot_change_provider_timing_or_invent_finer_alignment(self):
+        from copy import deepcopy
+        from unittest.mock import patch
+
+        source_word = {"text": "Comece", "start_seconds": 0.0, "end_seconds": 0.4}
+        valid_timeline = {
+            "contract_version": "1.0",
+            "audio_asset_id": "narration.mp3",
+            "alignment_method": "Fish Audio timestamp stream",
+            "alignment_level": "word",
+            "audio_duration_seconds": 4.0,
+            "word_timestamps": [source_word],
+            "character_timestamps": [],
+            "phoneme_timestamps": [],
+            "edit_anchors": [],
+            "caption_events": [],
+            "sfx_events": [],
+            "audio_mix_events": [],
+        }
+        plan = {"scenes": [{"voiceover": "Comece agora.", "duration_seconds": 4.0}]}
+        args = {
+            "plan": plan,
+            "narration_audio": {"audio_asset_id": "narration.mp3", "duration_seconds": 4.0},
+            "word_timestamps": [source_word],
+            "model_call": lambda prompt: {},
+        }
+
+        altered = deepcopy(valid_timeline)
+        altered["word_timestamps"][0]["end_seconds"] = 0.9
+        with patch(
+            "nexus.editorial_executors.build_four_brain_executors",
+            return_value={"editor": lambda payload: altered},
+        ):
+            with self.assertRaisesRegex(ValueError, "must be preserved exactly"):
+                run_brain4_for_storyboard(**args)
+
+        phonetic = deepcopy(valid_timeline)
+        phonetic["alignment_level"] = "phoneme"
+        phonetic["phoneme_timestamps"] = [
+            {"text": "k", "start_seconds": 0.0, "end_seconds": 0.1}
+        ]
+        with patch(
+            "nexus.editorial_executors.build_four_brain_executors",
+            return_value={"editor": lambda payload: phonetic},
+        ):
+            with self.assertRaisesRegex(ValueError, "must remain word-level"):
+                run_brain4_for_storyboard(**args)
+
+        caption_hallucination = deepcopy(valid_timeline)
+        caption_hallucination["caption_events"] = [{
+            "id": "caption-1",
+            "start_seconds": 0.0,
+            "end_seconds": 1.0,
+            "text": "Comece",
+            "position": "bottom",
+            "words": [{"text": "Comece", "start_seconds": 0.0, "end_seconds": 0.9}],
+        }]
+        with patch(
+            "nexus.editorial_executors.build_four_brain_executors",
+            return_value={"editor": lambda payload: caption_hallucination},
+        ):
+            with self.assertRaisesRegex(ValueError, "does not match a verified provider word timestamp"):
+                run_brain4_for_storyboard(**args)
+
     def test_brain4_adapter_refuses_unverified_word_timing(self):
         with self.assertRaisesRegex(ValueError, "verified word timestamps"):
             run_brain4_for_storyboard(
