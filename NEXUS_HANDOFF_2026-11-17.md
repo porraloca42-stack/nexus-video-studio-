@@ -638,3 +638,11 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - A tentativa de atualização sem force anteriormente foi rejeitada por não-fast-forward; nenhuma alteração foi perdida. A atualização seguinte usou `force=true` com `expected_sha` da branch, concluindo o force-with-lease.
 - Próxima ação: verificar compare branch/main e abrir PR. Testes/CI ainda pendentes; nenhuma chamada Gemini, deploy, GPU ou render.
 - Timestamp: `2026-11-17T14:25:19-03:00` (UTC−03:00).
+
+
+## Checkpoint — PR de correção Brain 4 aberto — 2026-11-17T14:25:45-03:00 (America/Sao_Paulo)
+- PR #3 aberto: https://github.com/porraloca42-stack/nexus-video-studio-/pull/3 ; título `Fix Brain 4 smoke test with stale Streamlit director module`.
+- Base `main` em `e4040956f742691a8ec0749f9003b0af18c7d3b2`; branch `fix/brain4-reload-director-module` em `29d2fb01101570c3bd6caf6121d1700da8a77659`. PR contém 2 arquivos, 46 adições e 2 remoções; apenas helper e teste.
+- GitHub retornou PR aberto, ainda não merged e mergeable `false` no instante de criação (estado inicial/checagens pendentes; investigar checks e atualizar metadata antes de qualquer merge).
+- CI/testes ainda pendentes. Nenhuma chamada Gemini real, produção, GPU ou render. Próxima ação: consultar workflow disparado pelo PR #3, jobs e logs; corrigir se necessário e não fazer merge antes de CI verde.
+- Timestamp: `2026-11-17T14:25:45-03:00` (UTC−03:00).
