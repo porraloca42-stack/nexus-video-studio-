@@ -60,10 +60,20 @@ def generate_image(
         references = list(reference_images or [])
         if len(references) > 4:
             raise ValueError("FLUX.2 Klein aceita no máximo quatro imagens de referência.")
+        if references and model != VERTICAL_MODEL:
+            raise ValueError("Imagens de referência exigem o modelo FLUX.2 Klein 4B neste adaptador.")
         for index, reference in enumerate(references):
             if not isinstance(reference, bytes) or not reference:
                 raise ValueError(f"Imagem de referência {index} inválida.")
-            files[f"input_image_{index}"] = (f"reference_{index}.png", reference, "image/png")
+            if reference.startswith(b"\\x89PNG\\r\\n\\x1a\\n"):
+                filename, mime_type = f"reference_{index}.png", "image/png"
+            elif reference.startswith(b"\\xff\\xd8\\xff"):
+                filename, mime_type = f"reference_{index}.jpg", "image/jpeg"
+            elif reference[:4] == b"RIFF" and reference[8:12] == b"WEBP":
+                filename, mime_type = f"reference_{index}.webp", "image/webp"
+            else:
+                raise ValueError(f"Imagem de referência {index} não é PNG, JPEG ou WebP.")
+            files[f"input_image_{index}"] = (filename, reference, mime_type)
         response = client.post(url, headers=headers, files=files, timeout=timeout)
     else:
         if not 1 <= int(steps) <= 8:
