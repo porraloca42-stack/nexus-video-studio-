@@ -181,20 +181,20 @@ def open_voice_picker():
 
 @st.dialog("Duração do vídeo", width="small", icon=":material/schedule:")
 def open_duration_picker():
-    st.caption("Escolha o tempo total do vídeo.")
-    st.session_state.setdefault("nexus_duration_choice", int(st.session_state.get("nexus_duration", 45)))
-    chosen = st.pills(
-        "Duração", [40, 45, 50, 60], selection_mode="single",
-        default=st.session_state["nexus_duration_choice"],
-        format_func=lambda value: f"{value}s",
-        key="nexus_duration_choice", width="stretch", wrap=False,
-        label_visibility="collapsed",
-    )
-    chosen = chosen if chosen is not None else st.session_state.get("nexus_duration", 45)
-    if st.button("Confirmar duração", type="primary", width="stretch", key="nexus-confirm-duration"):
-        st.session_state["nexus_duration"] = int(chosen)
-        st.rerun()
-
+    st.caption("Toque no tempo desejado. A escolha é aplicada imediatamente.")
+    current = int(st.session_state.get("nexus_duration", 45))
+    for row in ((40, 45), (50, 60)):
+        cols = st.columns(2, gap="small")
+        for col, seconds in zip(cols, row):
+            with col:
+                if st.button(
+                    f"{seconds}s",
+                    type="primary" if seconds == current else "secondary",
+                    width="stretch",
+                    key=f"nexus-duration-option-{seconds}",
+                ):
+                    st.session_state["nexus_duration"] = seconds
+                    st.rerun()
 
 
 def style_preview_svg(style):
@@ -231,9 +231,11 @@ html,body,.stApp,[data-testid="stAppViewContainer"]{background:#09090B!important
 [data-testid="stSidebar"],[data-testid="collapsedControl"],[data-testid="stHeader"],[data-testid="stToolbar"],[data-testid="manage-app-button"],[data-testid="stFooter"],[data-testid="stBottom"],#MainMenu,header,footer,.stApp>footer,div[class*="viewerBadge"],div[class*="ViewerBadge"],div[class*="viewer-badge"]{display:none!important;visibility:hidden!important;height:0!important;min-height:0!important;padding:0!important;margin:0!important;border:0!important}
 .block-container{padding-top:1rem!important;padding-bottom:8rem!important;max-width:1280px!important}
 .nexus-hero{position:relative;overflow:hidden;padding:1.45rem 1.65rem;border:1px solid #30234d;border-radius:22px;background:linear-gradient(115deg,rgba(24,18,43,.98),rgba(18,18,22,.96) 65%,rgba(30,24,52,.95));box-shadow:0 18px 48px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.06);margin-bottom:1rem}
-.nexus-brand-lockup{display:flex;align-items:center;justify-content:center;gap:.7rem;width:100%;min-width:0;margin:.35rem auto 1.1rem}
-.nexus-brand-lockup .nexus-logo-mark{display:block;width:42px!important;height:48px!important;flex:0 0 42px!important;object-fit:contain;filter:drop-shadow(0 0 8px rgba(167,139,250,.32))}
-.nexus-brand-name{font-family:Georgia,serif!important;font-size:1.7rem!important;letter-spacing:.03em!important;font-weight:700!important;color:#f4f4f5!important;white-space:nowrap}
+.st-key-nexus-header{position:relative!important;min-height:5.2rem!important;margin:0 0 .85rem!important;display:flex!important;align-items:center!important;justify-content:center!important}
+.nexus-brand-lockup{display:flex;align-items:center;justify-content:center;gap:.72rem;width:100%;min-width:0;margin:.2rem auto .35rem}
+.nexus-brand-lockup svg{display:block;width:48px!important;height:58px!important;flex:0 0 48px!important;object-fit:contain;filter:drop-shadow(0 0 10px rgba(167,139,250,.4))}
+.nexus-brand-name{font-family:Georgia,serif!important;font-size:1.8rem!important;letter-spacing:.035em!important;font-weight:700!important;color:#f4f4f5!important;white-space:nowrap}
+.st-key-nexus-header .st-key-nexus-open-settings{position:absolute!important;right:.1rem!important;top:.25rem!important;z-index:5!important;width:42px!important}
 .st-key-nexus-open-settings button{width:42px!important;height:42px!important;min-height:42px!important;border-radius:50%!important;background:#24232b!important;border:1px solid #38343f!important;font-size:1.2rem!important;padding:0!important}
 .nexus-prompt-label,.nexus-section-label{font-size:.78rem;letter-spacing:.12em;font-weight:750;color:#aaa0c5;margin:0 0 .65rem}
 .nexus-control-eyebrow{font-size:.68rem;letter-spacing:.1em;font-weight:750;color:#a78bfa;margin:0 0 .5rem}
@@ -283,21 +285,19 @@ div[data-testid="stButton"] button[kind="primary"]:hover{box-shadow:0 8px 25px r
 [data-testid="stAlert"]{border-radius:13px!important}
 [data-testid="stProgress"]>div>div{background:linear-gradient(90deg,#6366F1,#8B5CF6)!important}
 hr{border-color:#27272A!important}
-@media(max-width:850px){.block-container{padding:.75rem .8rem 8rem!important}.nexus-hero{padding:1rem .7rem;border-radius:17px}.nexus-brand-lockup{gap:.55rem}.nexus-brand-lockup .nexus-logo-mark{width:36px!important;height:42px!important;flex-basis:36px!important}.nexus-brand-name{font-size:1.45rem!important}.nexus-preview-stage{width:min(100%,300px)}.st-key-nexus-compact-controls [data-testid="stButton"] button{font-size:.76rem!important;padding:.5rem .45rem!important}}
+@media(max-width:850px){.block-container{padding:.75rem .8rem 8rem!important}.nexus-hero{padding:1rem .7rem;border-radius:17px}.st-key-nexus-header{min-height:4.6rem!important}.nexus-brand-lockup{gap:.55rem}.nexus-brand-lockup svg{width:42px!important;height:50px!important;flex-basis:42px!important}.nexus-brand-name{font-size:1.5rem!important}.st-key-nexus-header .st-key-nexus-open-settings{right:0!important;top:.1rem!important}.nexus-preview-stage{width:min(100%,300px)}.st-key-nexus-compact-controls [data-testid="stButton"] button{font-size:.76rem!important;padding:.5rem .45rem!important}}
 </style>
 """, unsafe_allow_html=True)
 
-NEXUS_MARK_PATH = """M 957 0 L 833 118 L 831 115 L 841 103 L 779 158 L 773 158 L 778 149 L 760 163 L 696 223 L 694 221 L 711 201 L 677 225 L 675 219 L 680 218 L 683 207 L 679 209 L 671 229 L 661 240 L 661 245 L 653 249 L 650 255 L 639 254 L 636 229 L 633 225 L 634 214 L 627 230 L 627 219 L 623 221 L 618 253 L 613 258 L 613 265 L 604 273 L 608 274 L 605 278 L 610 283 L 606 362 L 609 360 L 611 363 L 606 366 L 605 399 L 608 402 L 605 404 L 599 625 L 525 519 L 533 536 L 525 533 L 509 508 L 517 508 L 519 500 L 504 484 L 518 504 L 516 507 L 510 503 L 508 506 L 508 501 L 503 500 L 499 494 L 501 481 L 458 427 L 454 418 L 460 431 L 459 435 L 454 435 L 462 454 L 457 452 L 445 428 L 446 421 L 431 400 L 431 392 L 417 373 L 401 336 L 346 259 L 340 240 L 339 251 L 317 223 L 312 222 L 294 204 L 290 205 L 284 200 L 286 206 L 283 209 L 268 195 L 263 196 L 286 213 L 297 227 L 294 228 L 275 216 L 266 220 L 246 210 L 248 217 L 241 222 L 242 227 L 233 229 L 240 234 L 237 241 L 224 231 L 231 228 L 186 227 L 170 223 L 26 209 L 86 246 L 84 251 L 87 255 L 80 252 L 84 261 L 78 265 L 99 271 L 108 269 L 111 277 L 132 295 L 130 317 L 133 322 L 133 346 L 137 314 L 140 313 L 143 318 L 142 332 L 144 312 L 150 321 L 150 393 L 146 399 L 141 383 L 141 354 L 134 434 L 138 422 L 141 423 L 142 431 L 139 452 L 142 461 L 143 501 L 140 507 L 139 562 L 145 556 L 145 552 L 150 551 L 151 566 L 152 557 L 160 549 L 161 559 L 152 589 L 148 627 L 143 645 L 140 647 L 137 644 L 137 631 L 133 637 L 135 641 L 131 642 L 130 613 L 128 624 L 122 631 L 104 757 L 101 762 L 101 781 L 95 784 L 84 802 L 90 798 L 92 792 L 100 789 L 143 754 L 146 758 L 142 763 L 161 747 L 158 747 L 160 743 L 166 742 L 167 748 L 179 734 L 183 735 L 191 727 L 193 730 L 167 762 L 172 762 L 166 766 L 156 799 L 139 833 L 133 841 L 132 837 L 128 845 L 133 844 L 140 834 L 146 831 L 97 934 L 127 893 L 122 909 L 125 906 L 129 894 L 133 892 L 135 884 L 145 872 L 146 875 L 138 887 L 140 890 L 125 916 L 124 923 L 119 927 L 119 937 L 114 936 L 110 941 L 107 940 L 80 988 L 88 982 L 51 1055 L 63 1039 L 62 1047 L 67 1048 L 57 1055 L 0 1174 L 73 1062 L 86 1049 L 90 1042 L 90 1030 L 94 1026 L 97 1027 L 96 1030 L 107 1016 L 105 1026 L 125 998 L 131 994 L 126 1013 L 120 1023 L 165 961 L 198 922 L 225 900 L 221 913 L 227 907 L 226 901 L 229 898 L 231 905 L 239 898 L 236 894 L 242 894 L 258 878 L 261 881 L 256 884 L 256 888 L 262 885 L 270 951 L 279 833 L 276 792 L 278 773 L 259 805 L 257 802 L 262 793 L 253 800 L 251 798 L 270 752 L 268 745 L 272 739 L 268 734 L 267 725 L 270 720 L 273 722 L 271 730 L 274 735 L 327 644 L 311 659 L 308 656 L 360 589 L 388 626 L 385 630 L 376 622 L 388 636 L 396 640 L 395 647 L 404 653 L 415 669 L 435 688 L 423 670 L 419 660 L 420 657 L 423 658 L 436 681 L 466 715 L 487 751 L 491 751 L 497 758 L 495 770 L 486 767 L 460 735 L 467 747 L 466 751 L 477 760 L 503 796 L 503 805 L 508 804 L 514 810 L 527 835 L 534 835 L 543 846 L 514 803 L 516 799 L 522 804 L 536 827 L 520 800 L 521 796 L 527 798 L 540 820 L 553 836 L 561 840 L 563 848 L 580 874 L 597 894 L 601 914 L 623 941 L 649 981 L 643 959 L 666 986 L 692 1025 L 674 984 L 678 980 L 686 987 L 673 961 L 674 957 L 678 956 L 690 979 L 695 976 L 695 982 L 700 989 L 691 990 L 698 997 L 714 1027 L 729 1066 L 731 1060 L 735 1064 L 734 1082 L 741 1105 L 738 1045 L 734 1028 L 735 993 L 728 970 L 731 923 L 727 918 L 728 898 L 731 897 L 733 923 L 738 935 L 736 940 L 740 944 L 744 967 L 741 879 L 744 873 L 744 834 L 741 820 L 736 815 L 737 810 L 731 801 L 731 767 L 726 763 L 726 758 L 731 756 L 735 629 L 738 623 L 742 627 L 747 619 L 751 623 L 752 634 L 758 639 L 759 657 L 754 671 L 758 720 L 764 680 L 768 682 L 765 694 L 767 703 L 769 683 L 764 676 L 764 651 L 768 625 L 768 582 L 773 550 L 778 548 L 777 555 L 780 551 L 780 543 L 776 547 L 772 538 L 775 483 L 781 468 L 783 448 L 779 405 L 776 413 L 772 494 L 764 543 L 757 560 L 750 551 L 747 522 L 744 525 L 742 522 L 747 506 L 743 484 L 745 454 L 766 405 L 769 408 L 761 433 L 769 417 L 769 409 L 779 380 L 781 385 L 788 349 L 802 323 L 809 302 L 816 268 L 823 261 L 820 259 L 821 252 L 818 254 L 814 270 L 810 274 L 807 273 L 814 258 L 803 277 L 797 283 L 794 282 L 771 313 L 771 326 L 767 325 L 767 319 L 763 323 L 760 321 L 766 310 L 742 339 L 737 339 L 746 328 L 747 320 L 781 265 L 782 258 L 790 246 L 787 245 L 801 230 L 820 199 L 813 207 L 811 203 L 825 185 L 831 183 L 849 154 L 814 187 L 812 186 L 844 144 L 850 133 L 848 127 L 852 128 L 877 101 L 922 41 L 938 26 L 939 19 L 941 22 L 958 3 Z"""
+NEXUS_MARK_SVG = (Path(__file__).parent / "assets" / "nexus-mark.svg").read_text(encoding="utf-8")
 
-header_left, header_brand, header_settings = st.columns([1, 4, 1], vertical_alignment="center")
-with header_brand:
+with st.container(key="nexus-header"):
     st.markdown(f"""
     <div class="nexus-brand-lockup">
-      <svg class="nexus-logo-mark" viewBox="0 0 958 1174" role="img" aria-label="Símbolo N NEXUS"><path d="{NEXUS_MARK_PATH}" fill="#F7F5FA"/></svg>
+      {NEXUS_MARK_SVG}
       <span class="nexus-brand-name">NEXUS</span>
     </div>
     """, unsafe_allow_html=True)
-with header_settings:
     if st.button("⚙", key="nexus-open-settings", help="Abrir perfil e configurações"):
         st.session_state["nexus_navigation"] = "♙ Perfil"
 
