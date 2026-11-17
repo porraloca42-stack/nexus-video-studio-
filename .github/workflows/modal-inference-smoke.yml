@@ -1,0 +1,40 @@
+name: NEXUS Modal inference smoke test
+run-name: NEXUS Modal paid smoke test (manual)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  modal-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Modal CLI and smoke-test dependencies
+        run: |
+          python -m pip install --upgrade modal pillow
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+      - name: Run one-scene LTX inference smoke test
+        env:
+          MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+          MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+        run: |
+          test -n "$MODAL_TOKEN_ID"
+          test -n "$MODAL_TOKEN_SECRET"
+          python scripts/modal_smoke_test.py
+      - name: Upload LTX smoke-test MP4 and report
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexus-ltx-smoke-test
+          path: modal-smoke-output/*
+          if-no-files-found: error
+          retention-days: 3
