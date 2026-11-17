@@ -7,6 +7,8 @@ from nexus.editorial_pipeline import (
     validate_hook_strategy,
     validate_micro_script,
     validate_visual_direction,
+    micro_script_advisories,
+    run_four_brain_pipeline,
 )
 
 
@@ -191,6 +193,73 @@ class EditorialPipelineContractTests(unittest.TestCase):
         from nexus.editorial_pipeline import validate_editorial_pipeline
         errors = validate_editorial_pipeline(pipeline)
         self.assertTrue(any("selected hook must appear" in error for error in errors["micro_script"]))
+
+
+    def test_micro_script_duration_guidance_is_advisory(self):
+        data = valid_micro_script()
+        data["blocks"][0]["target_duration_seconds"] = 4.2
+        self.assertEqual(validate_micro_script(data), [])
+        self.assertTrue(any("outside the preferred 2.5–3.5s range" in item for item in micro_script_advisories(data)))
+
+    def test_edit_anchor_must_match_word_timestamp_and_location(self):
+        data = valid_edit_timeline()
+        data["edit_anchors"][0]["trigger_text"] = "tempo"
+        self.assertTrue(any("no matching aligned word" in error for error in validate_edit_timeline(data)))
+        data = valid_edit_timeline()
+        data["edit_anchors"][0]["at_seconds"] = 2.0
+        self.assertTrue(any("falls outside the aligned trigger word" in error for error in validate_edit_timeline(data)))
+
+    def test_injected_four_brain_runner_executes_in_order_without_network(self):
+        calls = []
+        audio = {"audio_asset_id": "narration-final.wav", "duration_seconds": 6.0}
+
+        def strategist(brief):
+            calls.append(("brain1", brief["topic"]))
+            return valid_hook_strategy()
+
+        def scriptwriter(payload):
+            calls.append(("brain2", payload["hook_strategy"]["selected_hook_type"]))
+            return valid_micro_script()
+
+        def photographer(payload):
+            calls.append(("brain3", len(payload["micro_script"]["blocks"])))
+            return valid_visual_direction()
+
+        def editor(payload):
+            calls.append(("brain4", payload["narration_audio"]["audio_asset_id"]))
+            return valid_edit_timeline()
+
+        result = run_four_brain_pipeline(
+            {"topic": "teste"},
+            strategist=strategist,
+            scriptwriter=scriptwriter,
+            photographer=photographer,
+            editor=editor,
+            narration_audio=audio,
+        )
+        self.assertEqual([item[0] for item in calls], ["brain1", "brain2", "brain3", "brain4"])
+        self.assertEqual(result["narration_audio"], audio)
+        self.assertEqual(result["edit_timeline"]["audio_asset_id"], audio["audio_asset_id"])
+
+    def test_injected_runner_stops_when_a_brain_fails_validation(self):
+        calls = []
+
+        def strategist(brief):
+            calls.append("brain1")
+            result = valid_hook_strategy()
+            result["hook_candidates"] = []
+            return result
+
+        with self.assertRaisesRegex(ValueError, "Brain 1 rejected"):
+            run_four_brain_pipeline(
+                {"topic": "teste"},
+                strategist=strategist,
+                scriptwriter=lambda payload: calls.append("brain2"),
+                photographer=lambda payload: calls.append("brain3"),
+                editor=lambda payload: calls.append("brain4"),
+                narration_audio={"audio_asset_id": "audio.wav", "duration_seconds": 6.0},
+            )
+        self.assertEqual(calls, ["brain1"])
 
     def test_full_pipeline_reports_each_brain_independently(self):
         pipeline = {
