@@ -1447,3 +1447,8 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Compatibilidade com os nomes antigos “Cinematográfico realista” e “Anime 2D” permanece oculta na seleção, apenas para storyboards existentes.
 - Commits: `672277f` (perfis sem motivos narrativos), `e24c786` (amostras abstratas na galeria).
 - Revisão estática confirmou ausência dos termos de exemplo conhecidos nos perfis e remoção do catálogo de mini-cenas do app. GitHub Actions run `43989176956` acionado; aguardando testes.
+
+
+## Ajuste final do teste de gramática cósmica — 17/11/2026
+- A primeira execução após remover exemplos aprovou 98 de 99 testes; a única falha era uma expectativa antiga que exigia a palavra “geometric”, removida intencionalmente para não transformar um motivo visual em parte obrigatória do estilo. O teste agora verifica “luminous contrast”, característica formal preservada no perfil.
+- Commit do ajuste: `3cfbaeb`. Novo ciclo de CI acionado; resultado pendente.
