@@ -39,7 +39,8 @@ CENAS:
 - Decida a quantidade a partir da duração e da progressão narrativa. Use pelo menos ceil(duração/5) cenas e prefira ceil(duração/4) ou mais: 50s normalmente 12–15 cenas; 40s 10–12; 60s 15–18.
 - Cada cena representa uma unidade narrativa e uma ação concreta. As durações são estimativas: o sistema medirá a voz selecionada e distribuirá a duração real entre as cenas. Não sacrifique a narrativa para tentar fazer a soma matemática.
 - Cada cena deve representar exatamente o trecho narrado com ação, objeto, pessoa, ambiente ou processo diretamente relacionado. Não use cenas genéricas só porque combinam com a emoção.
-- Para image-to-video, gere também `video_motion_prompt` em inglês: uma única tomada contínua de 2–5 segundos, com 1–3 movimentos físicos concretos e observáveis, indicando quem/o que se move, direção e ritmo. Preserve a identidade, o rosto, a roupa, o cenário e a composição da imagem-base; não introduza novos sujeitos, objetos, cortes ou mudanças de cena. Evite instruções abstratas como "make it cinematic".
+- A `image_prompt` deve criar o QUADRO INICIAL de uma ação que ainda vai acontecer: pose de partida, mãos e objetos importantes visíveis, espaço físico para o gesto e enquadramento que permita perceber a ação. Não use retrato posado ou personagem apenas olhando para a câmera quando a cena pede uma ação.
+- Para image-to-video, `video_motion_prompt` em inglês é obrigatório. A imagem já informa aparência e cenário: NÃO repita a descrição estática da imagem. Descreva somente o que muda ao longo de uma tomada contínua de 2–5 segundos, em parágrafo natural e cronológico: movimento inicial, desenvolvimento físico e estado final. Escolha UMA ação principal observável (por exemplo, a mão alcança a maçaneta, gira e abre a porta; a pessoa se levanta e dá dois passos), podendo acrescentar um movimento secundário do ambiente. Diga quem/o que se move, direção, ritmo e consequência visível. A câmera é secundária à ação e deve ter no máximo um movimento simples. Preserve identidade, rosto, roupa, cenário e composição; não introduza sujeitos/objetos, cortes ou mudanças de cena. Não use adjetivos vagos, instruções abstratas ou câmera em movimento como substituto de ação física.
 - Leia e compreenda o roteiro inteiro antes de planejar cenas. Identifique ideia central, progressão, afirmações, exemplos e emoção de cada trecho.
 - Priorize ações filmáveis e específicas. Evite slideshows, colagens, infográficos escolares, imagens abstratas sem função e repetição de enquadramentos.
 - Cada cena precisa de busca visual própria, derivada da ação, objeto, ambiente e significado EXATOS daquele trecho. Nunca reutilize conjunto fixo de palavras-chave nem force objetos que não estejam no roteiro. Buscas principal e alternativa devem ser distintas, concretas, em inglês. A consulta deve descrever o que a câmera verá literalmente (sujeito + ação + objeto/ambiente), nunca conceitos abstratos como sucesso, mudança, motivação ou medo isolados. Se a fala for abstrata, crie uma ação humana específica que demonstre a ideia, sem usar paisagens genéricas como substituto.
@@ -59,7 +60,7 @@ Para cada cena, entregue também um objeto scene_direction estruturado. Não use
   "atmosphere": {"effect":"none|dust|rain|fog|embers|particles","intensity":0.0},
   "transition": {"in":"cut|crossfade|match_cut|fade","out":"cut|crossfade|match_cut|fade","duration_frames":0},
   "beats": [{"at":0.0,"event":"...","visual_target":"..."}]
-Use intensity entre 0.65 e 0.95 para cenas com ação; start_scale entre 1.03 e 1.08 e end_scale entre 1.18 e 1.25, salvo quando pull_out justificar o inverso. Use pan/tilt de forma alternada entre cenas vizinhas; evite repetir o mesmo movimento em mais de duas cenas seguidas. No máximo 3 beats por cena, com at entre 0 e 1, e posicione-os em momentos que correspondam à fala. Cada motion_event deve descrever um microevento visual observável e específico, não adjetivos vagos. Só escolha efeitos coerentes com o que realmente aparece na cena. Em imagens únicas, descreva movimento de câmera, profundidade e atmosfera; não prometa animação realista de corpo/objeto sem camada separada ou vídeo-fonte. O Remotion usa os beats/motion_events para pulsos de câmera e acentos gráficos; isso não substitui image-to-video para movimento orgânico de personagens. Mantenha fallback seguro: push_in, dust leve ou none, cut.
+Para cenas destinadas ao LTX, o movimento físico deve estar no `video_motion_prompt`; o Remotion não deve acrescentar zoom, shake ou pulsos sobre o clipe gerado. `scene_direction.camera` só orienta movimento digital quando houver fallback de imagem estática. Não imponha zoom por padrão: prefira escala 1.0→1.0 e use movimento digital somente quando houver intenção editorial clara. Use pan/tilt de forma alternada entre cenas vizinhas apenas quando fizer sentido. No máximo 3 beats por cena, com at entre 0 e 1. Cada motion_event deve ser observável e específico. Não prometa animação de corpo/objeto por meio de efeitos gráficos.
 
 Retorne somente JSON válido:
 {
@@ -77,8 +78,8 @@ Retorne somente JSON válido:
    "purpose":"...",
    "voiceover":"trecho contínuo do roteiro integral",
    "visual_action":"ação específica e observável, em sequência",
-   "image_prompt":"English image-generation prompt, concrete cinematic scene, 9:16 vertical composition, no text or typography, preserve the global visual style",
-   "video_motion_prompt":"English image-to-video prompt for one continuous 2–5 second shot, with specific natural physical movement and camera motion, preserving the exact subject identity and scene",
+   "image_prompt":"English image-generation prompt for the opening frame of a concrete physical action, cinematic 9:16 composition, visible hands/props and room for movement, no text or typography, preserve global visual style",
+   "video_motion_prompt":"Required English chronological image-to-video prompt for one continuous 2–5 second shot; describe only physical changes after the supplied first frame, with a clear start, middle and end; one main observable action and at most one secondary environmental motion; camera movement secondary; preserve subject identity and scene",
    "visual_style":"estilo visual aplicado nesta cena",
    "style_search_terms":"English visual-style terms to append to the scene search",
    "semantic_reason":"relação direta entre a fala e a imagem",
@@ -87,7 +88,7 @@ Retorne somente JSON válido:
    "shot_type":"...",
    "camera_motion":"push_in, pull_out, pan_left, pan_right, tilt_up ou tilt_down",
    "motion_events":["microevento 1","microevento 2"],
-   "scene_direction":{"camera":{"move":"push_in","intensity":0.82,"start_scale":1.04,"end_scale":1.22,"focus":"subject"},"depth_layers":{"foreground":"...","subject":"...","background":"...","parallax_strength":0.2},"lighting":{"mood":"...","key_direction":"...","change":"none"},"atmosphere":{"effect":"none","intensity":0.0},"transition":{"in":"cut","out":"cut","duration_frames":0},"beats":[{"at":0.35,"event":"...","visual_target":"..."}]},
+   "scene_direction":{"camera":{"move":"static","intensity":0.0,"start_scale":1.0,"end_scale":1.0,"focus":"subject"},"depth_layers":{"foreground":"...","subject":"...","background":"...","parallax_strength":0.2},"lighting":{"mood":"...","key_direction":"...","change":"none"},"atmosphere":{"effect":"none","intensity":0.0},"transition":{"in":"cut","out":"cut","duration_frames":0},"beats":[{"at":0.35,"event":"...","visual_target":"..."}]},
    "asset_search_query":"English query with concrete subject and action",
    "fallback_search_query":"different concrete English query"
   }
@@ -839,9 +840,11 @@ def validate_storyboard(plan, requested_duration=None):
         errors.append(f"O diretor criou {len(scenes)} cenas, mas são necessárias pelo menos {minimum_scenes} para cobrir {requested_duration}s sem segmentos longos.")
     for index, scene in enumerate(scenes, 1):
         total += float(scene.get("duration_seconds", 0) or 0)
-        for field in ("voiceover", "visual_action", "image_prompt", "semantic_reason", "camera_motion", "asset_search_query", "visual_style", "style_search_terms"):
+        for field in ("voiceover", "visual_action", "image_prompt", "video_motion_prompt", "semantic_reason", "camera_motion", "asset_search_query", "visual_style", "style_search_terms"):
             if not str(scene.get(field, "")).strip():
                 errors.append(f"Cena {index}: campo {field} vazio.")
+        if len(str(scene.get("video_motion_prompt", "")).strip()) < 40:
+            errors.append(f"Cena {index}: prompt de movimento LTX ausente ou curto demais.")
         if len(scene.get("semantic_reason", "")) < 80:
             errors.append(f"Cena {index}: justificativa semântica insuficiente.")
         if len(scene.get("motion_events", [])) < 2:
