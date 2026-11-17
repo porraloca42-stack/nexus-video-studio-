@@ -462,3 +462,11 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - CI #1037: 206 testes Python, typecheck e Commons smoke passaram. Hook worker testado com executor mockado; fluxo padrão continua disabled.
 - `scripts/validate_remotion_render.py` agora usa `run_brain4_for_storyboard()` e timeline simulada validada antes de gerar manifest e MP4 sintético; nenhum modelo/API externo.
 - Commit `e1f8737447fe14fb7114617dc9681200bf5742f0`. Próximo: executar com marcador `[run-remotion-validation]` e verificar MP4, captions, SFX e ducking.
+
+
+## Resultado — render sintético ponta a ponta Brain 4 → Remotion — 17/11/2026
+- CI #1045 passou integralmente: 206 testes Python, typecheck, Commons smoke e render sintético.
+- Timeline Brain 4 determinística/mockada passou pelo adapter real, manifest e Remotion. MP4 H.264/AAC, 4.011s.
+- Medidas: palavras destacadas 2249/1773 pixels dourados; caption off 0; música -36.1 dB antes, -50.6 dB ducked, -36.1 dB depois (14.5 dB de redução); SFX -45.7 dB antes, -30.0 dB ativo (15.7 dB acima). Artifact #14343349831.
+- Workflow demo #121 passou (adapter Python → Remotion + FFprobe). Demo 50s manual skipped.
+- Validação ainda é sintética e mockada; Gemini real/produção não habilitados. Próximo: revisão visual do artifact e preparar plano de integração Gemini com orçamento aprovado.
