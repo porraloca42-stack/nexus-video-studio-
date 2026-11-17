@@ -2137,3 +2137,13 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 ## Execução autorizada do render sintético Brain 4 — 17/11/2026
 - Solicitação de execução CPU-only do workflow de validação sintética após o script passar a construir a timeline via adapter Brain 4 mockado. Não usa APIs pagas, GPU, assets de produção ou serviços externos.
 - Este commit aciona `remotion-synthetic-render` por meio do marcador obrigatório no título do commit. Resultado pendente; não declarar render validado até logs e artifact serem conferidos.
+
+
+## Render sintético Brain 4 → Remotion aprovado — 17/11/2026
+- CI #1045 / run `44119522517`, commit `b1d6231a5f2387ff4efdc9f14c0503fba1e0a7f0`: todos os jobs passaram — 206 testes Python, Remotion typecheck, Commons live smoke e `remotion-synthetic-render`.
+- O script executou `run_brain4_for_storyboard()` com resposta determinística mockada, validou o contrato e enviou a timeline a `build_remotion_manifest()`; Remotion renderizou MP4 H.264 com áudio AAC, duração 4.011s.
+- Verificações do MP4: destaque palavra 1 = 2249 pixels dourados; palavra 2 = 1773; legenda desligada = 0. Música: -36.1 dB antes, -50.6 dB durante ducking (redução 14.5 dB), -36.1 dB depois. SFX: -45.7 dB antes e -30.0 dB ativo (aumento 15.7 dB). Todas as asserções passaram.
+- Artifact `nexus-remotion-synthetic-validation` ID `14343349831`, 196246 bytes, retenção até 24/11/2026.
+- Workflow demo #121 / run `44119421068` também passou: repetiu adapter Python → Remotion e validação FFprobe. Demo manual de 50s permaneceu skipped.
+- Estado: caminho sintético completo Brain4 adapter (mock) → manifest → Remotion MP4 está validado para captions, word highlight, SFX e ducking/fades. Ainda não é saída de Gemini real, nem vídeo com assets reais, nem implantação do Brain 4 em produção.
+- Próximo: revisar visualmente o artifact MP4 e então planejar a integração Gemini real com autorização de orçamento explícita; manter default-off.
