@@ -31,6 +31,7 @@ def generate_image(
     steps=4,
     width=512,
     height=910,
+    reference_images=None,
     timeout=180,
     session=None,
 ):
@@ -51,16 +52,19 @@ def generate_image(
         if not 256 <= int(width) <= 1920 or not 256 <= int(height) <= 1920:
             raise ValueError("A resolução de imagem deve ficar entre 256 e 1920 pixels.")
         # FLUX.2 klein 4B requires multipart/form-data and has a fixed 4-step inference.
-        response = client.post(
-            url,
-            headers=headers,
-            files={
-                "prompt": (None, prompt.strip()),
-                "width": (None, str(int(width))),
-                "height": (None, str(int(height))),
-            },
-            timeout=timeout,
-        )
+        files = {
+            "prompt": (None, prompt.strip()),
+            "width": (None, str(int(width))),
+            "height": (None, str(int(height))),
+        }
+        references = list(reference_images or [])
+        if len(references) > 4:
+            raise ValueError("FLUX.2 Klein aceita no máximo quatro imagens de referência.")
+        for index, reference in enumerate(references):
+            if not isinstance(reference, bytes) or not reference:
+                raise ValueError(f"Imagem de referência {index} inválida.")
+            files[f"input_image_{index}"] = (f"reference_{index}.png", reference, "image/png")
+        response = client.post(url, headers=headers, files=files, timeout=timeout)
     else:
         if not 1 <= int(steps) <= 8:
             raise ValueError("FLUX.1-schnell aceita de 1 a 8 steps neste adaptador.")
@@ -119,16 +123,35 @@ def generate_image(
     }
 
 
-def generate_scene_images(scenes, output_dir, *, steps=6, **kwargs):
-    """Generate one image per scene from each scene's image_prompt field."""
+def generate_scene_images(scenes, output_dir, *, steps=6, visual_continuity=None, **kwargs):
+    """Generate scene keyframes, optionally conditioning all scenes on one character reference."""
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     results = []
+    reference_images = []
+    reference_path = None
+    continuity = visual_continuity if isinstance(visual_continuity, dict) else {}
+    character_prompt = str(continuity.get("character_reference_prompt") or "").strip()
+    lead_character = str(continuity.get("lead_character") or "").strip().lower()
+    if character_prompt and lead_character not in {"none", "nenhum"}:
+        reference_path = output_dir / "character_reference.png"
+        reference_result = generate_image(
+            character_prompt, reference_path, width=448, height=448, **kwargs
+        )
+        reference_path = Path(reference_result["path"])
+        reference_images = [reference_path.read_bytes()]
     for index, scene in enumerate(scenes, start=1):
-        prompt = scene.get("image_prompt") or scene.get("visual_action") or ""
+        prompt = str(scene.get("image_prompt") or scene.get("visual_action") or "").strip()
+        if reference_images:
+            prompt = (
+                "Use input image 0 as the exact identity reference for the recurring lead character. "
+                "Preserve the same face, hair, age, skin tone, body type and base clothing; "
+                "do not copy its pose or background. Follow the new scene action, camera framing and setting. "
+                + prompt
+            )
         destination = output_dir / f"scene_{index:02d}.png"
         try:
-            result = generate_image(prompt, destination, steps=steps, **kwargs)
+            result = generate_image(prompt, destination, steps=steps, reference_images=reference_images, **kwargs)
         except CloudflareAIError as exc:
             # Workers AI may reject a generated output even when the request is valid.
             # Retry only moderation code 3030, once, with a conservative editorial framing.
@@ -142,7 +165,7 @@ def generate_scene_images(scenes, output_dir, *, steps=6, **kwargs):
                 "setting, subject, and benign action described here: " + str(prompt).strip()
             )
             try:
-                result = generate_image(safe_prompt, destination, steps=steps, **kwargs)
+                result = generate_image(safe_prompt, destination, steps=steps, reference_images=reference_images, **kwargs)
                 result["moderation_retry"] = True
             except CloudflareAIError as retry_exc:
                 raise CloudflareAIError(
@@ -151,5 +174,7 @@ def generate_scene_images(scenes, output_dir, *, steps=6, **kwargs):
                     "Revise o image_prompt/visual_action dessa cena no planejamento."
                 ) from retry_exc
         result["scene_index"] = index
+        result["continuity_reference_used"] = bool(reference_images)
+        result["continuity_reference_path"] = str(reference_path) if reference_path else None
         results.append(result)
     return results
