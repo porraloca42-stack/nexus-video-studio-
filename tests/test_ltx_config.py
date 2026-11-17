@@ -2,6 +2,8 @@ import unittest
 
 from nexus.ltx_config import (
     GPU_RATE_USD_PER_SECOND,
+    GPU_COST_BUDGET_USD,
+    SCALEDOWN_WINDOW_SECONDS,
     GPU_TYPE,
     INFERENCE_STEP_COUNT,
     MODEL_CHECKPOINT,
@@ -23,6 +25,8 @@ class LTXPipelineConfigTests(unittest.TestCase):
         self.assertTrue(MODEL_CODE_REVISION.startswith("50f0aef"))
         self.assertEqual(GPU_TYPE, "L40S")
         self.assertLess(GPU_RATE_USD_PER_SECOND, 0.0006)
+        self.assertEqual(GPU_COST_BUDGET_USD, 0.42)
+        self.assertEqual(SCALEDOWN_WINDOW_SECONDS, 5)
         self.assertEqual(INFERENCE_STEP_COUNT, 10)
 
     def test_uses_official_multiscale_7_plus_3_schedule_and_upscaler(self):
