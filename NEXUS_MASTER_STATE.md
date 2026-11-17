@@ -1850,3 +1850,13 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - A adaptação NEXUS registrada mantém 9:16, clipes de 2–5s, Fish Audio como voz oficial, descarte do áudio LTX e composição Remotion.
 - Testes em `tests/test_ltx25_workflow_manifest.py` protegem a revisão fixada, a distinção visual/API e os requisitos de adaptação.
 - Commits: `dbbaf1b` (manifesto) e `71d5a61` (testes). A execução CI do commit ainda precisa ser consultada; nenhum modelo foi baixado e nenhuma GPU/ComfyUI foi iniciada.
+
+
+### Correção da suíte e validação CI — 17/11/2026
+- O primeiro CI do contrato comum encontrou um teste desatualizado em `tests/test_visual_review_normalization.py`: o fixture da auditoria multimodal usava apenas um quadro e omitia `motion_progression_score`, `action_observed` e `continuity_score`, embora a auditoria agora avalie três quadros temporais e esses campos façam parte do contrato. O código de produção normalizou corretamente campos ausentes como zero; o teste ainda esperava valores antigos.
+- Corrigido o fixture para fornecer início/meio/fim e todos os campos de resposta esperados, incluindo a progressão temporal. A correção alterou apenas o teste, não a lógica de auditoria.
+- Um primeiro commit de fixture ainda falhou por apontar para o bloco de texto temporal em vez da primeira parte `inlineData`; a asserção foi corrigida para localizar a parte de imagem pelo campo, sem depender da posição no array.
+- Commit final do ajuste de teste: `6731ed3` (precedido por `1016215`).
+- CI GitHub Actions #878, run `44091549701`, commit `6731ed34867b08b1c63f62354167c200f854811b`: **148 testes Python passaram**; `remotion-typecheck` passou; `commons-live-smoke` passou. Execução concluída com sucesso.
+- A validação acima cobre o HEAD `6731ed3`. Commits documentais posteriores podem disparar nova execução e devem ser verificados separadamente.
+- Investigação do export API: a implementação oficial do ComfyUI frontend `graphToPrompt` (revisão `196dd85cde3314dffdc33b41caa3e5d9be432ffb`) expande subgrafos via `ExecutableNodeDTO.getInnerNodes()`, resolve conexões/widget values e emite `class_type` + `inputs`. Isso confirma que o grafo visual com seis subgrafos não pode ser convertido por simples renomeação de campos; a exportação/API deve preservar a resolução de conexões e nós internos.
