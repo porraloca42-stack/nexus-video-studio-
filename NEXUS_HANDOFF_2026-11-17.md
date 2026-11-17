@@ -913,3 +913,10 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - Estado: implementação na branch e revisão estática concluídas; CI dos jobs executados aprovado; PR aberta, não mergeada; não implantada. Main e deployments existentes permanecem inalterados.
 - Nenhum deploy Modal, smoke de inferência, GPU, Cloudflare, Fish Audio, Gemini ou render foi acionado. Nenhum custo variável adicional gerado.
 - Próxima ação: aguardar autorização explícita para merge; após eventual merge, deploy e inferência continuam sendo operações independentes e exigem autorização própria.
+
+## PR #11 — sincronização da branch e reteste aprovados — 2026-11-17T18:13:47-03:00 (America/Sao_Paulo)
+- Para incorporar os três commits documentais recentes da main sem perder o trabalho da PR, a branch `safety/separate-modal-deploy-smoke` foi sincronizada com a main por merge commit `8ad700537fae41199f1b506a5fc68b74173ed5d9`. A comparação `main...branch` confirmou 4 commits à frente e 0 atrás; os únicos arquivos divergentes são os dois workflows Modal e o registro correspondente no Master State.
+- CI #1182 / run `44177472367`, novo head `8ad700537fae41199f1b506a5fc68b74173ed5d9`: `unit-tests` success, `commons-live-smoke` success e `remotion-typecheck` success; `remotion-synthetic-render` skipped.
+- O resultado verde no novo head confirma novamente os jobs executados após a sincronização. Não valida deploy Modal, inferência GPU ou render de produção.
+- PR #11 permanece aberta, não mergeada e não implantada. Nenhuma operação paga foi iniciada.
+- Próxima ação: aguardar autorização explícita para integrar a PR. Deploy Modal e inferência smoke permanecem operações separadas, cada uma com autorização própria.
