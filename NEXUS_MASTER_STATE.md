@@ -2132,3 +2132,8 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Testes confirmam o hook `apply_optional_brain4()` com executor injetado e status `disabled` no relatório padrão do worker.
 - Script `scripts/validate_remotion_render.py` atualizado para gerar timeline Brain 4 determinística via `run_brain4_for_storyboard()` com callable simulado e então renderizar MP4 via Remotion. Exercita contrato, preservação de word timestamps, captions, SFX, ducking e fades sem Gemini/Fish/Cloudflare/Modal.
 - Commit `e1f8737447fe14fb7114617dc9681200bf5742f0`; próximo passo é rodar workflow sintético com marcador `[run-remotion-validation]` e inspecionar resultado/artifact.
+
+
+## Execução autorizada do render sintético Brain 4 — 17/11/2026
+- Solicitação de execução CPU-only do workflow de validação sintética após o script passar a construir a timeline via adapter Brain 4 mockado. Não usa APIs pagas, GPU, assets de produção ou serviços externos.
+- Este commit aciona `remotion-synthetic-render` por meio do marcador obrigatório no título do commit. Resultado pendente; não declarar render validado até logs e artifact serem conferidos.
