@@ -1501,3 +1501,11 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 
 - Validação CI: GitHub Actions run `43991873374` do commit `988ab9a` concluiu com sucesso nos três jobs. `unit-tests` passou em 99 testes (`Ran 99 tests ... OK`), `remotion-typecheck` e `commons-live-smoke` também passaram.
 - Isso valida regressões automatizadas e a compilação/testes do repositório; não comprova que os seletores CSS renderizem como carrossel no navegador móvel nem que os popovers tenham a ergonomia visual desejada. A confirmação visual permanece pendente.
+
+## Correção real do overflow mobile — 17/11/2026
+- As novas capturas do usuário demonstraram que o CSS adicionado no commit `988ab9a` não criou o carrossel: os chips ainda quebravam em linhas e as regras `width:max-content` em descendentes genéricos faziam o documento inteiro transbordar horizontalmente, cortando os controles de voz/duração e a prévia.
+- Correção incremental: removidas as regras CSS que manipulavam a estrutura interna de `st.pills` e de `st.columns/st.popover`. O seletor agora usa o comportamento nativo oficial `st.pills(..., width="stretch", wrap=False)`, que mantém as opções numa linha e fornece rolagem horizontal dentro do próprio widget.
+- Dependência mínima atualizada de `streamlit>=1.40` para `streamlit>=1.64.0`, versão cuja API documenta o parâmetro `wrap` de `st.pills`. Referência: documentação oficial do widget `st.pills`.
+- Narração e duração mantêm os dois popovers em colunas; ao remover o CSS que ampliava os ancestrais, os controles deixam de herdar largura artificial. Não foi introduzida rolagem horizontal global nem largura fixa na página.
+- Commits: `75870c1` (remoção do CSS invasivo e uso de wrap=False) e `dbd2738` (mínimo Streamlit 1.64.0).
+- Estado: código e dependência gravados em `main`. GitHub Actions run `43992412802` do commit `75870c1` e run `43992420470` do commit de dependência `dbd2738` foram acionados; confirmar os resultados. A validação visual no Streamlit mobile permanece pendente até nova captura do usuário.
