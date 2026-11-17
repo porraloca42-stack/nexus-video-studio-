@@ -39,6 +39,10 @@ MINUTES = 60
 FPS = 24
 WIDTH = 512
 HEIGHT = 896
+INFERENCE_STEPS = 50
+GUIDANCE_SCALE = 5.0
+DECODE_TIMESTEP = 0.05
+IMAGE_COND_NOISE_SCALE = 0.025
 
 
 def frames_for_duration(seconds):
@@ -112,8 +116,10 @@ class Inference:
                 height=HEIGHT,
                 num_frames=frame_count,
                 frame_rate=FPS,
-                num_inference_steps=50,
-                guidance_scale=3.0,
+                num_inference_steps=INFERENCE_STEPS,
+                guidance_scale=GUIDANCE_SCALE,
+                decode_timestep=DECODE_TIMESTEP,
+                image_cond_noise_scale=IMAGE_COND_NOISE_SCALE,
             ).frames[0]
 
             output_path = Path(f"/tmp/nexus-scene-{index:02d}-{seed}.mp4")
@@ -135,8 +141,10 @@ class Inference:
                 "model_load_seconds": self.model_load_seconds,
                 "batch_wall_seconds": round(time.monotonic() - batch_started, 3),
                 "gpu_name": self.gpu_name,
-                "num_inference_steps": 50,
-                "guidance_scale": 3.0,
+                "num_inference_steps": INFERENCE_STEPS,
+                "guidance_scale": GUIDANCE_SCALE,
+                "decode_timestep": DECODE_TIMESTEP,
+                "image_cond_noise_scale": IMAGE_COND_NOISE_SCALE,
             })
             self.torch.cuda.empty_cache()
         return results
