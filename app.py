@@ -132,13 +132,15 @@ def open_voice_picker():
     if not api_key:
         st.warning("A narração ainda não está conectada. Configure FISH_API_KEY nos Secrets do Streamlit.")
         return
+
     catalog_key = "nexus_curated_voice_catalog_v1"
     if catalog_key not in st.session_state:
         try:
-            with st.spinner("Carregando o catálogo de vozes..."):
+            with st.spinner("Carregando as 40 vozes cadastradas..."):
                 st.session_state[catalog_key] = fish_audio.list_curated_voice_catalog(api_key, max_workers=8)
         except Exception as exc:
             st.session_state[catalog_key] = {"error": str(exc)}
+
     catalog = st.session_state[catalog_key]
     if isinstance(catalog, dict) and catalog.get("error"):
         st.error(f"Não foi possível carregar as vozes: {catalog['error']}")
@@ -146,37 +148,44 @@ def open_voice_picker():
             st.session_state.pop(catalog_key, None)
             st.rerun()
         return
-    voice_items = []
-    for category in ("CapCut", "ElevenLabs", "Licenciadas Fish"):
-        for item in catalog.get(category, []):
-            voice_items.append({**item, "category": category})
-    if not voice_items:
-        st.info("Nenhuma voz disponível no catálogo.")
-        return
-    voice_by_id = {item["id"]: item for item in voice_items}
-    voice_ids = list(voice_by_id)
-    current_id = st.session_state.get("nexus_fish_voice_id", "")
-    if current_id not in voice_by_id:
-        current_id = voice_ids[0]
-    st.caption("Digite para pesquisar pelo nome ou provedor. A amostra aparece quando disponível.")
-    selected_id = st.selectbox(
-        "Buscar voz", voice_ids,
-        index=voice_ids.index(current_id),
-        format_func=lambda value: f"{voice_by_id[value]['category']} · {voice_by_id[value]['title']}",
-        key="nexus_voice_picker_choice",
-        width="stretch",
+
+    categories = ("CapCut", "ElevenLabs", "Licenciadas Fish")
+    total_voices = sum(len(catalog.get(category, [])) for category in categories)
+    st.caption(
+        f"{total_voices} vozes cadastradas · toque em uma opção para selecioná-la. "
+        "As vozes estão separadas por provedor."
     )
-    selected = voice_by_id[selected_id]
-    if selected.get("description"):
-        st.caption(selected["description"][:220])
-    if selected.get("sample_audio"):
-        st.audio(selected["sample_audio"], format="audio/mp3")
-    else:
-        st.caption("Amostra de áudio indisponível para esta voz.")
-    if st.button("Usar esta voz", type="primary", width="stretch", key="nexus-confirm-voice"):
-        st.session_state["nexus_fish_voice_id"] = selected_id
-        st.session_state["nexus_fish_voice_name"] = f"{selected['category']} · {selected['title']}"
-        st.rerun()
+    current_id = st.session_state.get("nexus_fish_voice_id", "")
+    current_name = st.session_state.get("nexus_fish_voice_name", "")
+
+    for category in categories:
+        category_voices = catalog.get(category, [])
+        if not category_voices:
+            continue
+        with st.expander(f"{category} · {len(category_voices)} vozes", expanded=True):
+            for row_start in range(0, len(category_voices), 2):
+                columns = st.columns(2, gap="small")
+                for column, item in zip(columns, category_voices[row_start:row_start + 2]):
+                    voice_id = item["id"]
+                    voice_title = item.get("title") or f"Voz {voice_id[:8]}"
+                    selected = voice_id == current_id
+                    with column:
+                        if st.button(
+                            f"{'✓ ' if selected else ''}{voice_title}",
+                            type="primary" if selected else "secondary",
+                            width="stretch",
+                            key=f"nexus-select-voice-{voice_id}",
+                            help=f"{category} · {voice_title}",
+                        ):
+                            st.session_state["nexus_fish_voice_id"] = voice_id
+                            st.session_state["nexus_fish_voice_name"] = f"{category} · {voice_title}"
+                            st.rerun()
+
+    if total_voices != 40:
+        st.warning(
+            f"O catálogo retornou {total_voices} de 40 vozes cadastradas. "
+            "As opções com metadados indisponíveis continuam selecionáveis."
+        )
 
 
 @st.dialog("Duração do vídeo", width="small", icon=":material/schedule:")
