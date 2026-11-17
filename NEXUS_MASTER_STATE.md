@@ -2066,3 +2066,11 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Testes cobrem snapshots cumulativos, substituição latest-wins, offsets entre chunks, concatenação de áudio e propagação do relatório no worker.
 - CI #991, run `44115678230`, commit `a6711e616932c43ee4ae16731084db30850ea0f5`: 193 testes Python passaram, Remotion typecheck passou e Commons smoke passou; render sintético foi corretamente ignorado por ausência do marcador. Os erros intermediários #989/#990 foram corrigidos e o estado final #991 está verde.
 - Próxima etapa: alinhar o contrato Brain 4 à evidência real do Fish (segmentos sem confidence; palavra vs frase), e preparar a execução com executor injetado. Não habilitar uma chamada Gemini adicional no worker sem autorização de custo.
+
+
+## Ponte segura entre alinhamento Fish e contrato Brain 4 — 17/11/2026
+- Criado `provider_segments_to_word_timestamps()` em `nexus/editorial_pipeline.py`: só promove segmentos a word-level quando cada segmento contém exatamente um token, com intervalo numérico válido e ordenado. Segmentos de frase ou pontuação isolada não são reclassificados como palavra.
+- Worker remoto agora registra no plano/relatório tanto os segmentos originais do Fish quanto a lista `word_timestamps` promovida quando a evidência permite. Granularidade fica `word`, `provider_segments` ou `unavailable`; confiança não é fabricada.
+- Contrato Brain 4 aceita `confidence` ausente, valida o campo apenas quando o provedor o fornece e rejeita itens multi-palavra em `word_timestamps`. Prompt do editor proíbe inventar confidence e não permite transformar frases em palavras.
+- CI #1002, run `44116215338`, commit `e755143c177def67ce98922fd1036ec736b53066`: 198 testes Python passaram; Remotion typecheck e Commons live smoke passaram; render sintético foi ignorado por não ser alteração de render.
+- Próximo passo: construir e testar com mocks o executor do Brain 4 no worker, consumindo a evidência Fish e produzindo `edit_timeline`. A execução real do Brain 4 adicionará uma chamada Gemini por render; manter desligada até autorização explícita de custo. Ainda não ligar captions/SFX/ducking ao vídeo real sem essa etapa e validação.
