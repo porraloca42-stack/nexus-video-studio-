@@ -400,3 +400,10 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - Correção: Remotion já está no caminho padrão indireto: `app.py` → `render_on_github()` → workflow `nexus-render-worker.yml` → `nexus.remote_render_job.main()` → `render_video_remotion()`. Não descrever o adapter como desconectado; produção externa ainda não foi validada.
 - Lacuna real: app.py não chama o runner/prompts dos quatro cérebros; director.py não monta `edit_timeline`. Sem esse campo, `build_remotion_manifest()` recebe timeline vazia, então o teste sintético de captions/SFX/ducking ainda não prova que esses eventos chegam aos vídeos reais.
 - Próxima tarefa: desenhar e testar offline a ponte entre o plano atual e os contratos dos quatro cérebros, mantendo fallback atual e sem chamadas pagas. Só habilitar executores externos após autorização específica.
+
+
+## Checkpoint — alinhamento Fish Audio preservado — 17/11/2026
+- Implementado em `nexus/audio.py`: retorno opcional de segmentos de alinhamento Fish, latest snapshot por `chunk_seq`, offsets globais via `chunk_audio_offset_sec`; retorno legado permanece compatível.
+- Worker remoto inclui os segmentos no relatório criptografado, sem chamada adicional de API. Granularidade registrada como `provider_segments`, sem fingir confiança, palavra ou fonema.
+- CI #991 / `44115678230`: 193 testes passaram, typecheck passou e Commons smoke passou. Commits da etapa: `ee917342`, `b5eb9d81`, `0b7d840d`, `a672b4bc`, `a6711e61`.
+- Brain 4 ainda não consome esses segmentos. Próximo: ajustar o contrato para aceitar evidência sem confidence e classificar apenas segmentos realmente unitários como word-level; depois preparar o executor com mocks. Não adicionar chamada Gemini real sem autorização específica.
