@@ -36,24 +36,26 @@ def main():
         "duration_seconds": 2.0,
         "voiceover": "A mudança começa quando você decide enxergar além do óbvio.",
         "image_prompt": (
-            "Vertical cinematic photorealistic scene: a lone human silhouette standing "
-            "on a dark mountain ridge at blue hour, looking toward a vast luminous cosmic "
-            "nebula opening above the horizon, delicate stars, atmospheric clouds, subtle "
-            "golden light breaking through, profound sense of wonder, realistic film still, "
-            "high detail, no text, no logos, no watermark."
+            "Vertical cinematic photorealistic medium-wide shot of a golden retriever "
+            "standing in shallow water at the edge of a quiet forest lake, three-quarter "
+            "side view, all four paws visible, wet detailed fur, ears relaxed, body poised "
+            "as if just before shaking off water, soft overcast morning light, natural "
+            "colors, realistic documentary cinematography, no text, no logos, no watermark."
         ),
         "video_motion_prompt": (
-            "The cloud layers drift slowly from left to right, tiny stars shimmer subtly, "
-            "the luminous nebula gently expands and pulses with restrained natural light, "
-            "the person's coat moves slightly in the mountain breeze, and the camera makes "
-            "a very slow forward push. Preserve the silhouette, mountain geometry and "
-            "composition. Physically plausible, elegant organic motion, no cuts."
+            "The dog plants all four paws and performs one clear, vigorous full-body shake "
+            "from its head through its shoulders and torso to its tail. Its ears flap, wet "
+            "fur ripples visibly, and water droplets spray outward in an arc before falling "
+            "back into the lake and creating expanding ripples. Keep the same dog, anatomy, "
+            "position, shoreline and lighting. One continuous locked-off shot, no cuts, "
+            "no camera movement."
         ),
+        # Generated I2V footage owns its motion and lighting; do not add decorative overlays.
         "scene_direction": {
-            "camera": {"move": "push_in", "intensity": 0.35},
-            "atmosphere": {"effect": "fog", "intensity": 0.2},
-            "lighting": {"change": "light_sweep"},
-            "transition": {"in": "fade", "out": "fade"}
+            "camera": {"move": "static", "intensity": 0.0},
+            "atmosphere": {"effect": "none", "intensity": 0.0},
+            "lighting": {"change": "none"},
+            "transition": {"in": "cut", "out": "cut"}
         },
     }
     image = generate_image(
