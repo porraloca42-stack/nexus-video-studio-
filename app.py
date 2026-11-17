@@ -739,6 +739,7 @@ if active_view == "Criar":
                             "audio_codec": report.get("audio_codec", ""),
                             "narration_provider": report.get("narration_provider", "não informado pelo worker"),
                             "editorial_pipeline": report.get("editorial_pipeline", {"status": "unknown"}),
+                            "captioning": report.get("captioning", {"status": "unknown"}),
                             "size_mb": len(video_bytes) / (1024 * 1024),
                             "scene_count": len(plan.get("scenes", [])),
                             "motion_clip_count": len(report.get("motion_clips") or []),
