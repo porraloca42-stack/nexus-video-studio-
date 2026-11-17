@@ -833,3 +833,15 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - remotion-synthetic-render: skipped conforme a condição do workflow.
 - PR #10 continua aberta e não mergeada. Nenhum deploy, GPU, inferência, API paga ou render de produção foi executado.
 - Próxima ação: aguardar commons-live-smoke; se concluir, revisar a conclusão integral do run e registrar. Não fazer merge sem pedido explícito.
+
+
+## CHECKPOINT — CI VERDE DA PR #10 E DOCUMENTAÇÃO SINCRONIZADA — 2026-11-17T17:01:49-03:00 (America/Sao_Paulo)
+- Consulta GitHub: 2026-11-17T17:01:49-03:00 (America/Sao_Paulo). HEAD de main antes desta atualização documental: 1912d74df55661a375f590b843dffb2d601be82c.
+- PR #10: https://github.com/porraloca42-stack/nexus-video-studio-/pull/10; branch `fix/modal-gpu-identity-and-cost-report`; head `92f2f3dae72604f9a20087af5780827680615afc`. Continua aberta, não mergeada e não implantada.
+- CI #1143 / run `44164137648`: `unit-tests` success; `remotion-typecheck` success; `commons-live-smoke` success; `remotion-synthetic-render` skipped pela condição do workflow. Portanto, todos os três jobs executados passaram; render sintético não foi executado.
+- A revisão dos jobs confirmou que o Commons smoke pesquisou, baixou e inspecionou um vídeo licenciado; testes Python compilaram módulos e rodaram regressões; typecheck do Remotion passou.
+- PR #10 implementa validação fail-closed da GPU CUDA solicitada versus GPU real antes de baixar/carregar os pesos, registra tipo solicitado e nome real, remove a falsa estimativa de billing baseada em taxa L40S × tempo de parede e corrige mensagem de budget hardcoded. Quatro testes unitários cobrem L40S correspondente, H100 divergente, GPU ausente e tipo sem mapeamento.
+- O CI verde não prova que o código foi implantado no Modal, não identifica o deployment atualmente ativo, não confirma custo faturado nem valida movimento/qualidade de vídeo.
+- Nenhum merge, deploy, chamada Modal, inferência GPU, Cloudflare, Fish Audio, Gemini ou render de produção foi executado. Nenhum custo variável foi gerado nesta etapa.
+- Documentação sincronizada em main: `NEXUS_MASTER_STATE.md` commit `465d517b32f4059bc0ebdf7547219ac1623add9f`; `NEXUS_NEW_CHAT_BOOTSTRAP.md` commit `b37a8919e27219634dbd9e3d29b138713c8932b2`; este checkpoint está sendo gravado agora.
+- Próxima ação sem custo: revisão técnica final do diff da PR #10 contra o código atual, procurando falhas de integração/contrato. Manter PR aberta; não fazer merge sem pedido explícito. A auditoria do deployment Modal continua bloqueada para qualquer ação que gere custo.
