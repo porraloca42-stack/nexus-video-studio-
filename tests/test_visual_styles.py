@@ -26,6 +26,7 @@ class VisualStyleLibraryTests(unittest.TestCase):
         forbidden_motifs = (
             "man in front of mirror", "solitary silhouette", "detective",
             "liquid gold", "ancient temple", "floating clocks",
+            "espelho", "detetive", "relógio", "templo", "castelo", "gotas",
         )
         for name in STYLE_OPTIONS:
             with self.subTest(style=name):
