@@ -591,6 +591,9 @@ if active_view == "Criar":
                             plan, voice, github_token, encryption_secret=cloudflare_token,
                             fish_api_key=fish_api_key,
                             fish_voice_id=voice,
+                            gemini_api_key=secret("GEMINI_API_KEY"),
+                            topic=topic,
+                            style=style,
                             progress_callback=update_worker_progress
                         )
                         video_bytes = result["video"]
