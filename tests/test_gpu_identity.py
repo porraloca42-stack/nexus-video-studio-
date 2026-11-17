@@ -22,6 +22,15 @@ class GPUIdentityTests(unittest.TestCase):
         result = validate_gpu_identity("A10", "NVIDIA A10G")
         self.assertTrue(result["gpu_identity_verified"])
 
+    def test_accepts_a10g_when_a10g_was_requested(self):
+        result = validate_gpu_identity("A10G", "NVIDIA A10G")
+        self.assertTrue(result["gpu_identity_verified"])
+        self.assertEqual(result["requested_gpu_type"], "A10G")
+
+    def test_rejects_a10_when_a10g_was_requested(self):
+        with self.assertRaisesRegex(RuntimeError, "solicitou A10G.*reportou NVIDIA A10"):
+            validate_gpu_identity("A10G", "NVIDIA A10")
+
     def test_rejects_a100_when_a10_was_requested(self):
         with self.assertRaisesRegex(RuntimeError, "solicitou A10.*reportou NVIDIA A100"):
             validate_gpu_identity("A10", "NVIDIA A100 80GB")
