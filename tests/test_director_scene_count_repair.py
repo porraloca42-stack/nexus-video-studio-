@@ -173,6 +173,19 @@ class SceneCountRepairTests(unittest.TestCase):
         self.assertEqual(report["action_coverage_ratio"], 0.9)
         self.assertEqual(report["motion_prompt_coverage_ratio"], 0.9)
 
+    def test_preflight_flags_motion_prompt_without_physical_action_verb(self):
+        plan = make_plan(10)
+        plan["scenes"][0]["video_motion_prompt"] = (
+            "A person remains still in a cinematic composition with soft light and a fixed camera."
+        )
+
+        report = director.build_storyboard_preflight(plan)
+
+        self.assertEqual(report["motion_scenes_without_recognized_action"], [1])
+        self.assertEqual(report["motion_action_coverage_ratio"], 0.9)
+        self.assertTrue(any("verbo físico reconhecido" in warning for warning in report["warnings"]))
+
+
     def test_preflight_does_not_flag_distinct_concrete_actions_as_near_duplicates(self):
         report = director.build_storyboard_preflight(make_plan(12))
         self.assertEqual(report["near_duplicate_action_pairs"], [])
