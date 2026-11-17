@@ -267,3 +267,12 @@ Antes de qualquer alteração em todo chat novo:
 - Este mecanismo é continuidade versionada por GitHub, não promessa de memória automática entre chats.
 
 O protocolo detalhado e prevalente está no fim do `NEXUS_MASTER_STATE.md`. O handoff deve conter sempre o checkpoint mais recente.
+
+
+## REGRA PERMANENTE — CHECKPOINT APÓS TODO PROCESSO — 17/11/2026, 14:08:19 (America/Sao_Paulo)
+
+**SEMPRE ATUALIZAR A CADA PROCESSO. SEMPRE REGISTRAR DATA E HORÁRIO. SEM EXCEÇÃO.**
+
+Cada unidade de trabalho — consulta, leitura, pesquisa, análise, decisão, alteração, teste, workflow, revisão, correção, atualização documental ou bloqueio — exige checkpoint imediato, antes da próxima unidade. Registrar timestamp completo em `America/Sao_Paulo`, ação, resultado/evidência, arquivos/commits/IDs, estado real, limitações, pendências e próxima ação. Atualizar imediatamente master state e handoff; manter este bootstrap sincronizado quando mudar procedimento ou ponto de continuidade. Relêr na main. Se não for possível gravar, declarar o bloqueio e deixar o checkpoint explícito na resposta; nunca fingir que foi salvo. É proibido adiar os registros para o fim ou limitar a regra a etapas grandes. Ver regra prevalente no fim de `NEXUS_MASTER_STATE.md`.
+
+Timestamp da atualização: 2026-11-17T14:08:19-03:00 (UTC−03:00).
