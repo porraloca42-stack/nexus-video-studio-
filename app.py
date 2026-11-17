@@ -258,24 +258,37 @@ def open_duration_picker():
 
 def style_preview_svg(style):
     sky, accent, ground, _ = STYLE_META[style]
-    # Abstract material/lighting study only: no people, props, locations or scene examples.
+    # A visual-language sample, not a scene template: abstract treatments only.
+    art = {
+        "Quântico & Cósmico": '<g fill="none" stroke="{a}" opacity=".8"><ellipse cx="240" cy="135" rx="190" ry="55"/><ellipse cx="240" cy="135" rx="125" ry="105" transform="rotate(35 240 135)"/><ellipse cx="240" cy="135" rx="125" ry="105" transform="rotate(-35 240 135)"/></g><g fill="{a}"><circle cx="240" cy="135" r="8"/><circle cx="95" cy="55" r="3"/><circle cx="390" cy="72" r="2"/><circle cx="360" cy="210" r="3"/></g>',
+        "Sonho Lúcido": '<g opacity=".72"><ellipse cx="155" cy="100" rx="115" ry="70" fill="{a}" opacity=".24"/><ellipse cx="300" cy="155" rx="150" ry="88" fill="{a}" opacity=".2"/><path d="M0 190 C90 80 170 250 260 120 S410 90 480 30" fill="none" stroke="{a}" stroke-width="5" opacity=".8"/></g>',
+        "Dark Psychology": '<g><path d="M0 0H290L160 270H0Z" fill="#050609" opacity=".9"/><path d="M480 0H350L225 270H480Z" fill="#050609" opacity=".7"/><path d="M310 0L205 270" stroke="{a}" stroke-width="3" opacity=".75"/><ellipse cx="260" cy="130" rx="80" ry="110" fill="url(#glow)" opacity=".45"/></g>',
+        "Épico Espiritual": '<g stroke="{a}" fill="none" opacity=".72"><path d="M240 25L25 270M240 25L455 270M240 25V270" stroke-width="3"/><path d="M110 270L240 70L370 270M55 270L240 120L425 270"/></g><circle cx="240" cy="78" r="48" fill="url(#glow)"/>',
+        "Aura Neon": '<g fill="none" stroke="{a}" stroke-width="5" opacity=".85"><circle cx="240" cy="135" r="85"/><circle cx="240" cy="135" r="58"/><path d="M35 180C120 20 360 20 445 180M35 90C120 250 360 250 445 90"/></g>',
+        "Hermetismo Clássico": '<g fill="none" stroke="{a}" opacity=".78"><circle cx="240" cy="135" r="104" stroke-width="3"/><circle cx="240" cy="135" r="72"/><path d="M240 25V245M130 135H350M162 57L318 213M318 57L162 213" stroke-width="2"/><path d="M240 42L260 115L333 135L260 155L240 228L220 155L147 135L220 115Z"/></g>',
+        "Visual ASMR / Hipnótico": '<g fill="none" stroke="{a}" opacity=".82"><path d="M0 170Q80 35 160 170T320 170T480 170" stroke-width="12"/><path d="M0 205Q80 70 160 205T320 205T480 205" stroke-width="4"/><path d="M0 125Q80 -10 160 125T320 125T480 125" stroke-width="2"/></g>',
+        "Cinematográfico": '<g fill="{a}" opacity=".28"><circle cx="95" cy="65" r="38"/><circle cx="380" cy="72" r="55"/><circle cx="330" cy="215" r="25"/></g><path d="M0 220L190 0H285L95 270Z" fill="{a}" opacity=".14"/><path d="M0 245L210 0" stroke="{a}" stroke-width="2" opacity=".55"/>',
+        "Dark Cinematográfico": '<path d="M0 0H230L95 270H0ZM480 0H370L250 270H480Z" fill="#05070b" opacity=".9"/><path d="M320 0L205 270" stroke="{a}" stroke-width="4" opacity=".8"/><ellipse cx="255" cy="135" rx="70" ry="125" fill="url(#glow)" opacity=".3"/>',
+        "Ilustração Editorial": '<g><path d="M40 35L240 20L190 245L30 220Z" fill="{a}" opacity=".75"/><circle cx="335" cy="95" r="72" fill="{a}" opacity=".3"/><path d="M245 150L440 65L420 245L255 230Z" fill="{a}" opacity=".5"/><path d="M55 235L430 35" stroke="#17151b" stroke-width="5" opacity=".6"/></g>',
+        "Filme Noir": '<g fill="none" stroke="{a}" opacity=".75"><path d="M-20 35L160 0M-20 75L205 0M-20 115L250 0M230 270L500 125M275 270L500 170M320 270L500 215" stroke-width="12"/></g><ellipse cx="245" cy="130" rx="90" ry="120" fill="url(#glow)" opacity=".25"/>',
+        "Aquarela Artística": '<g opacity=".58"><path d="M35 150C15 65 120 20 190 72S280 210 200 240S45 230 35 150Z" fill="{a}"/><path d="M200 70C250 0 420 35 440 125S380 250 290 220S160 145 200 70Z" fill="{a}" opacity=".55"/><path d="M45 195Q160 115 245 190T455 150" fill="none" stroke="{a}" stroke-width="8"/></g>',
+        "Fantasia Cinematográfica": '<g fill="none" stroke="{a}" opacity=".7"><path d="M0 210L100 95L175 185L265 55L370 190L445 100L500 220" stroke-width="8"/><path d="M0 245Q120 170 240 235T480 220" stroke-width="3"/></g><circle cx="265" cy="75" r="60" fill="url(#glow)" opacity=".5"/>',
+        "Graphic Novel": '<defs><pattern id="dots" width="9" height="9" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.7" fill="{a}" opacity=".6"/></pattern></defs><path d="M0 0H300L190 270H0Z" fill="{a}" opacity=".28"/><path d="M300 0H480V270H190Z" fill="url(#dots)"/><path d="M0 220L480 45" stroke="{a}" stroke-width="9"/><path d="M0 242L480 67" stroke="#050505" stroke-width="3"/>',
+        "Minimalista Clean": '<g fill="none" stroke="{a}" stroke-width="3"><circle cx="240" cy="135" r="72"/><path d="M240 25V245M130 135H350"/></g><circle cx="240" cy="135" r="24" fill="{a}" opacity=".72"/>',
+        "Realismo Humano Emocional": '<ellipse cx="240" cy="135" rx="105" ry="125" fill="url(#glow)" opacity=".65"/><path d="M80 270Q115 170 240 170T400 270" fill="none" stroke="{a}" stroke-width="5" opacity=".65"/><path d="M140 0Q240 70 340 0" fill="none" stroke="{a}" stroke-width="2" opacity=".5"/>',
+        "Reconstituição Histórica": '<g fill="none" stroke="{a}" opacity=".8"><path d="M75 245V85Q75 25 135 25Q195 25 195 85V245M285 245V85Q285 25 345 25Q405 25 405 85V245" stroke-width="9"/><path d="M45 245H435M110 110H160M320 110H370" stroke-width="3"/></g><path d="M0 0H480V270H0Z" fill="url(#grain)" opacity=".3"/>',
+        "Natureza Contemplativa": '<g fill="none" stroke="{a}" opacity=".75"><path d="M0 200Q90 110 180 195T360 180T480 150" stroke-width="6"/><path d="M0 235Q110 150 220 230T480 205" stroke-width="3"/><path d="M240 40Q180 105 240 160Q300 105 240 40Z" stroke-width="3"/></g><circle cx="240" cy="95" r="65" fill="url(#glow)" opacity=".3"/>',
+    }
+    drawing = art.get(style, art["Cinematográfico"]).format(a=accent)
     svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="480" height="270" viewBox="0 0 480 270">
       <defs>
         <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="{sky}"/><stop offset="1" stop-color="{ground}"/></linearGradient>
         <radialGradient id="glow"><stop stop-color="{accent}" stop-opacity=".8"/><stop offset="1" stop-color="{accent}" stop-opacity="0"/></radialGradient>
-        <pattern id="grain" width="18" height="18" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="{accent}" opacity=".22"/></pattern>
+        <pattern id="grain" width="18" height="18" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="{accent}" opacity=".16"/></pattern>
       </defs>
       <rect width="480" height="270" fill="url(#bg)"/>
-      <ellipse cx="245" cy="128" rx="190" ry="110" fill="url(#glow)" opacity=".8"/>
-      <g fill="none" stroke="{accent}" stroke-opacity=".72">
-        <ellipse cx="240" cy="135" rx="175" ry="62" stroke-width="2"/>
-        <ellipse cx="240" cy="135" rx="125" ry="95" stroke-width="1.5" transform="rotate(-28 240 135)"/>
-        <ellipse cx="240" cy="135" rx="125" ry="95" stroke-width="1.5" transform="rotate(28 240 135)"/>
-        <path d="M35 205 Q145 150 240 205 T445 205" stroke-width="3"/>
-        <path d="M35 220 Q145 165 240 220 T445 220" stroke-width="1.5"/>
-      </g>
-      <circle cx="240" cy="135" r="34" fill="{accent}" opacity=".18"/>
-      <circle cx="240" cy="135" r="8" fill="{accent}"/>
+      <rect width="480" height="270" fill="url(#glow)" opacity=".2"/>
+      {drawing}
       <rect width="480" height="270" fill="url(#grain)"/>
       <rect x="5" y="5" width="470" height="260" rx="13" fill="none" stroke="{accent}" stroke-opacity=".45" stroke-width="3"/>
     </svg>'''
