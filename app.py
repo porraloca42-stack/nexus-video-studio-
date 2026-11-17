@@ -158,9 +158,22 @@ st.markdown("""
 html,body,.stApp,[data-testid="stAppViewContainer"]{background:#09090B!important;color:#F4F4F5!important;font-family:'Plus Jakarta Sans',sans-serif!important}
 [data-testid="stAppViewContainer"]{background:radial-gradient(circle at 50% 0%,#18122B 0%,#09090B 46%)!important}
 [data-testid="stSidebar"],[data-testid="collapsedControl"],[data-testid="stHeader"],[data-testid="stToolbar"],[data-testid="manage-app-button"],[data-testid="stFooter"],[data-testid="stBottom"],#MainMenu,header,footer,.stApp>footer,div[class*="viewerBadge"],div[class*="ViewerBadge"],div[class*="viewer-badge"]{display:none!important;visibility:hidden!important;height:0!important;min-height:0!important;padding:0!important;margin:0!important;border:0!important}
-.block-container{padding-top:2rem!important;padding-bottom:10rem!important;max-width:1280px!important}
+.block-container{padding-top:1rem!important;padding-bottom:8rem!important;max-width:1280px!important}
 .nexus-hero{position:relative;overflow:hidden;padding:1.45rem 1.65rem;border:1px solid #30234d;border-radius:22px;background:linear-gradient(115deg,rgba(24,18,43,.98),rgba(18,18,22,.96) 65%,rgba(30,24,52,.95));box-shadow:0 18px 48px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.06);margin-bottom:1rem}
 .nexus-brand-lockup{display:flex;align-items:center;justify-content:center;gap:clamp(.65rem,2.8vw,1.15rem);width:100%;min-width:0;margin:0 auto}
+.nexus-brand-lockup{display:flex;align-items:center;justify-content:flex-start;gap:.7rem;width:100%;min-width:0;margin:.35rem 0 1.1rem}
+.nexus-logo-mark{width:44px!important;height:44px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+.nexus-logo-mark svg{width:100%!important;height:100%!important}
+.nexus-brand-name{font-family:Georgia,serif!important;font-size:1.55rem!important;letter-spacing:.02em!important;font-weight:700!important}
+.nexus-brand-subtitle{display:none!important}
+.nexus-prompt-label,.nexus-section-label{font-size:.78rem;letter-spacing:.12em;font-weight:750;color:#aaa0c5;margin:0 0 .65rem}
+.nexus-control-eyebrow{font-size:.68rem;letter-spacing:.1em;font-weight:750;color:#a78bfa;margin:0 0 .5rem}
+.nexus-preview-stage{width:100%;aspect-ratio:1.08/1;min-height:270px;border:1px solid #51416e;border-radius:18px;background:linear-gradient(145deg,#1a1920,#121116);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.75rem;margin:.6rem 0 1rem;box-shadow:inset 0 0 42px rgba(124,58,237,.06)}
+.nexus-preview-stage svg{width:78px;height:150px;opacity:.75}
+.nexus-preview-caption{text-align:center;color:#aaa5b4;font-size:.85rem;line-height:1.45;letter-spacing:.01em}
+.st-key-nexus-video-stage{margin-top:.25rem}
+.st-key-nexus-video-stage [data-testid="stVerticalBlock"]{gap:0!important}
+
 .nexus-logo-mark{display:grid;place-items:center;width:clamp(58px,16vw,76px);height:clamp(58px,16vw,76px);flex:0 0 auto;border-radius:18px;background:linear-gradient(145deg,#21163e,#101019);border:1px solid #6245a2;box-shadow:0 0 28px rgba(139,92,246,.22),inset 0 1px 0 rgba(255,255,255,.12)}.nexus-logo-mark svg{width:66%;height:66%;filter:drop-shadow(0 0 9px rgba(167,139,250,.45))}
 .nexus-brand-copy{display:flex;flex:0 1 auto;min-width:0;flex-direction:column;align-items:flex-start;justify-content:center;line-height:1.05;white-space:nowrap}
 .nexus-brand-name{font-size:clamp(1.55rem,6.2vw,2.25rem);font-weight:800;letter-spacing:.10em;color:#f4f4f5;white-space:nowrap}
@@ -174,7 +187,7 @@ html,body,.stApp,[data-testid="stAppViewContainer"]{background:#09090B!important
 [data-testid="stTextInput"] input,[data-testid="stTextArea"] textarea,[data-testid="stSelectbox"] div[data-baseweb="select"],[data-testid="stMultiSelect"] div[data-baseweb="select"]{background:#18181B!important;border:1px solid #27272A!important;border-radius:10px!important;color:#FAFAFA!important;transition:border-color .2s ease,box-shadow .2s ease!important}
 [data-testid="stTextInput"] input:focus,[data-testid="stTextArea"] textarea:focus,[data-testid="stSelectbox"] div[data-baseweb="select"]:focus-within{border-color:#8B5CF6!important;box-shadow:0 0 0 1px #8B5CF6!important}
 [data-testid="stTextArea"] textarea{line-height:1.55!important;min-height:112px!important}
-.st-key-nexus-bottom-nav{position:fixed!important;z-index:9999!important;left:0!important;right:0!important;bottom:5.25rem!important;width:100%!important;padding:.45rem .7rem!important;background:rgba(12,12,18,.97)!important;border-top:1px solid #30234d!important;border-bottom:1px solid #30234d!important;backdrop-filter:blur(18px)!important}
+.st-key-nexus-bottom-nav{position:fixed!important;z-index:9999!important;left:0!important;right:0!important;bottom:0!important;width:100%!important;padding:.45rem .7rem!important;background:rgba(12,12,18,.97)!important;border-top:1px solid #30234d!important;border-bottom:1px solid #30234d!important;backdrop-filter:blur(18px)!important}
 .st-key-nexus-bottom-nav [data-testid="stPills"]{margin:0!important}
 .st-key-nexus-bottom-nav [data-testid="stPills"] [role="group"]{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;justify-content:space-between!important;gap:.35rem!important;scrollbar-width:none!important}
 .st-key-nexus-bottom-nav [data-testid="stPills"] button{flex:1 0 auto!important;min-width:max-content!important;justify-content:center!important;padding:.45rem .75rem!important;border-radius:12px!important;font-size:.8rem!important}
@@ -197,18 +210,21 @@ div[data-testid="stButton"] button[kind="primary"]:hover{box-shadow:0 8px 25px r
 [data-testid="stAlert"]{border-radius:13px!important}
 [data-testid="stProgress"]>div>div{background:linear-gradient(90deg,#6366F1,#8B5CF6)!important}
 hr{border-color:#27272A!important}
-@media(max-width:850px){.block-container{padding:1rem .8rem 10rem!important}.nexus-hero{padding:1rem .7rem;border-radius:17px}.nexus-brand-lockup{gap:.65rem}.nexus-brand-name{font-size:clamp(1.45rem,6.4vw,1.9rem);letter-spacing:.08em}.nexus-brand-subtitle{font-size:clamp(.72rem,3.1vw,.92rem);letter-spacing:.15em}.nexus-preview img{width:112px}}
+@media(max-width:850px){.block-container{padding:.75rem .8rem 8rem!important}.nexus-hero{padding:1rem .7rem;border-radius:17px}.nexus-brand-lockup{gap:.55rem}.nexus-brand-name{font-size:1.45rem!important;letter-spacing:.02em!important}.nexus-preview-stage{min-height:245px}.nexus-preview-stage svg{width:68px;height:132px}}
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown("""
-<div class="nexus-hero"><div class="nexus-brand-lockup">
-<div class="nexus-logo-mark" aria-label="NEXUS"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 3 39 23 59 32 39 39 32 61 24 40 4 32 24 24Z" fill="#9B7BFF"/><path d="M32 17 36 28 47 32 36 36 32 47 28 36 17 32 28 28Z" fill="#E9DFFF"/></svg></div>
-<div class="nexus-brand-copy"><div class="nexus-brand-name">NEXUS</div><div class="nexus-brand-subtitle">VIDEO STUDIO</div></div>
-</div></div>
-""", unsafe_allow_html=True)
-
-
+header_brand, header_settings = st.columns([5, 0.65], vertical_alignment="center")
+with header_brand:
+    st.markdown("""
+    <div class="nexus-brand-lockup">
+      <div class="nexus-logo-mark" aria-label="NEXUS"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 3 39 23 59 32 39 39 32 61 24 40 4 32 24 24Z" fill="#9B7BFF"/><path d="M32 17 36 28 47 32 36 36 32 47 28 36 17 32 28 28Z" fill="#E9DFFF"/></svg></div>
+      <div class="nexus-brand-copy"><div class="nexus-brand-name">NEXUS</div><div class="nexus-brand-subtitle">VIDEO STUDIO</div></div>
+    </div>
+    """, unsafe_allow_html=True)
+with header_settings:
+    if st.button("⚙", key="nexus-open-settings", help="Abrir perfil e configurações"):
+        st.session_state["nexus_navigation"] = "Perfil"
 
 # Mobile-first navigation; the production pipeline is preserved.
 with st.container(key="nexus-bottom-nav"):
@@ -222,13 +238,16 @@ if active_view == "Criar":
     if "nexus_style" not in st.session_state or st.session_state["nexus_style"] not in STYLE_OPTIONS:
         st.session_state["nexus_style"] = "Cinematográfico"
     
-    col_editor, col_preview = st.container(), st.container()
-    
-    with col_editor:
-        with st.container(border=True):
-            st.markdown('<div class="nexus-kicker">01 · Conteúdo</div>', unsafe_allow_html=True)
-            topic = st.text_area("Assunto ou roteiro", height=105, placeholder="Descreva a ideia ou cole seu roteiro completo...")
-            duration = st.selectbox("Duração", [40, 50, 60], index=1, format_func=lambda value: f"{value}s")
+    # Primary creation flow follows the mobile reference: prompt, style, voice/duration, preview.
+    with st.container(border=True):
+        st.markdown('<div class="nexus-prompt-label">DESCREVA SEU VÍDEO</div>', unsafe_allow_html=True)
+        topic = st.text_area(
+            "Assunto ou roteiro", height=92,
+            placeholder="Descreva o tema do vídeo ou cole seu roteiro completo...",
+            label_visibility="collapsed", key="nexus_topic",
+        )
+        generate_requested = st.button("Gerar vídeo", type="primary", use_container_width=True, key="nexus-generate-top")
+
         with st.expander("Configurações avançadas de produção", expanded=False):
             st.markdown('<div class="nexus-kicker">PRODUÇÃO</div>', unsafe_allow_html=True)
             render_mode = st.selectbox(
@@ -316,90 +335,120 @@ if active_view == "Criar":
             st.session_state["nexus_style"] = style
         with st.container(border=True):
             st.markdown('<div class="nexus-kicker">Narração</div>', unsafe_allow_html=True)
-            fish_api_key = secret("FISH_API_KEY")
-            if "nexus_fish_voice_id" not in st.session_state:
-                st.session_state["nexus_fish_voice_id"] = secret("FISH_VOICE_ID")
-            if "nexus_fish_voice_name" not in st.session_state:
-                st.session_state["nexus_fish_voice_name"] = ""
-    
-            if not fish_api_key:
-                st.warning("Configure FISH_API_KEY nos Secrets do Streamlit para carregar as vozes.")
-            else:
-                selected_name = st.session_state.get("nexus_fish_voice_name") or "Nenhuma voz selecionada"
-                st.markdown("**NARRAÇÃO**")
-                st.text(selected_name)
-                st.caption("40 modelos selecionados manualmente · IDs preservados por categoria")
-                with st.expander("🎙️ Escolher voz", expanded=False):
-                    st.caption("As categorias seguem sua lista. A separação masculino/feminino é feita somente quando os metadados identificam o gênero; os demais ficam em Não identificado.")
-                    catalog_key = "nexus_curated_voice_catalog_v1"
-                    if catalog_key not in st.session_state:
-                        try:
-                            with st.spinner("Consultando os metadados das 40 vozes selecionadas..."):
-                                st.session_state[catalog_key] = fish_audio.list_curated_voice_catalog(
-                                    fish_api_key, max_workers=8
-                                )
-                        except Exception as catalog_error:
-                            st.session_state[catalog_key] = {"error": str(catalog_error)}
-                    narrator_catalog = st.session_state[catalog_key]
-                    if isinstance(narrator_catalog, dict) and narrator_catalog.get("error"):
-                        st.error(f"Não foi possível carregar o catálogo: {narrator_catalog['error']}")
-                        if st.button("Tentar novamente", key="retry_curated_voices"):
-                            st.session_state.pop(catalog_key, None)
-                            st.rerun()
-                    else:
-                        gender_groups = (
-                            ("male", "Masculinas"),
-                            ("female", "Femininas"),
-                            ("unknown", "Gênero não identificado"),
-                        )
-                        for category in ("CapCut", "ElevenLabs", "Licenciadas Fish"):
-                            category_voices = narrator_catalog.get(category, [])
-                            with st.expander(f"{category} · {len(category_voices)} modelos", expanded=False):
-                                for gender, gender_label in gender_groups:
-                                    voices = [item for item in category_voices if item.get("gender") == gender]
-                                    st.markdown(f"**{gender_label} · {len(voices)}**")
-                                    if not voices:
-                                        st.caption("Nenhuma voz identificada nesta divisão.")
-                                    for voice_option in voices:
-                                        voice_col, sample_col = st.columns([1.1, 1.5], vertical_alignment="center")
-                                        with voice_col:
-                                            is_selected = voice_option["id"] == st.session_state.get("nexus_fish_voice_id", "")
-                                            st.markdown(f"**{voice_option['title']}**")
-                                            st.caption(f"ID: {voice_option['id']}")
-                                            details = []
-                                            source_label = str(voice_option.get("source") or "").casefold()
-                                            if "pvc" in source_label:
-                                                details.append("Professional Voice Clone")
-                                            if voice_option.get("licensed"):
-                                                details.append("Licenciada pela Fish Audio")
-                                            if voice_option.get("author"):
-                                                details.append(voice_option["author"])
-                                            if details:
-                                                st.caption(" · ".join(details))
-                                            if voice_option.get("description"):
-                                                st.caption(voice_option["description"][:150])
-                                            if not voice_option.get("metadata_available"):
-                                                st.caption("Metadados indisponíveis; ID mantido conforme sua lista.")
-                                            if st.button(
-                                                "Selecionada" if is_selected else "Usar esta voz",
-                                                key=f"curated_voice_pick_{voice_option['id']}",
-                                                use_container_width=True,
-                                                type="primary" if is_selected else "secondary",
-                                            ):
-                                                st.session_state["nexus_fish_voice_id"] = voice_option["id"]
-                                                st.session_state["nexus_fish_voice_name"] = f"{category} · {voice_option['title']}"
-                                                st.rerun()
-                                        with sample_col:
-                                            if voice_option.get("sample_audio"):
-                                                st.audio(voice_option["sample_audio"], format="audio/mp3")
-                                            else:
-                                                st.caption("Amostra não publicada ou indisponível.")
-            voice = st.session_state.get("nexus_fish_voice_id", "")
-    
-    if not st.session_state.get("nexus_rendered_video"):
-        st.markdown('<div class="nexus-output-placeholder"><div><strong>PRÉVIA DO VÍDEO · 9:16</strong>Seu vídeo aparecerá aqui depois da geração</div></div>', unsafe_allow_html=True)
-    
-    if st.button("Gerar vídeo", type="primary", use_container_width=True):
+    st.markdown('<div class="nexus-section-label">ESTILO VISUAL</div>', unsafe_allow_html=True)
+    style = st.pills(
+        "Estilo visual", STYLE_OPTIONS, selection_mode="single",
+        default=st.session_state["nexus_style"], key="nexus_style",
+        label_visibility="collapsed",
+    ) or st.session_state["nexus_style"]
+
+    voice_col, duration_col = st.columns([1.2, 0.85], gap="small", vertical_alignment="top")
+    with voice_col:
+        with st.container(border=True):
+                fish_api_key = secret("FISH_API_KEY")
+                if "nexus_fish_voice_id" not in st.session_state:
+                    st.session_state["nexus_fish_voice_id"] = secret("FISH_VOICE_ID")
+                if "nexus_fish_voice_name" not in st.session_state:
+                    st.session_state["nexus_fish_voice_name"] = ""
+        
+                if not fish_api_key:
+                    st.warning("Configure FISH_API_KEY nos Secrets do Streamlit para carregar as vozes.")
+                else:
+                    selected_name = st.session_state.get("nexus_fish_voice_name") or "Nenhuma voz selecionada"
+                    st.markdown("**NARRAÇÃO**")
+                    st.text(selected_name)
+                    st.caption("40 modelos selecionados manualmente · IDs preservados por categoria")
+                    with st.expander("🎙️ Escolher voz", expanded=False):
+                        st.caption("As categorias seguem sua lista. A separação masculino/feminino é feita somente quando os metadados identificam o gênero; os demais ficam em Não identificado.")
+                        catalog_key = "nexus_curated_voice_catalog_v1"
+                        if catalog_key not in st.session_state:
+                            try:
+                                with st.spinner("Consultando os metadados das 40 vozes selecionadas..."):
+                                    st.session_state[catalog_key] = fish_audio.list_curated_voice_catalog(
+                                        fish_api_key, max_workers=8
+                                    )
+                            except Exception as catalog_error:
+                                st.session_state[catalog_key] = {"error": str(catalog_error)}
+                        narrator_catalog = st.session_state[catalog_key]
+                        if isinstance(narrator_catalog, dict) and narrator_catalog.get("error"):
+                            st.error(f"Não foi possível carregar o catálogo: {narrator_catalog['error']}")
+                            if st.button("Tentar novamente", key="retry_curated_voices"):
+                                st.session_state.pop(catalog_key, None)
+                                st.rerun()
+                        else:
+                            gender_groups = (
+                                ("male", "Masculinas"),
+                                ("female", "Femininas"),
+                                ("unknown", "Gênero não identificado"),
+                            )
+                            for category in ("CapCut", "ElevenLabs", "Licenciadas Fish"):
+                                category_voices = narrator_catalog.get(category, [])
+                                with st.expander(f"{category} · {len(category_voices)} modelos", expanded=False):
+                                    for gender, gender_label in gender_groups:
+                                        voices = [item for item in category_voices if item.get("gender") == gender]
+                                        st.markdown(f"**{gender_label} · {len(voices)}**")
+                                        if not voices:
+                                            st.caption("Nenhuma voz identificada nesta divisão.")
+                                        for voice_option in voices:
+                                            voice_col, sample_col = st.columns([1.1, 1.5], vertical_alignment="center")
+                                            with voice_col:
+                                                is_selected = voice_option["id"] == st.session_state.get("nexus_fish_voice_id", "")
+                                                st.markdown(f"**{voice_option['title']}**")
+                                                st.caption(f"ID: {voice_option['id']}")
+                                                details = []
+                                                source_label = str(voice_option.get("source") or "").casefold()
+                                                if "pvc" in source_label:
+                                                    details.append("Professional Voice Clone")
+                                                if voice_option.get("licensed"):
+                                                    details.append("Licenciada pela Fish Audio")
+                                                if voice_option.get("author"):
+                                                    details.append(voice_option["author"])
+                                                if details:
+                                                    st.caption(" · ".join(details))
+                                                if voice_option.get("description"):
+                                                    st.caption(voice_option["description"][:150])
+                                                if not voice_option.get("metadata_available"):
+                                                    st.caption("Metadados indisponíveis; ID mantido conforme sua lista.")
+                                                if st.button(
+                                                    "Selecionada" if is_selected else "Usar esta voz",
+                                                    key=f"curated_voice_pick_{voice_option['id']}",
+                                                    use_container_width=True,
+                                                    type="primary" if is_selected else "secondary",
+                                                ):
+                                                    st.session_state["nexus_fish_voice_id"] = voice_option["id"]
+                                                    st.session_state["nexus_fish_voice_name"] = f"{category} · {voice_option['title']}"
+                                                    st.rerun()
+                                            with sample_col:
+                                                if voice_option.get("sample_audio"):
+                                                    st.audio(voice_option["sample_audio"], format="audio/mp3")
+                                                else:
+                                                    st.caption("Amostra não publicada ou indisponível.")
+                voice = st.session_state.get("nexus_fish_voice_id", "")
+    with duration_col:
+        with st.container(border=True):
+            st.markdown('<div class="nexus-control-eyebrow">DURAÇÃO</div>', unsafe_allow_html=True)
+            duration = st.selectbox(
+                "Duração", [40, 50, 60], index=1,
+                format_func=lambda value: f"{value}s",
+                label_visibility="collapsed", key="nexus_duration",
+            )
+
+    with st.container(key="nexus-video-stage"):
+        if st.session_state.get("nexus_rendered_video"):
+            st.markdown('<div class="nexus-section-label">SEU VÍDEO</div>', unsafe_allow_html=True)
+        else:
+            st.markdown("""
+            <div class="nexus-preview-stage">
+              <svg viewBox="0 0 120 230" role="img" aria-label="Prévia vertical do vídeo">
+                <rect x="2" y="2" width="116" height="226" rx="18" fill="none" stroke="#66616f" stroke-width="3"/>
+                <path d="M48 84 L48 146 Q48 152 54 148 L82 121 Q87 116 82 111 L54 82 Q48 78 48 84Z" fill="#aaa5b4"/>
+              </svg>
+              <div class="nexus-preview-caption">SEU VÍDEO GERADO<br/>APARECERÁ AQUI (9:16)</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+    if generate_requested:
+
         # Remove any previous result first: a failed new request must never leave
         # an old 44s storyboard visible as if it were the latest response.
         st.session_state.pop("nexus_plan", None)
