@@ -294,3 +294,13 @@ Timestamp da atualização: 2026-11-17T14:08:19-03:00 (UTC−03:00).
 - CI #1101 / run `44134707594` passou: unit-tests, Commons live smoke e Remotion typecheck; render sintético skipped.
 - Deploy Streamlit continua não confirmado. A próxima ação é verificar o botão Brain 4 na URL registrada; clique executa uma geração Gemini e pode consumir cota/crédito.
 - O registro completo está no fim do master state e do handoff.
+
+
+## Checkpoint diagnóstico inicial do erro de importação Brain 4 — 2026-11-17T14:22:02-03:00 (America/Sao_Paulo)
+- Consulta GitHub em `2026-11-17T14:21:35-03:00`; branch `main`; HEAD `794d9551703a1c8ae8968254f382844661e3ed4a` (sem novos commits desde o checkpoint anterior). Documentos lidos diretamente da main: master SHA `e16422da5922c74fdc794c8b912e43f025fabb0e`, handoff `9dfd7ddebd5f60bb0ebbee0935214838b25d8608`, bootstrap `6786faf621cc89077a3d8802d6121876b2ce696c`.
+- Auditoria de código: `nexus/director.py` na main (blob `19df93c`) contém `generate_editorial_json`; `nexus/brain4_smoke_test.py` (blob `ee0b8b1`) faz import local dessa função dentro do caminho de execução. `app.py` (blob `da114a3`) recarrega apenas `nexus.brain4_smoke_test` via `importlib.reload`; não recarrega `nexus.director`.
+- Hipótese técnica principal, ainda não confirmada: processo Streamlit manteve `nexus.director` antigo em `sys.modules`; recarregar somente o smoke helper não atualiza a referência do módulo diretor. O erro reportado (símbolo ausente embora presente no arquivo atual) é compatível com cache de módulo/processo ou instância implantada com código misturado/desatualizado. Não afirmar ainda que esta seja a causa definitiva.
+- Comparação GitHub `a9b3d4f...` → HEAD atual: 20 commits à frente, mas somente os três documentos de continuidade mudaram; nenhum código de produção foi alterado desde o baseline técnico. CI #1101 (`44134707594`) continua sendo o último workflow observado, sucesso nos jobs relevantes; não há execução CI nova após ele.
+- Evidência do usuário: a UI publicada mostrou botão e devolveu `cannot import name 'generate_editorial_json' from 'nexus.director'`. Isso comprova falha real em runtime; não comprova chamada Gemini. Nenhum vídeo, GPU ou serviço de mídia foi iniciado pelo assistente.
+- Estado: hipótese registrada; nenhuma alteração de código, deploy, chamada paga, GPU ou render nesta etapa. Próxima ação: inspecionar testes existentes do smoke e o carregamento/import do pacote; desenhar correção mínima com teste de regressão para módulo já carregado e só então editar em branch/PR.
+- Timestamp deste checkpoint: `2026-11-17T14:22:02-03:00` (UTC−03:00).
