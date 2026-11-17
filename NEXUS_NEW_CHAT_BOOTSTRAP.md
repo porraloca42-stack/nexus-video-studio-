@@ -489,3 +489,12 @@ Timestamp da atualização: 2026-11-17T14:08:19-03:00 (UTC−03:00).
 - Nenhuma nova chamada Gemini live, Fish Audio, Cloudflare, Modal/GPU ou render foi iniciada pelo assistente. Nenhum custo novo foi gerado nesta etapa.
 - Próximo passo seguro: verificar que o app Streamlit carregou a versão integrada e então, com autorização explícita do usuário para eventuais custos, fazer uma única produção controlada. A correção só retenta Gemini uma vez; não garante que o serviço esteja saudável nem que o restante do pipeline esteja implantado.
 - Timestamp: 2026-11-17T15:26:48-03:00 (UTC−03:00). Atualização documental [skip ci].
+
+
+## CHECKPOINT PRIORITÁRIO — 17/11/2026
+Antes de qualquer teste pago de LTX, leia o bloco mais recente de `NEXUS_MASTER_STATE.md` com o título **“ALERTA OPERACIONAL — discrepância GPU faturada vs. código Modal”**.
+- O painel Modal mostrado pelo usuário registra gasto acumulado de US$1,50: H100 US$1,46, CPU US$0,02, memória US$0,01. Tratar H100 como GPU histórica faturada, não como mera configuração de código.
+- O código versionado em `main` declara L40S, mas isso não prova que o worker implantado no Modal usa L40S. `.github/workflows/modal-deploy.yml` é manual (`workflow_dispatch`); push/merge não implanta automaticamente.
+- GPU efetiva do worker atualmente implantado e causa da divergência ainda não identificadas. Não fazer deploy nem nova inferência paga sem autorização explícita.
+- PR #9 permanece aberta e não integrada. CI #1135 / run `44159676828`: unit-tests, commons-live-smoke e remotion-typecheck passaram; remotion-synthetic-render foi skipped. CI não comprova movimento, GPU ativa ou custo.
+- Fonte de verdade operacional: `NEXUS_MASTER_STATE.md` na branch `main`; não usar anexo antigo cuja última atualização seja 16/11/2026.
