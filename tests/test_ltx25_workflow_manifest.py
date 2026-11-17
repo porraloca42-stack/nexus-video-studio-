@@ -16,6 +16,15 @@ class LTX25WorkflowManifestTests(unittest.TestCase):
         self.assertEqual(manifest["source_format"], "comfyui_visual_workflow")
         self.assertFalse(manifest["api_prompt_exported"])
         self.assertFalse(manifest["status"]["worker_integrated"])
+        self.assertFalse(manifest["api_exporter"]["api_prompt_exported"])
+        self.assertEqual(
+            manifest["api_exporter"]["commit"],
+            "196dd85cde3314dffdc33b41caa3e5d9be432ffb",
+        )
+        self.assertIn(
+            "resolve links across subgraph boundaries and widget passthrough values",
+            manifest["api_exporter"]["requirements"],
+        )
 
     def test_manifest_records_nested_workflow_groups_and_nexus_constraints(self):
         path = Path(__file__).resolve().parents[1] / "workflows" / "ltx25" / "source_manifest.json"
