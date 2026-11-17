@@ -47,6 +47,46 @@ class RemoteNarrationTests(unittest.TestCase):
         self.assertNotIn("edit_timeline", result)
         self.assertNotIn("editorial_pipeline", plan)
 
+    def test_brain4_worker_hook_invokes_only_explicitly_injected_executor(self):
+        from nexus.remote_render_job import apply_optional_brain4
+
+        audio = Path("/tmp/nexus-final-narration.mp3")
+        words = [{"text": "Comece", "start_seconds": 0.0, "end_seconds": 0.4}]
+        timeline = {
+            "contract_version": "1.0",
+            "audio_asset_id": str(audio),
+            "alignment_method": "Fish Audio timestamp stream",
+            "alignment_level": "word",
+            "audio_duration_seconds": 4.0,
+            "word_timestamps": words,
+            "character_timestamps": [],
+            "phoneme_timestamps": [],
+            "edit_anchors": [],
+            "caption_events": [],
+            "sfx_events": [],
+            "audio_mix_events": [],
+        }
+        calls = []
+        def model_call(prompt):
+            calls.append(prompt)
+            return timeline
+
+        plan = {
+            "scenes": [{
+                "voiceover": "Comece agora.",
+                "duration_seconds": 4.0,
+                "image_prompt": "A person opening a door.",
+            }]
+        }
+        result = apply_optional_brain4(
+            plan, audio, 4.0, words, model_call=model_call,
+        )
+        self.assertEqual(len(calls), 1)
+        self.assertTrue(calls[0].startswith("BRAIN 4"))
+        self.assertEqual(result["editorial_pipeline"]["status"], "brain4_validated")
+        self.assertEqual(result["edit_timeline"], timeline)
+        self.assertNotIn("edit_timeline", plan)
+
     def test_worker_requires_fish_credentials_instead_of_using_robotic_fallback(self):
         from nexus.audio import FishAudioError
         audio = Path("/tmp/nexus-test-narration.mp3")
@@ -166,6 +206,7 @@ class RemoteNarrationTests(unittest.TestCase):
             self.assertEqual(report["narration_alignment"]["granularity"], "word")
             self.assertEqual(report["narration_alignment"]["segment_count"], 1)
             self.assertEqual(report["narration_alignment"]["word_timestamp_count"], 1)
+            self.assertEqual(report["editorial_pipeline"]["status"], "disabled")
             self.assertEqual(report["narration_alignment"]["segments"][0]["text"], "Uma")
             self.assertEqual(report["narration_alignment"]["word_timestamps"][0]["text"], "Uma")
             self.assertNotIn("confidence", report["narration_alignment"]["word_timestamps"][0])
