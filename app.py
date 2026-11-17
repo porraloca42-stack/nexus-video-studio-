@@ -674,6 +674,7 @@ if active_view == "Criar":
                             "video_codec": report.get("video_codec", "h264"),
                             "audio_codec": report.get("audio_codec", ""),
                             "narration_provider": report.get("narration_provider", "não informado pelo worker"),
+                            "editorial_pipeline": report.get("editorial_pipeline", {"status": "unknown"}),
                             "size_mb": len(video_bytes) / (1024 * 1024),
                             "scene_count": len(plan.get("scenes", [])),
                             "motion_clip_count": len(report.get("motion_clips") or []),
@@ -1100,6 +1101,11 @@ if active_view == "Criar":
             st.caption("Direção visual: " + info["visual_source"])
         if info.get("narration_provider"):
             st.caption("Narração: " + info["narration_provider"])
+        editorial_status = (info.get("editorial_pipeline") or {}).get("status")
+        if editorial_status == "brain4_validated":
+            st.success("Brain 4 executado: edição sincronizada validada.")
+        elif editorial_status == "disabled":
+            st.caption("Brain 4 não foi executado neste vídeo.")
         if info.get("motion_clip_count"):
             st.caption(
                 f"Animação LTX: {info['motion_clip_count']} cenas · "
