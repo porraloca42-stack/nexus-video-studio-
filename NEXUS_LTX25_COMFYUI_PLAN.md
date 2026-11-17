@@ -134,3 +134,27 @@ A proposta anterior de “protótipo isolado” não significa projeto paralelo 
 - O workflow visual fixado possui seis subgrafos, incluindo o subgrafo Input Parameters com dois nós GemmaAPITextEncode. O caminho de API externa depende de uma chave LTX; a configuração padrão observada não fornece chave. Não usar serviço externo nem adicionar segredo sem avaliar custo e necessidade. A codificação local usa Gemma e deve ser revisada para remover o enhancer somente se isso não quebrar a topologia.
 - CI #887 / run 44092812673 / commit 2d0a8068c72430cc4dd6cded0f5d49a981968ccd: 154 testes Python, Remotion typecheck e Commons live smoke aprovados.
 - Estado: compatibilidade do patcher e regressões testadas; API prompt real ainda não exportado; bindings dos nós ainda não validados; worker e integração não implementados; GPU, downloads, deploy e render não executados.
+
+
+## 13. Contrato real do exportador API — revisão de implementação (17/11/2026)
+
+Foi inspecionado o código-fonte do exportador oficial do ComfyUI frontend, fixado em `196dd85cde3314dffdc33b41caa3e5d9be432ffb`:
+
+- `src/utils/executionUtil.ts`, função `graphToPrompt`.
+- `src/lib/litegraph/src/subgraph/ExecutableNodeDTO.ts`, classe `ExecutableNodeDTO`.
+
+A exportação não é uma conversão simples do JSON visual. O frontend:
+1. Percorre os nós na ordem de execução e chama `getInnerNodes()` para expandir subgrafos.
+2. Cria IDs de execução compostos por caminho de instâncias de subgrafo, separados por dois-pontos.
+3. Resolve cada input através dos limites dos subgrafos, incluindo conexões que entram/saem e valores de widgets pass-through.
+4. Resolve nós em bypass/never, nós virtuais e links antes de montar o grafo executável.
+5. Serializa widgets e conexões em `class_type` + `inputs` e anexa `_meta`.
+6. Encapsula widgets cujo valor é array em `{ "__value__": [...] }`, pois arrays de dois elementos no prompt API são reservados para conexões.
+
+O manifesto versiona agora o repositório, commit e caminhos exatos do exportador, além de manter `api_prompt_exported=false` e `export_runtime_verified=false`. O patcher NEXUS já reproduz o encapsulamento de arrays e tem teste de regressão.
+
+**Decisão de segurança:** não reimplementar superficialmente o algoritmo nem gerar IDs a partir dos IDs visuais. A resolução completa depende do runtime LiteGraph, das definições de nós registradas e da topologia de subgrafos. O próximo passo seguro é executar a exportação oficial com ComfyUI/frontend e custom nodes compatíveis, sem carregar pesos nem iniciar inferência; depois validar o API prompt e os bindings em teste mockado. Se esse runtime não puder ser executado sem custo variável, manter o workflow bloqueado em vez de fabricar um grafo.
+
+A inspeção também encontrou dois nós `GemmaAPITextEncode` no subgrafo de parâmetros. O workflow documenta um caminho de codificação externa quando uma chave LTX é fornecida; o NEXUS não deve configurar essa chave automaticamente. O caminho local ainda usa modelos Gemma e precisa de análise separada para decidir se o enhancer pode ser desativado sem quebrar as conexões.
+
+Estado após esta investigação: exporter identificado e pinado; API prompt não exportado; runtime de exportação não executado; bindings não validados; worker não integrado; GPU, pesos, deploy e geração não iniciados. Custo variável adicional: US$0.
