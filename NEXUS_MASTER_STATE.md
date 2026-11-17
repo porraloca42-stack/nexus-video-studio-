@@ -1472,3 +1472,11 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 
 - Validação posterior do commit `8d66cbc`: GitHub Actions run `43989995593` concluiu com sucesso nos três jobs. `unit-tests` compilou os módulos da aplicação e passou em 99 testes; `remotion-typecheck` e `commons-live-smoke` também passaram.
 - A compilação do CI confirma sintaxe Python dos módulos, mas não comprova a renderização visual do Streamlit. O novo layout ainda aguarda inspeção no app publicado em celular; não afirmar implantação visual validada.
+
+## Correção do seletor mobile após evidência do usuário — 17/11/2026
+- Novas capturas do app publicado mostraram que o seletor `st.radio(horizontal=True)` não respeitava a apresentação horizontal em telas estreitas: os rótulos eram quebrados verticalmente. Também havia um cartão-resumo duplicando o estilo selecionado e a navegação inferior ficava parcialmente encoberta pela sobreposição "Manage app" do Streamlit.
+- Commit `d441a75`: substituído o seletor de estilo por `st.pills(selection_mode="single")`, com chips de largura intrínseca, texto sem quebra e rolagem horizontal. Removido o cartão de resumo redundante; a escolha permanece visível no próprio seletor.
+- Commit `2879abe`: barra de navegação também migrou para `st.pills`, foi elevada acima da sobreposição inferior do Streamlit e recebeu espaço de rolagem horizontal; área de prévia reduzida de 290px para 220px; espaço inferior da página ampliado para evitar conteúdo encoberto.
+- Requisito mínimo do Streamlit elevado para `>=1.40`, versão que inclui `st.pills`.
+- Revisão estática dos arquivos no GitHub confirmou: ambos os seletores usam `st.pills`; o antigo `st.radio` do estilo foi removido; o cartão-resumo foi removido; o placeholder ficou limitado a 220px.
+- Estado: commits gravados em `main`. GitHub Actions run `43990510784` está em execução; ainda não declarar CI aprovado. A aparência final no Streamlit mobile precisa ser confirmada por nova captura após o deploy.
