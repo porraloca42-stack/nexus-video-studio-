@@ -2099,3 +2099,10 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - MP4 sintético produzido a partir do adapter Python real: H.264 720×1280, AAC, duração 4.011s (limite do teste 3.8–4.2s). Artifact `nexus-remotion-demos` ID `14344496316`, retenção até 24/11/2026.
 - Demo manual de 50s foi skipped por não ser workflow_dispatch; nenhum vídeo de produção foi gerado. O teste usa still sintético + áudio sintético, sem Cloudflare, Fish, Modal, GPU ou modelo.
 - Isso valida o caminho Python manifest adapter → Remotion para o manifesto sintético; não valida a nova timeline Brain 4 no worker nem conteúdo audiovisual real.
+
+
+## Hardening da saída Brain 4 e CI — 17/11/2026
+- `run_brain4_for_storyboard()` agora exige que o nível declarado permaneça `word`, que os timestamps retornados sejam idênticos aos fornecidos pela Fish, que não surjam arrays de caracteres/fonemas sem alinhador e que cada palavra temporizada de legenda corresponda exatamente a um intervalo verificado.
+- Testes cobrem deriva temporal, tentativa de declarar fonemas não fornecidos e palavra de legenda com intervalo inventado.
+- CI #1022, run `44118368309`, commit `c7d25424a2ab10f6bb50ea711f1ba068be6ba0ca`: 203 testes Python passaram; Remotion typecheck e Commons smoke passaram; render sintético multifaixa foi skipped (sem alteração no renderer).
+- Integração Brain 4 continua opt-in e mockada; nenhum executor Gemini real foi conectado.
