@@ -4,12 +4,12 @@ _STYLE_ROWS = [
   [
     "Quântico & Cósmico",
     "Universo, manifestação e geometria luminosa.",
-    "cinematic cosmic surrealism, deep space nebula, sacred geometry, golden light",
+    "cinematic cosmic visual language, deep-space color grading, luminous volumetric atmosphere, refined science-fiction production design",
     "deep indigo, midnight blue, violet, restrained gold",
     "volumetric rays, luminous nebula backlight, controlled bloom, readable silhouettes",
     "monumental wides, human silhouettes, slow orbital moves, measured push-ins",
     "cosmic dust, layered nebula clouds, subtle sacred geometry",
-    "Humanos em relação à vastidão do cosmos; caminhos de luz e padrões geométricos devem representar a ideia narrada. Linguagem sofisticada de ficção científica, com metáforas claras e escala cinematográfica.",
+    "Express scale, interconnection, uncertainty and wonder through a sophisticated cosmic visual language. Use celestial and geometric visual vocabulary only when it strengthens the scene's specific meaning. The style governs atmosphere and visual treatment, never the subject matter.",
     "horoscope graphics, random equations, busy HUD, rainbow galaxies, generic stars, alegações de prova científica",
     "spaceship",
     [
@@ -21,12 +21,12 @@ _STYLE_ROWS = [
   [
     "Sonho Lúcido",
     "Surrealismo, subconsciente e realidades paralelas.",
-    "cinematic lucid dream surrealism, impossible architecture, floating clocks, infinite mirrors",
+    "surrealist dream logic, liminal spatial composition, ethereal visual transitions, soft atmospheric cinematography",
     "midnight blue, lavender, pearl, desaturated teal, amber",
     "soft sunlight through haze, dreamlike shafts, reflective highlights",
     "slow dolly through impossible spaces, deliberate reveals, uncanny symmetry",
     "thin mist, glass reflections, floating dust, cloud layers",
-    "Um elemento impossível por cena — escadas nas nuvens, portas repetidas, relógios suspensos ou espelhos para outro espaço. O elemento surreal precisa expressar o trecho narrado, não decorar aleatoriamente.",
+    "Use dream logic, spatial ambiguity, symbolic transformation and controlled impossibility to express the exact psychological or narrative state. Surreal elements must emerge from the scene's meaning; no fixed dream motifs or recurring prop formula.",
     "random collages, melting faces, childish fantasy, visual glitches, kaleidoscope excess",
     "surreal",
     [
@@ -38,12 +38,12 @@ _STYLE_ROWS = [
   [
     "Dark Psychology",
     "Psicologia sombria, sombra e tensão interior.",
-    "neo noir psychological thriller, chiaroscuro, solitary silhouette, cold blue amber",
+    "neo-noir psychological thriller visual language, low-key chiaroscuro, restrained cool grading, subtle film grain",
     "near-black, graphite, cold navy, steel blue, restrained amber",
     "hard chiaroscuro, narrow practical lights, rim lighting, detailed shadows",
     "controlled close-ups, over-shoulder, negative space, slow push-ins",
     "subtle grain, rain on glass, tactile concrete and dark wood",
-    "Mostrar conflito interno por comportamento humano concreto: confronto com o espelho, hesitação, isolamento, decisão difícil. Psicologia realista e ambiguidade; luz e composição carregam a tensão.",
+    "Explore psychological tension, inner conflict, ambiguity, vulnerability, control and emotional subtext through composition, contrast, gesture, distance and environment. The style does not prescribe a character type, prop, location or action; derive those independently from the script.",
     "gore, demonic clichés, hooded hackers, red eyes, sensational manipulation, crushed blacks",
     "detective",
     [
@@ -55,12 +55,12 @@ _STYLE_ROWS = [
   [
     "Épico Espiritual",
     "Despertar, propósito e escala monumental.",
-    "epic spiritual cinematic scale, monumental ancient temple, vast desert, golden dust",
+    "epic cinematic scale, monumental production design, atmospheric perspective, warm volumetric light",
     "sandstone, bronze, muted gold, umber, twilight violet",
     "golden-hour sun, volumetric beams, atmospheric haze",
     "extreme wide shots, slow crane/aerial reveals, tiny human figures",
     "windblown sand, weathered stone, drifting dust",
-    "Expressar despertar e propósito com arquitetura monumental, paisagens vastas, viajantes e limiares. A escala épica precisa servir à mensagem e manter plausibilidade física.",
+    "Convey significance and emotional scale through composition, perspective, production design, atmosphere and visual rhythm. Monumentality is an expressive tool, not a requirement to use temples, deserts, heroic figures or any recurring setting.",
     "imposed religious icons, game castles, random planets, lens flare excess, landscape filler",
     "castle",
     [
@@ -72,12 +72,12 @@ _STYLE_ROWS = [
   [
     "Aura Neon",
     "Energia, chakras e experiências meditativas.",
-    "bioluminescent energy art, cyan violet golden aura, glowing waveforms, black background",
+    "bioluminescent visual language, controlled neon illumination, luminous gradients, high-contrast dark-field cinematography",
     "black, electric cyan, ultraviolet, indigo, balanced gold",
     "self-illuminated forms, neon edge light, controlled glow",
     "slow macro pushes, symmetry, fluid lateral and orbital motion",
     "bioluminescent filaments, particles, translucent energy waves",
-    "Traduzir estados internos em formas luminosas elegantes ou silhuetas humanas com campos de luz. Usar cores de chakras apenas quando pertinentes; variar as soluções visuais.",
+    "Translate internal or energetic ideas into a controlled luminous visual language. The form may be abstract, environmental, material or human depending on the narrative. Do not default to glowing bodies, chakra diagrams or a fixed color-coded figure.",
     "cheap chakra charts, rainbow gradients everywhere, nightclub, neon clutter, pseudo-science as fact",
     "neon_city",
     [
@@ -89,12 +89,12 @@ _STYLE_ROWS = [
   [
     "Hermetismo Clássico",
     "Filosofia antiga, simbolismo e sabedoria.",
-    "classical baroque oil painting, Rembrandt chiaroscuro, hermetic symbolism, antique library",
+    "classical baroque fine-art painting, Rembrandt chiaroscuro, aged pigment palette, museum-grade painterly texture",
     "burnt umber, deep brown, antique gold, olive black, parchment",
     "candle/window source, Rembrandt chiaroscuro, warm highlights",
     "painterly frames, slow push-ins, still-life inserts, classical geometry",
     "oil brushwork, aged canvas, carved wood, parchment, patinated metal",
-    "Evocar pintura histórica de museu. Usar estudiosos, manuscritos, instrumentos e objetos simbólicos discretos quando sustentarem a fala; símbolos integrados ao cenário, nunca adesivos gráficos.",
+    "Use the visual sophistication of classical painting: deliberate composition, tonal hierarchy, material richness, symbolic restraint and painterly texture. Historical or esoteric references must be relevant to the script, not decorative defaults.",
     "random occult sigils, wizard props, modern objects, fake readable text, excessive gold, symbolism as scientific evidence",
     "watch",
     [
@@ -106,12 +106,12 @@ _STYLE_ROWS = [
   [
     "Visual ASMR / Hipnótico",
     "Macro, fluidos e estímulo visual sensorial.",
-    "hypnotic macro cinematography, molten liquid gold, fluid dynamics, neon ink, dark water",
+    "hypnotic macro cinematography, fluid-motion visual language, precise specular highlights, high-detail material rendering",
     "black, liquid gold, violet, cyan, selective pigments",
     "precise specular highlights, glossy reflections, backlit fluids",
     "extreme macro, smooth tracking, slow motion, stable compositions",
     "viscous liquid, metallic surfaces, pigment diffusion, bubbles, ripples",
-    "Um evento físico hipnótico por cena: metal líquido, tinta difundindo, gotas colidindo, pigmento em espiral. Usar como pontuação sensorial ou abstração pertinente, não como substituto de toda a narrativa.",
+    "Prioritize precise material behavior, tactile detail, rhythm and controlled visual fascination. Macro abstraction is appropriate only when it communicates the scene's idea; do not default to liquid metal, droplets or endlessly repeating fluid patterns.",
     "kaleidoscope loops, abstract filler, impossible physics, repeated gold liquid, flashing/strobing",
     "droplet",
     [
@@ -123,12 +123,12 @@ _STYLE_ROWS = [
   [
     "Cinematográfico",
     "Fotografia de cinema realista e versátil.",
-    "cinematic realistic film still, natural motivated light, 35mm lens, shallow depth of field",
+    "naturalistic cinematic photography, 35mm film language, motivated light, restrained color grading",
     "natural restrained colors, balanced skin tones, warm-cool contrast",
     "motivated natural/practical light, soft directional key",
     "24–50mm perspective, intentional medium/wide shots, restrained dolly/handheld",
     "organic grain, realistic skin/materials, subtle atmospheric depth",
-    "Live-action convincente, ambientes autênticos, performance natural. Escolher lente, enquadramento e movimento para apoiar a ação e variar composições com continuidade.",
+    "Apply believable live-action cinematography. Let the script determine subjects, actions, locations and emotional register; use lensing, motivated light, composition and restrained movement to make the scene feel photographed rather than templated.",
     "plastic CGI, excessive teal-orange, artificial flares, generic stock poses, fake text",
     "mountain",
     [
@@ -140,12 +140,12 @@ _STYLE_ROWS = [
   [
     "Dark Cinematográfico",
     "Cinema dramático com sombras profundas.",
-    "dark cinematic film still, deep shadows, dramatic rim light, moody atmosphere",
+    "dark cinematic photography, low-key exposure, sculpted rim light, deep but detailed shadows",
     "charcoal, midnight blue, desaturated green, restrained amber/cold white",
     "low-key, practical sources, rim light, preserved shadow detail",
     "measured push-ins, silhouettes, selective close-ups, layered frames",
     "subtle grain, motivated haze/rain/smoke",
-    "Ambientes realistas com registro emocional escuro. O sujeito e a ação permanecem legíveis; escuridão direciona o olhar, não esconde a cena.",
+    "Use shadow, selective visibility, contrast and controlled atmosphere to establish a darker emotional register. Preserve clear visual storytelling. Darkness is a treatment, not a mandate for night scenes, anonymous figures or thriller props.",
     "underexposure, horror clichés, constant smoke, crushed blacks, arbitrary neon",
     "silhouette",
     [
@@ -157,12 +157,12 @@ _STYLE_ROWS = [
   [
     "Ilustração Editorial",
     "Metáforas visuais e arte conceitual sofisticada.",
-    "premium editorial illustration, conceptual visual metaphor, refined graphic shapes",
+    "premium editorial illustration, conceptual graphic language, refined shape design, limited color palette",
     "limited 3–5 color palette, deliberate accent",
     "illustrative tonal modeling, clean separation, negative space",
     "graphic composition, strong silhouette, clear hierarchy",
     "paper grain, screenprint or painterly digital texture",
-    "Converter ideias abstratas em uma metáfora imediatamente compreensível, com linguagem de capa de revista sofisticada e poucos detalhes bem escolhidos.",
+    "Translate the scene's meaning into a concise, high-concept editorial image with clear hierarchy and intentional shape language. The metaphor must be specific to the narration, not a recurring icon or generic infographic.",
     "clip-art, generic icons, school infographic, text-heavy poster, inconsistent technique",
     "editorial",
     [
@@ -174,12 +174,12 @@ _STYLE_ROWS = [
   [
     "Filme Noir",
     "Mistério, contraste e linguagem noir clássica.",
-    "classic film noir cinematography, black and white, hard side light, venetian blind shadows",
+    "classic black-and-white noir cinematography, silver-gelatin tonal range, hard chiaroscuro, expressive shadow design",
     "monochrome black, charcoal, silver, nuanced gray",
     "hard directional light, long shadows, silhouettes, pools of practical light",
     "low angles, reflective surfaces, door frames, deliberate close-ups",
     "silver-gelatin grain, wet pavement, motivated smoke",
-    "Linguagem noir clássica para segredo, tensão moral, isolamento e escolhas difíceis. Cues de época apenas quando coerentes; não transformar tudo em história de detetive.",
+    "Apply classic noir visual grammar through tonal contrast, framing, negative space and expressive shadow. Use it as a photographic language across subjects and genres; do not force crime stories, detectives, period costumes or familiar noir props.",
     "color neon, cyberpunk, fedora clichés, unreadable darkness, random crime props",
     "detective",
     [
@@ -191,12 +191,12 @@ _STYLE_ROWS = [
   [
     "Aquarela Artística",
     "Pintura delicada, orgânica e contemplativa.",
-    "fine art watercolor illustration, translucent pigment washes, organic paper texture",
+    "fine-art watercolor medium, translucent pigment behavior, organic paper texture, soft tonal transitions",
     "muted pigments, watercolor transparency, warm paper white",
     "soft diffuse light, luminous paper, gentle transitions",
     "illustrative framing, breathing room, clear focal point",
     "pigment blooms, granulation, paper fibers, wet-on-wet edges",
-    "Cena reconhecível em aquarela refinada. Preservar sujeito e ação enquanto as lavagens e bordas pigmentadas criam atmosfera; manter papel e pincel consistentes.",
+    "Preserve the scene's recognizable subject and action while translating surfaces, edges, light and color into a coherent watercolor medium. The medium is constant; subject matter remains entirely script-led.",
     "photorealistic inserts, muddy colors, splashes hiding subjects, childish clip-art",
     "vase",
     [
@@ -208,12 +208,12 @@ _STYLE_ROWS = [
   [
     "Fantasia Cinematográfica",
     "Fantasia imersiva com escala e encantamento.",
-    "cinematic fantasy film still, atmospheric magical realism, ancient worlds, volumetric glow",
+    "cinematic fantasy production design, atmospheric magical realism, coherent world-building, tactile materials",
     "earthy natural colors, deep teal, forest green, muted violet, gold",
     "motivated moonlight/firelight, magical practical glow, volumetric beams",
     "immersive wides, character-led tracking, revealing moves, depth",
     "weathered stone, organic landscapes, mist, embers, tactile costumes",
-    "Mundo de fantasia crível, com regras visuais consistentes. Elementos mágicos têm propósito narrativo; priorizar lugares tangíveis e ações de personagens em vez de espetáculo decorativo.",
+    "Create a coherent cinematic fantasy treatment only when the narrative supports it. Establish believable visual rules, tactile environments and purposeful extraordinary elements; never inject fantasy creatures, castles or magic simply because the style is selected.",
     "generic game art, random dragons/castles, particle excess, cartoon proportions",
     "castle",
     [
@@ -225,12 +225,12 @@ _STYLE_ROWS = [
   [
     "Graphic Novel",
     "Narrativa ilustrada, traço forte e impacto.",
-    "premium graphic novel illustration, expressive ink linework, dramatic shadow blocks",
+    "premium graphic-novel illustration, expressive ink language, controlled halftone, dramatic graphic contrast",
     "limited dramatic palette, ink black, warm paper, accent colors",
     "graphic chiaroscuro, hard-edged shadows, strong silhouettes",
     "dynamic perspective, expressive angles, single-frame storytelling",
     "ink hatching, brush strokes, restrained halftone, paper texture",
-    "Uma ilustração cinematográfica completa por cena, não uma página de quadrinhos. Ação clara, linguagem de traço e design de personagens consistentes.",
+    "Use a unified graphic-novel drawing language, expressive line, deliberate shadow shapes and strong readable staging. Render a single cinematic scene, not a comic page; do not default to action poses, speech bubbles or superhero conventions.",
     "comic panels, speech bubbles, captions, lettering, sound effects, collage",
     "comic",
     [
@@ -242,12 +242,12 @@ _STYLE_ROWS = [
   [
     "Minimalista Clean",
     "Composição limpa, elegante e essencial.",
-    "minimalist clean visual composition, uncluttered frame, refined neutral palette",
+    "minimalist visual composition, restrained neutral palette, precise negative space, low visual noise",
     "soft neutrals, off-white, stone, muted gray, one accent",
     "soft diffused light, gentle shadows, clean separation",
     "restrained movement, negative space, precise subject placement",
     "matte surfaces, subtle natural materials, low visual noise",
-    "Reduzir a imagem ao mínimo necessário para comunicar a cena. Espaço negativo e hierarquia clara sem remover ação humana ou contexto significativo.",
+    "Reduce visual noise and retain only the elements essential to communicate the scene. Minimalism governs hierarchy, spacing and restraint, not emptiness; preserve the concrete action and context required by the narration.",
     "empty decorative frames, generic gradients, excess props, tiny subjects, UI mockups, text overlays",
     "vase",
     [
@@ -259,12 +259,12 @@ _STYLE_ROWS = [
   [
     "Realismo Humano Emocional",
     "Pessoas reais, emoções e transformação cotidiana.",
-    "cinematic emotional human realism, authentic candid portrait, natural performance",
+    "cinematic human realism, natural skin texture, authentic performance, observational photography",
     "natural skin tones, warm neutrals, earthy colors, gentle cool shadows",
     "window light, practical lamps, soft backlight, believable exposure",
     "intimate close-ups, observational medium shots, eye-level, subtle handheld",
     "real skin, natural imperfections, tactile clothing, lived-in spaces",
-    "Pessoas verossímeis expressando emoções por gestos específicos: hesitar, aliviar-se, concentrar-se, refletir, conectar-se, decidir. Atuação contida, diversidade de pessoas e ambientes.",
+    "Prioritize credible human behavior, nuanced emotion, natural physical detail and lived-in environments. Derive people, gestures and settings from the actual story; avoid stock-photo expressions and repeated generic protagonists.",
     "plastic retouching, stock smiles, staged handshakes, melodrama, uncanny faces, anonymous same person",
     "silhouette",
     [
@@ -276,12 +276,12 @@ _STYLE_ROWS = [
   [
     "Reconstituição Histórica",
     "Épocas, personagens e ambientes historicamente coerentes.",
-    "historical period cinematic reconstruction, authentic architecture, period costume",
+    "historically grounded production design, period-accurate material culture, natural practical lighting",
     "period-appropriate muted pigments, natural dyes, aged wood, stone, bronze",
     "firelight, candlelight, window daylight, plausible practical sources",
     "observational wides, medium character scenes, tactile tool/manuscript inserts",
     "aged paper, worn stone, hand-forged metal, woven fabrics",
-    "Reconstrução plausível somente quando roteiro indicar época, pessoa ou contexto. Compatibilizar roupas, ferramentas, arquitetura e materiais. Se houver incerteza, usar referência de época genérica sem inventar fatos específicos.",
+    "Reconstruct a historical period only when supported by the script or verified context. Maintain consistency in materials, clothing, architecture and technology; when details are uncertain, avoid invented specificity.",
     "anachronisms, fantasy armor, fake manuscript text, unsupported likenesses, mixing centuries",
     "watch",
     [
@@ -293,12 +293,12 @@ _STYLE_ROWS = [
   [
     "Natureza Contemplativa",
     "Natureza, serenidade e reflexão.",
-    "cinematic contemplative nature, misty forest, calm water, golden sunrise",
+    "contemplative nature cinematography, natural atmospheric light, organic motion, restrained earth-tone grading",
     "moss green, muted teal, mist gray, sunrise gold, earth tones",
     "soft dawn/dusk, diffused sun, natural haze, gentle reflections",
     "slow stable tracking, landscape reveals, water-level details",
     "moving leaves, ripples, mist, wet stone, natural surface detail",
-    "Natureza como ambiente emocional ou metáfora pertinente. Variar locais e movimentos naturais; ligar paisagem à narração. Silhueta humana apenas quando acrescentar sentido.",
+    "Use the natural world as subject, setting or metaphor only when it supports the narration. Emphasize observed movement, atmosphere and ecological plausibility; do not substitute generic landscapes for specific human or narrative actions.",
     "repeated generic sunsets, fantasy glowing forests, oversaturated greens, unrelated wallpaper landscapes",
     "waterfall",
     [
@@ -341,5 +341,12 @@ def build_visual_style_directive(style):
         "pessoas, ambientes, planos, ações e enquadramentos. O estilo nunca substitui "
         "a correspondência semântica com a narração. Não inserir texto, legendas, "
         "logotipos ou tipografia nas imagens. Cada cena deve continuar específica "
-        "ao trecho narrado."
+        "ao trecho narrado.\\n"
+        "REGRA ANTI-TEMPLATE: estilo visual não é tema, personagem, objeto, cenário ou ação. "
+        "Não escolha automaticamente sujeitos, lugares, símbolos ou adereços associados ao nome do estilo. "
+        "Não transforme qualquer referência conceitual em cena obrigatória; referências são possibilidades, nunca receitas. "
+        "Derive primeiro sujeito, ação, ambiente e metáfora do trecho específico do roteiro. "
+        "Depois aplique a gramática visual do estilo. "
+        "Varie soluções entre cenas do mesmo vídeo e evite repetir motivos centrais, mesmo quando o estilo permitir. "
+        "Se duas soluções forem igualmente coerentes, prefira a que amplia a variedade visual sem perder a identidade artística."
     )
