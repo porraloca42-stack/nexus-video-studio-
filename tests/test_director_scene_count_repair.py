@@ -9,7 +9,20 @@ def make_scene(index):
         "duration_seconds": 4,
         "purpose": f"Beat {index}",
         "voiceover": f"Trecho narrado da cena {index}.",
-        "visual_action": f"Uma pessoa realiza uma ação concreta diferente na cena {index}.",
+        "visual_action": [
+            "Uma mulher abre a janela e afasta a cortina.",
+            "Um homem encaixa uma chave e gira a fechadura.",
+            "Uma criança empilha blocos coloridos sobre a mesa.",
+            "Uma cozinheira corta tomates com uma faca afiada.",
+            "Um ciclista sobe uma ladeira pedalando com força.",
+            "Uma artesã costura tecido azul usando uma agulha.",
+            "Um jardineiro rega mudas pequenas com um regador.",
+            "Um músico afina as cordas de um violão antigo.",
+            "Uma pessoa organiza livros em uma estante alta.",
+            "Um trabalhador pinta a parede com um rolo.",
+            "Uma atleta amarra os cadarços antes da corrida.",
+            "Um fotógrafo ajusta o foco de uma câmera.",
+        ][(index - 1) % 12],
         "image_prompt": f"Opening frame of a person beginning action {index}, hands and relevant props visible, cinematic vertical shot, no text.",
         "video_motion_prompt": f"A person begins action {index}, then performs a clear physical movement with their hands and body. The action progresses naturally and reaches a visible end state in one continuous shot. The camera remains steady.",
         "visual_style": "Cinematográfico realista",
@@ -100,7 +113,7 @@ class SceneCountRepairTests(unittest.TestCase):
         self.assertLess(report["unique_search_ratio"], 1.0)
         self.assertTrue(any("ação visual repetida" in warning for warning in report["warnings"]))
         self.assertTrue(any("busca principal repetida" in warning for warning in report["warnings"]))
-        self.assertEqual(report["method"], "deterministic_text_checks_no_external_calls")
+        self.assertEqual(report["method"], "deterministic_token_overlap_heuristic_no_external_calls")
 
     def test_preflight_does_not_flag_distinct_scene_actions(self):
         report = director.build_storyboard_preflight(make_plan(12))
@@ -126,6 +139,32 @@ class SceneCountRepairTests(unittest.TestCase):
 
         self.assertEqual(len(result["scenes"]), 12)
         self.assertEqual(request.call_count, 1)
+
+
+    def test_preflight_detects_near_duplicate_actions_with_reordered_words(self):
+        plan = make_plan(12)
+        plan["scenes"][0]["visual_action"] = "A person opens a wooden door with the right hand."
+        plan["scenes"][1]["visual_action"] = "A person opens a wooden door with the left hand."
+
+        report = director.build_storyboard_preflight(plan)
+
+        self.assertTrue(report["near_duplicate_action_pairs"])
+        self.assertEqual(report["near_duplicate_action_pairs"][0]["scenes"], [1, 2])
+        self.assertTrue(any("alta sobreposição de termos" in warning for warning in report["warnings"]))
+
+    def test_preflight_reports_action_and_motion_prompt_coverage(self):
+        plan = make_plan(10)
+        plan["scenes"][0]["visual_action"] = ""
+        plan["scenes"][1]["video_motion_prompt"] = ""
+
+        report = director.build_storyboard_preflight(plan)
+
+        self.assertEqual(report["action_coverage_ratio"], 0.9)
+        self.assertEqual(report["motion_prompt_coverage_ratio"], 0.9)
+
+    def test_preflight_does_not_flag_distinct_concrete_actions_as_near_duplicates(self):
+        report = director.build_storyboard_preflight(make_plan(12))
+        self.assertEqual(report["near_duplicate_action_pairs"], [])
 
 
 if __name__ == "__main__":
