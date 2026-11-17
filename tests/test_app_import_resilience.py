@@ -113,6 +113,18 @@ class AppImportResilienceTests(unittest.TestCase):
         self.assertNotIn('st.selectbox(', dialog)
         self.assertNotIn('Confirmar duração', dialog)
 
+    def test_storyboard_preflight_is_exposed_with_clear_limitations(self):
+        source = Path("app.py").read_text(encoding="utf-8")
+        self.assertIn('preflight = plan.get("preflight_report")', source)
+        self.assertIn('st.markdown("### Pré-validação audiovisual")', source)
+        self.assertIn('unique_action_ratio', source)
+        self.assertIn('unique_search_ratio', source)
+        self.assertIn('unique_shot_types', source)
+        self.assertIn('unique_settings', source)
+        self.assertIn('não analisa os quadros', source)
+        self.assertIn('Pontos para revisar:', source)
+        self.assertIn('Nenhuma repetição literal', source)
+
     def test_calibrator_import_is_lazy_and_guarded(self):
         source = Path("app.py").read_text(encoding="utf-8")
         self.assertIn("from nexus.director import revise_narration_for_duration", source)
