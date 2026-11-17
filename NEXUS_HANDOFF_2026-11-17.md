@@ -433,3 +433,10 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 ## Validação adicional — adapter Python → Remotion — 17/11/2026
 - Workflow #119 / `44118084308` passou. O adapter Python construiu o manifesto e Remotion gerou MP4 sintético 4.011s; FFprobe confirmou H.264 720×1280 + AAC. Artifact #14344496316.
 - Demo manual 50s foi skipped; teste de integração usa still/áudio sintéticos, sem serviços externos. Não equivale a render real nem prova timeline Brain 4.
+
+
+## Checkpoint — proteção de timestamps Brain 4 — 17/11/2026
+- Brain 4 não pode alterar timestamps Fish, declarar phoneme/character sem evidência ou inserir palavras de legenda com tempos diferentes dos originais.
+- CI #1022: 203 testes passaram, typecheck e Commons smoke passaram; synthetic multitrack skipped.
+- Workflow #119 também passou: adapter Python → Remotion produziu MP4 sintético 4.011s H.264/AAC 720×1280, artifact #14344496316.
+- Próxima etapa técnica: teste de integração offline que alimenta uma timeline Brain 4 válida no `build_remotion_manifest()`, incluindo captions, SFX e ducking, para provar a passagem dos dados ao manifest sem Gemini/serviços pagos.
