@@ -141,3 +141,14 @@ Responder em português brasileiro, com clareza e sem exagerar. O usuário quer 
 4. Próxima prioridade de engenharia: melhorar cobertura narrativa e especificidade filmável das cenas com verificações locais/testes determinísticos, sem alegar compreensão semântica real por heurística lexical.
 5. Manter LTX 0.9.8 como pipeline atual; protótipo LTX-2.5/ComfyUI permanece isolado e sem inferência paga.
 6. Nenhuma chamada Gemini/Cloudflare/Fish/Modal, geração GPU ou benchmark pago sem autorização explícita adicional.
+
+
+### Complemento — verificação de ação física explícita (17/11/2026)
+- A pré-validação também identifica prompts `video_motion_prompt` sem nenhum verbo de movimento físico reconhecido por uma lista lexical controlada. Retorna `motion_action_coverage_ratio` e `motion_scenes_without_recognized_action`, além de aviso com os números das cenas.
+- A interface mostra a proporção de prompts com verbo físico reconhecido. Isso é apenas uma triagem lexical: não prova que o sujeito se move, que a ação é coerente com a fala, nem que o vídeo gerado executa o movimento. Um verbo pode se referir à câmera ou ao ambiente; sinônimos não listados podem ser falsos negativos.
+- A normalização foi ajustada para preservar letras acentuadas do português. Teste adicionado para pares semelhantes com termos como “portão metálico” e para prompt sem verbo físico reconhecido.
+- Commits adicionais: `6769d06` (normalização Unicode), `f8af365` (teste de português acentuado), `8161dd2` (detecção lexical de ação física), `875ea44` (teste do prompt estático), `3bf05cd` (métrica na UI), `6b8accc` (contrato UI).
+- Código e testes foram gravados na branch main. Ainda não há execução de testes/CI confirmada, deploy ou validação visual. Nenhuma API paga, GPU ou renderização foi chamada; custo variável adicional: US$0.
+
+
+Próximo passo exato: confirmar HEAD, reler todos os arquivos alterados e consultar novamente o CI. A integração atual não lista runs de push; se não houver evidência nova, CI permanece desconhecido. Não executar chamadas pagas, deploy Modal ou render de produção sem autorização adicional.
