@@ -93,17 +93,19 @@ def main(project_root=None):
     work = root / "worker_output" / job_id
     work.mkdir(parents=True, exist_ok=True)
 
-    # Calibrate the selected Fish voice before expensive image generation and I2V.
-    # A short narration must never waste a full visual-generation run before failing.
+    # The selected duration is an editorial reference; the hard ceiling is +10s.
+    # Fish Audio is the source of truth for runtime. Never stretch or pad narration.
     narration = " ".join(str(scene.get("voiceover", "")).strip() for scene in scenes).strip()
     if not narration:
         raise RuntimeError("Narração vazia.")
-    expected_duration = sum(
+    requested_duration = float(plan.get("requested_duration_seconds") or sum(
         float(scene.get("duration_seconds") or scene.get("duration") or 0)
         for scene in scenes
-    )
-    if expected_duration <= 0:
-        raise RuntimeError("O storyboard não possui duração total válida.")
+    ))
+    maximum_duration = float(plan.get("maximum_duration_seconds") or (requested_duration + 10.0))
+    if requested_duration <= 0 or maximum_duration < requested_duration:
+        raise RuntimeError("A janela de duração do storyboard é inválida.")
+
     audio_path, narration_provider = generate_worker_narration(
         narration,
         voice,
@@ -113,32 +115,28 @@ def main(project_root=None):
     )
     audio_path = Path(audio_path)
     actual_audio_duration = _measure_audio_duration(audio_path)
-    ratio = actual_audio_duration / expected_duration
 
-    # If the real voice rate differs materially from the estimate, ask Gemini
-    # to revise only the spoken lines while preserving scene order and visuals.
-    for calibration_attempt in range(2):
-        if 0.90 <= ratio <= 1.10:
-            break
+    # Only edit if the real voice exceeds the allowed ceiling. The editor may
+    # remove redundancy, but must never expand/pad the narration to hit a target.
+    if actual_audio_duration > maximum_duration + 0.75:
         gemini_api_key = fish_credentials.get("gemini_api_key", "")
         if not gemini_api_key:
             raise RuntimeError(
-                f"A narração ficou com {actual_audio_duration:.1f}s para {expected_duration:.1f}s. "
-                "A calibração automática exige GEMINI_API_KEY; nenhuma imagem foi gerada."
+                f"A narração natural ficou com {actual_audio_duration:.1f}s, acima do teto "
+                f"de {maximum_duration:.0f}s. Nenhuma imagem foi gerada; configure o Gemini "
+                "para permitir uma edição de contenção sem alterar a mensagem."
             )
         print(
-            f"Calibrando narração com a duração real da voz "
-            f"({actual_audio_duration:.1f}s / {expected_duration:.1f}s), "
-            f"tentativa {calibration_attempt + 1}/2."
+            f"Narração acima do teto editorial ({actual_audio_duration:.1f}s / "
+            f"{maximum_duration:.1f}s). Tentando uma única edição de contenção."
         )
         style = str(fish_credentials.get("style") or plan.get("style_lock") or "")
         topic = str(fish_credentials.get("topic") or plan.get("topic") or "")
         plan = revise_narration_for_duration(
-            plan, expected_duration, actual_audio_duration, topic, style,
+            plan, maximum_duration, actual_audio_duration, topic, style,
             lambda name, default="": gemini_api_key if name == "GEMINI_API_KEY" else default,
         )
         scenes = plan.get("scenes") or []
-        _fit_scene_durations(scenes, expected_duration)
         narration = " ".join(str(scene.get("voiceover", "")).strip() for scene in scenes).strip()
         audio_path.unlink(missing_ok=True)
         audio_path, narration_provider = generate_worker_narration(
@@ -150,17 +148,29 @@ def main(project_root=None):
         )
         audio_path = Path(audio_path)
         actual_audio_duration = _measure_audio_duration(audio_path)
-        ratio = actual_audio_duration / expected_duration
+        if actual_audio_duration > maximum_duration + 0.75:
+            raise RuntimeError(
+                f"Mesmo após a edição editorial, a narração ficou com {actual_audio_duration:.1f}s, "
+                f"acima do teto de {maximum_duration:.0f}s. O trabalho foi interrompido antes "
+                "da geração de imagens para evitar custo desnecessário."
+            )
 
-    if not 0.85 <= ratio <= 1.15:
-        raise RuntimeError(
-            f"Após a calibração, a narração ficou com {actual_audio_duration:.1f}s "
-            f"para uma meta de {expected_duration:.1f}s. "
-            "O trabalho foi interrompido antes da geração das imagens para evitar custo desnecessário."
-        )
-    narration_duration = _fit_narration_to_timeline(
-        audio_path, expected_duration, actual_duration=actual_audio_duration
-    )
+    # Scene boundaries follow the final narration's measured duration and each
+    # scene's word share. Audio remains at its original natural speaking rate.
+    fitted_durations = _fit_scene_durations(scenes, actual_audio_duration)
+    plan["requested_duration_seconds"] = requested_duration
+    plan["maximum_duration_seconds"] = maximum_duration
+    plan["actual_duration_seconds"] = round(actual_audio_duration, 3)
+    plan["duration_adjustment"] = {
+        **(plan.get("duration_adjustment") or {}),
+        "requested_seconds": requested_duration,
+        "maximum_seconds": maximum_duration,
+        "actual_narration_seconds": round(actual_audio_duration, 3),
+        "scene_durations": fitted_durations,
+        "timing_source": "measured_fish_audio_without_time_stretch",
+    }
+    expected_duration = actual_audio_duration
+    narration_duration = actual_audio_duration
 
     generated = generate_scene_images(
         scenes,
@@ -265,6 +275,8 @@ def main(project_root=None):
         "job_id": job_id,
         "output": str(output),
         "duration": duration,
+        "requested_duration": requested_duration,
+        "maximum_duration": maximum_duration,
         "narration_duration": narration_duration,
         "narration_provider": narration_provider,
         "width": video["width"],
