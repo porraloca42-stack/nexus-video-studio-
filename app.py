@@ -126,7 +126,7 @@ st.set_page_config(page_title="NEXUS VIDEO STUDIO", page_icon="🎬", layout="wi
 
 from nexus.visual_styles import STYLE_OPTIONS, STYLE_META, STYLE_PROFILES
 
-@st.dialog("Escolher narração", width="large", icon=":material/record_voice_over:")
+@st.dialog("Escolher narração", width="medium", icon=":material/record_voice_over:")
 def open_voice_picker():
     api_key = secret("FISH_API_KEY")
     if not api_key:
@@ -158,9 +158,9 @@ def open_voice_picker():
     current_id = st.session_state.get("nexus_fish_voice_id", "")
     if current_id not in voice_by_id:
         current_id = voice_ids[0]
-    st.caption("Pesquise e escolha uma voz. A amostra, quando disponível, aparece abaixo.")
+    st.caption("Digite para pesquisar pelo nome ou provedor. A amostra aparece quando disponível.")
     selected_id = st.selectbox(
-        "Voz disponível", voice_ids,
+        "Buscar voz", voice_ids,
         index=voice_ids.index(current_id),
         format_func=lambda value: f"{voice_by_id[value]['category']} · {voice_by_id[value]['title']}",
         key="nexus_voice_picker_choice",
