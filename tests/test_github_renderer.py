@@ -99,6 +99,8 @@ class GitHubRendererTests(unittest.TestCase):
             fish_api_key="fish-private-key",
             fish_voice_id="fish-private-voice",
             gemini_api_key="gemini-private-key",
+            brain4_enabled=True,
+            gemini_model="gemini-flash-test",
             topic="Tema de teste",
             style="Cinematográfico",
             session=session,
@@ -118,6 +120,8 @@ class GitHubRendererTests(unittest.TestCase):
             "api_key": "fish-private-key",
             "voice_id": "fish-private-voice",
             "gemini_api_key": "gemini-private-key",
+            "brain4_enabled": True,
+            "gemini_model": "gemini-flash-test",
             "topic": "Tema de teste",
             "style": "Cinematográfico",
         })
