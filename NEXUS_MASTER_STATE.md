@@ -1781,3 +1781,17 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Não faz chamadas adicionais ao Gemini, não usa GPU e não altera cenas automaticamente. Os avisos são diagnósticos para orientar revisão posterior, sem reprovar storyboards por heurísticas frágeis.
 - Testes adicionados para repetição literal e diversidade de ações/buscas. Commits: `4d81513` (implementação) e `94b7980` (testes).
 - Estado no momento do registro: alterações gravadas na branch main; status de CI ainda não retornado pela integração GitHub. Não houve deploy, inferência GPU, chamada paga ou geração de MP4.
+
+## Exposição da pré-validação do storyboard na interface — 17/11/2026 09:56 BRT
+- Retomada feita a partir da leitura integral de `NEXUS_HANDOFF_2026-11-17.md` e `NEXUS_MASTER_STATE.md` diretamente da branch `main`.
+- HEAD observado antes desta alteração: `50a0a70c51de9c40648218772f672a362f1cecc9`. A branch `main` foi confirmada.
+- Inspeção do código confirmou que `build_storyboard_preflight(plan)` já calcula repetição literal de ações/buscas, variedade de tipos de plano e variedade de ambientes, e anexa `preflight_report` ao plano. A interface não exibia esse relatório.
+- Alteração em `app.py`: dentro do expander existente de planejamento, adicionada a seção compacta **Pré-validação audiovisual**, com percentuais de variedade textual de ações e buscas, quantidade de tipos de plano e ambientes distintos, além dos avisos encontrados.
+- Transparência na UI: a seção informa que é uma checagem heurística de texto/metadados, não analisa quadros e não substitui a revisão visual. A ausência de alertas é descrita somente como ausência de repetição literal/alertas detectados pelas regras automáticas.
+- Teste de contrato adicionado em `tests/test_app_import_resilience.py` para verificar exibição dos indicadores, avisos e limitações.
+- Commits: `355d493ba1047e34a9df9d0a8fb8f7aec852f4fa` (interface) e `9b4326ced1eb14f34fb055512aec8aab4f82a839` (teste).
+- Verificação pós-commit: `app.py` e `tests/test_app_import_resilience.py` foram relidos diretamente de `main`; a seção e o teste estão presentes. A consulta de status combinado para `9b4326c` retornou zero statuses. O wrapper de workflow runs disponível informa que filtra apenas execuções disparadas por pull request e também retornou lista vazia; portanto, o estado do CI de push não pôde ser confirmado por esta integração. O workflow `.github/workflows/tests.yml` declara gatilho `push` em `main`, mas isso não comprova que a execução terminou ou passou.
+- Estado: implementação gravada no GitHub e confirmada por releitura; teste adicionado, ainda sem execução confirmada; CI de push não verificável nesta sessão; deploy Streamlit e visualização no celular pendentes.
+- Custos: nenhuma chamada Gemini, Cloudflare, Fish Audio, Modal/GPU ou renderização paga foi iniciada nesta etapa. Custo variável adicional: US$0.
+- Próximo passo: obter o resultado do CI de push do commit `9b4326c` por uma consulta de Actions que inclua eventos push; se verde, continuar com a próxima melhoria de direção semântica em código/testes locais, sem inferência paga. A validação visual publicada permanece separada.
+
