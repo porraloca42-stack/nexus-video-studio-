@@ -2,9 +2,9 @@
 
 # STATUS OPERACIONAL VIGENTE — SOBRESCREVE CHECKPOINTS HISTÓRICOS
 
-Atualizado em: 2026-11-17T18:16:51-03:00 (America/Sao_Paulo)
-HEAD da branch main no início desta atualização: e93fbe5a171f9d1cc3c19dc8796c4e3d343f1252
-Último commit de main antes desta atualização documental: e93fbe5a171f9d1cc3c19dc8796c4e3d343f1252.
+Atualizado em: 2026-11-17T18:20:48-03:00 (America/Sao_Paulo)
+HEAD da branch main no início desta atualização documental: 10ea042ac9fb3d68636edbe28ccb331f0cd47ca5
+Último commit de main antes desta atualização documental: 10ea042ac9fb3d68636edbe28ccb331f0cd47ca5.
 
 **REGRA DE LEITURA:** este bloco é a fonte prioritária para o estado atual. Os registros cronológicos abaixo são histórico. Nunca retomar uma “próxima ação” antiga sem confrontá-la com este bloco e com o HEAD atual. Em especial, NÃO tratar tarefas do dia 16/11 nem checkpoints antigos sobre integração Brain 4/Remotion como pendências atuais.
 
@@ -28,6 +28,16 @@ HEAD da branch main no início desta atualização: e93fbe5a171f9d1cc3c19dc8796c
 - Estado: implementação na branch, revisão estática e CI #1190 aprovado nos jobs executados; PR aberta, não mergeada; não implantada. Main e deployments existentes permanecem inalterados.
 - Nenhum deploy Modal, smoke de inferência, GPU, Cloudflare, Fish Audio, Gemini ou render foi acionado. Nenhum custo variável adicional gerado.
 - Próxima ação: aguardar autorização explícita para merge e conferir novamente a base/checks antes da integração. Deploy e inferência continuam exigindo autorizações próprias.
+
+## PR #11 — integrada na main — 2026-11-17T18:20:48-03:00 (America/Sao_Paulo)
+- PR #11 (`Separate Modal deployment from paid inference smoke`) foi mergeada por squash após autorização explícita do usuário.
+- Merge commit na main: `10ea042ac9fb3d68636edbe28ccb331f0cd47ca5`. GitHub confirma PR fechada com `merged=true`; branch de origem: `safety/separate-modal-deploy-smoke`; head integrado: `a2b5d2c3a668cf36db0ee891854d3bb457ad8534`.
+- Diff funcional confirmado antes do merge: somente `.github/workflows/modal-deploy.yml` e `.github/workflows/modal-inference-smoke.yml`.
+- Verificação pós-merge: ambos os arquivos foram relidos em `main`. O workflow de deploy continua manual (`workflow_dispatch`) e executa apenas `modal deploy modal_worker.py`; o smoke LTX é outro workflow, também manual, valida os secrets Modal, executa `scripts/modal_smoke_test.py` e guarda artifact por 3 dias.
+- CI mais recente antes do merge: #1190 / run `44177875187`, no head `a2b5d2c3a668cf36db0ee891854d3bb457ad8534`: unit-tests, commons-live-smoke e remotion-typecheck success; remotion-synthetic-render skipped. Nenhum CI foi localizado associado diretamente ao merge commit `10ea042...`; portanto não declarar reteste pós-merge.
+- Nenhum deploy Modal, inferência GPU, chamada paga Cloudflare/Fish Audio/Gemini ou render de produção foi executado. Merge de código não significa implantação.
+- Estado: PR #11 integrada/mergeada; workflows implementados e conferidos em main; CI validou o head imediatamente anterior ao merge; deployment e inferência permanecem não executados.
+- Próxima etapa de produto: seguir com auditoria estática de PR #10 e dos limites de custo/telemetria. Deploy Modal e smoke pago continuam bloqueados até autorização específica.
 
 ## Próxima ação sem custo
 1. Fazer revisão final do diff e dos logs do CI #1163; manter PR #10 aberta até solicitação explícita de merge.
