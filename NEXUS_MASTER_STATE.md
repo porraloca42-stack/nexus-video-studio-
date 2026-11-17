@@ -2024,3 +2024,11 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - O job `remotion-synthetic-render` deve ser disparado por esse push, pois o workflow filtra a mensagem do commit.
 - A integração GitHub consultada retornou status combinado vazio e não expõe runs de push (a ação `fetch_commit_workflow_runs` retorna apenas execuções de pull request). Resultado do job, logs e artifact continuam sem confirmação.
 - Próxima ação: abrir GitHub Actions no repositório e localizar a execução do commit acima; conferir o job `remotion-synthetic-render` e artifact `nexus-remotion-synthetic-validation`. Não declarar sucesso até obter evidência.
+
+
+## Correção do caminho de importação e nova validação sintética — 17/11/2026
+- Logs do job `remotion-synthetic-render` no run #969 (44106516739) confirmaram a falha: `ModuleNotFoundError: No module named 'nexus'` ao executar `scripts/validate_remotion_render.py`.
+- Corrigido em `178ffe1bcb26a5a9ebbbbf69c08979ebfb555df7`: o script adiciona a raiz do repositório a `sys.path` antes de importar `nexus.remotion_renderer`.
+- No run #973 (44113431413), após esse commit, `unit-tests`, `remotion-typecheck` e `commons-live-smoke` concluíram com sucesso; `remotion-synthetic-render` foi ignorado porque a mensagem do commit não continha o marcador `[run-remotion-validation]`. Portanto, a correção de importação ainda não foi exercitada pelo job de render.
+- Este checkpoint será enviado com o marcador de execução para disparar somente a validação sintética prevista no workflow. Aguardar conclusão, logs e artifact antes de declarar MP4 validado.
+- Sem APIs pagas, GPU, download adicional de modelos, deploy ou render de produção. O runner hospedado do GitHub pode consumir minutos da franquia.
