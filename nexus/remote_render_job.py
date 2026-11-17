@@ -23,8 +23,10 @@ def animate_scene_images(generated_images, scenes, output_dir, *, progress_callb
     )
 
 
-def generate_worker_narration(text, voice, output_path, fish_api_key="", fish_voice_id=""):
-    """Generate narration with the selected Fish Audio voice; never substitute a system TTS voice."""
+def generate_worker_narration(
+    text, voice, output_path, fish_api_key="", fish_voice_id="", return_alignment=False
+):
+    """Generate Fish narration and optionally return its native alignment segments."""
     return make_voice(
         text,
         voice,
@@ -32,6 +34,7 @@ def generate_worker_narration(text, voice, output_path, fish_api_key="", fish_vo
         fish_api_key=fish_api_key or None,
         fish_voice_id=fish_voice_id or None,
         return_provider=True,
+        return_alignment=return_alignment,
     )
 
 
@@ -123,7 +126,9 @@ def main(project_root=None):
         work / "narration.mp3",
         fish_api_key=fish_credentials.get("api_key", ""),
         fish_voice_id=fish_credentials.get("voice_id", ""),
+        return_alignment=True,
     )
+    audio_path, narration_provider, narration_alignment_segments = audio_path
     audio_path = Path(audio_path)
     actual_audio_duration = _measure_audio_duration(audio_path)
 
@@ -156,7 +161,9 @@ def main(project_root=None):
             work / "narration.mp3",
             fish_api_key=fish_credentials.get("api_key", ""),
             fish_voice_id=fish_credentials.get("voice_id", ""),
+            return_alignment=True,
         )
+        audio_path, narration_provider, narration_alignment_segments = audio_path
         audio_path = Path(audio_path)
         actual_audio_duration = _measure_audio_duration(audio_path)
         if actual_audio_duration > maximum_duration + 0.75:
@@ -308,6 +315,13 @@ def main(project_root=None):
         "maximum_duration": maximum_duration,
         "narration_duration": narration_duration,
         "narration_provider": narration_provider,
+        "narration_alignment": {
+            "provider": "Fish Audio",
+            "method": "fish_audio_tts_stream_with_timestamp",
+            "granularity": "provider_segments",
+            "segment_count": len(narration_alignment_segments),
+            "segments": narration_alignment_segments,
+        },
         "width": video["width"],
         "height": video["height"],
         "audio_codec": audio.get("codec_name"),
