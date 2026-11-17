@@ -2081,3 +2081,14 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Teste de regressão confirma que o Brain 4 recebe os timestamps Fish promovidos com evidência. A ponte permanece pura e sem chamadas de rede.
 - CI #1007, run `44116479483`, commit `696528f48e939ce1ae077c3cd5358da96e617c43`: unit-tests e Remotion typecheck passaram; Commons live smoke estava em execução na última consulta; render sintético foi ignorado por não ser alteração do renderer.
 - O fluxo de produção ainda não chama `run_four_brain_pipeline()` nem possui executor real do Brain 4. Próximo passo é preparar o executor e integração opcional com mocks; ativar uma chamada Gemini adicional por vídeo requer autorização explícita de custo. Manter a integração desativada até lá.
+
+
+## Integração opt-in do Brain 4 com o worker — 17/11/2026
+- Criado `run_brain4_for_storyboard()` em `nexus/editorial_executors.py`: adapta as cenas já aprovadas do manifesto para o contexto do editor, chama somente o executor Brain 4 explicitamente injetado, valida o contrato completo de `edit_timeline` e confirma correspondência do asset e duração do áudio final antes de anexar a timeline a uma cópia do plano.
+- Criada a ponte `apply_optional_brain4()` em `nexus/remote_render_job.py`; `main()` aceita `editorial_model_call=None`. Sem callable injetado, registra `editorial_pipeline.status=disabled`, não chama modelo e mantém o plano original sem `edit_timeline`. O app/worker padrão continua sem injeção, portanto não há chamada Gemini adicional nem alteração de comportamento de produção.
+- A ponte exige timestamps de palavra comprovados; se Fish devolver apenas segmentos de frase ou não devolver alinhamento utilizável, a chamada Brain 4 opt-in é recusada antes de chamar o modelo. Não há fallback para tempos estimados.
+- Testes cobrem adapter Brain 4 com modelo simulado, validação de asset/duração, recusa sem timestamps, cópia imutável do plano e worker desativado por padrão.
+- CI #1017, run `44118108425`, commit `caa5ca1c60c7b7993a7b5c8894594b1251bbb58a`: 202 testes Python passaram; Remotion typecheck e Commons live smoke passaram; synthetic multitrack render foi skipped (sem alteração do renderer).
+- Run #119, `44118084308`, workflow Remotion demo: typecheck e testes de adapters passaram; demo manual de 50s foi skipped; render de integração sintética de 4s via adapter real estava em andamento na última consulta. Aguardar validação do MP4.
+- Estado: ponte Brain 4 implementada e validada com mock; NÃO implantada como executor Gemini real e NÃO conectada ao app por padrão. Ainda não comprova captions/SFX/ducking em produção.
+- Sem chamada Gemini/Fish adicional, GPU, modelo, deploy ou render de produção. O workflow demo executa somente teste sintético CPU/Remotion; o render manual de 50s permanece condicionado a workflow_dispatch.
