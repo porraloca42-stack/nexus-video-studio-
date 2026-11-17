@@ -240,3 +240,10 @@ Este bootstrap reduz perda de continuidade, mas não garante que a plataforma ca
 - Botão `Testar Brain 4 — sem produzir vídeo` está no código da main, dentro do modo Cloudflare + Modal I2V + Remotion. Requer clique explícito e `GEMINI_API_KEY`; usa fixture sintético e não inicia serviços de mídia nem render.
 - Deploy Streamlit não confirmado e URL pública não identificada no repositório. Solicitar ao usuário a URL da instância antes de afirmar que o botão foi publicado.
 - Não executar Gemini sem clique explícito do usuário. Não iniciar vídeo completo, GPU ou serviços pagos sem autorização separada.
+
+
+## Verificação mais recente — 17/11/2026
+- URL oficial da instância, já registrada no master state: https://htykbebk3hceoen5bvopax.streamlit.app/ .
+- CI #1085, #1086 e #1087 dos três commits documentais concluiu com sucesso.
+- A raiz do app e `/_stcore/health` não puderam ser acessadas pelas ferramentas disponíveis; falha de acesso/DNS no ambiente não comprova que o serviço esteja fora do ar.
+- O botão Brain 4 consta no código da main, mas a publicação da versão e sua visibilidade ainda não foram confirmadas. Próxima etapa: confirmar o último deploy no Streamlit Cloud ou obter acesso observável à UI; depois aguardar clique explícito do usuário para Gemini.
