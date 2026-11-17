@@ -1,4 +1,4 @@
-"""Pinned, budget-oriented LTX-Video 0.9.8 distilled multi-scale profile."""
+"""Low-cost LTX-Video 0.9.8 distilled profile for simple image animation."""
 
 MODEL_ID = "Lightricks/LTX-Video"
 MODEL_REVISION = "main"
