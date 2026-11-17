@@ -75,6 +75,29 @@ class RemoteNarrationTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "GEMINI_API_KEY"):
             build_brain4_model_call({"brain4_enabled": True})
 
+    def test_brain4_validation_failure_keeps_provider_aligned_captions(self):
+        from nexus.remote_render_job import apply_optional_brain4
+
+        plan = {"scenes": [{"voiceover": "Palavra validada."}]}
+        def fail_validation(_prompt):
+            raise ValueError("invalid Brain 4 response")
+
+        result = apply_optional_brain4(
+            plan,
+            Path("/tmp/narration-brain4-failure.mp3"),
+            1.0,
+            [
+                {"text": "Palavra", "start_seconds": 0.0, "end_seconds": 0.45},
+                {"text": "validada.", "start_seconds": 0.46, "end_seconds": 0.9},
+            ],
+            model_call=fail_validation,
+        )
+
+        self.assertEqual(result["editorial_pipeline"]["status"], "disabled")
+        self.assertEqual(result["captioning"]["status"], "provider_alignment")
+        self.assertEqual(result["edit_timeline"]["caption_events"][0]["text"], "Palavra validada.")
+        self.assertNotIn("edit_timeline", plan)
+
     def test_enabled_brain4_uses_phrase_captions_without_word_alignment(self):
         from nexus.remote_render_job import apply_optional_brain4
 
