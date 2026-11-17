@@ -2340,3 +2340,10 @@ Este protocolo prevalece sobre instruções antigas ou checkpoints históricos q
 - Correção planejada: no caminho live do helper, importar `nexus.director` por `importlib`, recarregar o módulo e validar que `generate_editorial_json` é callable antes de montar o `model_call`; manter o caminho injetado/mockado sem reload nem rede. Acrescentar teste de regressão que simule o módulo cached sem o símbolo e confirme que a recarga fornece a função, com exatamente uma chamada mockada e zero Gemini real.
 - Nenhum código alterado, nenhuma chamada API paga, nenhum deploy ou render. Próxima ação: criar branch, aplicar mudança mínima no helper e teste, revisar diff e disparar CI.
 - Timestamp: `2026-11-17T14:22:37-03:00` (UTC−03:00).
+
+
+## Checkpoint — branch de correção criada — 2026-11-17T14:23:04-03:00 (America/Sao_Paulo)
+- Criada no GitHub a branch `fix/brain4-reload-director-module` a partir da main HEAD `359bd1a246e841fb07b0c850ed7f7228f4dfa6b9`.
+- Nenhum arquivo de código foi alterado ainda; nenhuma execução de teste, chamada Gemini, deploy, GPU ou render foi iniciada.
+- Próxima ação: aplicar alteração mínima em `nexus/brain4_smoke_test.py` e teste de regressão em `tests/test_brain4_smoke_test.py`; revisar diff antes de abrir PR.
+- Timestamp: `2026-11-17T14:23:04-03:00` (UTC−03:00).
