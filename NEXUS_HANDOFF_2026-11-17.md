@@ -470,3 +470,9 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - Medidas: palavras destacadas 2249/1773 pixels dourados; caption off 0; música -36.1 dB antes, -50.6 dB ducked, -36.1 dB depois (14.5 dB de redução); SFX -45.7 dB antes, -30.0 dB ativo (15.7 dB acima). Artifact #14343349831.
 - Workflow demo #121 passou (adapter Python → Remotion + FFprobe). Demo 50s manual skipped.
 - Validação ainda é sintética e mockada; Gemini real/produção não habilitados. Próximo: revisão visual do artifact e preparar plano de integração Gemini com orçamento aprovado.
+
+
+## Revisão visual do artifact Brain 4 sintético — 17/11/2026
+- Artifact #14343349831 foi baixado e frames em 0.8s, 1.5s e 2.7s foram vistos: highlight dourado alterna corretamente entre NEXUS/valida e some após a legenda. Fundo gráfico de teste estável.
+- FFprobe: H.264 720×1280, AAC, 4.011s. Ducking 14.5 dB; SFX +15.7 dB; recuperação da música confirmada.
+- Só valida fixture sintético; não comprova cenas reais nem sincronismo com fala Fish.
