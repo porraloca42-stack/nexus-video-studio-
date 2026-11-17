@@ -2554,3 +2554,13 @@ Este protocolo prevalece sobre instruções antigas ou checkpoints históricos q
 - `image_cond_noise_scale=0.025` foi mantido: a documentação do Diffusers recomenda esse valor para variantes LTX 0.9.1+ com VAE timestep-aware; não há evidência suficiente para alterá-lo como suposta causa da imagem estática. Fonte: https://huggingface.co/docs/diffusers/en/api/pipelines/ltx_video.
 - Economia de pixels e teto de orçamento são reduções de configuração, não economia real medida. Nenhuma inferência Modal/GPU foi iniciada; a validação de movimento e custo real depende de um único smoke live de 2s aprovado pelo usuário.
 - Testes CI devem validar configuração e fixture. Mesmo com CI verde, não declarar que LTX voltou a produzir movimento até assistir ao MP4 e medir o movimento de forma apropriada.
+
+## Checkpoint — custo observado e diagnóstico LTX — 2026-11-17
+- Custo real informado pelo usuário no smoke anterior de 2s: US$0,16, apesar de não haver movimento perceptível. Esse valor foi reportado pelo usuário; não foi obtido de uma consulta direta à fatura Modal nesta sessão.
+- Projeção linear simples: US$3,20 para 40s. Não é previsão confiável porque cold start, carregamento e batching alteram o custo; ainda assim, o custo observado reprova economicamente o perfil anterior.
+- PR #9 / branch `feat/ltx-low-cost-simple-motion`: CI #1126 passou em unit-tests, Remotion typecheck e Commons smoke; synthetic Remotion render foi skipped. PR continua aberta, não integrada nem implantada.
+- Perfil econômico: 384×672, 24fps, schedule multi-scale 7+3; teto da estimativa de GPU reduzido para US$0,08 por batch. Esse valor não é teto garantido de cobrança Modal; CPU/memória, inicialização e diferenças de billing podem acrescentar custo.
+- Adicionado `nexus/ltx_motion_metrics.py` e testes: medição entre quadros adjacentes, fração de pixels alterados e flag de saída quase estática. É diagnóstico, não comprovação visual de movimento.
+- Worker passou a registrar essas métricas e a mensagem de proteção de orçamento deixou de exibir o valor hardcoded antigo de US$0,50.
+- Nenhuma nova inferência Modal/GPU, chamada Cloudflare, Fish Audio, Gemini ou render live foi iniciada. Nenhum custo novo nesta etapa.
+- Próxima ação: CI desta atualização; em seguida, auditar custo do smoke anterior com os tempos de carregamento/inferência disponíveis. Não executar novo smoke pago sem autorização explícita. Movimento e custo reais continuam não validados até inspeção de novo MP4 e comparação com cobrança.
