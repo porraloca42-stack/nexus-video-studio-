@@ -1,6 +1,6 @@
 # NEXUS VIDEO STUDIO — BOOTSTRAP PARA NOVOS CHATS
 
-Última revisão: 2026-11-17T16:58:21-03:00 (America/Sao_Paulo)
+Última revisão: 2026-11-17T17:01:49-03:00 (America/Sao_Paulo)
 Repositório: https://github.com/porraloca42-stack/nexus-video-studio-
 Branch oficial: main
 
@@ -37,22 +37,23 @@ Não peça ao usuário para repetir informações registradas. Não declare depl
 - Diferencie movimento real do sujeito, movimento de câmera e efeitos sintéticos. Não usar diferença de luminância start/end como prova suficiente de movimento.
 - Responder em português, com clareza e sem alegar tarefas concluídas sem validação.
 
-## Estado vigente resumido — 2026-11-17T16:52:25-03:00 (America/Sao_Paulo)
+## Estado vigente resumido — 2026-11-17T17:01:49-03:00 (America/Sao_Paulo)
 Consultar o bloco operacional completo no início de NEXUS_MASTER_STATE.md. Em resumo:
 - Brain 4 isolado: smoke real Gemini aprovado pelo usuário em fixture de 4s; não valida vídeo completo.
 - Remotion multifaixa: MP4 sintético de 4s validado.
 - Smoke live de uma cena Cloudflare → Modal/LTX → Remotion: passou tecnicamente em 17/11 às 15:58:59 BRT; movimento quase estático e GPU não identificada (gpu_name=null).
 - Produção completa de 40–50s com Fish Audio + Brain 4 + render: ainda não validada.
-- PR #9 permanece aberta/não mergeada/não implantada; CI #1135 passou nos jobs relevantes, render sintético skipped.
-- PR #10 está aberta para validar a GPU real antes de carregar os pesos e remover a estimativa de custo falsa do smoke Modal. CI #1143 / run 44164137648: unit-tests e Remotion typecheck passaram; Commons live smoke ainda está em andamento; render sintético skipped. Não declarar CI integralmente aprovado nem fazer merge.
-- Modal: painel do usuário mostra gasto acumulado US$1.50 majoritariamente H100; código declara L40S; deployment ativo não identificado. Deploy e nova inferência pagos bloqueados sem autorização.
+- PR #9 continua aberta, não mergeada e não implantada; CI #1135 passou nos jobs aplicáveis, render sintético skipped.
+- PR #10 continua aberta, não mergeada e não implantada. CI #1143 / run 44164137648 concluiu com unit-tests, remotion-typecheck e commons-live-smoke em success; remotion-synthetic-render skipped. Não confundir CI verde com validação de deploy, GPU, billing ou MP4.
+- PR #10 propõe validar identidade CUDA antes de carregar pesos e remover a estimativa de custo falsa do smoke. As alterações permanecem apenas na branch da PR até eventual merge.
+- Modal: painel do usuário mostrou gasto acumulado de US$1.50, majoritariamente H100; código versionado declara L40S; deployment ativo permanece não identificado. Deploy e nova inferência pagos bloqueados sem autorização.
 - Build indicator Streamlit integrado pela PR #6; confirmar SHA no app publicado.
 
 ## Próxima sequência autorizada sem custo
-1. Conferir HEAD, PRs e CI atuais.
-2. Auditar/corrigir estimativa de custo Modal e captura de GPU com testes offline.
+1. Revisar o diff completo da PR #10 contra o código atual e corrigir apenas defeitos demonstráveis.
+2. Manter PRs abertas até solicitação explícita de merge.
 3. Atualizar Master State e handoff com timestamp preciso após cada marco.
-4. Só planejar execução paga após confirmação do deployment e autorização explícita.
+4. Não executar deploy, Modal/GPU ou APIs pagas sem autorização específica e limite de custo.
 
 ## Fonte de verdade
 - NEXUS_MASTER_STATE.md na branch main é a fonte operacional atual.
