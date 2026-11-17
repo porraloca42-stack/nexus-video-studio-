@@ -47,6 +47,32 @@ class RemoteNarrationTests(unittest.TestCase):
         self.assertNotIn("edit_timeline", result)
         self.assertNotIn("editorial_pipeline", plan)
 
+    def test_worker_builds_gemini_executor_only_when_brain4_is_enabled(self):
+        from nexus.remote_render_job import build_brain4_model_call
+
+        self.assertIsNone(build_brain4_model_call({
+            "gemini_api_key": "private-key",
+        }))
+        with patch(
+            "nexus.director.generate_editorial_json",
+            return_value={"contract_version": "1.0"},
+        ) as generate:
+            model_call = build_brain4_model_call({
+                "brain4_enabled": True,
+                "gemini_api_key": "private-key",
+                "gemini_model": "gemini-flash-test",
+            })
+            self.assertEqual(model_call("BRAIN 4 prompt"), {"contract_version": "1.0"})
+        generate.assert_called_once_with(
+            "BRAIN 4 prompt", "private-key", "gemini-flash-test"
+        )
+
+    def test_worker_refuses_enabled_brain4_without_gemini_key(self):
+        from nexus.remote_render_job import build_brain4_model_call
+
+        with self.assertRaisesRegex(RuntimeError, "GEMINI_API_KEY"):
+            build_brain4_model_call({"brain4_enabled": True})
+
     def test_brain4_worker_hook_invokes_only_explicitly_injected_executor(self):
         from nexus.remote_render_job import apply_optional_brain4
 
