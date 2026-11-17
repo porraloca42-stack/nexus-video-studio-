@@ -456,6 +456,7 @@ def _repair_semantic_justifications(plan, topic, style, target, secret_reader):
     repair_prompt = f"""Você é editor de continuidade e coerência semântica audiovisual.
 Reescreva SOMENTE as justificativas e, se necessário, a ação visual das cenas indicadas, explicando precisamente como a imagem materializa o trecho narrado.
 Duração: {target}s. Tema original: {topic}. Estilo visual: {style}.
+Direção de arte obrigatória: {build_visual_style_directive(style)}
 Leia a fala de cada cena e descreva a relação concreta entre o que é dito e o que aparece. Não use frases vagas como "transmite a emoção", "representa a mensagem" ou "combina com o tema". Cite o objeto, gesto, pessoa, ambiente ou consequência visual que corresponde à fala.
 Cada semantic_reason deve ter 80 a 160 caracteres e ser específica para aquela fala. Se a ação atual não corresponder à fala, substitua-a por uma ação filmável que corresponda.
 Cenas para reparar:
@@ -501,41 +502,14 @@ Não altere narração, ordem das cenas, duração, estilo geral nem qualquer ce
         )
 
 
-STYLE_SEARCH_TERMS = {
-    "Cinematográfico realista": "cinematic realistic film, natural light, shallow depth of field, 35mm lens",
-    "Documentário cinematográfico": "cinematic documentary, observational camera, natural texture, available light",
-    "Dark cinematográfico": "dark cinematic lighting, deep shadows, dramatic rim light",
-    "Filme noir": "film noir, black and white, hard light, dramatic shadows",
-    "Publicidade premium": "premium commercial cinematography, polished production, controlled studio lighting",
-    "Lifestyle realista": "realistic lifestyle footage, natural everyday moments, warm natural light",
-    "Natureza documental": "nature documentary footage, organic colors, natural ambient light",
-    "Minimalista clean": "minimalist clean composition, uncluttered frame, soft neutral light",
-    "Vintage filme 35mm": "vintage 35mm film look, subtle film grain, warm analog colors",
-    "VHS retrô": "retro VHS aesthetic, analog tape texture, chromatic aberration",
-    "Cyberpunk neon": "cyberpunk neon lighting, magenta and cyan, futuristic urban atmosphere",
-    "Ficção científica futurista": "futuristic science fiction visuals, technological lighting, cool tones",
-    "Fantasia cinematográfica": "cinematic fantasy visuals, magical atmosphere, epic soft glow",
-    "Surrealismo fotográfico": "photorealistic surrealism, dreamlike composition, unusual visual metaphors",
-    "Anime 2D": "2D anime style, hand-drawn animation, expressive line art, cel shading",
-    "Anime 3D": "3D anime style, stylized characters, volumetric animated environments",
-    "Ilustração editorial": "editorial illustration, graphic shapes, sophisticated limited color palette",
-    "Aquarela artística": "artistic watercolor illustration, organic pigment texture, soft edges",
-    "Graphic novel": "graphic novel illustration, bold ink lines, dramatic panels, high contrast",
-    "3D realista": "photorealistic 3D render, realistic materials, cinematic 3D lighting",
-    "3D estilizado": "stylized 3D animation, expressive shapes, colorful dimensional environments",
-    "Stop motion": "stop motion animation, handcrafted miniature sets, tactile materials",
-    "Macro e detalhes": "macro cinematography, extreme close-up, shallow depth of field, fine details",
-    "Drone e paisagens aéreas": "aerial drone cinematography, sweeping landscape views, high angle perspective",
-}
-
+from nexus.visual_styles import STYLE_SEARCH_TERMS, build_visual_style_directive
 
 def apply_visual_style_lock(plan, style):
     """Enforce the selected global visual style on every scene, independent of LLM compliance."""
     plan["style_lock"] = style
-    style_terms = STYLE_SEARCH_TERMS.get(
-        style,
-        f"{style}, consistent visual style, cohesive cinematography",
-    )
+    style_terms = STYLE_SEARCH_TERMS.get(style, f"{style}, consistent visual style")
+    plan["style_profile_version"] = "1.0"
+    plan["style_directive"] = build_visual_style_directive(style)
     for scene in plan.get("scenes", []):
         scene["visual_style"] = style
         scene["style_search_terms"] = style_terms
@@ -553,6 +527,8 @@ def create_storyboard(topic, style, duration, secret_reader):
 
 DURAÇÃO FINAL ESCOLHIDA: {target} segundos (OBRIGATÓRIA).
 ESTILO VISUAL: {style}
+DIREÇÃO DE ARTE OBRIGATÓRIA (instruções internas; não mostrar ao usuário):
+{build_visual_style_directive(style)}
 
 Primeiro interprete o briefing completo (assunto/roteiro, estilo visual e {target}s) e defina público provável, promessa, hook inicial, progressão de retenção, insight/entrega e CTA adequado.
 Escreva um roteiro narrado completo de aproximadamente {min_words} a {max_words} palavras, adequado a {target}s de fala natural em português brasileiro. A velocidade do sintetizador permanece natural: dimensione o texto, não a voz.
