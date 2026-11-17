@@ -276,9 +276,19 @@ def _is_human_narrator_voice(voice, gender):
     excluded = (
         "meme", "anime", "personagem", "character", "celebrity", "celebridade",
         "ator", "actress", "movie", "filme", "game", "gaming", "jogo",
-        "cartoon", "parody", "paródia", "fictional", "fiction",
+        "cartoon", "parody", "paródia", "fictional", "fiction", "impersonation",
+        "impersona", "imitação", "imitacao", "politician", "politician", "president",
+        "dictator", "publicfigure", "famous",
     )
     if any(word == token or word.startswith(token) for word in metadata_words for token in excluded):
+        return False
+    excluded_identity_phrases = (
+        "adolf", "hitler", "lula", "bolsonaro", "donald trump", "joe biden",
+        "barack obama", "papai noel", "santa claus", "mickey mouse",
+        "donald duck", "bob esponja", "spongebob", "shrek", "darth vader",
+        "harry potter", "sao cipriano", "são cipriano",
+    )
+    if any(phrase in language_context for phrase in excluded_identity_phrases):
         return False
     gender_terms = {
         "male": ("male", "mascul", "homem", "man"),
@@ -294,7 +304,7 @@ def _is_human_narrator_voice(voice, gender):
     )
 
 
-def list_fish_professional_narrators(api_key, *, per_gender=25, session=None):
+def list_fish_professional_narrators(api_key, *, per_gender=25, session=None, require_sample=True):
     """Return up to 25 natural Portuguese male and female professional narrators.
 
     Queries the same male/female + narration tag combinations used by Fish
@@ -321,6 +331,8 @@ def list_fish_professional_narrators(api_key, *, per_gender=25, session=None):
                     # exposes source and licensed in ModelEntity; unknown sources
                     # are excluded rather than silently broadening the catalog.
                     if not voice.get("licensed") and "pvc" not in source:
+                        continue
+                    if require_sample and not voice.get("sample_audio"):
                         continue
                     if _is_human_narrator_voice(voice, gender):
                         discovered[voice["id"]] = voice
