@@ -104,6 +104,10 @@ class RemoteNarrationTests(unittest.TestCase):
                  patch("nexus.remote_render_job.generate_worker_narration", return_value=(audio, "Fish Audio")) as gen_voice, \
                  patch("nexus.remote_render_job.revise_narration_for_duration", side_effect=fake_revise_narration) as revise_narration, \
                  patch("nexus.remote_render_job.render_video_remotion", side_effect=fake_render) as render, \
+                 patch("nexus.remote_render_job.analyze_video_motion", return_value={
+                     "status": "analyzed", "diagnostic": "no_long_freeze_detected",
+                     "freeze_ratio": 0.0, "longest_freeze_seconds": 0.0,
+                 }), \
                  patch("nexus.remote_render_job.subprocess.run", side_effect=(
                      [audio_measured] + [image_result] * 10 + [clip_result] * 10 + [final_result]
                  )):
@@ -132,6 +136,8 @@ class RemoteNarrationTests(unittest.TestCase):
             self.assertEqual(report["maximum_duration"], 50.0)
             self.assertEqual(report["visual_source"], "Cloudflare FLUX.2 Klein + Modal LTX-Video I2V + Remotion")
             self.assertEqual(len(report["motion_clips"]), 10)
+            self.assertEqual(len(report["motion_quality"]), 10)
+            self.assertEqual(report["low_motion_scene_count"], 0)
             self.assertEqual(decrypt_bytes(video_path.read_bytes(), secret), b"realistic-mocked-mp4")
 
     def test_audio_sync_has_no_subtitle_dependency(self):
