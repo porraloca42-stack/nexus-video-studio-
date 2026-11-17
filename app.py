@@ -533,6 +533,7 @@ if active_view == "Criar":
                 search_ratio = float(preflight.get("unique_search_ratio", 0) or 0)
                 action_coverage = float(preflight.get("action_coverage_ratio", 0) or 0)
                 motion_coverage = float(preflight.get("motion_prompt_coverage_ratio", 0) or 0)
+                physical_motion_coverage = float(preflight.get("motion_action_coverage_ratio", 0) or 0)
                 near_action_count = len(preflight.get("near_duplicate_action_pairs", []))
                 near_search_count = len(preflight.get("near_duplicate_search_pairs", []))
                 st.caption(
@@ -544,6 +545,7 @@ if active_view == "Criar":
                 st.caption(
                     f"Cobertura: ação descrita {action_coverage:.0%} · "
                     f"movimento descrito {motion_coverage:.0%} · "
+                    f"verbo físico reconhecido {physical_motion_coverage:.0%} · "
                     f"possíveis pares semelhantes: {near_action_count} ações / {near_search_count} buscas."
                 )
                 preflight_warnings = preflight.get("warnings", [])
