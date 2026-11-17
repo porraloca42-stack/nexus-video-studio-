@@ -155,17 +155,33 @@ def open_voice_picker():
     categories = ("CapCut", "ElevenLabs", "Licenciadas Fish")
     total_voices = sum(len(catalog.get(category, [])) for category in categories)
     st.caption(
-        f"{total_voices} vozes cadastradas · toque no nome para selecionar. "
-        "Use ▶ para ouvir ou ⏸ para parar a prévia."
+        f"{total_voices} vozes cadastradas · toque em um nome para ouvir a amostra. "
+        "Depois, confirme para usar a voz no vídeo."
     )
     current_id = st.session_state.get("nexus_fish_voice_id", "")
-    active_preview_id = st.session_state.get("nexus_active_voice_preview_id")
-    active_preview_source = st.session_state.get("nexus_active_voice_preview_source")
+    pending_id = st.session_state.get("nexus_pending_voice_id")
+    pending_source = st.session_state.get("nexus_pending_voice_preview_source")
+    pending_name = st.session_state.get("nexus_pending_voice_name")
 
-    # One shared native player guarantees that only one voice can play at a time.
-    if active_preview_source:
-        st.caption(f"Prévia: {st.session_state.get('nexus_active_voice_preview_name', 'Voz selecionada')}")
-        st.audio(active_preview_source, format="audio/mp3", autoplay=True)
+    # Preview is a staging choice. The production voice changes only after confirmation.
+    if pending_id and pending_source:
+        st.markdown(f"**Prévia selecionada: {pending_name}**")
+        st.audio(pending_source, format="audio/mp3", autoplay=True)
+        if st.button(
+            f"✓ Confirmar voz {pending_name.split(' · ')[-1]}",
+            type="primary",
+            width="stretch",
+            key="nexus-confirm-pending-voice",
+        ):
+            st.session_state["nexus_fish_voice_id"] = pending_id
+            st.session_state["nexus_fish_voice_name"] = pending_name
+            for key in (
+                "nexus_pending_voice_id",
+                "nexus_pending_voice_preview_source",
+                "nexus_pending_voice_name",
+            ):
+                st.session_state.pop(key, None)
+            st.rerun()
 
     for category in categories:
         category_voices = catalog.get(category, [])
@@ -176,62 +192,51 @@ def open_voice_picker():
                 voice_id = item["id"]
                 voice_title = item.get("title") or f"Voz {voice_id[:8]}"
                 selected = voice_id == current_id
-                is_previewing = voice_id == active_preview_id
-
-                name_col, play_col = st.columns([0.86, 0.14], gap="small", vertical_alignment="center")
-                with name_col:
-                    if st.button(
-                        f"{'✓ ' if selected else ''}{voice_title}",
-                        type="primary" if selected else "secondary",
-                        width="stretch",
-                        key=f"nexus-select-voice-{voice_id}",
-                        help=f"Selecionar · {category} · {voice_title}",
-                    ):
-                        st.session_state["nexus_fish_voice_id"] = voice_id
-                        st.session_state["nexus_fish_voice_name"] = f"{category} · {voice_title}"
-                        st.rerun()
-
-                with play_col:
-                    if st.button(
-                        "⏸" if is_previewing else "▶",
-                        key=f"nexus-preview-voice-{voice_id}",
-                        help="Parar prévia" if is_previewing else "Ouvir amostra",
-                        width="stretch",
-                    ):
-                        if is_previewing:
-                            st.session_state.pop("nexus_active_voice_preview_id", None)
-                            st.session_state.pop("nexus_active_voice_preview_source", None)
-                            st.session_state.pop("nexus_active_voice_preview_name", None)
+                pending = voice_id == pending_id
+                label = f"{'✓ ' if selected else ''}{'▶ ' if pending else ''}{voice_title}"
+                if st.button(
+                    label,
+                    type="primary" if pending else "secondary",
+                    width="stretch",
+                    key=f"nexus-preview-select-voice-{voice_id}",
+                    help=f"Ouvir prévia · {category} · {voice_title}",
+                ):
+                    preview_key = f"nexus_voice_preview_audio_{voice_id}"
+                    preview_audio = st.session_state.get(preview_key)
+                    sample_audio = item.get("sample_audio") or ""
+                    try:
+                        if preview_audio:
+                            preview_source = base64.b64decode(preview_audio)
+                        elif sample_audio.startswith("data:audio/") and "," in sample_audio:
+                            preview_source = base64.b64decode(sample_audio.split(",", 1)[1])
+                        elif sample_audio.startswith(("https://", "http://")):
+                            preview_source = sample_audio
                         else:
-                            preview_key = f"nexus_voice_preview_audio_{voice_id}"
-                            preview_audio = st.session_state.get(preview_key)
-                            sample_audio = item.get("sample_audio") or ""
-                            if preview_audio:
-                                preview_source = base64.b64decode(preview_audio)
-                            elif sample_audio.startswith("data:audio/") and "," in sample_audio:
-                                preview_source = base64.b64decode(sample_audio.split(",", 1)[1])
-                            elif sample_audio.startswith(("https://", "http://")):
-                                preview_source = sample_audio
-                            else:
-                                try:
-                                    with st.spinner(f"Preparando amostra de {voice_title}..."):
-                                        audio_bytes = fish_audio.generate_fish_preview(api_key, voice_id)
-                                    st.session_state[preview_key] = base64.b64encode(audio_bytes).decode("ascii")
-                                    preview_source = audio_bytes
-                                except Exception as exc:
-                                    st.error(f"Não foi possível gerar a amostra de {voice_title}: {str(exc)[:180]}")
-                                    continue
-                            st.session_state["nexus_active_voice_preview_id"] = voice_id
-                            st.session_state["nexus_active_voice_preview_source"] = preview_source
-                            st.session_state["nexus_active_voice_preview_name"] = f"{category} · {voice_title}"
+                            with st.spinner(f"Preparando amostra de {voice_title}..."):
+                                audio_bytes = fish_audio.generate_fish_preview(api_key, voice_id)
+                            st.session_state[preview_key] = base64.b64encode(audio_bytes).decode("ascii")
+                            preview_source = audio_bytes
+
+                        st.session_state["nexus_pending_voice_id"] = voice_id
+                        st.session_state["nexus_pending_voice_preview_source"] = preview_source
+                        st.session_state["nexus_pending_voice_name"] = f"{category} · {voice_title}"
                         st.rerun()
+                    except Exception as exc:
+                        for key in (
+                            "nexus_pending_voice_id",
+                            "nexus_pending_voice_preview_source",
+                            "nexus_pending_voice_name",
+                        ):
+                            st.session_state.pop(key, None)
+                        st.error(f"Não foi possível preparar a amostra de {voice_title}: {str(exc)[:180]}")
 
     if total_voices != 40:
         st.warning(
             f"O catálogo retornou {total_voices} de 40 vozes cadastradas. "
             "As opções com metadados indisponíveis continuam selecionáveis."
         )
-    st.caption("A prévia usa um único reprodutor: ao trocar de voz, o áudio anterior é interrompido.")
+    st.caption("A voz usada na produção só muda ao tocar em “Confirmar voz”.")
+
 
 @st.dialog("Duração do vídeo", width="small", icon=":material/schedule:")
 def open_duration_picker():
