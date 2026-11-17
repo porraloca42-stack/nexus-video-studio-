@@ -66,23 +66,58 @@ class GeminiJsonRecoveryTests(unittest.TestCase):
         )
 
 
-    def test_brain4_single_call_503_message_does_not_claim_retry_or_failover(self):
+    def test_brain4_retries_transient_503_once_on_same_model(self):
+        timeline = {
+            "contract_version": "1.0",
+            "audio_asset_id": "narration.mp3",
+            "alignment_method": "Fish Audio",
+            "alignment_level": "word",
+            "audio_duration_seconds": 4.0,
+            "word_timestamps": [],
+            "character_timestamps": [],
+            "phoneme_timestamps": [],
+            "edit_anchors": [],
+            "caption_events": [],
+            "sfx_events": [],
+            "audio_mix_events": [],
+        }
+        with patch.object(
+            director, "discover_models", return_value=["gemini-3.5-flash-lite"]
+        ), patch.object(
+            director.requests, "post",
+            side_effect=[
+                FakeErrorResponse(503, "Model overloaded"),
+                FakeResponse(json.dumps(timeline)),
+            ],
+        ) as post, patch.object(director.time, "sleep") as sleep:
+            result = director.generate_editorial_json(
+                "BRAIN 4 prompt", "private-test-key", "auto"
+            )
+
+        self.assertEqual(result, timeline)
+        self.assertEqual(post.call_count, 2)
+        self.assertEqual(
+            post.call_args_list[0].args[0], post.call_args_list[1].args[0]
+        )
+        sleep.assert_called_once_with(2)
+
+    def test_brain4_reports_two_503_attempts_without_claiming_model_failover(self):
         with patch.object(
             director, "discover_models", return_value=["gemini-3.5-flash-lite"]
         ), patch.object(
             director.requests, "post",
             return_value=FakeErrorResponse(503, "Model overloaded"),
-        ) as post:
+        ) as post, patch.object(director.time, "sleep"):
             with self.assertRaisesRegex(
-                RuntimeError, "faz uma única chamada.*não tentou outros modelos"
+                RuntimeError, "após duas tentativas.*Nenhum outro modelo foi acionado"
             ) as error:
                 director.generate_editorial_json(
                     "BRAIN 4 prompt", "private-test-key", "auto"
                 )
 
-        post.assert_called_once()
+        self.assertEqual(post.call_count, 2)
         self.assertIn("gemini-3.5-flash-lite (HTTP 503)", str(error.exception))
-        self.assertNotIn("Tentei novamente", str(error.exception))
+        self.assertNotIn("recorri a outros modelos", str(error.exception))
 
     def test_retries_malformed_json_then_fails_over_to_next_model(self):
         valid_plan = {
