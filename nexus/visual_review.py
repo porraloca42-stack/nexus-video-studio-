@@ -58,8 +58,13 @@ def normalize_review(payload, scenes):
             "scene_number": number,
             "semantic_score": 0,
             "matches_narration": False,
+            "motion_progression_score": 0,
+            "action_observed": False,
+            "continuity_score": 0,
+            "temporal_progression": "Não foi possível avaliar a sequência.",
             "visual_quality": "Cena não avaliada pelo modelo.",
             "issues": ["missing_review"],
+            "critical_issues": ["review_missing"],
             "recommendation": "Revisão manual necessária.",
         }))
     return result
