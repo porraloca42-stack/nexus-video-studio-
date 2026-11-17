@@ -662,3 +662,12 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - Correção planejada: no teste, usar `patch.object` diretamente no objeto `importlib` para mockar `import_module` e `reload`, evitando resolução de targets por caminho enquanto o próprio import está sendo simulado. Depois, atualizar a branch/PR e aguardar CI completo novamente.
 - PR #3 permanece aberto e não pode ser mergeado. Nenhum deploy de produção, GPU ou render de vídeo foi iniciado.
 - Timestamp: `2026-11-17T14:27:10-03:00` (UTC−03:00). Atualização documental `[skip ci]` para não disparar workflow concorrente.
+
+
+## Checkpoint — harness do teste de regressão corrigido — 2026-11-17T14:27:43-03:00 (America/Sao_Paulo)
+- Atualizada a branch `fix/brain4-reload-director-module`; commit `445322eda04549ac745f568b7739585ca277747a` (`test: isolate Brain 4 reload mocks`).
+- Arquivo alterado: `tests/test_brain4_smoke_test.py`. O teste agora usa `patch.object` diretamente no módulo `importlib` para simular `import_module` e `reload`, evitando que a resolução textual do segundo mock seja interceptada pelo primeiro.
+- O código de produção do helper não mudou nesta correção do harness. Teste local não foi executado neste ambiente; aguardar nova execução do CI da PR #3 para validação real.
+- PR #3 permanece aberto. Próxima ação: verificar que a PR recebeu o novo head, aguardar novo workflow `pull_request`, ler logs do job Python e confirmar também `commons-live-smoke`.
+- Nenhuma chamada Gemini, deploy, GPU ou render de produção.
+- Timestamp: `2026-11-17T14:27:43-03:00` (UTC−03:00). Atualização documental `[skip ci]`.
