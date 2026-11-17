@@ -152,3 +152,8 @@ Este bootstrap reduz perda de continuidade, mas não garante que a plataforma ca
 - Workflow #119: MP4 sintético 4.011s via adapter Python real validado por FFprobe (H.264/AAC, 720×1280); artifact #14344496316.
 - Brain 4 permanece opt-in/mockado; Gemini real desativado.
 - Próxima ação: teste offline Brain4 timeline → `build_remotion_manifest()` com captions, SFX e ducking.
+
+
+## Trabalho em andamento — Brain 4 → Remotion manifest — 17/11/2026
+- Novo teste em `tests/test_remotion_renderer.py` verifica que a timeline validada do Brain 4 chega ao manifest Remotion com captions, palavras temporizadas, SFX e fades/ducking.
+- CI #1030 e workflow demo #120 estão em execução; verificar resultados antes de prosseguir. Sem APIs pagas ou render de produção.
