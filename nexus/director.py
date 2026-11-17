@@ -867,6 +867,8 @@ def build_storyboard_preflight(plan):
         pairs = []
         for left_index, (left_scene, left_tokens) in enumerate(records):
             for right_scene, right_tokens in records[left_index + 1:]:
+                if left_tokens == right_tokens:
+                    continue
                 shared = len(left_tokens & right_tokens)
                 overlap = shared / min(len(left_tokens), len(right_tokens))
                 if shared >= minimum_shared and overlap >= minimum_overlap:
