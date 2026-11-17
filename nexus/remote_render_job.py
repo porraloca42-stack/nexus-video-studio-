@@ -295,6 +295,14 @@ def main(project_root=None):
         "total_i2v_inference_seconds": round(
             sum(float(clip.get("inference_seconds") or 0) for clip in motion_clips), 3
         ),
+        "modal_call_wall_seconds": max(
+            (float(clip.get("modal_call_wall_seconds") or 0) for clip in motion_clips), default=0
+        ),
+        "model_load_seconds": max(
+            (float(clip.get("model_load_seconds") or 0) for clip in motion_clips), default=0
+        ),
+        "gpu_name": next((clip.get("gpu_name") for clip in motion_clips if clip.get("gpu_name")), None),
+        "ltx_inference_steps": next((clip.get("num_inference_steps") for clip in motion_clips if clip.get("num_inference_steps")), None),
     }
     report_path = work / "render-report.json"
     report_path.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
