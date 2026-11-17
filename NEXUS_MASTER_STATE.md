@@ -1459,3 +1459,13 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - A suíte Python executou 99 testes e terminou `OK`; inclui os testes de gramática sem motivos fixos, compatibilidade legada oculta, direção completa anexada ao prompt efetivamente consumido pelo worker e idempotência.
 - O typecheck da composição Remotion passou. O smoke de Wikimedia Commons concluiu busca, download e inspeção de um vídeo licenciado.
 - Estado: implementação e CI validados no GitHub. Ainda não declarar deploy Streamlit visualmente validado nem pipeline de vídeo integral validado por este ciclo; a saída MP4 de teste registrada pelo job remoto confirma artefato de teste, não uma sessão real do usuário com os novos estilos.
+
+## Redesign da interface mobile — 17/11/2026
+- Evidência visual do usuário: a versão publicada ainda apresentava o formulário longo com abas superiores e o logotipo quebrado; a referência desejada é uma experiência mobile de estúdio, com navegação inferior, campo de roteiro compacto, seletor horizontal de estilos, prévia vertical e identidade visual roxa.
+- Commit `8d66cbc`: `app.py` substitui as abas Criar/Estilos por navegação inferior com quatro áreas: Criar, Biblioteca, Modelos e Perfil.
+- Cabeçalho deixa de depender do PNG inline que aparecia quebrado; usa marca vetorial SVG embutida, sem requisição externa nem arquivo de imagem.
+- Tela Criar passa a usar área de roteiro menor, duração compacta, estilos selecionáveis em chips horizontais e prévia vazia 9:16. Configurações de motor e diagnóstico ficam recolhidas em configurações avançadas.
+- Biblioteca apresenta o último vídeo/planejamento da sessão atual; persistência entre sessões ainda não está implementada. Modelos apresenta os 18 estilos; Perfil mostra somente estado de configuração dos serviços, nunca valores de segredos.
+- O pipeline de storyboard e renderização existente foi preservado. O botão principal agora é rotulado "Gerar vídeo".
+- Estado: alteração gravada no GitHub main. GitHub Actions do commit `8d66cbc493536970661b3a29691351d25c4f7d20` iniciou os três checks (unit-tests, Remotion typecheck e Commons smoke), mas ainda não havia resultado final no momento desta atualização. Implantação automática e aparência real no Streamlit mobile ainda precisam ser confirmadas.
+- Limitação conhecida: a prévia vazia é apenas um placeholder visual; não representa uma prévia renderizada. A biblioteca ainda é limitada à sessão ativa e não é uma biblioteca persistente.
