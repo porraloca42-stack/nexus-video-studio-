@@ -823,3 +823,13 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - CI PR #10: run #1143 / ID 44164137648. Na consulta das 16:57:47 BRT, unit-tests, remotion-typecheck e commons-live-smoke ainda estavam in_progress; remotion-synthetic-render skipped. Não declarar CI aprovado até os três jobs terminarem.
 - Nenhum deploy, chamada Modal, inferência GPU, Cloudflare, Fish Audio, Gemini ou render de produção foi executado. Nenhum custo variável foi gerado.
 - Próxima ação: acompanhar CI #1143, inspecionar logs de qualquer falha e corrigir a PR. Não fazer merge automaticamente.
+
+
+## CHECKPOINT — CI PARCIAL DA PR #10 — 2026-11-17T16:58:21-03:00 (America/Sao_Paulo)
+- Run #1143 / 44164137648, head inicial a29d0281436f7785774345cbc9b5686c9d8083fa; branch recebeu commit posterior 92f2f3dae72604f9a20087af5780827680615afc para remover mapeamento ambíguo de GPU L4.
+- unit-tests: success; compilação da aplicação e regressões passaram, incluindo os quatro testes novos de identidade GPU.
+- remotion-typecheck: success.
+- commons-live-smoke: ainda in_progress durante instalação de FFmpeg/requests; ainda não declarar CI completo.
+- remotion-synthetic-render: skipped conforme a condição do workflow.
+- PR #10 continua aberta e não mergeada. Nenhum deploy, GPU, inferência, API paga ou render de produção foi executado.
+- Próxima ação: aguardar commons-live-smoke; se concluir, revisar a conclusão integral do run e registrar. Não fazer merge sem pedido explícito.
