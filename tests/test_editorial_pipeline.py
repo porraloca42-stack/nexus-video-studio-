@@ -136,6 +136,20 @@ class EditorialPipelineContractTests(unittest.TestCase):
     def test_edit_timeline_accepts_word_alignment(self):
         self.assertEqual(validate_edit_timeline(valid_edit_timeline()), [])
 
+    def test_edit_timeline_accepts_provider_word_timestamps_without_confidence(self):
+        data = valid_edit_timeline()
+        for word in data["word_timestamps"]:
+            word.pop("confidence", None)
+        self.assertEqual(validate_edit_timeline(data), [])
+
+    def test_edit_timeline_rejects_multiword_segment_as_word_timestamp(self):
+        data = valid_edit_timeline()
+        data["word_timestamps"][0]["text"] = "O problema"
+        self.assertTrue(any(
+            "word timestamp must contain exactly one token" in error
+            for error in validate_edit_timeline(data)
+        ))
+
     def test_edit_timeline_rejects_unordered_word_timestamps(self):
         data = valid_edit_timeline()
         data["word_timestamps"][1]["start_seconds"] = 0.05
