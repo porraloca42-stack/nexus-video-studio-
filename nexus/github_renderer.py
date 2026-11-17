@@ -92,6 +92,10 @@ def render_on_github(
     expected_name = f"NEXUS render {job_id}"
     runs_url = f"{API}/repos/{repository}/actions/runs"
     started = time.monotonic()
+    # The Actions workflow exposes coarse stages, not per-frame telemetry.
+    # Use a clearly labeled estimate during the long worker step; never present
+    # elapsed-time estimation as an exact rendering percentage.
+    estimated_render_seconds = 600.0
     run = None
     while time.monotonic() - started < timeout:
         response = client.get(
@@ -115,7 +119,13 @@ def render_on_github(
         if run:
             break
         if progress_callback:
-            progress_callback("Aguardando o GitHub iniciar o renderizador...")
+            elapsed = time.monotonic() - started
+            progress_callback(
+                "Aguardando o GitHub iniciar o renderizador...",
+                min(0.04, 0.01 + elapsed / estimated_render_seconds * 0.03),
+                elapsed,
+                max(0.0, estimated_render_seconds - elapsed),
+            )
         time.sleep(poll_interval)
 
     if not run:
@@ -132,10 +142,20 @@ def render_on_github(
             raise GitHubRenderError(f"Não foi possível consultar o render (HTTP {response.status_code}).")
         run = response.json()
         status = run.get("status")
+        elapsed = time.monotonic() - started
+        if status == "completed":
+            fraction = 0.96
+            message = "Renderização concluída; recuperando e validando o MP4..."
+        elif status == "queued" or status == "waiting":
+            fraction = 0.05
+            message = "Trabalho na fila do GitHub; aguardando um executor..."
+        else:
+            fraction = min(0.90, 0.10 + (elapsed / estimated_render_seconds) * 0.80)
+            message = "Produção audiovisual em andamento (estimativa baseada no tempo decorrido)..."
         if progress_callback:
             progress_callback(
-                "Renderização Remotion em andamento..." if status != "completed"
-                else "Renderização concluída; recuperando o MP4..."
+                message, fraction, elapsed,
+                max(0.0, estimated_render_seconds - elapsed),
             )
         if status == "completed":
             break
