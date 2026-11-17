@@ -354,3 +354,12 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - Commit de habilitação pontual: `108410748fc872314ebf32f2a95bbf2a77476b8b`. O push foi marcado com o token de execução para solicitar esta validação aprovada.
 - A consulta ao endpoint de status do commit ainda não retornou checks; a execução efetiva do job permanece sem confirmação nesta sessão.
 - O job usa runner hospedado do GitHub Actions; o consumo de minutos pode estar sujeito à franquia/plano da conta. Não há chamadas a APIs pagas, GPU, download de pesos ou deploy.
+
+## Continuidade entre chats e correção do teste sintético — 17/11/2026
+- Criado `NEXUS_NEW_CHAT_BOOTSTRAP.md` com instruções obrigatórias para o próximo chat: ler master state e handoff na branch main, conferir commits/CI, preservar arquitetura aprovada e retomar a próxima ação pendente.
+- O bootstrap explica que o anexo antigo de `NEXUS_MASTER_STATE.md` pode estar desatualizado e que a versão GitHub main é a fonte oficial.
+- Revisão do script `scripts/validate_remotion_render.py` encontrou um defeito: o diretório temporário de fixtures era removido antes da extração dos frames de inspeção. Corrigido no commit `1425f46c283a00c438dc7716f18336cd0e900277`: os frames agora usam diretório de inspeção separado e persistente durante o job.
+- Commit do bootstrap: `cc58c3a5174b13c5a1e4a48a13ea2dd3b71cac34`.
+- Próximo passo: disparar novamente o job sintético com commit marker após a correção, e obter resultado/artifact. A integração GitHub disponível não oferece listagem de runs disparados por push nem dispatch explícito; status combinado até aqui retornou vazio. Não inferir sucesso.
+- O job permanece restrito a `workflow_dispatch` ou push com `[run-remotion-validation]`; runner hospedado pode consumir minutos da franquia GitHub. Sem APIs pagas, GPU, modelos ou deploy.
+- Continuidade: manter este arquivo, `NEXUS_HANDOFF_2026-11-17.md` e `NEXUS_NEW_CHAT_BOOTSTRAP.md` sincronizados a cada marco relevante. Esses registros reduzem perda de contexto, mas o próximo chat ainda deve verificar o estado vivo do GitHub.
