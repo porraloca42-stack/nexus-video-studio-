@@ -1169,7 +1169,10 @@ if active_view == "Criar":
         editorial_status = (info.get("editorial_pipeline") or {}).get("status")
         captioning = info.get("captioning") or {}
         if editorial_status == "brain4_validated":
-            st.success("Brain 4 executado: edição sincronizada validada.")
+            if captioning.get("status") == "brain4_word_aligned":
+                st.success("Brain 4 executado: edição e cobertura das legendas sincronizadas validadas.")
+            else:
+                st.info("Brain 4 planejou a edição; as legendas foram completadas pelos timestamps da Fish Audio.")
         elif editorial_status == "disabled":
             st.caption("Brain 4 não foi executado neste vídeo.")
         if captioning.get("status") == "provider_alignment":
