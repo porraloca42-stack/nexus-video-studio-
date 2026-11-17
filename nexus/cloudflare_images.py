@@ -65,9 +65,9 @@ def generate_image(
         for index, reference in enumerate(references):
             if not isinstance(reference, bytes) or not reference:
                 raise ValueError(f"Imagem de referência {index} inválida.")
-            if reference.startswith(b"\\x89PNG\\r\\n\\x1a\\n"):
+            if reference.startswith(b"\x89PNG\r\n\x1a\n"):
                 filename, mime_type = f"reference_{index}.png", "image/png"
-            elif reference.startswith(b"\\xff\\xd8\\xff"):
+            elif reference.startswith(b"\xff\xd8\xff"):
                 filename, mime_type = f"reference_{index}.jpg", "image/jpeg"
             elif reference[:4] == b"RIFF" and reference[8:12] == b"WEBP":
                 filename, mime_type = f"reference_{index}.webp", "image/webp"
