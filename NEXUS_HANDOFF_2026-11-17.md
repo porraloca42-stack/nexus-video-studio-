@@ -813,3 +813,13 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - Nenhuma API paga, GPU, deploy, render de produção ou merge de PR foi acionado nesta correção documental.
 - Commits desta atualização documental: consultar HEAD de main para a cadeia final dos três commits sequenciais.
 - Próxima ação técnica sem custo: confirmar os novos commits/CI, depois auditar e corrigir scripts/modal_smoke_test.py e a observabilidade/guard de GPU, com testes offline. Não executar deploy ou inferência.
+
+
+## CHECKPOINT — PR #10 E CI EM ANDAMENTO — 2026-11-17T16:57:47-03:00 (America/Sao_Paulo)
+- Main antes desta atualização: f9aba1daad188bd4c1ad8c0090382fc7001829c8. Correções de continuidade já estão na main: o bloco operacional vigente foi inserido no topo do Master State; o bootstrap antigo e contraditório foi substituído por instruções curtas que proíbem retomar checkpoints de 16/11; este handoff recebeu checkpoint explícito.
+- Auditoria de código encontrou dois defeitos relevantes: scripts/modal_smoke_test.py estimava custo GPU usando taxa L40S fixa multiplicada pelo tempo de parede da chamada Modal (não é billing); modal_worker.py verificava o nome da GPU só depois do download/carregamento dos pesos; e a mensagem de budget estava hardcoded em US$0.50 embora a configuração da main fosse US$0.42.
+- PR #10 aberta: https://github.com/porraloca42-stack/nexus-video-studio-/pull/10 ; branch fix/modal-gpu-identity-and-cost-report; head 92f2f3dae72604f9a20087af5780827680615afc; base main f9aba1daad188bd4c1ad8c0090382fc7001829c8.
+- Alterações propostas: helper nexus/gpu_identity.py com validação fail-closed; worker verifica CUDA antes de baixar/carregar pesos, registra GPU solicitada e real, falha em mismatch/identidade ausente; smoke deixa custo como indisponível em vez de inventar estimativa; mensagem de budget usa GPU_COST_BUDGET_USD; quatro testes unitários para GPU L40S válida, H100 divergente, identidade ausente e tipo sem mapeamento.
+- CI PR #10: run #1143 / ID 44164137648. Na consulta das 16:57:47 BRT, unit-tests, remotion-typecheck e commons-live-smoke ainda estavam in_progress; remotion-synthetic-render skipped. Não declarar CI aprovado até os três jobs terminarem.
+- Nenhum deploy, chamada Modal, inferência GPU, Cloudflare, Fish Audio, Gemini ou render de produção foi executado. Nenhum custo variável foi gerado.
+- Próxima ação: acompanhar CI #1143, inspecionar logs de qualquer falha e corrigir a PR. Não fazer merge automaticamente.
