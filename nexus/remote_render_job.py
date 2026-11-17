@@ -120,7 +120,7 @@ def main(project_root=None):
     if requested_duration <= 0 or maximum_duration < requested_duration:
         raise RuntimeError("A janela de duração do storyboard é inválida.")
 
-    audio_path, narration_provider = generate_worker_narration(
+    audio_path, narration_provider, narration_alignment_segments = generate_worker_narration(
         narration,
         voice,
         work / "narration.mp3",
@@ -128,7 +128,6 @@ def main(project_root=None):
         fish_voice_id=fish_credentials.get("voice_id", ""),
         return_alignment=True,
     )
-    audio_path, narration_provider, narration_alignment_segments = audio_path
     audio_path = Path(audio_path)
     actual_audio_duration = _measure_audio_duration(audio_path)
 
@@ -155,7 +154,7 @@ def main(project_root=None):
         scenes = plan.get("scenes") or []
         narration = " ".join(str(scene.get("voiceover", "")).strip() for scene in scenes).strip()
         audio_path.unlink(missing_ok=True)
-        audio_path, narration_provider = generate_worker_narration(
+        audio_path, narration_provider, narration_alignment_segments = generate_worker_narration(
             narration,
             voice,
             work / "narration.mp3",
@@ -163,7 +162,6 @@ def main(project_root=None):
             fish_voice_id=fish_credentials.get("voice_id", ""),
             return_alignment=True,
         )
-        audio_path, narration_provider, narration_alignment_segments = audio_path
         audio_path = Path(audio_path)
         actual_audio_duration = _measure_audio_duration(audio_path)
         if actual_audio_duration > maximum_duration + 0.75:
