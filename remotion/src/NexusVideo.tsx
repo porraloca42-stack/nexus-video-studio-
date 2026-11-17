@@ -8,6 +8,7 @@ const SceneLayer: React.FC<{ scene: NexusScene; duration: number; overlapFrames:
   const frame = useCurrentFrame();
   const { width, height } = useVideoConfig();
   const accent = scene.accent || "#e8b66b";
+  const isGeneratedVideo = scene.visualMode === "video";
   const direction = scene.sceneDirection;
   const camera = direction?.camera;
   const progress = clamp(frame / Math.max(1, duration - overlapFrames), 0, 1);
@@ -24,7 +25,7 @@ const SceneLayer: React.FC<{ scene: NexusScene; duration: number; overlapFrames:
         event,
         visualTarget: "subject",
       }))).slice(0, 3);
-  const beatEnergy = beats.reduce((energy, beat) => {
+  const beatEnergy = isGeneratedVideo ? 0 : beats.reduce((energy, beat) => {
     const center = clamp(beat.at, 0.08, 0.92) * duration;
     const distance = Math.abs(frame - center);
     const envelope = distance < 10 ? Math.sin((1 - distance / 10) * Math.PI / 2) : 0;
@@ -47,7 +48,7 @@ const SceneLayer: React.FC<{ scene: NexusScene; duration: number; overlapFrames:
   const rotation = Math.sin(progress * Math.PI) * intensity * (move === "pan_left" || move === "pan_right" ? 0.42 : 0.18);
   const mediaStyle: React.CSSProperties = {
     width: "100%", height: "100%", objectFit: "cover",
-    transform: `translate(${x}px, ${y}px) scale(${scale}) rotate(${rotation}deg)`,
+    transform: isGeneratedVideo ? "none" : `translate(${x}px, ${y}px) scale(${scale}) rotate(${rotation}deg)`,
     transformOrigin: camera?.focus === "foreground" ? "50% 75%" : camera?.focus === "background" ? "50% 25%" : "50% 50%",
     willChange: "transform",
   };
