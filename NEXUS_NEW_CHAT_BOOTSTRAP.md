@@ -77,3 +77,5 @@ Este bootstrap reduz perda de continuidade, mas não garante que a plataforma ca
 - Este bootstrap foi criado no commit `cc58c3a5174b13c5a1e4a48a13ea2dd3b71cac34`.
 - Master state e handoff registraram essa mudança nos commits `875460450db3193c7c123faf055bf009846774bd` e `50ba514919fbd446dc0304eb456b21a027b0e945`.
 - Próximo passo imediato: criar push marker `[run-remotion-validation]` após a correção e então verificar a execução do job/artifact pelo GitHub Actions.
+
+- Solicitação de nova execução após a correção do teste: commit de push com marcador `[run-remotion-validation]` a ser consultado no Actions. A execução e o artifact só serão considerados confirmados após leitura do resultado real do job.
