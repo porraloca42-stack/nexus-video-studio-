@@ -1830,3 +1830,15 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Testes adicionais verificam isolamento do grafo original, alteração de widgets, rejeição de links e referências desconhecidas.
 - Commits: `273c047` (patcher), `9cb0830` (testes).
 - O arquivo `.github/workflows/tests.yml` foi inspecionado: a job de regressão compila `nexus` e executa `python -m unittest discover -s tests -v`, portanto o novo arquivo de teste entra na descoberta padrão. Isso confirma a configuração do workflow, não o resultado de uma execução.
+
+
+## Decisão arquitetural definitiva — integração LTX-2.5 no NEXUS oficial (17/11/2026)
+- Esta decisão substitui a proposta anterior de manter um protótipo/projeto paralelo com posterior portabilidade. Não haverá segundo repositório, produto duplicado nem migração posterior de código: implementação, workflow, worker, testes e operação pertencem ao repositório oficial `porraloca42-stack/nexus-video-studio-`, branch `main`.
+- LTX-2.5 + ComfyUI é o motor-alvo definitivo da evolução audiovisual. O LTX-0.9.8 permanece temporariamente como motor de produção/fallback até que o novo motor passe pelos portões de compatibilidade, qualidade, estabilidade e custo. Não são dois produtos em paralelo.
+- Um worker pode continuar isolado como processo/runtime por segurança e dependências, mas será um componente versionado e operado pelo próprio NEXUS; isolamento operacional não significa projeto paralelo.
+- Implementado: contrato comum de animação em `nexus/video_engine.py` e adaptador `LTX098VideoEngine`. `nexus/remote_render_job.py` passa a chamar o contrato, preservando a função de entrada usada pelos testes e o comportamento atual. O contrato exige uma saída por cena com caminho MP4 e telemetria.
+- A resolução de `ltx25_comfyui` falha explicitamente enquanto o workflow API versionado e o adaptador não estiverem prontos; não existe fallback silencioso que esconda configuração incompleta.
+- Testes determinísticos adicionados em `tests/test_video_engine.py` para motor padrão, delegação, bloqueio explícito do LTX-2.5 incompleto e nome desconhecido. Ainda não há execução local/CI confirmada nesta atualização.
+- A base HTTP ComfyUI e o patcher seguro existentes serão reutilizados. Próxima implementação: obter e versionar um workflow realmente exportado em formato API, validar IDs/classes/inputs e então implementar o adaptador ComfyUI no mesmo contrato. O JSON visual do workflow não pode ser tratado como API prompt.
+- Não houve deploy, download de pesos, boot ComfyUI, chamada API paga, inferência GPU ou benchmark. Custo variável adicional: US$0. Nenhuma alteração do motor padrão de produção foi feita.
+- Estado desta etapa: código gravado em `main`; teste adicionado; validação pós-commit, execução dos testes e CI pendentes; deploy e MP4 real não realizados.
