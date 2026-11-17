@@ -9,6 +9,7 @@ from nexus.editorial_pipeline import (
     validate_visual_direction,
     micro_script_advisories,
     run_four_brain_pipeline,
+    provider_segments_to_word_timestamps,
 )
 
 
@@ -132,6 +133,23 @@ class EditorialPipelineContractTests(unittest.TestCase):
         data = valid_visual_direction()
         data["beats"][1]["block_id"] = "m1"
         self.assertTrue(any("duplicate visual beat" in error for error in validate_visual_direction(data)))
+
+    def test_provider_segments_promote_only_single_word_items(self):
+        result = provider_segments_to_word_timestamps([
+            {"text": "Olá", "start_seconds": 0.0, "end_seconds": 0.25, "chunk_seq": 0},
+            {"text": "mundo!", "start_seconds": 0.3, "end_seconds": 0.6, "chunk_seq": 0},
+        ])
+        self.assertEqual(result, [
+            {"text": "Olá", "start_seconds": 0.0, "end_seconds": 0.25},
+            {"text": "mundo!", "start_seconds": 0.3, "end_seconds": 0.6},
+        ])
+        self.assertNotIn("confidence", result[0])
+
+    def test_provider_phrase_segment_is_not_mislabeled_as_word_timing(self):
+        with self.assertRaisesRegex(ValueError, "phrase or punctuation segment"):
+            provider_segments_to_word_timestamps([
+                {"text": "Olá mundo", "start_seconds": 0.0, "end_seconds": 0.6},
+            ])
 
     def test_edit_timeline_accepts_word_alignment(self):
         self.assertEqual(validate_edit_timeline(valid_edit_timeline()), [])
