@@ -8,7 +8,7 @@ from nexus.audio import make_voice
 from nexus.cloudflare_images import generate_scene_images
 from nexus.modal_i2v import animate_scene_images
 from nexus.remotion_renderer import render_video_remotion
-from nexus.render_crypto import decrypt_text, encrypt_bytes, encrypt_text
+from nexus.render_crypto import decrypt_compressed_text, decrypt_text, encrypt_bytes, encrypt_text
 
 
 def generate_worker_narration(text, voice, output_path, fish_api_key="", fish_voice_id=""):
@@ -69,7 +69,7 @@ def main(project_root=None):
     encryption_secret = os.environ.get("CLOUDFLARE_API_TOKEN", "")
     if not raw or not encryption_secret:
         raise RuntimeError("Manifesto criptografado ou segredo de criptografia ausente.")
-    plan = json.loads(decrypt_text(raw, encryption_secret))
+    plan = json.loads(decrypt_compressed_text(raw, encryption_secret))
     fish_credentials = {"api_key": "", "voice_id": ""}
     if encrypted_fish:
         fish_credentials.update(json.loads(decrypt_text(encrypted_fish, encryption_secret)))
