@@ -578,6 +578,15 @@ if active_view == "Criar":
                 st.caption("Busca visual: " + scene.get("asset_search_query", ""))
                 st.divider()
     
+        brain4_enabled = st.checkbox(
+            "Ativar Brain 4 — edição inteligente sincronizada",
+            value=False,
+            help=(
+                "Faz uma chamada Gemini por vídeo para planejar cortes, legendas, "
+                "efeitos e mixagem usando os timestamps reais da Fish Audio. "
+                "Pode gerar custo de API. Desativado por padrão."
+            ),
+        )
         if st.button("Produzir vídeo completo", type="primary", use_container_width=True):
             coverr_key = ""
             pixabay_key = secret("PIXABAY_API_KEY")
@@ -595,6 +604,8 @@ if active_view == "Criar":
                 )
             if st.session_state.get("nexus_errors"):
                 st.error("O storyboard precisa ser corrigido antes da produção.")
+            elif brain4_enabled and not secret("GEMINI_API_KEY"):
+                st.error("Brain 4 foi ativado, mas GEMINI_API_KEY não está configurada. Nenhum trabalho foi enviado.")
             elif render_mode == "Imagens originais · Cloudflare + Modal I2V + Remotion":
                 github_token = secret("GITHUB_ACTIONS_TOKEN")
                 cloudflare_token = secret("CLOUDFLARE_API_TOKEN")
@@ -643,6 +654,8 @@ if active_view == "Criar":
                             fish_api_key=fish_api_key,
                             fish_voice_id=voice,
                             gemini_api_key=secret("GEMINI_API_KEY"),
+                            brain4_enabled=brain4_enabled,
+                            gemini_model=secret("GEMINI_MODEL") or "auto",
                             topic=topic,
                             style=style,
                             progress_callback=update_worker_progress
