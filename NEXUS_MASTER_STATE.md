@@ -1487,3 +1487,7 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - O fluxo funcional foi preservado: o botão superior solicita o storyboard; após o planejamento, o fluxo existente ainda oferece a etapa separada de produção/renderização do MP4. A prévia passa a hospedar o MP4 quando ele existe; sem vídeo, exibe placeholder vertical 9:16. A biblioteca e as opções avançadas continuam disponíveis nas áreas inferiores.
 - Motor de produção e diagnósticos foram movidos para Perfil > Configurações avançadas; a seleção fica guardada em `nexus_render_mode` e é recuperada na tela Criar.
 - Estado: código atualizado no GitHub `main`. Run mais recente `43991099437` está em execução nos três jobs; ainda não marcar como testado até a conclusão. O deploy Streamlit e a confirmação visual no dispositivo continuam pendentes.
+
+- Validação do código de interface: GitHub Actions run `43991099437`, commit de aplicação `42a2eea`, concluiu com sucesso nos três jobs (`unit-tests`, `remotion-typecheck`, `commons-live-smoke`). A suíte unitária passou; typecheck e smoke também passaram.
+- O run `43991135448`, disparado pelo commit de documentação `53a4a5c`, também concluiu typecheck e Commons smoke; a suíte unitária ainda estava em execução no último polling. O código de aplicação validado é o mesmo commit `42a2eea`.
+- Limite de validação: CI confirma regressões automatizadas e sintaxe exercitada pela suíte, não confirma a aparência publicada nem o comportamento real dos widgets no navegador móvel. Aguardando confirmação visual no Streamlit após sincronização.
