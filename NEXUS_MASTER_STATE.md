@@ -1580,3 +1580,11 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Removidos os botões ▶/⏸ individuais e o layout de duas colunas que o Streamlit empilhava em telas estreitas. O player nativo fornece pausa/reprodução.
 - Teste de regressão verifica prévia ao tocar no nome, estado pendente, player único e confirmação explícita antes de atualizar a voz final.
 - Estado: implementação e teste enviados à branch `main`; CI e comportamento mobile após deploy ainda pendentes. Autoplay pode ser restringido pelo navegador; o player nativo permanece disponível para iniciar/pausar manualmente.
+
+## Correção do fechamento indevido do seletor ao ouvir prévia — 17/11/2026
+- Evidência da captura mobile: tocar na voz fechava o diálogo; ao reabri-lo, a prévia pendente aparecia e começava a tocar.
+- Causa identificada em `app.py`: o clique na voz atualizava o estado pendente e chamava `st.rerun()` no escopo global, descartando o diálogo antes de renderizar a prévia.
+- Correção: o clique de prévia e a ação de tentar novamente o catálogo usam `st.rerun(scope="fragment")`, atualizando somente o fragmento do diálogo. A confirmação final continua usando `st.rerun()` global intencionalmente para fechar o seletor e retornar à criação.
+- Teste de regressão adicionado para distinguir o rerun local de prévia do rerun global de confirmação.
+- Commits: `b1753c4` (correção) e `1db54dd` (teste).
+- Estado: enviado à branch `main`; CI ainda precisa concluir. A validação final de manter o diálogo aberto e tocar a amostra depende de teste no navegador móvel após deploy.
