@@ -1670,5 +1670,7 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - `app.py`: planejamento informa estimativa, referência e limite máximo; deixa claro que a duração final acompanhará a voz real.
 - Testes alterados para verificar alocação proporcional ao áudio medido, margem de +10s e ausência de time-stretch no worker.
 - Commits principais: `41b5a3e` (diretor/janela), `fc038c9` (worker), `ccc77f9` (UI), `09c8bab` e `cb6f8e3` (cobertura de cenas), `1480cc7` (revisão somente para teto), `c0289fb` e `3a742e4` (teste worker), `f2c7ca9` (timeline medida), `dfb48d2` (instruções SYSTEM), `87a4877` (fixture de teste).
-- CI consolidado do commit `87a4877`: execução `44066397504` ainda em andamento no último acompanhamento. Execuções intermediárias falharam por fixture de teste com newline escapado duas vezes; corrigido no commit `87a4877`. Aguardar CI final.
+- CI consolidado do commit `87a4877`: execução `44066397504` concluiu com sucesso (`unit-tests`, `remotion-typecheck` e `commons-live-smoke`). Execuções intermediárias falharam por fixture de teste com newline escapado duas vezes; corrigido no commit `87a4877`.
 - Não há render real validado com esta política ainda. Não consumir créditos da Modal até CI passar; depois realizar teste controlado e conferir duração real do MP4.
+
+- Validação confirmada: todos os checks da execução `44066397504` passaram no commit `87a4877`. O commit posterior de documentação `f5ad5b7` também iniciou CI separado; sem alterações adicionais de código após o commit testado.
