@@ -1869,3 +1869,11 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Correção em nexus/comfyui_client.py: patch_api_workflow agora aplica o mesmo encapsulamento ao alterar widgets cujo valor é array. Teste de regressão em tests/test_comfyui_client.py confirma preservação do grafo original e compatibilidade com o validador. Commits: e5b3246 e 2d0a806.
 - Inspeção do workflow upstream confirmou seis subgrafos reais e que o subgrafo Input Parameters contém nós GemmaAPITextEncode. O caminho de API externa é condicionado à presença de chave LTX; não adicionar nem configurar essa chave no NEXUS sem decisão de custo/segurança. O caminho local também carrega encoder/enhancer Gemma; a remoção/desativação do enhancer precisa ser feita no grafo API real e testada, não presumida.
 - Estado: CI validado até 2d0a806; workflow API exportado ainda não existe; worker, binding IDs e integração produtiva continuam pendentes. Sem download de pesos, boot ComfyUI, GPU, API paga, deploy ou render. Custo variável adicional: US$0.
+
+
+
+## Correção da referência de frontend ComfyUI — 17/11/2026
+- O workflow visual original registra frontendVersion 1.48.7. A primeira investigação consultou uma revisão posterior (1.61.2), útil apenas como comparação, e não como referência de compatibilidade do workflow.
+- Referência correta confirmada: tag oficial ComfyUI_frontend v1.48.7, commit 6d6af63c00f132cd25dc29307fc56bd2c094fa22. A função graphToPrompt e a classe ExecutableNodeDTO foram relidas nessa revisão. O manifesto workflows/ltx25/source_manifest.json foi corrigido para essa versão.
+- O teste do manifesto agora verifica tag e versão. CI #895 (run 44094091786) e #896 (run 44094125992) passaram com 154 testes Python, Remotion typecheck e Commons live smoke. O run #894 falhou transitoriamente porque o manifesto foi atualizado antes do teste; a execução seguinte após atualizar o teste passou.
+- O código do cliente NEXUS continua compatível com o encapsulamento de widgets array como __value__. O API prompt real ainda não foi exportado; a integração segue bloqueada até exportação oficial/runtime e validação dos bindings. Sem GPU, download de pesos, deploy, API paga ou render. Custo variável adicional US$0.
