@@ -69,7 +69,7 @@ class Brain4SmokeTest(unittest.TestCase):
         timeline["word_timestamps"][0]["start_seconds"] = 0.0
         model_call = Mock(return_value=timeline)
 
-        with self.assertRaisesRegex(ValueError, "provider word timestamps must be preserved"):
+        with self.assertRaisesRegex(ValueError, "does not match a verified provider word timestamp"):
             run_brain4_live_smoke_test("test-key", model_call=model_call)
 
         self.assertEqual(model_call.call_count, 1)
