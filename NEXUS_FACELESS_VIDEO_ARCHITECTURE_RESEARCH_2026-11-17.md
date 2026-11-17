@@ -320,3 +320,100 @@ O custo de geração de imagens FLUX.2 Klein pode ficar abaixo de um centavo par
 - Modal pricing: https://modal.com/pricing
 - Modal timeout reference: https://modal.com/docs/sdk/py/latest/App
 - Modal budgets: https://modal.com/docs/guide/budgets
+
+
+## 11. Pipeline editorial em quatro cérebros — proposta aprovada pelo usuário (17/11/2026)
+
+Esta seção incorpora uma proposta editorial fornecida pelo usuário. Ela deve ser tratada como **arquitetura-alvo do NEXUS**, inspirada em padrões de produto observáveis, e não como descrição comprovada do backend proprietário de Revid, Crayo, Pictory ou qualquer outro app. A separação em quatro cérebros é uma decisão de design para tornar o raciocínio auditável, testável e especializado. Os quatro estágios podem usar prompts/chamadas separados ou módulos encadeados sobre o mesmo modelo; não é obrigatório pagar por quatro modelos diferentes.
+
+### Cérebro 1 — Estrategista de retenção (Hook & estrutura)
+
+Antes de escrever cenas, recebe tema, objetivo, público e duração e deve:
+1. Propor três hooks distintos: curiosidade, perda/oportunidade relevante (sem urgência falsa ou medo manipulativo) e quebra de padrão.
+2. Avaliar força, clareza, especificidade, credibilidade e aderência ao tema.
+3. Selecionar um hook e registrar por que venceu os outros.
+4. Desenhar o arco narrativo: promessa inicial, desenvolvimento, tensão/curiosidade crescente, revelação/entrega e fechamento.
+5. Projetar um final que possa conectar naturalmente ao início em loop, sem corte arbitrário nem retenção enganosa.
+
+**Saída estruturada:** três candidatos, hook escolhido, justificativa, promessa narrativa, curva de tensão por trecho, payoff e proposta de ligação entre final e abertura.
+
+### Cérebro 2 — Roteirista de micro-ritmo
+
+Recebe o arco aprovado e o transforma em fala oral curta e editável:
+- Preferir unidades de fala com cerca de 2,5–3,5 segundos, como heurística inicial, não como limite rígido.
+- Eliminar enchimentos, redundâncias e frases que não avançam a ideia.
+- Alternar frases curtas e pausas intencionais; evitar transformar tudo em metralhadora de palavras.
+- Marcar palavras-chave, pausas, mudança emocional, pergunta, revelação e payoff.
+- Preservar naturalidade, inteligibilidade e densidade compatível com a velocidade real de narração.
+- Garantir a duração pretendida sem quebrar a lógica nem cortar explicações essenciais.
+
+**Saída estruturada:** blocos de fala ordenados, texto exato, duração-alvo, intenção vocal, palavras de ênfase, pausas e função narrativa. A duração será recalibrada após gerar a voz e alinhar o áudio.
+
+### Cérebro 3 — Diretor de fotografia (tradução visual metafórica)
+
+Não deve ilustrar cada substantivo literalmente. Deve traduzir a intenção emocional e semântica da fala em imagens filmáveis, específicas e memoráveis. Uma fala sobre dinheiro, por exemplo, não obriga a mostrar cédulas; pode pedir uma metáfora visual coerente. A metáfora precisa comunicar a ideia — não ser apenas bonita e aleatória.
+
+O diretor cria uma **bíblia visual por vídeo**, travando:
+- paleta e contraste;
+- linguagem de luz e atmosfera;
+- família de lentes/linguagem de enquadramento;
+- textura, grão e tratamento de cor;
+- regras de composição e distância de câmera;
+- continuidade de personagem/objetos quando necessária.
+
+Consistência não significa repetir enquadramentos, sujeitos ou cenários. Cada cena deve variar ação, escala, composição e ambiente sem romper a identidade visual.
+
+**Saída estruturada por beat:** intenção da fala, emoção dominante, metáfora, ação visível, sujeito/ambiente, enquadramento/lente, movimento de câmera, paleta/iluminação, continuidade e rota recomendada (stock, imagem IA animada, parallax 2.5D, overlay, motion graphics ou vídeo IA). O roteador híbrido por cena continua decidindo a técnica de produção.
+
+### Cérebro 4 — Editor de ritmo e sincronização audiovisual
+
+Só fecha a edição depois que a narração final existir:
+1. Alinhar o texto efetivamente falado ao áudio e obter timestamps por palavra.
+2. Selecionar palavras/expressões âncora, priorizando sílabas tônicas ou momentos de ênfase perceptiva quando detectáveis com confiança.
+3. Posicionar cortes, transições, zooms e movimentos para reforçar a fala.
+4. Aplicar whoosh, bass hit ou outros SFX discretos apenas quando houver evento visual/narrativo que os justifique.
+5. Sincronizar legendas, ênfases tipográficas, música e ducking.
+6. Verificar a continuidade entre último e primeiro beat quando houver loop intencional.
+
+**Precisão técnica:** o repositório oficial do OpenAI Whisper oferece a opção word_timestamps para extrair tempos por palavra, mas documenta o recurso como experimental. Isso não equivale a alinhamento fonético perfeito nem identifica automaticamente a sílaba tônica. Para sincronizar no nível de sílaba/fonema, o NEXUS precisará avaliar um alinhador fonético/forced aligner e, se necessário, uma camada de prosódia/ênfase. Não prometer corte na sílaba exata usando apenas timestamps de palavra. Mesmo com alinhamento, o corte deve respeitar continuidade visual e inteligibilidade.
+
+Referências técnicas:
+- OpenAI Whisper — opção experimental word_timestamps: https://github.com/openai/whisper/blob/main/whisper/transcribe.py
+- OpenAI Whisper — implementação de alinhamento de palavras: https://github.com/openai/whisper/blob/main/whisper/timing.py
+- Discussão do projeto sobre limites de precisão dos timestamps: https://github.com/openai/whisper/discussions/1855
+
+### Contrato entre os quatro cérebros
+
+Fluxo: Tema + objetivo + duração → 1) três hooks, escolha, arco e loop → 2) micro-blocos, fala final e ênfases → 3) metáforas, bíblia visual e plano por beat → geração da narração final → 4) alinhamento temporal, cortes, SFX, movimento e legendas → roteador híbrido + Remotion → MP4 → auditoria.
+
+O cérebro 3 pode planejar em paralelo à preparação da narração, mas o cérebro 4 depende do áudio final. Se a duração real da voz mudar, timestamps e montagem precisam ser recalculados.
+
+### Regras de qualidade
+
+- O hook deve criar interesse com promessa que o vídeo realmente entrega.
+- A tensão não pode inventar fatos, explorar medo de forma enganosa ou adiar artificialmente uma resposta simples.
+- A metáfora deve ser compreensível e conectada à ideia; beleza sem semântica não é qualidade.
+- A bíblia visual garante unidade, não uniformidade repetitiva.
+- Não cortar em toda palavra nem adicionar whoosh/bass em cada transição. Silêncio e ausência de efeito também fazem parte do ritmo.
+- 2,5–3,5s por unidade é ponto de partida para teste, não regra universal.
+- O loop deve ser continuidade intencional, não repetição forçada.
+- Cada cérebro produz dados estruturados, justificativas e sinais de confiança; a auditoria aponta decisões frágeis antes do render.
+
+### Estado de implementação
+
+- **Aprovado como direção de produto/arquitetura:** sim, pelo usuário em 17/11/2026.
+- **Implementado no código:** não.
+- **Testado com roteiro/áudio real:** não.
+- **Validado por retenção ou comparação A/B:** não.
+- **Custo variável nesta etapa:** US$0; nenhuma API paga, GPU, render de produção ou download de modelo foi acionado.
+
+### Ordem recomendada de implementação sem custo variável
+
+1. Definir schemas JSON e testes determinísticos para os quatro artefatos.
+2. Separar hooks/arco da escrita de cenas, preservando o diretor atual até a nova cadeia passar nos testes.
+3. Adicionar micro-blocos e marcações editoriais sem impor duração rígida.
+4. Adicionar bíblia visual e tradução metafórica por beat, conectadas ao roteador híbrido.
+5. Criar alinhamento temporal com áudio sintético/local; comparar Whisper word timestamps com forced alignment antes de escolher dependência.
+6. Fazer Remotion consumir cortes/ênfases/SFX como eventos de timeline e validar sincronismo em render local.
+7. Só depois comparar qualidade e retenção com vídeos reais, mediante autorização explícita para qualquer custo variável.
+
