@@ -110,6 +110,21 @@ def apply_optional_brain4(plan, audio_path, duration_seconds, word_timestamps, m
     )
 
 
+def build_brain4_model_call(credentials):
+    """Build one bounded Gemini call only for an explicitly enabled render."""
+    if credentials.get("brain4_enabled") is not True:
+        return None
+    api_key = str(credentials.get("gemini_api_key") or "").strip()
+    if not api_key:
+        raise RuntimeError(
+            "Brain 4 foi ativado, mas GEMINI_API_KEY não está configurada. "
+            "Nenhuma imagem foi gerada."
+        )
+    model = str(credentials.get("gemini_model") or "auto").strip() or "auto"
+    from nexus.director import generate_editorial_json
+    return lambda prompt: generate_editorial_json(prompt, api_key, model)
+
+
 def main(project_root=None, editorial_model_call=None):
     raw = os.environ.get("NEXUS_MANIFEST_ENCRYPTED", "")
     encrypted_fish = os.environ.get("NEXUS_FISH_CREDENTIALS_ENCRYPTED", "")
@@ -117,9 +132,11 @@ def main(project_root=None, editorial_model_call=None):
     if not raw or not encryption_secret:
         raise RuntimeError("Manifesto criptografado ou segredo de criptografia ausente.")
     plan = json.loads(decrypt_compressed_text(raw, encryption_secret))
-    fish_credentials = {"api_key": "", "voice_id": ""}
+    fish_credentials = {"api_key": "", "voice_id": "", "brain4_enabled": False}
     if encrypted_fish:
         fish_credentials.update(json.loads(decrypt_text(encrypted_fish, encryption_secret)))
+    if editorial_model_call is None:
+        editorial_model_call = build_brain4_model_call(fish_credentials)
     scenes = plan.get("scenes") or []
     if not scenes:
         raise RuntimeError("O manifesto não contém cenas.")
