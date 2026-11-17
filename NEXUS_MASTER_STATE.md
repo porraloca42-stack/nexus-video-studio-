@@ -2184,3 +2184,15 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Commit `72f4721f77d02ad22f5203c8f54c5a243e062797`: CI #1068 / run `44121435313` passou — 209 testes Python, compileall, Remotion typecheck e Commons smoke; synthetic render skipped por ser alteração de UI.
 - Resultado do render agora exibe claramente `Brain 4 executado: edição sincronizada validada` ou `Brain 4 não foi executado neste vídeo`, baseado no relatório real do worker.
 - Integração de código pronta para opt-in e validada em CI; ainda não testada com uma chamada Gemini real. Não foi feito deploy independente nem render real nesta etapa.
+
+
+
+## Smoke test isolado do Brain 4 Gemini — 17/11/2026
+- Criado `nexus/brain4_smoke_test.py` com fixture sintético de 4s, duas cenas, oito timestamps word-level determinísticos e chamada explícita ao adapter `run_brain4_for_storyboard()`. O módulo não faz chamadas ao importar.
+- Criado botão Streamlit **“Testar Brain 4 — sem produzir vídeo”**, disponível apenas no modo Cloudflare + Modal I2V + Remotion. Ao clique, usa `GEMINI_API_KEY` e faz uma geração Gemini limitada pelo helper existente a um modelo/uma geração; a descoberta de modelos é uma consulta de catálogo. O teste não inicia Fish Audio, Cloudflare, Modal, GPU, GitHub worker ou render.
+- A saída só é aprovada se passar `validate_edit_timeline()` e as proteções de preservação exata dos timestamps do fixture. A UI mostra granularidade, quantidade de legendas, âncoras e eventos de mixagem; erros são expostos sem retry.
+- Testes offline adicionados em `tests/test_brain4_smoke_test.py`: chamada injetada única, validação de contrato, rejeição de deriva temporal e bloqueio sem chave.
+- Commits: `12315a2` (fixture/helper), `eb3c2d3` (testes), `49da8be` (controle UI). CI #1075–#1077 foi iniciado; status final ainda precisa ser confirmado.
+- Estado: código commitado na branch main; nenhuma chamada Gemini real foi executada; nenhum vídeo de produção, serviço de mídia ou GPU foi iniciado; deploy Streamlit não verificado.
+- Limitação: o fixture comprova que o Gemini consegue produzir uma timeline estruturalmente válida contra dados sintéticos. Não comprova alinhamento de voz real, qualidade perceptual, adequação de SFX, mixagem audível nem resultado visual final.
+- Próximo passo: confirmar CI dos três commits, então aguardar o usuário executar o botão no Streamlit para a primeira chamada Gemini real. Só depois analisar o resultado. Um vídeo completo controlado exigirá confirmação separada de custos de Fish/Cloudflare/Modal e execução de produção.
