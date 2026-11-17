@@ -8,7 +8,7 @@ HEAD da branch main no início desta atualização: 69db4d2a2b31d4f6d5e97c8f0424
 
 **REGRA DE LEITURA:** este bloco é a fonte prioritária para o estado atual. Os registros cronológicos abaixo são histórico. Nunca retomar uma “próxima ação” antiga sem confrontá-la com este bloco e com o HEAD atual. Em especial, NÃO tratar tarefas do dia 16/11 nem checkpoints antigos sobre integração Brain 4/Remotion como pendências atuais.
 
-## Estado vigente em 17/11/2026 às 17:50 (BRT)
+## Estado vigente em 17/11/2026 às 17:53 (BRT)
 - Quatro cérebros: contratos, validadores, prompts e runner implementados. Brain 4 isolado foi aprovado pelo usuário em execução real Gemini, validando timeline em fixture sintética de 4s; isso não valida vídeo completo.
 - Integração editorial no worker de produção existe como opt-in: usa narração Fish Audio e segmentos/timestamps do provedor, aplica Brain 4 quando habilitado, valida timeline e encaminha eventos para Remotion. Não confundir integração de código/testes com pipeline completo live.
 - Remotion multifaixa (captions, SFX, ducking/fades) implementado e validado em MP4 sintético de 4s; qualidade com voz/música reais e vídeo de 40–50s não validada.
@@ -22,8 +22,7 @@ HEAD da branch main no início desta atualização: 69db4d2a2b31d4f6d5e97c8f0424
 ## Próxima ação sem custo
 1. Fazer revisão final do diff e dos logs do CI #1163; manter PR #10 aberta até solicitação explícita de merge.
 2. Prosseguir com auditoria estática de observabilidade/cache e documentação de deployment, sem chamar Modal ou serviços pagos.
-3. Prosseguir com auditoria estática de observabilidade/cache e documentação de deployment, sem chamar Modal ou serviços pagos.
-4. Manter produção completa bloqueada até confirmação do deployment e autorização explícita de custos.
+3. Manter produção completa bloqueada até confirmação do deployment e autorização explícita de custos.
 
 ## Separação de estados
 - Implementado/commitado: contratos dos cérebros, integração opt-in no worker, eventos multifaixa Remotion, diagnóstico de movimento, indicador de build.
