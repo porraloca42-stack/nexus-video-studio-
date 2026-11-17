@@ -173,6 +173,29 @@ html,body,.stApp,[data-testid="stAppViewContainer"]{background:#09090B!important
 .nexus-preview-stage svg{width:86px;height:164px;opacity:.75}
 .nexus-preview-caption{text-align:center;color:#aaa5b4;font-size:.85rem;line-height:1.45;letter-spacing:.01em}
 .st-key-nexus-video-stage{margin-top:.25rem}
+
+/* Compact, thumb-first controls and a true one-line style carousel */
+.st-key-nexus-style-carousel{width:100%!important;min-width:0!important;overflow:hidden!important;margin:.15rem 0 .35rem!important}
+.st-key-nexus-style-carousel [data-testid="stPills"]{width:100%!important;max-width:100%!important;overflow-x:auto!important;overflow-y:hidden!important;white-space:nowrap!important;scrollbar-width:none!important;overscroll-behavior-x:contain!important}
+.st-key-nexus-style-carousel [data-testid="stPills"]::-webkit-scrollbar{display:none!important}
+.st-key-nexus-style-carousel [data-testid="stPills"] div{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:center!important;width:max-content!important;min-width:max-content!important;max-width:none!important}
+.st-key-nexus-style-carousel [data-testid="stPills"] button{flex:0 0 auto!important;width:auto!important;min-width:max-content!important;white-space:nowrap!important}
+.st-key-nexus-compact-controls{width:100%!important;margin:.2rem 0 .8rem!important}
+.st-key-nexus-compact-controls [data-testid="stHorizontalBlock"]{display:flex!important;flex-wrap:nowrap!important;align-items:center!important;gap:.55rem!important}
+.st-key-nexus-compact-controls [data-testid="column"]{flex:1 1 0!important;min-width:0!important;width:50%!important}
+.st-key-nexus-compact-controls [data-testid="stPopover"]{width:100%!important}
+.st-key-nexus-compact-controls [data-testid="stPopover"]>button{width:100%!important;min-height:3.35rem!important;max-height:3.35rem!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;padding:.65rem .75rem!important;border:1px solid #51416e!important;border-radius:13px!important;background:linear-gradient(135deg,#1b1924,#15141b)!important;color:#f4f0ff!important;font-size:.82rem!important;font-weight:600!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)!important}
+.st-key-nexus-compact-controls [data-testid="stPopover"]>button p{overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+.st-key-nexus-compact-controls [data-testid="stPopover"]>button:hover{border-color:#9b7bff!important;background:#211b31!important}
+.st-key-nexus-compact-controls [data-testid="stPopoverBody"]{max-width:min(92vw,520px)!important}
+@media(max-width:850px){
+ .st-key-nexus-style-carousel [data-testid="stPills"]{padding-bottom:.25rem!important}
+ .st-key-nexus-style-carousel [data-testid="stPills"] div{flex-wrap:nowrap!important}
+ .st-key-nexus-compact-controls [data-testid="stHorizontalBlock"]{flex-wrap:nowrap!important}
+ .st-key-nexus-compact-controls [data-testid="column"]{min-width:0!important}
+ .st-key-nexus-compact-controls [data-testid="stPopover"]>button{font-size:.75rem!important;padding:.55rem .55rem!important}
+}
+
 .st-key-nexus-video-stage [data-testid="stVerticalBlock"]{gap:0!important}
 
 .nexus-logo-mark{display:grid;place-items:center;width:clamp(58px,16vw,76px);height:clamp(58px,16vw,76px);flex:0 0 auto;border-radius:18px;background:linear-gradient(145deg,#21163e,#101019);border:1px solid #6245a2;box-shadow:0 0 28px rgba(139,92,246,.22),inset 0 1px 0 rgba(255,255,255,.12)}.nexus-logo-mark svg{width:66%;height:66%;filter:drop-shadow(0 0 9px rgba(167,139,250,.45))}
@@ -254,30 +277,32 @@ if active_view == "Criar":
         generate_requested = st.button("Gerar vídeo", type="primary", use_container_width=True, key="nexus-generate-top")
 
     st.markdown('<div class="nexus-section-label">ESTILO VISUAL</div>', unsafe_allow_html=True)
-    style = st.pills(
-        "Estilo visual", STYLE_OPTIONS, selection_mode="single",
-        default=st.session_state["nexus_style"], key="nexus_style",
-        label_visibility="collapsed",
-    ) or st.session_state["nexus_style"]
+    with st.container(key="nexus-style-carousel"):
+        style = st.pills(
+            "Estilo visual", STYLE_OPTIONS, selection_mode="single",
+            default=st.session_state["nexus_style"], key="nexus_style",
+            label_visibility="collapsed",
+        ) or st.session_state["nexus_style"]
 
-    voice_col, duration_col = st.columns([1.2, 0.85], gap="small", vertical_alignment="top")
-    with voice_col:
-        with st.container(border=True):
-            st.markdown('<div class="nexus-control-eyebrow">NARRAÇÃO</div>', unsafe_allow_html=True)
-            fish_api_key = secret("FISH_API_KEY")
-            if "nexus_fish_voice_id" not in st.session_state:
-                st.session_state["nexus_fish_voice_id"] = secret("FISH_VOICE_ID")
-            if "nexus_fish_voice_name" not in st.session_state:
-                st.session_state["nexus_fish_voice_name"] = ""
-        
-            if not fish_api_key:
-                st.warning("Configure FISH_API_KEY nos Secrets do Streamlit para carregar as vozes.")
-            else:
-                selected_name = st.session_state.get("nexus_fish_voice_name") or "Nenhuma voz selecionada"
+    fish_api_key = secret("FISH_API_KEY")
+    if "nexus_fish_voice_id" not in st.session_state:
+        st.session_state["nexus_fish_voice_id"] = secret("FISH_VOICE_ID")
+    if "nexus_fish_voice_name" not in st.session_state:
+        st.session_state["nexus_fish_voice_name"] = ""
+    selected_name = st.session_state.get("nexus_fish_voice_name") or ""
+    voice_button_label = selected_name if selected_name else "Escolher voz"
+    st.session_state.setdefault("nexus_duration", 45)
+    duration = st.session_state.get("nexus_duration", 45)
+
+    with st.container(key="nexus-compact-controls"):
+        voice_col, duration_col = st.columns([1.2, 0.9], gap="small", vertical_alignment="center")
+        with voice_col:
+            with st.popover(f"🎙️ {voice_button_label}", use_container_width=True):
                 st.markdown("**NARRAÇÃO**")
-                st.text(selected_name)
-                st.caption("40 modelos selecionados manualmente · IDs preservados por categoria")
-                with st.expander("🎙️ Escolher voz", expanded=False):
+                if not fish_api_key:
+                    st.warning("Configure FISH_API_KEY nos Secrets do Streamlit para carregar as vozes.")
+                else:
+                    st.caption("40 modelos selecionados manualmente · IDs preservados por categoria")
                     st.caption("As categorias seguem sua lista. A separação masculino/feminino é feita somente quando os metadados identificam o gênero; os demais ficam em Não identificado.")
                     catalog_key = "nexus_curated_voice_catalog_v1"
                     if catalog_key not in st.session_state:
@@ -342,15 +367,15 @@ if active_view == "Criar":
                                                 st.audio(voice_option["sample_audio"], format="audio/mp3")
                                             else:
                                                 st.caption("Amostra não publicada ou indisponível.")
+
             voice = st.session_state.get("nexus_fish_voice_id", "")
-    with duration_col:
-        with st.container(border=True):
-            st.markdown('<div class="nexus-control-eyebrow">DURAÇÃO</div>', unsafe_allow_html=True)
-            duration = st.selectbox(
-                "Duração", [40, 50, 60], index=1,
-                format_func=lambda value: f"{value}s",
-                label_visibility="collapsed", key="nexus_duration",
-            )
+        with duration_col:
+            with st.popover(f"◷  {duration}s", use_container_width=True):
+                duration = st.selectbox(
+                    "Duração do vídeo", [40, 45, 50, 60], index=1,
+                    format_func=lambda value: f"{value}s",
+                    key="nexus_duration",
+                )
 
     with st.container(key="nexus-video-stage"):
         if st.session_state.get("nexus_rendered_video"):
