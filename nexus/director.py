@@ -210,7 +210,7 @@ def generate_editorial_json(prompt, api_key, requested_model="auto"):
     """Make one bounded Gemini generation request for an editorial stage."""
     if not api_key:
         raise RuntimeError("Configure GEMINI_API_KEY para ativar o Brain 4.")
-    return _request(
+    result = _request(
         prompt,
         lambda name, default="": (
             api_key if name == "GEMINI_API_KEY"
@@ -220,7 +220,11 @@ def generate_editorial_json(prompt, api_key, requested_model="auto"):
         system_instruction=EDITORIAL_MODEL_SYSTEM,
         max_models=1,
         attempts_per_model=1,
+        require_scenes=False,
     )
+    result.pop("director_model", None)
+    result.pop("model_failover", None)
+    return result
 
 
 def _request(
@@ -230,6 +234,7 @@ def _request(
     system_instruction=None,
     max_models=5,
     attempts_per_model=2,
+    require_scenes=True,
 ):
     key = secret_reader("GEMINI_API_KEY")
     requested = secret_reader("GEMINI_MODEL", "auto")
@@ -362,7 +367,7 @@ def _request(
                 else:
                     plan = None
 
-            if not isinstance(plan, dict) or not isinstance(plan.get("scenes"), list):
+            if not isinstance(plan, dict) or (require_scenes and not isinstance(plan.get("scenes"), list)):
                 # Gemini may stop with malformed JSON even when finishReason is
                 # STOP. Retry once with a compact JSON-only instruction, then
                 # fail over to another compatible model if needed.
@@ -381,7 +386,7 @@ def _request(
                     continue
                 last_status = "invalid_json"
                 last_detail = (
-                    f"{model}: JSON inválido após duas tentativas "
+                    f"{model}: JSON inválido após {attempts_per_model} tentativa(s) "
                     f"(finishReason={finish_reason})."
                 )
                 attempted.append(f"{model} (JSON inválido)")
@@ -410,8 +415,8 @@ def _request(
         )
     if last_status == "invalid_json":
         raise RuntimeError(
-            "O Gemini respondeu, mas não conseguiu entregar um JSON completo mesmo após "
-            "uma nova tentativa automática e o teste de outros modelos compatíveis. "
+            "O Gemini respondeu, mas não conseguiu entregar um JSON completo dentro do limite "
+            "de tentativas configurado. "
             f"Modelos verificados: {tried}. Nenhum roteiro incompleto foi aceito. "
             "Tente novamente em instantes; a duração escolhida foi preservada."
         )
