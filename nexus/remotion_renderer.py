@@ -202,6 +202,8 @@ def build_remotion_manifest(plan, media, audio_path, public_dir, job_id="nexus-j
             "startSeconds": start,
             "endSeconds": end,
             "musicVolume": _bounded_number(event.get("music_volume"), 0.06, 0.0, 1.0),
+            "fadeInSeconds": _bounded_number(event.get("fade_in_seconds"), 0.12, 0.0, 2.0),
+            "fadeOutSeconds": _bounded_number(event.get("fade_out_seconds"), 0.12, 0.0, 2.0),
         })
 
     manifest = {
