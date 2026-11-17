@@ -1656,3 +1656,6 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Barra: ao terminar o worker, o texto passa a indicar recuperação/validação do MP4 e o restante estimado zera; não exibe mais minutos restantes estimados após o worker concluir. Commit `812b763`.
 - CI das correções está em execução: runs `44064355595`, `44064383883`, `44064401470`, `44064418134`. Aguardando todos os checks antes de nova tentativa real.
 - Ainda não há vídeo MP4 real validado. Não iniciar nova produção até CI aprovado e sincronização Streamlit.
+
+- Atualização CI: execução `44064383883` (inclui teste da função de leitura com 2 argumentos) concluiu `unit-tests`, `remotion-typecheck` e `commons-live-smoke` com sucesso. Execução `44064401470` para o rearranjo visual concluiu `unit-tests` e `remotion-typecheck` com sucesso; `commons-live-smoke` ainda estava em andamento no último acompanhamento. Execuções de render de integração `44064355595` e `44064418134` ainda em andamento no último acompanhamento.
+- O deploy/sincronização do Streamlit e a validação visual no celular ainda dependem do CI terminar e da atualização do app. Não pedir nova produção real enquanto isso não for confirmado.
