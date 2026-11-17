@@ -2178,3 +2178,9 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - UI agora também mostra o estado retornado pelo worker: Brain 4 validado ou não executado.
 - Commit UI `72f4721f77d02ad22f5203c8f54c5a243e062797`; CI deste último commit ainda precisa ser conferido.
 - Nenhuma chamada Gemini real ou render de produção ocorreu. A integração está pronta para opt-in, mas ainda não foi validada com resposta Gemini real.
+
+
+## UI de status Brain 4 validada — 17/11/2026
+- Commit `72f4721f77d02ad22f5203c8f54c5a243e062797`: CI #1068 / run `44121435313` passou — 209 testes Python, compileall, Remotion typecheck e Commons smoke; synthetic render skipped por ser alteração de UI.
+- Resultado do render agora exibe claramente `Brain 4 executado: edição sincronizada validada` ou `Brain 4 não foi executado neste vídeo`, baseado no relatório real do worker.
+- Integração de código pronta para opt-in e validada em CI; ainda não testada com uma chamada Gemini real. Não foi feito deploy independente nem render real nesta etapa.
