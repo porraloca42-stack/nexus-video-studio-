@@ -23,7 +23,7 @@ MEDIA_ROUTES = {
 NARRATIVE_FUNCTIONS = {
     "hook", "setup", "development", "contrast", "reveal", "payoff", "cta", "loop_bridge"
 }
-ALIGNMENT_LEVELS = {"word", "phoneme"}
+ALIGNMENT_LEVELS = {"word", "character", "phoneme"}
 
 
 def _is_object(value: Any) -> bool:
@@ -214,9 +214,21 @@ def validate_edit_timeline(data: Any) -> list[str]:
     _require_number(data, "audio_duration_seconds", path, errors, minimum=0.01)
     alignment_level = data.get("alignment_level")
     if alignment_level not in ALIGNMENT_LEVELS:
-        errors.append(f"{path}.alignment_level: expected word or phoneme")
+        errors.append(f"{path}.alignment_level: expected word, character or phoneme")
 
     words = _require_list(data, "word_timestamps", path, errors)
+    character_times = data.get("character_timestamps", [])
+    phoneme_times = data.get("phoneme_timestamps", [])
+    if not isinstance(character_times, list):
+        errors.append(f"{path}.character_timestamps: expected array")
+        character_times = []
+    if not isinstance(phoneme_times, list):
+        errors.append(f"{path}.phoneme_timestamps: expected array")
+        phoneme_times = []
+    if alignment_level == "character" and not character_times:
+        errors.append(f"{path}.character_timestamps: required for character-level alignment")
+    if alignment_level == "phoneme" and not phoneme_times:
+        errors.append(f"{path}.phoneme_timestamps: required for phoneme-level alignment")
     previous_end = 0.0
     for index, word in enumerate(words):
         item_path = f"{path}.word_timestamps[{index}]"
@@ -238,6 +250,27 @@ def validate_edit_timeline(data: Any) -> list[str]:
             errors.append(f"{item_path}: timestamp exceeds audio duration")
         if not _is_number(word.get("confidence")) or not 0 <= word["confidence"] <= 1:
             errors.append(f"{item_path}.confidence: expected value between 0 and 1")
+
+    def validate_fine_timestamps(items, field_name):
+        previous = 0.0
+        for index, item in enumerate(items):
+            item_path = f"{path}.{field_name}[{index}]"
+            if not _is_object(item):
+                errors.append(f"{item_path}: expected object")
+                continue
+            _require_string(item, "text", item_path, errors)
+            start, end = item.get("start_seconds"), item.get("end_seconds")
+            if not _is_number(start) or not _is_number(end):
+                errors.append(f"{item_path}: start_seconds and end_seconds must be numbers")
+                continue
+            if start < 0 or end <= start or start < previous - 0.02:
+                errors.append(f"{item_path}: invalid or unordered timestamp interval")
+            if _is_number(data.get("audio_duration_seconds")) and end > data["audio_duration_seconds"] + 0.05:
+                errors.append(f"{item_path}: timestamp exceeds audio duration")
+            previous = end
+
+    validate_fine_timestamps(character_times, "character_timestamps")
+    validate_fine_timestamps(phoneme_times, "phoneme_timestamps")
 
     anchors = _require_list(data, "edit_anchors", path, errors)
     aligned_words = [
@@ -263,10 +296,36 @@ def validate_edit_timeline(data: Any) -> list[str]:
         anchor_level = anchor.get("alignment_level")
         if anchor_level not in ALIGNMENT_LEVELS:
             errors.append(f"{item_path}.alignment_level: expected word or phoneme")
-        if anchor_level == "phoneme" and alignment_level != "phoneme":
-            errors.append(f"{item_path}: phoneme anchor requires phoneme-level alignment")
+        alignment_rank = {"word": 1, "character": 2, "phoneme": 3}
+        if anchor_level in ALIGNMENT_LEVELS and alignment_level in ALIGNMENT_LEVELS:
+            if alignment_rank[anchor_level] > alignment_rank[alignment_level]:
+                errors.append(f"{item_path}: anchor precision exceeds available alignment level")
         if anchor_level == "phoneme":
             _require_string(anchor, "phoneme", item_path, errors)
+            if not phoneme_times:
+                errors.append(f"{item_path}: phoneme anchor requires phoneme_timestamps")
+            elif _is_nonempty_string(anchor.get("phoneme")):
+                matches = [item for item in phoneme_times if _is_object(item) and item.get("text") == anchor["phoneme"]]
+                if not matches:
+                    errors.append(f"{item_path}.phoneme: no matching aligned phoneme")
+                elif _is_number(anchor.get("at_seconds")) and not any(
+                    item["start_seconds"] - 0.05 <= anchor["at_seconds"] <= item["end_seconds"] + 0.05
+                    for item in matches
+                ):
+                    errors.append(f"{item_path}.at_seconds: anchor falls outside the aligned phoneme")
+        if anchor_level == "character":
+            _require_string(anchor, "character", item_path, errors)
+            if not character_times:
+                errors.append(f"{item_path}: character anchor requires character_timestamps")
+            elif _is_nonempty_string(anchor.get("character")):
+                matches = [item for item in character_times if _is_object(item) and item.get("text") == anchor["character"]]
+                if not matches:
+                    errors.append(f"{item_path}.character: no matching aligned character")
+                elif _is_number(anchor.get("at_seconds")) and not any(
+                    item["start_seconds"] - 0.05 <= anchor["at_seconds"] <= item["end_seconds"] + 0.05
+                    for item in matches
+                ):
+                    errors.append(f"{item_path}.at_seconds: anchor falls outside the aligned character")
         if anchor_level == "word" and _is_nonempty_string(anchor.get("trigger_text")):
             matching = [
                 word for word in aligned_words
