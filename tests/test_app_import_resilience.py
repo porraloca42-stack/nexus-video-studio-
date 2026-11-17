@@ -32,6 +32,21 @@ class AppImportResilienceTests(unittest.TestCase):
         self.assertIn('max-width:100%!important;min-width:0!important', source)
         self.assertIn('flex:none!important;width:auto!important', source)
 
+    def test_voice_picker_shows_all_provider_groups_and_selects_in_one_tap(self):
+        source = Path("app.py").read_text(encoding="utf-8")
+        start = source.index('@st.dialog("Escolher narração"')
+        end = source.index('@st.dialog("Duração do vídeo"', start)
+        dialog = source[start:end]
+        self.assertIn('categories = ("CapCut", "ElevenLabs", "Licenciadas Fish")', dialog)
+        self.assertIn('total_voices = sum(len(catalog.get(category, [])) for category in categories)', dialog)
+        self.assertIn('with st.expander(f"{category} · {len(category_voices)} vozes", expanded=True):', dialog)
+        self.assertIn('for row_start in range(0, len(category_voices), 2):', dialog)
+        self.assertIn('st.session_state["nexus_fish_voice_id"] = voice_id', dialog)
+        self.assertIn('st.session_state["nexus_fish_voice_name"] = f"{category} · {voice_title}"', dialog)
+        self.assertIn('st.rerun()', dialog)
+        self.assertNotIn('st.selectbox(', dialog)
+        self.assertNotIn('Usar esta voz', dialog)
+
     def test_header_uses_centered_user_supplied_nexus_mark(self):
         source = Path("app.py").read_text(encoding="utf-8")
         self.assertIn('with st.container(key="nexus-header"):', source)
