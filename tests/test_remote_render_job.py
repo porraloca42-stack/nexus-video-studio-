@@ -44,8 +44,10 @@ class RemoteNarrationTests(unittest.TestCase):
             [{"text": "Narração", "start_seconds": 0.0, "end_seconds": 0.5}],
         )
         self.assertEqual(result["editorial_pipeline"]["status"], "disabled")
-        self.assertNotIn("edit_timeline", result)
+        self.assertEqual(result["captioning"]["status"], "provider_alignment")
+        self.assertEqual(result["edit_timeline"]["caption_events"][0]["text"], "Narração")
         self.assertNotIn("editorial_pipeline", plan)
+        self.assertNotIn("edit_timeline", plan)
 
     def test_worker_builds_gemini_executor_only_when_brain4_is_enabled(self):
         from nexus.remote_render_job import build_brain4_model_call
@@ -72,6 +74,30 @@ class RemoteNarrationTests(unittest.TestCase):
 
         with self.assertRaisesRegex(RuntimeError, "GEMINI_API_KEY"):
             build_brain4_model_call({"brain4_enabled": True})
+
+    def test_enabled_brain4_uses_phrase_captions_without_word_alignment(self):
+        from nexus.remote_render_job import apply_optional_brain4
+
+        plan = {"scenes": [{"voiceover": "Uma frase narrada."}]}
+        def fail_if_called(_prompt):
+            self.fail("Brain 4 must not run without verified word timestamps")
+
+        result = apply_optional_brain4(
+            plan,
+            Path("/tmp/narration-phrase.mp3"),
+            2.0,
+            [],
+            model_call=fail_if_called,
+            provider_segments=[{
+                "text": "Uma frase narrada.",
+                "start_seconds": 0.1,
+                "end_seconds": 1.8,
+            }],
+        )
+
+        self.assertEqual(result["captioning"]["status"], "provider_alignment")
+        self.assertEqual(result["captioning"]["alignment_level"], "phrase")
+        self.assertEqual(result["edit_timeline"]["caption_events"][0]["text"], "Uma frase narrada.")
 
     def test_brain4_worker_hook_invokes_only_explicitly_injected_executor(self):
         from nexus.remote_render_job import apply_optional_brain4
@@ -110,7 +136,8 @@ class RemoteNarrationTests(unittest.TestCase):
         self.assertEqual(len(calls), 1)
         self.assertTrue(calls[0].startswith("BRAIN 4"))
         self.assertEqual(result["editorial_pipeline"]["status"], "brain4_validated")
-        self.assertEqual(result["edit_timeline"], timeline)
+        self.assertEqual(result["captioning"]["status"], "provider_alignment")
+        self.assertEqual(result["edit_timeline"]["caption_events"][0]["text"], "Comece")
         self.assertNotIn("edit_timeline", plan)
 
     def test_worker_requires_fish_credentials_instead_of_using_robotic_fallback(self):
@@ -272,3 +299,4 @@ class RemoteNarrationTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
