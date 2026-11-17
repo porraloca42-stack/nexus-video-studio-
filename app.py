@@ -522,6 +522,32 @@ if active_view == "Criar":
                     f"A IA distribuiu os {adjustment['requested_seconds']} segundos entre as cenas "
                     f"(a estimativa inicial era de {adjustment.get('ai_estimated_seconds', adjustment.get('original_seconds', 0)):.1f}s)."
                 )
+            preflight = plan.get("preflight_report")
+            if isinstance(preflight, dict):
+                st.markdown("### Pré-validação audiovisual")
+                st.caption(
+                    "Checagem heurística de texto/metadados; não analisa os quadros "
+                    "e não substitui a revisão visual."
+                )
+                action_ratio = float(preflight.get("unique_action_ratio", 0) or 0)
+                search_ratio = float(preflight.get("unique_search_ratio", 0) or 0)
+                st.caption(
+                    f"Variedade textual: ações {action_ratio:.0%} · "
+                    f"buscas {search_ratio:.0%} · "
+                    f"{int(preflight.get('unique_shot_types', 0) or 0)} tipos de plano · "
+                    f"{int(preflight.get('unique_settings', 0) or 0)} ambientes distintos."
+                )
+                preflight_warnings = preflight.get("warnings", [])
+                if preflight_warnings:
+                    st.warning(
+                        "Pontos para revisar:\n"
+                        + "\n".join(f"• {warning}" for warning in preflight_warnings)
+                    )
+                else:
+                    st.caption(
+                        "Nenhuma repetição literal ou alerta de variedade foi detectado "
+                        "pelas regras automáticas."
+                    )
             st.markdown("### Cenas")
             for i, scene in enumerate(scenes, 1):
                 st.markdown(f"**Cena {i} · {scene.get('duration_seconds', 0)}s · {scene.get('purpose', '')}**")
