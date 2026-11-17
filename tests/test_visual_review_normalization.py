@@ -11,12 +11,20 @@ class VisualReviewTests(unittest.TestCase):
         scenes = [{"voiceover": "Uma pessoa abre a janela."}, {"voiceover": "A luz entra."}]
         result = normalize_review({"reviews": [
             {"scene_number": 1, "semantic_score": 14, "matches_narration": True,
-             "visual_quality": "Boa composição", "issues": [], "recommendation": "Manter"},
+             "motion_progression_score": 12, "action_observed": True, "continuity_score": -2,
+             "temporal_progression": "A mão abre a janela.", "visual_quality": "Boa composição",
+             "issues": [], "critical_issues": [], "recommendation": "Manter"},
             {"scene_number": 99, "semantic_score": 8},
         ]}, scenes)
         self.assertEqual(result[0]["semantic_score"], 10)
         self.assertTrue(result[0]["matches_narration"])
+        self.assertEqual(result[0]["motion_progression_score"], 10)
+        self.assertTrue(result[0]["action_observed"])
+        self.assertEqual(result[0]["continuity_score"], 0)
+        self.assertEqual(result[0]["temporal_progression"], "A mão abre a janela.")
         self.assertEqual(result[1]["issues"], ["missing_review"])
+        self.assertEqual(result[1]["critical_issues"], ["review_missing"])
+        self.assertEqual(result[1]["motion_progression_score"], 0)
 
     def test_normalize_review_rejects_missing_reviews(self):
         with self.assertRaises(ValueError):
@@ -41,6 +49,9 @@ class VisualReviewTests(unittest.TestCase):
                 "api-key", model="gemini-test", session=session
             )
         self.assertEqual(result[0]["semantic_score"], 9)
+        self.assertEqual(result[0]["motion_progression_score"], 8)
+        self.assertTrue(result[0]["action_observed"])
+        self.assertEqual(result[0]["continuity_score"], 9)
         payload = session.post.call_args.kwargs["json"]
         image_part = payload["contents"][0]["parts"][1]
         self.assertIn("inlineData", image_part)
