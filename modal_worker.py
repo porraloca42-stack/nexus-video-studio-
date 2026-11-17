@@ -11,6 +11,7 @@ from pathlib import Path
 
 import modal
 
+from nexus.gpu_identity import validate_gpu_identity
 from nexus.ltx_config import (
     DECODE_NOISE_SCALE,
     DECODE_TIMESTEP,
@@ -88,6 +89,9 @@ class Inference:
     def load_pipeline(self):
         load_started = time.monotonic()
         import torch
+        actual_gpu_name = torch.cuda.get_device_name(0) if torch.cuda.is_available() else "unknown"
+        gpu_identity = validate_gpu_identity(GPU_TYPE, actual_gpu_name)
+        self.gpu_name = actual_gpu_name
         from huggingface_hub import hf_hub_download
         from ltx_video.inference import create_latent_upsampler, create_ltx_video_pipeline
         from ltx_video.pipelines.pipeline_ltx_video import LTXMultiScalePipeline
@@ -138,7 +142,6 @@ class Inference:
                 f"LTX abortado para proteger o orçamento: carregamento estimado em "
                 + f"{load_gpu_cost:.3f} USD de GPU antes de gerar cenas."
             )
-        self.gpu_name = torch.cuda.get_device_name(0) if torch.cuda.is_available() else "unknown"
         print({
             "event": "ltx_model_ready",
             "model": MODEL_NAME,
@@ -146,6 +149,8 @@ class Inference:
             "model_code_revision": MODEL_CODE_REVISION,
             "model_load_seconds": self.model_load_seconds,
             "gpu_name": self.gpu_name,
+            "requested_gpu_type": GPU_TYPE,
+            "gpu_identity_verified": gpu_identity["gpu_identity_verified"],
             "width": WIDTH,
             "height": HEIGHT,
             "fps": FPS,
@@ -266,6 +271,8 @@ class Inference:
                 "model_load_seconds": self.model_load_seconds,
                 "batch_wall_seconds": round(time.monotonic() - batch_started, 3),
                 "gpu_name": self.gpu_name,
+                "requested_gpu_type": GPU_TYPE,
+                "gpu_identity_verified": True,
                 "num_inference_steps": INFERENCE_STEP_COUNT,
                 "first_pass_steps": 7,
                 "second_pass_steps": 3,
