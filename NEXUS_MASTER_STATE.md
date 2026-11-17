@@ -2196,3 +2196,21 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Estado: código commitado na branch main; nenhuma chamada Gemini real foi executada; nenhum vídeo de produção, serviço de mídia ou GPU foi iniciado; deploy Streamlit não verificado.
 - Limitação: o fixture comprova que o Gemini consegue produzir uma timeline estruturalmente válida contra dados sintéticos. Não comprova alinhamento de voz real, qualidade perceptual, adequação de SFX, mixagem audível nem resultado visual final.
 - Próximo passo: confirmar CI dos três commits, então aguardar o usuário executar o botão no Streamlit para a primeira chamada Gemini real. Só depois analisar o resultado. Um vídeo completo controlado exigirá confirmação separada de custos de Fish/Cloudflare/Modal e execução de produção.
+
+
+
+## Benchmark de produto faceless e direção de qualidade — 17/11/2026
+- Referência competitiva prioritária: Revid AI. A documentação pública do próprio fornecedor descreve fluxo de ideia/roteiro/link para vídeo curto, escolha de mídia por cena (stock, AI images, AI video, motion graphics e mídia própria), voz, legendas sincronizadas, música, editor de timeline, exportação até 4K, publicação social, automação e API/MCP/CLI. Também afirma possuir biblioteca de cerca de 2,77 milhões de vídeos/posts com dados públicos de engajamento e mais de 100 ferramentas. São declarações do fornecedor, não benchmark independente.
+- Fontes para revalidar em novas pesquisas: https://www.revid.ai/ai-instructions ; https://www.revid.ai/faq ; https://www.revid.ai/docs/workflows/script-to-video ; https://www.revid.ai/pricing
+- Benchmark adicional já consultado: Fliki (biblioteca ampla de vozes e script-to-video), InVideo AI (fluxo assistido por agente e stock), OpusClip (repurpose/clipping com captions e elementos de edição). Não tratar materiais promocionais como provas comparativas.
+- Direção de produto: competir pelo resultado audiovisual, não por quantidade de botões. Eixos de qualidade a desenvolver/medir:
+  1. compreensão narrativa: roteiro inteiro, promessa, beats, precisão factual e retenção sem clickbait;
+  2. direção visual: bíblia de estilo por vídeo, ação observável por cena, variedade de planos/locações e continuidade;
+  3. inteligência de mídia: múltiplas bibliotecas, ranking por aderência, inspeção de quadros reais e seleção explicável;
+  4. movimento: ação física legível, progressão temporal e detecção de congelamento, sem confundir câmera móvel com sujeito em movimento;
+  5. áudio/edição: voz natural, word timing somente quando comprovado, captions legíveis, mixagem inteligível, SFX seletivos e cortes motivados;
+  6. controle do criador: timeline editável, substituição/regeneração por cena, prévia e correção seletiva;
+  7. entrega: formatos sociais, exportação robusta, histórico de projetos e futuramente publicação/analytics.
+- Diferencial pretendido do NEXUS: direção semântica e avaliação audiovisual mais rigorosas, continuidade visual e controle de custo por cena. Ainda não afirmar superioridade: faltam vídeos reais comparáveis, métricas e revisão humana.
+- Priorização imediata permanece: validar Brain 4 com resposta Gemini real via botão isolado; depois executar um único vídeo controlado, com autorização de custos, e avaliar roteiro, cenas, movimento, áudio e MP4 antes de ampliar escopo.
+- Smoke test isolado Brain 4: commit corretivo `223f97a071befdfb18a0be5cf3393f9c59749753`; CI #1081 / run `44122780273` passou: 212 testes Python, Remotion typecheck e Commons live smoke; render sintético skipped (sem mudança do renderer). A falha anterior era somente uma regex de asserção de teste, corrigida. Nenhuma chamada Gemini real ou produção foi feita.
