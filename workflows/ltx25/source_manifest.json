@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "engine": "ltx25_comfyui",
+  "upstream": {
+    "repository": "https://github.com/Lightricks/ComfyUI-LTXVideo",
+    "commit": "db476dacc1469b2f17ccc5735693916afcb6fac1",
+    "workflow_path": "example_workflows/2.5/LTX-2.5_T2V_I2V_Two_Stage_Distilled.json",
+    "workflow_url": "https://github.com/Lightricks/ComfyUI-LTXVideo/blob/db476dacc1469b2f17ccc5735693916afcb6fac1/example_workflows/2.5/LTX-2.5_T2V_I2V_Two_Stage_Distilled.json",
+    "license_url": "https://github.com/Lightricks/ComfyUI-LTXVideo/blob/db476dacc1469b2f17ccc5735693916afcb6fac1/LICENSE"
+  },
+  "source_format": "comfyui_visual_workflow",
+  "api_prompt_exported": false,
+  "graph": {
+    "workflow_id": "394ed254-7306-42a2-9ae6-aa880ce4456d",
+    "top_level_nodes": 20,
+    "top_level_links": 34,
+    "subgraphs": [
+      {"id": "c28230e9-b195-4ec2-9679-39e1e920f733", "name": "Input Parameters", "nodes": 19},
+      {"id": "792f0fd8-129e-48eb-9904-8d1aa82154d1", "name": "Preprocess", "nodes": 6},
+      {"id": "f9337bd7-ca7a-4a59-99f1-65b664bed7e7", "name": "Sampler - Distilled (8 steps)", "nodes": 7},
+      {"id": "bee43e38-9234-4e41-86ff-63874164f482", "name": "Decode", "nodes": 3},
+      {"id": "cf7c664d-af7e-4a9e-9f19-9f93cfd2476e", "name": "Upscale and re-sampler (3 steps)", "nodes": 9},
+      {"id": "f007aab9-e7ad-4b10-974c-4d7cc55001a9", "name": "Load Models", "nodes": 7}
+    ],
+    "defaults": {
+      "fps": 24,
+      "frames": 121,
+      "width": 960,
+      "height": 544
+    },
+    "frame_count_constraint": "1 + 8n"
+  },
+  "nexus_adaptation": {
+    "target_aspect_ratio": "9:16",
+    "target_scene_duration_seconds": [2, 5],
+    "narration_provider": "Fish Audio",
+    "discard_generated_ltx_audio": true,
+    "final_composition": "Remotion",
+    "required_output": "one silent MP4 clip per scene"
+  },
+  "status": {
+    "source_pinned": true,
+    "api_prompt_exported": false,
+    "node_bindings_validated": false,
+    "worker_integrated": false,
+    "gpu_tested": false
+  }
+}
