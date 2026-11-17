@@ -162,3 +162,9 @@ Este bootstrap reduz perda de continuidade, mas não garante que a plataforma ca
 ## Resultado mais recente — teste Brain 4 → manifest — 17/11/2026
 - CI #1030 aprovado: 205 testes Python, Remotion typecheck e Commons smoke. A timeline Brain 4 validada chega ao manifest com captions, timestamps, SFX e fades/ducking.
 - Workflow Remotion demo #120 ainda em andamento na última consulta; verificar MP4 sintético.
+
+
+## Última alteração em validação — hook worker Brain 4 — 17/11/2026
+- Teste novo comprova executor explicitamente injetado em `apply_optional_brain4()` e status disabled no relatório quando não há executor.
+- Commit `3f721da8890c5b12fe7b01690e6156378350159b`; CI #1037 em andamento, conferir antes de prosseguir.
+- Workflow Remotion #120 passou com MP4 sintético H.264/AAC 720×1280, 4.011s; artifact #14344765828.
