@@ -1758,3 +1758,10 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Teste de contrato adicionado em `tests/test_director_scene_count_repair.py` para proteger a instrução.
 - CI da revisão `00b8ed31ccd4d6e5daedce2ff1237767b10f75c6`, execução `44078552758`: testes Python, Remotion typecheck e Commons live smoke aprovados.
 - Alteração implementada e CI validado. Não houve geração de imagem/vídeo, chamada Gemini real, deploy ou custo de inferência.
+## Auditoria editorial multimétrica — 17/11/2026
+- Evoluída a revisão visual final existente: Gemini recebe três quadros temporais por cena (início, meio e fim) e agora avalia separadamente aderência semântica, progressão de movimento, execução observável da ação e continuidade visual.
+- O contrato de resposta inclui `semantic_score`, `matches_narration`, `motion_progression_score`, `action_observed`, `continuity_score`, `temporal_progression`, `issues` e `critical_issues`.
+- A interface calcula um índice editorial composto (40% aderência, 35% movimento, 25% continuidade) e sinaliza cenas abaixo de 7/10, ação não observável, fala não correspondida ou falha crítica. O índice é ferramenta de triagem, não uma certificação objetiva de qualidade.
+- Revisão ausente agora falha de forma conservadora: campos críticos ficam zerados e `review_missing` é registrado, em vez de a cena parecer aprovada.
+- Não foi adicionada chamada Gemini: a alteração amplia a análise multimodal já realizada após o render, usando os mesmos três quadros por cena.
+- CI da alteração está em execução; não declarar validado até concluir. Não houve deploy, render real, nova inferência LTX ou cobrança de GPU.
