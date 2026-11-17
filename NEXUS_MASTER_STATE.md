@@ -21,7 +21,7 @@ Aplicativo pessoal em nuvem para transformar tema ou roteiro em vídeo vertical 
 - Pesquisar em várias bibliotecas, comparar candidatos por cena e avaliar quadros reais antes de selecionar.
 - Alvo inicial: uso pessoal, cerca de 2 vídeos/dia, 40–50 segundos, 720p, 9:16.
 
-## Arquitetura atual — estado do repositório em 16/11/2026
+## Arquitetura atual — estado do repositório em 17/11/2026
 - Interface: Streamlit (app.py).
 - Diretor: Gemini API (nexus/director.py), com failover entre modelos textuais compatíveis; produz roteiro, storyboard semântico e contrato `scene_direction` por cena.
 - Narração: Fish Audio S2.1 Pro Free como provedor obrigatório (nexus/audio.py); Edge TTS foi removido do pipeline e das dependências. A interface apresenta uma curadoria de até 25 vozes masculinas e 25 femininas de narração em português, com amostras e seleção. Não há busca nem criação/gravação de voz na UI. Não há trilha de legendas no pipeline.
@@ -2576,3 +2576,18 @@ Este protocolo prevalece sobre instruções antigas ou checkpoints históricos q
 - Portanto, o custo de US$0,16 informado pelo usuário não pode ser atribuído com precisão a carregamento, inferência ou scaledown usando o artefato preservado. O tempo da chamada remota visto no log foi ~37.5s, mas não é equivalente a tempo faturável de GPU e não explica por si só o valor reportado.
 - Worker atualizado para registrar estimativas separadas de GPU para carregamento do modelo, processamento do batch e scaledown, além do total estimado e do diagnóstico temporal. São estimativas internas; ainda precisam ser comparadas com a cobrança real do Modal.
 - A atualização mais recente do worker e do registro master gerou novo CI; não declarar PR inteira aprovada até o run do commit final terminar. Nenhuma execução live paga foi iniciada.
+
+
+## ALERTA OPERACIONAL — discrepância GPU faturada vs. código Modal — 2026-11-17
+- Evidência fornecida pelo usuário: painel Modal da aplicação `nexus-video-i2v` mostra consumo acumulado total de **US$ 1,50** nos testes e vídeos realizados até esta data: H100 **US$ 1,46**, CPU **US$ 0,02**, memória **US$ 0,01**; a seção Functions mostra `modal_worker.Inference.*` por **US$ 1,49**. Os valores individuais exibidos somam US$ 1,49 por arredondamento; o total do painel é US$ 1,50. Este é gasto acumulado, não custo de uma única execução.
+- O painel identifica H100 como recurso faturado. Portanto, as execuções históricas refletidas nesse painel consumiram predominantemente H100; não tratar a GPU como L40S com base apenas no código.
+- Auditoria do GitHub: em `main`, `nexus/ltx_config.py` define `GPU_TYPE = "L40S"`; `modal_worker.py` passa esse valor ao decorator Modal em `gpu=GPU_TYPE`. A branch `feat/ltx-low-cost-simple-motion` também define L40S. Isso demonstra a configuração versionada, não a GPU da implantação ativa nem das execuções históricas.
+- O workflow `.github/workflows/modal-deploy.yml` executa `modal deploy modal_worker.py` somente por `workflow_dispatch` (disparo manual). Push/merge no GitHub não implanta automaticamente o worker Modal. Não foi obtida evidência de uma implantação Modal posterior à mudança para L40S; a hipótese de worker implantado desatualizado é plausível, mas ainda **não comprovada**.
+- A execução live anterior registrou `gpu_name: null`; logo, não permite identificar a GPU real daquele job. A evidência de H100 vem do painel de faturamento fornecido pelo usuário.
+- PR #9 (`feat/ltx-low-cost-simple-motion`) permanece aberta, não integrada e não implantada. Configuração na branch: 384×672, 24 fps, multi-scale 7+3, teto estimado de GPU **US$ 0,08 por batch** (não é teto de cobrança total). Não executar novo smoke live nem deploy Modal sem autorização explícita de custo.
+- CI mais recente da PR #9: run **44159676828** (#1135), commit `36a309db2dbe1538a99193036bf80d6c69f21d15`: unit-tests **success**, commons-live-smoke **success**, remotion-typecheck **success**, remotion-synthetic-render **skipped**. CI verde não valida GPU implantada, custo real ou movimento perceptível.
+- Próxima ação obrigatória antes de qualquer geração paga: auditar histórico/versão da implantação Modal e o workflow de deploy; identificar a GPU efetiva no runtime; garantir que relatório de cada execução registre GPU real não nula; só então decidir entre L40S, A10 ou L4 com base em compatibilidade, VRAM, estabilidade e custo. Não alterar para GPU menor sem confirmar memória e suporte do LTX 2B multi-scale.
+- Estado: código versionado em main declara L40S; PR #9 contém perfil econômico L40S; GPU histórica faturada H100 confirmada pelo painel; versão ativa Modal **não identificada**; causa da divergência **pendente**; novo deploy/teste pago **não autorizado e não executado**.
+- Nenhuma inferência Modal/GPU, chamada Cloudflare, Fish Audio, Gemini ou render foi iniciada durante esta auditoria documental. Nenhum custo adicional foi gerado.
+- Timestamp do registro: 2026-11-17 (UTC−03:00).
+
