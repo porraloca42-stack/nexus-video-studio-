@@ -88,6 +88,25 @@ class SceneCountRepairTests(unittest.TestCase):
         self.assertEqual(request.call_count, 2)
         self.assertIn("NO MÍNIMO ABSOLUTO 10 CENAS", request.call_args.args[0])
 
+    def test_preflight_reports_repeated_actions_and_searches_without_api_calls(self):
+        plan = make_plan(12)
+        plan["scenes"][1]["visual_action"] = plan["scenes"][0]["visual_action"]
+        plan["scenes"][1]["asset_search_query"] = plan["scenes"][0]["asset_search_query"]
+
+        report = director.build_storyboard_preflight(plan)
+
+        self.assertEqual(report["scene_count"], 12)
+        self.assertLess(report["unique_action_ratio"], 1.0)
+        self.assertLess(report["unique_search_ratio"], 1.0)
+        self.assertTrue(any("ação visual repetida" in warning for warning in report["warnings"]))
+        self.assertTrue(any("busca principal repetida" in warning for warning in report["warnings"]))
+        self.assertEqual(report["method"], "deterministic_text_checks_no_external_calls")
+
+    def test_preflight_does_not_flag_distinct_scene_actions(self):
+        report = director.build_storyboard_preflight(make_plan(12))
+        self.assertEqual(report["unique_action_ratio"], 1.0)
+        self.assertEqual(report["unique_search_ratio"], 1.0)
+
     def test_validator_rejects_six_or_seven_scenes_even_for_40_seconds(self):
         errors = director.validate_storyboard(make_plan(7), requested_duration=40)
         self.assertTrue(any("pelo menos 10" in error for error in errors))
