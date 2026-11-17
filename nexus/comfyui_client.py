@@ -160,6 +160,7 @@ class ComfyUIClient:
         """Submit a ComfyUI API-format workflow and return its prompt_id."""
         if not isinstance(workflow, dict) or not workflow:
             raise ComfyUIError("O workflow API do ComfyUI está vazio ou inválido.")
+        validate_api_workflow(workflow)
         body: dict[str, Any] = {"prompt": workflow}
         if client_id:
             body["client_id"] = str(client_id)
