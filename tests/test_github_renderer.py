@@ -144,6 +144,11 @@ class GitHubRendererTests(unittest.TestCase):
         self.assertTrue(progress_events)
         self.assertIn("Aguardando o GitHub iniciar", progress_events[0][0])
         self.assertEqual(result["video"], b"private-mp4")
+        from nexus.render_crypto import decrypt_text
+        inputs = next(call[2]["json"]["inputs"] for call in session.calls if call[0] == "POST")
+        credentials = json.loads(decrypt_text(inputs["fish_credentials_encrypted"], secret))
+        self.assertFalse(credentials["brain4_enabled"])
+        self.assertEqual(credentials["gemini_model"], "auto")
 
     def test_large_storyboard_is_compressed_before_dispatch(self):
         secret = "cloudflare-api-token"
