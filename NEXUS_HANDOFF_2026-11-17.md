@@ -920,3 +920,10 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - O resultado verde no novo head confirma novamente os jobs executados após a sincronização. Não valida deploy Modal, inferência GPU ou render de produção.
 - PR #11 permanece aberta, não mergeada e não implantada. Nenhuma operação paga foi iniciada.
 - Próxima ação: aguardar autorização explícita para integrar a PR. Deploy Modal e inferência smoke permanecem operações separadas, cada uma com autorização própria.
+
+## Estado de merge da PR #11 após atualização documental — 2026-11-17T18:14:17-03:00 (America/Sao_Paulo)
+- Último CI concluído no head da PR: #1182 / run `44177472367`, commit `8ad700537fae41199f1b506a5fc68b74173ed5d9`; unit-tests, commons-live-smoke e remotion-typecheck success; synthetic render skipped.
+- Após esse CI, a main avançou com três commits de continuidade: `db702c3a285bffefa5095120a226855339a56fdb`, `360373fec7eefc006448962428e8388415e7cbd6` e `1922407e433825d99d2d716d01b100fd92cb447b`. HEAD atual da main: `1922407e433825d99d2d716d01b100fd92cb447b`.
+- Comparação atual `main...safety/separate-modal-deploy-smoke`: branch 4 commits à frente e 3 atrás; GitHub reporta `mergeable=false`. O diff funcional continua restrito aos workflows Modal e ao registro Master State. A PR permanece aberta e não mergeada.
+- Não integrar enquanto o estado de merge estiver falso. Antes de uma futura integração, sincronizar novamente a branch com a main, repetir CI no novo head e só então aguardar autorização explícita para merge.
+- Nenhum deploy Modal, inferência GPU ou serviço pago foi acionado.
