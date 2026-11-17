@@ -158,3 +158,12 @@ O manifesto versiona agora o repositório, commit e caminhos exatos do exportado
 A inspeção também encontrou dois nós `GemmaAPITextEncode` no subgrafo de parâmetros. O workflow documenta um caminho de codificação externa quando uma chave LTX é fornecida; o NEXUS não deve configurar essa chave automaticamente. O caminho local ainda usa modelos Gemma e precisa de análise separada para decidir se o enhancer pode ser desativado sem quebrar as conexões.
 
 Estado após esta investigação: exporter identificado e pinado; API prompt não exportado; runtime de exportação não executado; bindings não validados; worker não integrado; GPU, pesos, deploy e geração não iniciados. Custo variável adicional: US$0.
+
+
+### Correção de compatibilidade da referência do frontend — 17/11/2026
+
+O manifesto inicial havia apontado para uma revisão posterior do frontend (1.61.2). A conferência do campo workflow extra.frontendVersion mostrou que o arquivo visual LTX-2.5 foi salvo com **ComfyUI frontend 1.48.7**. Para evitar usar uma implementação posterior como se fosse a original, a referência foi corrigida para a tag oficial v1.48.7, commit `6d6af63c00f132cd25dc29307fc56bd2c094fa22`.
+
+A função `graphToPrompt` e a classe `ExecutableNodeDTO` foram relidas nessa versão exata. O contrato de expansão de subgrafos, resolução de links/widgets e encapsulamento de arrays já existe nela. O manifesto e o teste agora verificam explicitamente a versão 1.48.7. A revisão 1.61.2 fica apenas como leitura comparativa e não é a base de compatibilidade.
+
+Essa correção não cria um API prompt e não altera o status de integração: a exportação oficial ainda precisa ser executada em runtime compatível, com os nós registrados.
