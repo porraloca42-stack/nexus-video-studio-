@@ -1752,3 +1752,9 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Teste de integração do worker atualizado para simular o analisador sem alterar a sequência de chamadas FFprobe/FFmpeg do teste. A tentativa inicial revelou essa interferência no mock; corrigida sem mudar o pipeline de produção.
 - CI da revisão final `32dceb2ee206fd054dd2e2c7538a4064223ed286`, execução `44078360380`: 120 testes Python aprovados, Remotion typecheck aprovado e Commons live smoke aprovado.
 - Código gravado na branch main. Não houve deploy no Streamlit/Modal, chamada Gemini adicional, inferência GPU ou produção de MP4 nesta etapa. Portanto, implementação e CI estão validados; deploy e comportamento visual na app publicada ainda não.
+## Direção de movimento sem ações concorrentes — 17/11/2026
+- Ajustado o SYSTEM do diretor: cada clipe de 2–5s deve ter uma única ação física principal com progressão observável (início → execução → resultado). Um microevento ambiental secundário é permitido, mas não deve competir com o gesto principal.
+- A regra substitui a exigência anterior de dois microeventos visuais independentes, que podia incentivar excesso de ações numa tomada curta.
+- Teste de contrato adicionado em `tests/test_director_scene_count_repair.py` para proteger a instrução.
+- CI da revisão `00b8ed31ccd4d6e5daedce2ff1237767b10f75c6`, execução `44078552758`: testes Python, Remotion typecheck e Commons live smoke aprovados.
+- Alteração implementada e CI validado. Não houve geração de imagem/vídeo, chamada Gemini real, deploy ou custo de inferência.
