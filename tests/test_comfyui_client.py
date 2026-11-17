@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from nexus.comfyui_client import ComfyUIClient, ComfyUIError, patch_api_workflow
+from nexus.comfyui_client import ComfyUIClient, ComfyUIError, patch_api_workflow, validate_api_workflow
 
 
 class FakeResponse:
@@ -32,6 +32,37 @@ class FakeSession:
 
     def get(self, url, **kwargs):
         return self._next("get", url, **kwargs)
+
+
+class ComfyUIAPIWorkflowValidationTests(unittest.TestCase):
+    def test_accepts_well_formed_api_graph_and_links(self):
+        workflow = {
+            "1": {"class_type": "LoadImage", "inputs": {"image": "keyframe.png"}},
+            "2": {"class_type": "SaveVideo", "inputs": {"images": ["1", 0]}},
+        }
+        self.assertTrue(validate_api_workflow(workflow))
+
+    def test_rejects_missing_class_type_or_inputs(self):
+        with self.assertRaisesRegex(ComfyUIError, "class_type"):
+            validate_api_workflow({"1": {"inputs": {}}})
+        with self.assertRaisesRegex(ComfyUIError, "inputs"):
+            validate_api_workflow({"1": {"class_type": "SaveVideo"}})
+
+    def test_rejects_dangling_node_references(self):
+        workflow = {
+            "2": {"class_type": "SaveVideo", "inputs": {"images": ["99", 0]}},
+        }
+        with self.assertRaisesRegex(ComfyUIError, "referencia nó ausente 99"):
+            validate_api_workflow(workflow)
+
+    def test_rejects_malformed_or_negative_output_slots(self):
+        for link in (["1"], ["1", -1], ["1", True], ["1", "0"]):
+            workflow = {
+                "1": {"class_type": "LoadImage", "inputs": {}},
+                "2": {"class_type": "SaveVideo", "inputs": {"images": link}},
+            }
+            with self.subTest(link=link), self.assertRaisesRegex(ComfyUIError, "Conexão inválida"):
+                validate_api_workflow(workflow)
 
 
 class ComfyUIClientTests(unittest.TestCase):
