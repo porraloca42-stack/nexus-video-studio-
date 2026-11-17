@@ -5,7 +5,7 @@ from nexus import director
 
 
 class NarrationDurationRevisionTests(unittest.TestCase):
-    def test_revises_voiceover_using_measured_speech_rate_and_preserves_scenes(self):
+    def test_shortens_only_when_measured_voice_exceeds_the_allowed_ceiling(self):
         plan = {
             "scenes": [
                 {"voiceover": "A ideia começa aqui.", "visual_action": "Pessoa abre a porta."},
@@ -21,17 +21,19 @@ class NarrationDurationRevisionTests(unittest.TestCase):
 
         with patch.object(director, "_request", return_value=revised) as request:
             result = director.revise_narration_for_duration(
-                plan, 50, 36.1, "Tema de teste", "Cinematográfico realista",
+                plan, 60, 66.1, "Tema de teste", "Cinematográfico realista",
                 lambda name, default=None: "test-key"
             )
 
         self.assertIn("explicação concreta", result["scenes"][0]["voiceover"])
         self.assertEqual(len(result["scenes"]), 2)
         self.assertIn("escolha consciente", result["full_narration"])
-        self.assertEqual(result["narration_calibration"]["previous_audio_seconds"], 36.1)
+        self.assertEqual(result["narration_calibration"]["previous_audio_seconds"], 66.1)
         prompt = request.call_args.args[0]
-        self.assertIn("36.1 segundos", prompt)
+        self.assertIn("66.1 segundos", prompt)
         self.assertIn("velocidade NATURAL", prompt)
+        self.assertIn("É PROIBIDO expandir o texto", prompt)
+        self.assertIn("encurte SOMENTE", prompt)
         self.assertIn("aproximadamente 12 palavras", prompt)
 
     def test_rejects_missing_scene_voiceover(self):
@@ -41,7 +43,7 @@ class NarrationDurationRevisionTests(unittest.TestCase):
         }):
             with self.assertRaisesRegex(RuntimeError, "cada cena"):
                 director.revise_narration_for_duration(
-                    plan, 50, 36.1, "Tema", "Estilo",
+                    plan, 60, 66.1, "Tema", "Estilo",
                     lambda name, default=None: "test-key"
                 )
 
