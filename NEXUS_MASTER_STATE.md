@@ -2162,3 +2162,11 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - `github_renderer.py` transporta a flag e o modelo escolhido dentro do payload de credenciais criptografado. A UI oferece checkbox opt-in, desmarcado por padrão, somente no modo Cloudflare + Modal I2V + Remotion; exige GEMINI_API_KEY quando ativado.
 - Testes adicionados para chamada Gemini única, contrato timeline, passagem criptografada da flag, default-off e ausência de chave. CI #1061 / run `44120993502` ainda em execução; aguardar resultado.
 - Nenhuma chamada Gemini real foi feita e nenhum render de produção foi iniciado. A integração está implementada, ainda não validada em CI nem em vídeo real.
+
+
+## CI aprovado — integração Gemini opt-in Brain 4 — 17/11/2026
+- CI #1061 / run `44120993502`, commit `5a3be3a544a9804371eece48fc2df99f2f6cbea8`: 209 testes Python passaram, compileall, Remotion typecheck e Commons live smoke passaram; synthetic render skipped.
+- `generate_editorial_json()` usa instrução de sistema específica e aceita o contrato de timeline (sem exigir scenes). Limite estrito de 1 modelo e 1 geração Gemini por vídeo, sem retry/failover.
+- Worker monta o callable apenas quando `brain4_enabled=true` no payload criptografado. Flag false/ausente mantém disabled; flag true sem chave interrompe antes de gerar imagens.
+- UI adiciona checkbox opt-in, desmarcado por padrão, apenas no modo Cloudflare + Modal I2V + Remotion; exige GEMINI_API_KEY quando marcado.
+- Nenhuma chamada Gemini real ou produção foi executada. Próximo: regressão sintética Remotion após as alterações; depois validação real controlada por usuário.
