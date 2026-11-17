@@ -124,7 +124,7 @@ def render_on_github(
                 "Aguardando o GitHub iniciar o renderizador...",
                 min(0.04, 0.01 + elapsed / estimated_render_seconds * 0.03),
                 elapsed,
-                remaining_seconds if status == "completed" else max(0.0, estimated_render_seconds - elapsed),
+                max(0.0, estimated_render_seconds - elapsed),
             )
         time.sleep(poll_interval)
 
