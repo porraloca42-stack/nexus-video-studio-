@@ -74,18 +74,20 @@
   },
   "api_exporter": {
     "repository": "https://github.com/Comfy-Org/ComfyUI_frontend",
-    "commit": "196dd85cde3314dffdc33b41caa3e5d9be432ffb",
+    "commit": "6d6af63c00f132cd25dc29307fc56bd2c094fa22",
     "source_path": "src/utils/executionUtil.ts",
     "dto_source_path": "src/lib/litegraph/src/subgraph/ExecutableNodeDTO.ts",
     "function": "graphToPrompt",
     "requirements": [
       "expand nested subgraphs with ExecutableNodeDTO.getInnerNodes",
       "resolve links across subgraph boundaries and widget passthrough values",
-      "preserve execution IDs using colon-separated subgraph paths",
+      "preserve colon-separated execution IDs for nested subgraph instances",
       "skip virtual, NEVER and BYPASS nodes according to frontend semantics",
       "serialize widget arrays as objects containing __value__"
     ],
     "api_prompt_exported": false,
-    "export_runtime_verified": false
+    "export_runtime_verified": false,
+    "tag": "v1.48.7",
+    "frontend_version": "1.48.7"
   }
 }
