@@ -524,3 +524,12 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - Gap de produto relevante a médio prazo: editor/timeline visual para correção por cena, histórico, prévia e export multi-formato; não afirmar paridade/superioridade até comparação com renders equivalentes.
 - CI do smoke isolado: run #1081 / `44122780273`, commit `223f97a071befdfb18a0be5cf3393f9c59749753` passou: 212 testes Python, Remotion typecheck e Commons live smoke; synthetic render skipped. A falha em #1076/#1077 era apenas expectativa textual incorreta no teste de rejeição; correção aprovada em #1081.
 - Botão isolado está commitado e testado em CI, mas ainda depende do deploy Streamlit e do clique explícito do usuário para chamar Gemini. Nenhuma chamada real foi feita. Próximo: verificar deploy/instância; solicitar que o usuário acione o botão se estiver disponível; revisar JSON/contagens e erros. Depois planejar primeiro vídeo real com limite de custo aprovado.
+
+
+## Retomada verificada — CI documental concluído; deploy ainda pendente — 17/11/2026
+- HEAD da branch `main`: `a9b3d4fd72eba3b81451034859a0791a30256656`.
+- CI #1082 / `44123082031` (commit `d18e3f4`), #1083 / `44123091378` (commit `8b2608b`) e #1084 / `44123106001` (commit `a9b3d4f`) foram conferidos: todos concluídos com sucesso. Em cada um, unit-tests, Remotion typecheck e Commons live smoke passaram; synthetic render skipped.
+- CI #1076 e #1077 tiveram uma falha de teste por texto esperado incorreto na asserção da mensagem de rejeição de timestamp. Logs inspecionados; correção registrada no commit `223f97a`, CI #1081 / `44122780273` aprovado (212 testes Python, typecheck e Commons smoke).
+- `app.py` foi relido nas linhas 580–630: botão isolado está no modo Cloudflare + Modal I2V + Remotion, exige clique e `GEMINI_API_KEY`, faz uma geração no fixture sintético e não dispara serviços de mídia ou render.
+- Deploy Streamlit segue sem confirmação; não foi possível identificar URL pública inequívoca a partir do repositório. Não presumir sincronização com a main.
+- Próxima ação: usuário fornecer/confirmar a URL da aplicação Streamlit; verificar a instância e localizar o botão. Aguardar clique explícito do usuário para a chamada Gemini real. Sem produção, GPU ou custos de serviços externos nesta etapa.
