@@ -1,3 +1,4 @@
+import importlib
 import unittest
 from unittest.mock import Mock, patch
 from types import SimpleNamespace
@@ -77,13 +78,11 @@ class Brain4SmokeTest(unittest.TestCase):
         )
 
         with (
-            patch(
-                "nexus.brain4_smoke_test.importlib.import_module",
-                return_value=stale_director,
+            patch.object(
+                importlib, "import_module", return_value=stale_director
             ) as import_module,
-            patch(
-                "nexus.brain4_smoke_test.importlib.reload",
-                return_value=refreshed_director,
+            patch.object(
+                importlib, "reload", return_value=refreshed_director
             ) as reload_module,
         ):
             result = run_brain4_live_smoke_test("test-key")
