@@ -1890,3 +1890,16 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Gap Remotion: já há zoom/pan/tilt 2D, transições e efeitos atmosféricos CSS. `depthLayers` ainda é metadado; não há depth-map parallax implementado nem overlays de vídeo transparentes. Os beats atuais vêm do storyboard, não de análise da batida da faixa. O componente examinado não inclui trilhas de SFX nem legendas word-level.
 - **Decisão de governança:** pausar novas decisões de adoção/implementação do LTX-2.5 até comparar a rota híbrida e validar custo/qualidade. Não remover nem alterar o worker LTX-0.9.8 existente. Nenhuma GPU, API paga, deploy, download de pesos ou render foi executado nesta pesquisa. Custo variável adicional US$0.
 - Próximo passo permitido sem custo: desenhar e testar por mocks o roteador por cena, a composição Remotion com camadas/overlays e o relatório de custo. Benchmark real de Cloudflare/Fish/Modal e comparação visual com GPU exigem autorização de custo separada.
+
+
+## Retomada — pipeline editorial em quatro cérebros aprovado (17/11/2026)
+- O usuário aprovou acrescentar à arquitetura híbrida uma cadeia editorial de quatro estágios especializados, inspirada na forma como apps faceless estruturam seus fluxos. Isso é uma arquitetura-alvo proposta para o NEXUS, não uma alegação verificada sobre os backends privados dos concorrentes.
+- Cérebro 1 — Estrategista de retenção: cria três hooks distintos (curiosidade, perda/oportunidade relevante e quebra de padrão), seleciona o melhor com justificativa, define arco de tensão crescente, payoff e possível ligação final-início em loop.
+- Cérebro 2 — Roteirista de micro-ritmo: converte o arco em blocos curtos; 2,5–3,5s por unidade é heurística inicial, não limite rígido. Remove enchimentos, marca ênfases/pausas e preserva naturalidade e duração total.
+- Cérebro 3 — Diretor de fotografia: traduz intenção/emoção em metáforas visuais filmáveis, não ilustração literal; cria bíblia visual consistente (paleta, luz, lentes/enquadramentos, textura, composição e continuidade) sem repetir cenas. Cada beat também recomenda a rota de mídia do motor híbrido.
+- Cérebro 4 — Editor de ritmo: após a voz final, alinha palavras ao áudio, seleciona âncoras de ênfase, sincroniza cortes, movimentos, SFX, legendas e música; loop final/inicial é validado quando intencional.
+- Precisão: OpenAI Whisper tem opção word_timestamps, documentada como experimental; timestamp de palavra não identifica por si só sílaba tônica nem garante alinhamento fonético exato. Antes de prometer cortes na sílaba, avaliar forced alignment/nível fonético e análise de prosódia. Fontes registradas no relatório de pesquisa.
+- Relatório atualizado: NEXUS_FACELESS_VIDEO_ARCHITECTURE_RESEARCH_2026-11-17.md, commit 92204b323c7ab8764cbe448a1ade731c1960db82.
+- Estado: decisão de produto aprovada e documentação atualizada; pipeline de quatro cérebros ainda NÃO implementado, testado com áudio real ou validado por retenção/A-B. Nenhuma mudança de código de produção, API paga, GPU, deploy ou render foi executada. Custo variável adicional US$0.
+- Próxima etapa sem custo: schemas/contratos JSON e testes determinísticos dos quatro estágios; integrar incrementalmente ao diretor atual somente depois de validar cada contrato. Preservar o roteador híbrido por cena e a pausa de novas decisões de motor LTX-2.5.
+
