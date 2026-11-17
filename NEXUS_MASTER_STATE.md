@@ -2214,3 +2214,16 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Diferencial pretendido do NEXUS: direção semântica e avaliação audiovisual mais rigorosas, continuidade visual e controle de custo por cena. Ainda não afirmar superioridade: faltam vídeos reais comparáveis, métricas e revisão humana.
 - Priorização imediata permanece: validar Brain 4 com resposta Gemini real via botão isolado; depois executar um único vídeo controlado, com autorização de custos, e avaliar roteiro, cenas, movimento, áudio e MP4 antes de ampliar escopo.
 - Smoke test isolado Brain 4: commit corretivo `223f97a071befdfb18a0be5cf3393f9c59749753`; CI #1081 / run `44122780273` passou: 212 testes Python, Remotion typecheck e Commons live smoke; render sintético skipped (sem mudança do renderer). A falha anterior era somente uma regex de asserção de teste, corrigida. Nenhuma chamada Gemini real ou produção foi feita.
+
+
+## Verificação posterior do CI e checkpoint de deploy — 17/11/2026
+- Revisão feita diretamente na branch `main`: HEAD documental `a9b3d4fd72eba3b81451034859a0791a30256656`.
+- Os três commits documentais que estavam pendentes foram confirmados no GitHub Actions:
+  - CI #1082 / run `44123082031`, commit `d18e3f4d3abbac6346d0b3124f41a4cfcc04b972`: concluído com sucesso; unit-tests, Remotion typecheck e Commons live smoke passaram; render sintético skipped.
+  - CI #1083 / run `44123091378`, commit `8b2608b9907d6b0f5e5e28a14c583842add73cdc`: concluído com sucesso; unit-tests, Remotion typecheck e Commons live smoke passaram; render sintético skipped.
+  - CI #1084 / run `44123106001`, commit `a9b3d4fd72eba3b81451034859a0791a30256656`: concluído com sucesso; unit-tests, Remotion typecheck e Commons live smoke passaram; render sintético skipped.
+- Histórico do smoke: #1075 passou; #1076 e #1077 falharam somente por divergência entre o texto esperado pela asserção e a mensagem real de rejeição de timestamp. O log foi inspecionado. A correção está no commit `223f97a071befdfb18a0be5cf3393f9c59749753`; CI #1081 / run `44122780273` passou com 212 testes Python, Remotion typecheck e Commons live smoke.
+- O código do botão foi relido em `app.py` (linhas 580–630): está restrito ao modo Cloudflare + Modal I2V + Remotion; exige clique explícito e `GEMINI_API_KEY`; executa uma geração Gemini sobre fixture sintético e não inicia Fish Audio, Cloudflare, Modal ou render. Checkbox de Brain 4 permanece desmarcado por padrão para produção.
+- **Deploy Streamlit:** continua não confirmado. O repositório consultado não fornece URL pública inequívoca da instância; não inferir domínio nem afirmar que a publicação já sincronizou a branch.
+- **Próximo passo:** obter/confirmar a URL da aplicação Streamlit e verificar a instância publicada. Se o botão estiver presente, aguardar o clique explícito do usuário para o smoke real Gemini. Não executar a API por conta própria e não iniciar produção ou serviços pagos.
+- Estado separado: código implementado na main; CI dos commits documentais e smoke corretivo testados/aprovados; deploy não confirmado; Gemini real ainda não validado; vídeo de produção não iniciado.
