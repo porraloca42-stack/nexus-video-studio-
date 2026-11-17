@@ -2003,3 +2003,9 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - A máquina desta sessão não tem checkout local do repositório nem dependências Remotion instaladas; a tentativa de acesso direto ao GitHub pela rede local falhou por indisponibilidade de DNS. A validação foi encaminhada ao GitHub Actions, sem contornar isso com downloads ou serviços pagos.
 - Nenhuma API Gemini/Fish/Cloudflare, inferência Modal/GPU, modelo, deploy ou render de produção foi acionado. Custo variável externo adicional: US$0. O artifact sintético, quando o job concluir, valida apenas o comportamento técnico básico dos eventos, não qualidade de conteúdo nem sincronismo em produção.
 - Próxima etapa: consultar o resultado real do job e inspecionar o MP4/artifact. Se passar, registrar a validação sintética; depois preparar um teste controlado com narração Fish Audio real apenas com autorização explícita para eventual custo.
+
+### Controle de execução do render sintético
+- O job `remotion-synthetic-render` foi restringido: roda somente por acionamento manual (`workflow_dispatch`) ou quando um push contém `[run-remotion-validation]` na mensagem do commit. Assim, não será executado automaticamente em todos os pushes/PRs.
+- Commit de habilitação pontual: `108410748fc872314ebf32f2a95bbf2a77476b8b`. O push foi marcado com o token de execução para solicitar esta validação aprovada.
+- A consulta ao endpoint de status do commit ainda não retornou checks; a execução efetiva do job permanece sem confirmação nesta sessão.
+- O job usa runner hospedado do GitHub Actions; o consumo de minutos pode estar sujeito à franquia/plano da conta. Não há chamadas a APIs pagas, GPU, download de pesos ou deploy.
