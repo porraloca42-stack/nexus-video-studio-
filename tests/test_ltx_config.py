@@ -5,6 +5,8 @@ from nexus.ltx_config import (
     GPU_COST_BUDGET_USD,
     SCALEDOWN_WINDOW_SECONDS,
     GPU_TYPE,
+    FPS,
+    IMAGE_COND_NOISE_SCALE,
     INFERENCE_STEP_COUNT,
     MODEL_CHECKPOINT,
     MODEL_CODE_REVISION,
@@ -32,6 +34,8 @@ class LTXPipelineConfigTests(unittest.TestCase):
         self.assertEqual(HEIGHT, 672)
         self.assertEqual(SCALEDOWN_WINDOW_SECONDS, 5)
         self.assertEqual(INFERENCE_STEP_COUNT, 10)
+        self.assertEqual(FPS, 24)
+        self.assertEqual(IMAGE_COND_NOISE_SCALE, 0.025)
 
     def test_uses_official_multiscale_7_plus_3_schedule_and_upscaler(self):
         self.assertEqual(PIPELINE_CONFIG["pipeline_type"], "multi-scale")
