@@ -56,6 +56,7 @@ def build_alignment_caption_events(
             or end <= start
             or start < previous_start
             or start < previous_end - 0.05
+            or start >= float(audio_duration_seconds)
             or end > float(audio_duration_seconds) + 0.05
         ):
             return {"events": [], "alignment_level": "unavailable", "warning": f"Os timestamps da narração são inválidos no segmento {index + 1}."}
@@ -64,10 +65,12 @@ def build_alignment_caption_events(
             "start_seconds": float(start),
             "end_seconds": min(float(end), float(audio_duration_seconds)),
         }
-        if not any(char.isalnum() for char in text) and normalized:
-            # Punctuation-only provider segments belong to the preceding spoken token.
-            normalized[-1]["text"] += text
-            normalized[-1]["end_seconds"] = item["end_seconds"]
+        if not any(char.isalnum() for char in text):
+            if normalized:
+                # Punctuation-only provider segments belong to the preceding spoken token.
+                normalized[-1]["text"] += text
+                normalized[-1]["end_seconds"] = item["end_seconds"]
+            # Ignore leading punctuation; it is not a caption by itself.
         else:
             normalized.append(item)
         previous_start = float(start)
