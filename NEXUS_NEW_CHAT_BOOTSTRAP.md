@@ -212,3 +212,13 @@ Este bootstrap reduz perda de continuidade, mas não garante que a plataforma ca
 ## UI Brain 4 validada — 17/11/2026
 - CI #1068 aprovado para commit `72f4721f77d02ad22f5203c8f54c5a243e062797`: 209 testes, compileall, typecheck e Commons smoke. Render sintético skipped (UI-only).
 - Status do Brain 4 aparece no resultado do MP4 usando o report do worker. A feature continua opt-in/default-off; nenhuma chamada Gemini real ou produção foi feita.
+
+
+
+## Atualização de continuidade — 17/11/2026: smoke test Brain 4
+- HEAD recente: commits `12315a2` (helper de smoke test isolado), `eb3c2d3` (testes), `49da8be` (botão Streamlit).
+- Leia a seção “Smoke test isolado do Brain 4 Gemini” do `NEXUS_MASTER_STATE.md` e a seção de continuidade mais recente do handoff.
+- O botão **“Testar Brain 4 — sem produzir vídeo”** chama Gemini somente mediante clique explícito; usa fixture sintético de 4s e valida a timeline, sem Fish, Cloudflare, Modal, GPU, worker ou render.
+- CI #1075–#1077 estava pendente na última consulta. Confirme cada execução no GitHub Actions e leia logs se falhar.
+- Nenhuma chamada Gemini real foi feita e deploy Streamlit não foi verificado. Não afirmar que a função está disponível na instância publicada até confirmar deploy.
+- Após CI verde, aguardar o usuário executar o botão no Streamlit; não acionar API Gemini por conta própria. Um render completo exigirá autorização de custos/execução separada.
