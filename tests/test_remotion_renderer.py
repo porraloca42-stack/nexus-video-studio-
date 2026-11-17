@@ -4,6 +4,7 @@ import unittest
 from pathlib import Path
 
 from nexus.remotion_renderer import build_remotion_manifest
+from nexus.editorial_executors import run_brain4_for_storyboard
 
 
 class RemotionManifestTests(unittest.TestCase):
@@ -153,6 +154,69 @@ class RemotionManifestTests(unittest.TestCase):
             self.assertEqual(manifest["audioMixEvents"][0]["fadeOutSeconds"], 0.3)
             self.assertTrue((root / "public/jobs/timeline/sfx_01.wav").is_file())
             self.assertTrue((root / "public/jobs/timeline/music.mp3").is_file())
+
+    def test_brain4_validated_timeline_flows_into_remotion_manifest(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            voice = root / "voice.wav"
+            music = root / "music.mp3"
+            sfx = root / "whoosh.wav"
+            voice.write_bytes(b"voice")
+            music.write_bytes(b"music")
+            sfx.write_bytes(b"sound-effect")
+            source_words = [
+                {"text": "Comece", "start_seconds": 0.0, "end_seconds": 0.4}
+            ]
+            timeline = {
+                "contract_version": "1.0",
+                "audio_asset_id": str(voice),
+                "alignment_method": "Fish Audio timestamp stream",
+                "alignment_level": "word",
+                "audio_duration_seconds": 4.0,
+                "word_timestamps": source_words,
+                "character_timestamps": [],
+                "phoneme_timestamps": [],
+                "edit_anchors": [],
+                "caption_events": [{
+                    "id": "caption-1", "start_seconds": 0.0, "end_seconds": 1.0,
+                    "text": "Comece", "position": "bottom",
+                    "words": [{
+                        "text": "Comece", "start_seconds": 0.0,
+                        "end_seconds": 0.4, "emphasis": True,
+                    }],
+                }],
+                "sfx_events": [{
+                    "id": "sfx-1", "asset_path": str(sfx),
+                    "start_seconds": 0.8, "duration_seconds": 0.5, "volume": 0.2,
+                }],
+                "audio_mix_events": [{
+                    "start_seconds": 0.0, "end_seconds": 4.0,
+                    "music_volume": 0.04, "fade_in_seconds": 0.2,
+                    "fade_out_seconds": 0.3,
+                }],
+            }
+            plan = {
+                "music_audio_path": str(music),
+                "scenes": [{
+                    "duration_seconds": 4.0,
+                    "voiceover": "Comece agora.",
+                    "image_prompt": "A person opening a door.",
+                }],
+            }
+            updated = run_brain4_for_storyboard(
+                plan,
+                narration_audio={"audio_asset_id": str(voice), "duration_seconds": 4.0},
+                word_timestamps=source_words,
+                model_call=lambda prompt: timeline,
+            )
+            _, manifest = build_remotion_manifest(
+                updated, [], voice, root / "public", job_id="brain4-integration"
+            )
+            self.assertEqual(len(manifest["captionEvents"]), 1)
+            self.assertEqual(manifest["captionEvents"][0]["words"][0]["endSeconds"], 0.4)
+            self.assertEqual(len(manifest["soundEffects"]), 1)
+            self.assertEqual(manifest["audioMixEvents"][0]["musicVolume"], 0.04)
+            self.assertEqual(manifest["audioMixEvents"][0]["fadeOutSeconds"], 0.3)
 
     def test_manifest_rejects_caption_word_outside_caption_interval(self):
         with tempfile.TemporaryDirectory() as temp:
