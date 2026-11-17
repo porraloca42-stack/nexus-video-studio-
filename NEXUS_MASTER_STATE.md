@@ -1596,3 +1596,12 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Também foi corrigido um teste legado do seletor de narração que ainda esperava seleção imediata; agora ele valida prévia pendente e confirmação explícita.
 - Commits: `33e5af2` (pré-visualizações distintas), `8e14ffa` (teste da galeria) e commit subsequente de ajuste do teste do fluxo de voz.
 - Estado: código enviado à branch `main`; CI ainda precisa concluir. A aparência final no navegador mobile depende de nova captura após deploy.
+
+## Correção do limite de payload no envio do storyboard ao GitHub Actions — 17/11/2026
+- Evidência do teste real no Streamlit: planejamento de 10 cenas/45s foi gerado, mas a etapa de produção parou com "O storyboard excede o limite seguro de envio ao GitHub Actions".
+- Causa confirmada em `nexus/github_renderer.py`: o manifesto JSON era enviado integralmente (após criptografia Fernet) como input de `workflow_dispatch`, com bloqueio preventivo de 42.000 caracteres antes mesmo da tentativa de envio.
+- Solução incremental: novo par `encrypt_compressed_text/decrypt_compressed_text` em `nexus/render_crypto.py` aplica zlib nível 9 antes da criptografia Fernet. O app envia o manifesto comprimido e criptografado; `nexus/remote_render_job.py` descriptografa/descomprime antes de reconstruir o mesmo JSON completo. Nenhuma cena ou campo é removido.
+- O limite preventivo agora mede o objeto completo de inputs do workflow após compressão, com teto de 60.000 caracteres para manter margem em relação ao limite do evento GitHub. Se ainda exceder, informa que o manifesto permanece grande mesmo após compressão e não reduz o conteúdo.
+- Testes adicionados/ajustados: round-trip da compressão; storyboard maior que 42 KB aceito e recuperado sem perda; worker usa manifesto comprimido.
+- Commits: `7fb8eff` (crypto comprimida), `bbf1bd1` (dispatch comprimido), `f716616` (worker descomprime), `e9b6c37` (teste crypto), `8968995` (teste de manifesto grande), `6cd43ce` (teste do worker).
+- Estado: implementação enviada à branch `main`; CI do commit mais recente ainda precisa concluir. Não declarar render validado até nova tentativa no app gerar e recuperar MP4 real.
