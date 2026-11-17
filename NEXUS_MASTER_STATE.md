@@ -1729,3 +1729,9 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Continuidade: o diretor define arco visual e protagonista; FLUX.2 Klein gera uma referência 448×448 e a reutiliza nas imagens de cena. O prompt LTX é obrigatório, em inglês, focado apenas na ação após a imagem inicial. Remotion não aplica mais zoom/pan/shake sobre clipes LTX.
 - CI: execução `44074680173` no commit `78dd8e570bf62a61d5476f1d40538fb249ec1981` passou nos testes unitários e compilação. Execução `44074672124` passou também em `remotion-typecheck` e `commons-live-smoke` no commit imediatamente anterior; o commit seguinte alterou apenas o relatório de custo. Demo Remotion do commit atual ainda em execução no último acompanhamento.
 - Não implementado/validado ainda: deploy do novo worker na Modal e render real de smoke test. O workflow `Deploy NEXUS Modal video worker` continua manual. Nenhum novo render pago de vídeo completo foi iniciado. A qualidade e o custo final do novo pipeline permanecem pendentes de validação em GPU real.
+
+## Correção após tentativa de deploy Modal — 17/11/2026
+- Execução iniciada pelo usuário: workflow `44075161120` falhou no passo `Deploy serverless LTX worker`; o smoke test foi pulado e nenhuma inferência foi iniciada.
+- Log exato: Modal rejeitou `image.add_local_python_source("nexus")` porque havia passos de build depois dele. A exigência é que `add_local_*` seja o último passo da cadeia de imagem ou use `copy=True`.
+- Correção aplicada no commit `7f7626e758231c4b4f89e4ee9cf3a08fdbe15351`: movido `add_local_python_source("nexus")` para depois do último `.env(...)`, tornando-o o passo final do build.
+- Estado: correção enviada para main; novo CI e novo deploy ainda precisam ser executados. O pipeline LTX 0.9.8 multi-scale não foi carregado em GPU real; qualidade e custo permanecem não validados.
