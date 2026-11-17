@@ -96,10 +96,15 @@ def main():
 
     report = {
         "status": "success",
-        "pipeline": ["Cloudflare Workers AI FLUX.2 Klein", "Modal LTX-Video H100", "Remotion"],
+        "pipeline": [
+            "Cloudflare Workers AI FLUX.2 Klein",
+            f"Modal LTX-Video ({clips[0].get('gpu_name') or 'GPU informada pelo worker'})",
+            "Remotion",
+        ],
         "image": {"model": image["model"], "bytes": image["bytes"], "width": 512, "height": 910},
         "ltx": {
             "model": clips[0]["model"],
+            "gpu_name": clips[0].get("gpu_name"),
             "duration_seconds": clips[0]["duration_seconds"],
             "inference_seconds": clips[0]["inference_seconds"],
             "frames": clips[0]["frames"],
