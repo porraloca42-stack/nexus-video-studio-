@@ -132,3 +132,11 @@ Este bootstrap reduz perda de continuidade, mas não garante que a plataforma ca
 - Runner puro dos quatro cérebros agora encaminha word timestamps validados ao executor Brain 4. Teste offline cobre a passagem dos dados.
 - CI #1007: testes Python e typecheck passaram; Commons smoke pendente na última consulta.
 - Ainda falta executor real Brain 4 e chamada no worker. Preparar com mocks; manter qualquer chamada Gemini extra desabilitada até autorização explícita.
+
+
+## Checkpoint atual — Brain 4 opt-in — 17/11/2026
+- Criada ponte `run_brain4_for_storyboard()` e integração opcional no worker via `editorial_model_call`. Sem callable, status disabled e comportamento atual preservado; app padrão não chama Gemini extra.
+- Com callable injetado, Brain 4 usa storyboard existente + áudio final + word timestamps comprovados, valida `edit_timeline`, asset e duração. Sem word timestamps, recusa antes da chamada; não estima sincronismo.
+- CI #1017: 202 testes Python, typecheck e Commons smoke passaram. Synthetic multitrack skipped.
+- Workflow Remotion demo #119: adapter tests/typecheck passaram; demo manual 50s skipped; render sintético de integração 4s ainda em andamento.
+- Estado: integração validada com mocks, não conectada ao app e sem Gemini real. Próximo: conferir MP4 sintético; manter chamadas pagas desabilitadas sem autorização.
