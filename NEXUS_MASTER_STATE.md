@@ -1538,3 +1538,10 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Run `43994160209` do commit `56f7c8d` concluiu com sucesso nos três jobs: unit-tests, Remotion typecheck e Commons live smoke. O run anterior `43994072632` também passou com 102 testes.
 - Ajuste final de robustez do cabeçalho: removido `display:flex` do contêiner Streamlit externo para não interferir no DOM interno; o lockup centraliza por largura total própria e o botão de configurações fica em posicionamento absoluto. Commit `a53364c`.
 - Run `43994261797` foi acionado para esse último ajuste; estava em fila no último polling. A validação do layout publicado segue pendente.
+
+## Correção do tamanho dos controles de voz e duração — 17/11/2026
+- Evidência: nova captura mobile mostrou que os dois botões estavam extrapolando a largura disponível; a segunda coluna ficava parcialmente fora da tela e o primeiro botão ocupava mais que metade da linha.
+- Correção em `app.py`: o bloco dos controles agora usa CSS Grid explícito com duas colunas iguais `minmax(0,1fr)`, gap fixo, largura/máximo de 100%, `min-width:0` e `box-sizing:border-box` em todos os níveis. As colunas Streamlit deixam de impor largura flex percentual e os botões ficam contidos em cada metade. Altura e aparência foram preservadas.
+- Teste de regressão adicionado em `tests/test_app_import_resilience.py` para verificar a grade 50/50 e as restrições contra overflow.
+- Commits: `e4bcbbc` (CSS de layout) e `bafb49f` (teste de regressão).
+- Estado: alteração enviada à branch `main`; CI do commit final ainda precisa ser consultado. A captura do usuário confirma o problema original; a aparência após deploy ainda depende de nova captura.
