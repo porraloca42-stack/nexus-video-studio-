@@ -64,7 +64,10 @@ class RemoteNarrationTests(unittest.TestCase):
             env = {
                 "NEXUS_MANIFEST_ENCRYPTED": encrypt_compressed_text(json.dumps(plan), secret),
                 "NEXUS_FISH_CREDENTIALS_ENCRYPTED": encrypt_text(
-                    json.dumps({"api_key": "fish-secret", "voice_id": "voice-369"}), secret
+                    json.dumps({
+                        "api_key": "fish-secret", "voice_id": "voice-369",
+                        "gemini_api_key": "gemini-secret", "topic": "Tema", "style": "Cinematográfico",
+                    }), secret
                 ),
                 "CLOUDFLARE_API_TOKEN": secret,
                 "NEXUS_JOB_ID": "job-test",
@@ -75,6 +78,7 @@ class RemoteNarrationTests(unittest.TestCase):
                 "format": {"duration": 5.04},
                 "streams": [{"codec_type": "video", "width": 512, "height": 896}],
             }), stderr="")
+            audio_short = Mock(returncode=0, stdout="37.6\n", stderr="")
             audio_result = Mock(returncode=0, stdout="45.0\n", stderr="")
             final_result = Mock(returncode=0, stdout=json.dumps({
                 "format": {"duration": 50.0, "size": 123456},
@@ -91,9 +95,10 @@ class RemoteNarrationTests(unittest.TestCase):
                  patch("nexus.remote_render_job.generate_scene_images", return_value=images) as gen_images, \
                  patch("nexus.remote_render_job.animate_scene_images", return_value=clips) as animate, \
                  patch("nexus.remote_render_job.generate_worker_narration", return_value=(audio, "Fish Audio")) as gen_voice, \
+                 patch("nexus.remote_render_job.revise_narration_for_duration", return_value=plan) as revise_narration, \
                  patch("nexus.remote_render_job.render_video_remotion", side_effect=fake_render) as render, \
                  patch("nexus.remote_render_job.subprocess.run", side_effect=(
-                     [audio_result] + [image_result] * 10 + [clip_result] * 10 + [final_result]
+                     [audio_short, audio_result] + [image_result] * 10 + [clip_result] * 10 + [final_result]
                  )):
                 from nexus.remote_render_job import main
                 main(project_root=root)
@@ -102,6 +107,9 @@ class RemoteNarrationTests(unittest.TestCase):
             self.assertEqual(len(animate.call_args.args[1]), 10)
             self.assertEqual(gen_voice.call_args.kwargs["fish_api_key"], "fish-secret")
             self.assertEqual(gen_voice.call_args.kwargs["fish_voice_id"], "voice-369")
+            self.assertEqual(gen_voice.call_count, 2)
+            revise_narration.assert_called_once()
+            self.assertEqual(revise_narration.call_args.args[1:3], (50, 37.6))
             self.assertEqual(render.call_args.kwargs, {"project_dir": root / "remotion", "job_id": "job-test"})
             report_path = root / "worker_output" / "job-test" / "render-report.json.enc"
             video_path = root / "worker_output" / "job-test" / "nexus_video.mp4.enc"
