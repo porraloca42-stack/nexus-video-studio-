@@ -1674,3 +1674,11 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Não há render real validado com esta política ainda. Não consumir créditos da Modal até CI passar; depois realizar teste controlado e conferir duração real do MP4.
 
 - Validação confirmada: todos os checks da execução `44066397504` passaram no commit `87a4877`. O commit posterior de documentação `f5ad5b7` também iniciou CI separado; sem alterações adicionais de código após o commit testado.
+
+
+## Correção do polling do GitHub Actions — 17/11/2026
+- Evidência real do usuário: ao iniciar a produção, a interface exibiu `cannot access local variable 'status' where it is not associated with a value`.
+- Causa confirmada em `nexus/github_renderer.py`: durante a janela entre o dispatch e a primeira aparição da execução na API do GitHub Actions, o callback de progresso lia `status` antes de sua primeira atribuição. O mesmo ramo também dependia de `remaining_seconds` antes de qualquer atribuição.
+- Correção: o callback da fase de espera usa apenas o tempo decorrido e a estimativa restante; não consulta estado de execução que ainda não existe. O polling do status real continua no segundo loop, após a execução ser localizada.
+- Teste de regressão adicionado em `tests/test_github_renderer.py`: simula uma primeira consulta sem execução visível, aciona o callback de progresso e depois devolve a execução; valida recuperação do MP4 simulado.
+- Estado: correção gravada no GitHub; CI e sincronização do Streamlit aguardam validação. Não iniciar novo render pago até o CI passar e o app publicado carregar a correção.
