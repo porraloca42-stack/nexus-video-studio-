@@ -138,6 +138,7 @@ class RemotionManifestTests(unittest.TestCase):
                     }],
                     "audio_mix_events": [{
                         "start_seconds": 0, "end_seconds": 2.5, "music_volume": 0.04,
+                        "fade_in_seconds": 0.2, "fade_out_seconds": 0.3,
                     }],
                 },
             }
@@ -148,6 +149,8 @@ class RemotionManifestTests(unittest.TestCase):
             self.assertEqual(manifest["captionEvents"][0]["words"][1]["emphasis"], True)
             self.assertEqual(manifest["soundEffects"][0]["asset"], "jobs/timeline/sfx_01.wav")
             self.assertEqual(manifest["audioMixEvents"][0]["musicVolume"], 0.04)
+            self.assertEqual(manifest["audioMixEvents"][0]["fadeInSeconds"], 0.2)
+            self.assertEqual(manifest["audioMixEvents"][0]["fadeOutSeconds"], 0.3)
             self.assertTrue((root / "public/jobs/timeline/sfx_01.wav").is_file())
             self.assertTrue((root / "public/jobs/timeline/music.mp3").is_file())
 
