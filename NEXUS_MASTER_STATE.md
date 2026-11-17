@@ -1607,3 +1607,9 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Estado: implementação enviada à branch `main`; CI do commit mais recente ainda precisa concluir. Não declarar render validado até nova tentativa no app gerar e recuperar MP4 real.
 
 - Validação CI concluída: execução GitHub Actions `43999265137`, commit `82a05b2f4f1b613da989f82d8b2923faff91b0f5`, resultado `success`; jobs `unit-tests`, `remotion-typecheck` e `commons-live-smoke` concluídos com sucesso. Isso valida os testes automatizados e o contrato de transporte comprimido; não equivale a render MP4 real.
+
+## Incidente de produção — recarga de módulo criptográfico (17/11/2026)
+- Após os testes automatizados anteriores passarem, a tentativa real no Streamlit falhou com ImportError: `cannot import name 'decrypt_compressed_text' from 'nexus.render_crypto'`.
+- A inspeção do código no GitHub confirmou que `nexus/render_crypto.py` define a função e `nexus/github_renderer.py` a importa. O bloco de produção em `app.py` recarregava apenas `nexus.github_renderer`, sem recarregar primeiro sua dependência criptográfica; isso pode deixar a referência antiga em memória no processo Streamlit.
+- Commit `401ccb83343f90222678b64d475f6aade5a4c13d`: `app.py` agora recarrega `nexus.render_crypto` primeiro, verifica a presença de `decrypt_compressed_text` e só então recarrega `nexus.github_renderer`.
+- Verificação pós-commit: o bloco atualizado foi relido do GitHub e confirmado na branch `main`. A implantação no Streamlit e a produção MP4 ainda NÃO foram validadas. Não declarar resolvido até nova tentativa real.
