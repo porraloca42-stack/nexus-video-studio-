@@ -91,11 +91,15 @@ class RemoteNarrationTests(unittest.TestCase):
             def fake_render(media, audio_path, destination, plan, **kwargs):
                 Path(destination).write_bytes(b"realistic-mocked-mp4")
                 return Path(destination)
+            def fake_revise_narration(current_plan, target, actual, topic, style, secret_reader):
+                self.assertEqual(secret_reader("GEMINI_API_KEY"), "gemini-secret")
+                self.assertEqual(secret_reader("GEMINI_MODEL", "auto"), "auto")
+                return current_plan
             with patch.dict(os.environ, env, clear=False), \
                  patch("nexus.remote_render_job.generate_scene_images", return_value=images) as gen_images, \
                  patch("nexus.remote_render_job.animate_scene_images", return_value=clips) as animate, \
                  patch("nexus.remote_render_job.generate_worker_narration", return_value=(audio, "Fish Audio")) as gen_voice, \
-                 patch("nexus.remote_render_job.revise_narration_for_duration", return_value=plan) as revise_narration, \
+                 patch("nexus.remote_render_job.revise_narration_for_duration", side_effect=fake_revise_narration) as revise_narration, \
                  patch("nexus.remote_render_job.render_video_remotion", side_effect=fake_render) as render, \
                  patch("nexus.remote_render_job.subprocess.run", side_effect=(
                      [audio_short, audio_result] + [image_result] * 10 + [clip_result] * 10 + [final_result]
