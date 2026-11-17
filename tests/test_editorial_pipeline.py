@@ -317,6 +317,7 @@ class EditorialPipelineContractTests(unittest.TestCase):
     def test_injected_four_brain_runner_executes_in_order_without_network(self):
         calls = []
         audio = {"audio_asset_id": "narration-final.wav", "duration_seconds": 6.0}
+        fish_words = [{"text": "Comece", "start_seconds": 0.0, "end_seconds": 0.5}]
 
         def strategist(brief):
             calls.append(("brain1", brief["topic"]))
@@ -332,6 +333,7 @@ class EditorialPipelineContractTests(unittest.TestCase):
 
         def editor(payload):
             calls.append(("brain4", payload["narration_audio"]["audio_asset_id"]))
+            self.assertEqual(payload["word_timestamps"], fish_words)
             return valid_edit_timeline()
 
         result = run_four_brain_pipeline(
@@ -341,6 +343,7 @@ class EditorialPipelineContractTests(unittest.TestCase):
             photographer=photographer,
             editor=editor,
             narration_audio=audio,
+            word_timestamps=fish_words,
         )
         self.assertEqual([item[0] for item in calls], ["brain1", "brain2", "brain3", "brain4"])
         self.assertEqual(result["narration_audio"], audio)
