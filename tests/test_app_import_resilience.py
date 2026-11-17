@@ -48,29 +48,33 @@ class AppImportResilienceTests(unittest.TestCase):
         self.assertIn('max-width:100%!important;min-width:0!important', source)
         self.assertIn('flex:none!important;width:auto!important', source)
 
-    def test_voice_picker_shows_all_provider_groups_and_selects_in_one_tap(self):
+    def test_voice_picker_shows_curated_brazilian_male_and_female_narrators(self):
         source = Path("app.py").read_text(encoding="utf-8")
         start = source.index('@st.dialog("Escolher narração"')
         end = source.index('@st.dialog("Duração do vídeo"', start)
         dialog = source[start:end]
-        self.assertIn('categories = ("CapCut", "ElevenLabs", "Licenciadas Fish")', dialog)
-        self.assertIn('total_voices = sum(len(catalog.get(category, [])) for category in categories)', dialog)
-        self.assertIn('with st.expander(f"{category} · {len(category_voices)} vozes", expanded=True):', dialog)
+        self.assertIn('catalog_key = "nexus_professional_voice_catalog_v2"', dialog)
+        self.assertIn('fish_audio.list_fish_professional_narrators(', dialog)
+        self.assertIn('groups = (("Masculinas", "male"), ("Femininas", "female"))', dialog)
+        self.assertIn('require_sample=True', dialog)
         self.assertIn('for item in category_voices:', dialog)
         self.assertIn('st.rerun(scope="fragment")', dialog)
         self.assertIn('st.session_state["nexus_pending_voice_id"] = voice_id', dialog)
         self.assertIn('st.session_state["nexus_fish_voice_id"] = pending_id', dialog)
         self.assertIn('st.session_state["nexus_fish_voice_name"] = pending_name', dialog)
         self.assertIn('st.rerun()', dialog)
+        self.assertNotIn('CapCut', dialog)
+        self.assertNotIn('Adolf Hitler', dialog)
         self.assertNotIn('st.selectbox(', dialog)
         self.assertNotIn('Usar esta voz', dialog)
 
-    def test_voice_picker_previews_then_requires_explicit_confirmation(self):
+    def test_voice_picker_uses_published_samples_and_requires_confirmation_without_paid_preview(self):
         source = Path("app.py").read_text(encoding="utf-8")
         start = source.index('@st.dialog("Escolher narração"')
         end = source.index('@st.dialog("Duração do vídeo"', start)
         dialog = source[start:end]
         self.assertIn('key=f"nexus-preview-select-voice-{voice_id}"', dialog)
+        self.assertIn('sample_audio = str(item.get("sample_audio") or "")', dialog)
         self.assertIn('st.session_state["nexus_pending_voice_id"] = voice_id', dialog)
         self.assertIn('st.session_state["nexus_pending_voice_preview_source"] = preview_source', dialog)
         self.assertIn('st.audio(pending_source, format="audio/mp3", autoplay=True)', dialog)
@@ -79,7 +83,7 @@ class AppImportResilienceTests(unittest.TestCase):
         self.assertIn('st.session_state["nexus_fish_voice_name"] = pending_name', dialog)
         self.assertNotIn('name_col, play_col = st.columns', dialog)
         self.assertNotIn('nexus_active_voice_preview_id', dialog)
-        self.assertIn('fish_audio.generate_fish_preview(api_key, voice_id)', dialog)
+        self.assertNotIn('fish_audio.generate_fish_preview', dialog)
 
     def test_visual_style_gallery_uses_distinct_visual_language_previews(self):
         source = Path("app.py").read_text(encoding="utf-8")
@@ -110,7 +114,7 @@ class AppImportResilienceTests(unittest.TestCase):
         # Confirming is intentionally a full-app rerun so the dialog closes.
         self.assertIn('st.session_state["nexus_fish_voice_id"] = pending_id', dialog)
         self.assertIn('st.session_state.pop(key, None)', dialog)
-        self.assertIn('st.rerun()\n\n    for category in categories:', dialog)
+        self.assertIn('for category, gender in groups:', dialog)
 
     def test_header_uses_centered_user_supplied_nexus_mark(self):
         source = Path("app.py").read_text(encoding="utf-8")
