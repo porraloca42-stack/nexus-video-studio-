@@ -123,6 +123,7 @@ class AppImportResilienceTests(unittest.TestCase):
         self.assertIn('unique_settings', source)
         self.assertIn('action_coverage_ratio', source)
         self.assertIn('motion_prompt_coverage_ratio', source)
+        self.assertIn('motion_action_coverage_ratio', source)
         self.assertIn('near_duplicate_action_pairs', source)
         self.assertIn('possíveis pares semelhantes', source)
         self.assertIn('não analisa os quadros', source)
