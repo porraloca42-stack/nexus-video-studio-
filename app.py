@@ -122,6 +122,10 @@ def secret(name, default=""):
     except Exception:
         return os.getenv(name, default)
 
+st.set_page_config(page_title="NEXUS VIDEO STUDIO", page_icon="🎬", layout="wide", initial_sidebar_state="collapsed")
+
+from nexus.visual_styles import STYLE_OPTIONS, STYLE_META, STYLE_PROFILES
+
 @st.dialog("Escolher narração", width="large", icon=":material/record_voice_over:")
 def open_voice_picker():
     api_key = secret("FISH_API_KEY")
@@ -192,9 +196,6 @@ def open_duration_picker():
         st.rerun()
 
 
-st.set_page_config(page_title="NEXUS VIDEO STUDIO", page_icon="🎬", layout="wide", initial_sidebar_state="collapsed")
-
-from nexus.visual_styles import STYLE_OPTIONS, STYLE_META, STYLE_PROFILES
 
 def style_preview_svg(style):
     sky, accent, ground, _ = STYLE_META[style]
