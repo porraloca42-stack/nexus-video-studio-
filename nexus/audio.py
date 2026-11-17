@@ -277,8 +277,8 @@ def _is_human_narrator_voice(voice, gender):
         "meme", "anime", "personagem", "character", "celebrity", "celebridade",
         "ator", "actress", "movie", "filme", "game", "gaming", "jogo",
         "cartoon", "parody", "paródia", "fictional", "fiction", "impersonation",
-        "impersona", "imitação", "imitacao", "politician", "politician", "president",
-        "dictator", "publicfigure", "famous",
+        "impersona", "imitação", "imitacao", "politician", "president",
+        "dictator", "publicfigure", "public figure", "public-figure", "famous",
     )
     if any(word == token or word.startswith(token) for word in metadata_words for token in excluded):
         return False
