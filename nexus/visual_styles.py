@@ -341,7 +341,7 @@ def build_visual_style_directive(style):
         "pessoas, ambientes, planos, ações e enquadramentos. O estilo nunca substitui "
         "a correspondência semântica com a narração. Não inserir texto, legendas, "
         "logotipos ou tipografia nas imagens. Cada cena deve continuar específica "
-        "ao trecho narrado.\\n"
+        "ao trecho narrado.\n"
         "REGRA ANTI-TEMPLATE: estilo visual não é tema, personagem, objeto, cenário ou ação. "
         "Não escolha automaticamente sujeitos, lugares, símbolos ou adereços associados ao nome do estilo. "
         "Não transforme qualquer referência conceitual em cena obrigatória; referências são possibilidades, nunca receitas. "
