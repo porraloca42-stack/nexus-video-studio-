@@ -2154,3 +2154,11 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Frames inspecionados em 0.8s, 1.5s e 2.7s: a primeira palavra (NEXUS) recebe destaque dourado, a segunda (valida) assume o destaque no intervalo seguinte e a legenda desaparece fora da janela. Fundo gráfico de validação permanece estável e sem texto indevido.
 - Métricas automatizadas confirmam os mesmos resultados: 2249/1773 pixels dourados nos dois intervalos e zero com legenda desligada; ducking de música 14.5 dB com recuperação; SFX 15.7 dB acima do nível de fundo.
 - Revisão visual limitada ao fixture gráfico sintético. Não avalia qualidade semântica de cenas reais, estética final, sincronismo com fala natural ou identidade visual de personagem.
+
+
+## Integração real Brain 4 — etapa de implementação — 17/11/2026
+- Criado `generate_editorial_json()` no diretor: chama Gemini com instrução de sistema específica para Brain 4, exige JSON de timeline e limita a execução a um único modelo e uma única geração por vídeo (sem retry/failover de geração). A descoberta de modelos é uma consulta de catálogo.
+- Worker agora cria executor Gemini somente quando o payload criptografado contém `brain4_enabled=true`; ausência da flag mantém status disabled. Flag ativa sem chave falha antes da geração de imagens.
+- `github_renderer.py` transporta a flag e o modelo escolhido dentro do payload de credenciais criptografado. A UI oferece checkbox opt-in, desmarcado por padrão, somente no modo Cloudflare + Modal I2V + Remotion; exige GEMINI_API_KEY quando ativado.
+- Testes adicionados para chamada Gemini única, contrato timeline, passagem criptografada da flag, default-off e ausência de chave. CI #1061 / run `44120993502` ainda em execução; aguardar resultado.
+- Nenhuma chamada Gemini real foi feita e nenhum render de produção foi iniciado. A integração está implementada, ainda não validada em CI nem em vídeo real.
