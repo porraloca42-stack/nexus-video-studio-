@@ -1,6 +1,6 @@
 # NEXUS VIDEO STUDIO — CONTEXTO OPERACIONAL
 
-## Atualização operacional — auditoria TikTok e conta Modal — 2026-11-17 20:32 BRT
+## Estado operacional — pós-merge da melhoria de legendas TikTok — 2026-11-17 20:38 BRT
 
 ### Conta Modal conferida somente para leitura
 - Workspace do projeto: plano Starter, com US$30 de créditos de computação por ciclo.
@@ -11,10 +11,10 @@
 
 ### Auditoria e melhoria de legendas padrão
 - A auditoria do fluxo Gemini → Fish Audio → Remotion encontrou que legendas sincronizadas dependiam do Brain 4, desligado por padrão. O modo padrão podia concluir MP4 sem legendas, inadequado para TikTok.
-- PR #14 adiciona legendas determinísticas no caminho padrão com intervalos vindos da Fish Audio, sem nova chamada Gemini. Alinhamento por palavra é agrupado em trechos curtos e mantém timestamps fornecidos; alinhamento por frase permanece por frase. O código não inventa sincronização palavra a palavra.
+- PR #14 foi mergeada por squash no commit `99114f0d6e81fd6c9e4662a0bb8635720af66a6a`. Adiciona legendas determinísticas no caminho padrão com intervalos vindos da Fish Audio, sem nova chamada Gemini. Alinhamento por palavra é agrupado em trechos curtos e mantém timestamps fornecidos; alinhamento por frase permanece por frase. O código não inventa sincronização palavra a palavra.
 - Se o Brain 4 retornar legendas ausentes/incompletas ou falhar na validação, o worker mantém as legendas baseadas no alinhamento do provedor e continua o render. O app passa a reportar se as legendas foram sincronizadas e alerta quando não há alinhamento utilizável.
-- CI #1214 no head `0d47a694fe7e7a6149991c2c5da2322c43b9a165`: unit-tests, Remotion typecheck e Commons live smoke passaram; Remotion synthetic render foi skipped. Esta verificação antecede a atualização documental nesta branch.
-- Nenhuma geração Gemini, chamada Fish Audio/Cloudflare/Modal, render de produção, deploy ou mudança de gasto foi executada. PR aberta e validação visual do vídeo completo continua pendente. Não declarar a qualidade TikTok final validada.
+- CI #1215 / run `44200739334` no head `0d48f8d375b72e03fc86d3c5e2c48ece0cb58cd3`, imediatamente antes do merge: unit-tests, Remotion typecheck e Commons live smoke passaram; Remotion synthetic render foi skipped. O SHA do merge não tem CI pós-merge reportado.
+- Implementação e testes estão na main; Streamlit/Modal não foram implantados. Nenhuma geração Gemini, chamada Fish Audio/Cloudflare/Modal, render de produção ou mudança de gasto foi executada. A validação visual de MP4 completo continua pendente; não declarar a qualidade TikTok final validada.
 
 
 
