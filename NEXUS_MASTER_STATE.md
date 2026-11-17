@@ -1,6 +1,6 @@
 # NEXUS VIDEO STUDIO — CONTEXTO OPERACIONAL
 
-Última atualização: 16/11/2026
+Última atualização: 17/11/2026
 
 ## Objetivo
 Aplicativo pessoal em nuvem para transformar tema ou roteiro em vídeo vertical 9:16 de aproximadamente 40–60 segundos, com direção contextual por IA, narração, clipes coerentes, edição e exportação MP4. O NEXUS não gera legendas; o usuário as adiciona no editor final.
@@ -2050,3 +2050,10 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Resultado: suporte sintético multifaixa (legendas com destaque por palavra, SFX agendado e ducking com fade/recuperação) está implementado, testado no CI e validado no MP4 sintético. A correção foi no isolamento das frequências do fixture; a lógica de ducking em `remotion/src/NexusVideo.tsx` não foi alterada nesta rodada.
 - Limite da validação: não comprova qualidade perceptual com voz/música reais, alinhamento fonético, cenas de produção, render de 40–50s, integração com o app Streamlit, implantação ou estabilidade de worker de produção. `nexus/remotion_renderer.py` continua documentado como adapter isolado, não usado por padrão pelo app.
 - Sem API paga, GPU, download de modelo, deploy ou render de produção. O CI usou runner hospedado e artifact com retenção de 7 dias.
+
+
+## Correção de leitura arquitetural e próximo gargalo — 17/11/2026
+- Correção de precisão: `nexus/remotion_renderer.py` não está desconectado do worker padrão. `app.py` chama `nexus.github_renderer.render_on_github()`; o workflow `.github/workflows/nexus-render-worker.yml` executa `python -m nexus.remote_render_job`; e `nexus/remote_render_job.py` chama `render_video_remotion()`. A integração Remotion está, portanto, no caminho padrão de render remoto quando as credenciais e o worker estão operacionais. O que ainda não foi validado é a execução de produção com serviços externos.
+- Lacuna identificada após inspeção do caminho real: `app.py` não importa nem chama `nexus.editorial_pipeline` ou `nexus.editorial_prompts`; `nexus/director.py` não produz `edit_timeline`; o worker passa o plano recebido ao adapter, e `build_remotion_manifest()` usa arrays vazios quando `edit_timeline` não existe. Logo, captions word-highlight, eventos SFX e ducking/fades passaram no fixture sintético, mas ainda não estão demonstrados como alimentados pelo planejamento de produção.
+- O runner dos quatro cérebros e seus contratos estão implementados como camada pura com executores injetados, mas a ligação com o fluxo vivo do Streamlit/Gemini ainda não foi feita. A próxima etapa deve ser um adaptador de integração testável offline, preservando o diretor e o fluxo atual; nenhuma chamada Gemini/Fish/Cloudflare/Modal deve ser executada sem autorização e controle de custo.
+- Atualização corrige a frase anterior que descrevia o adapter Remotion como isolado/não usado pelo app. O app o aciona indiretamente pelo worker GitHub Actions.
