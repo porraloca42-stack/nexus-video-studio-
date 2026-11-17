@@ -207,3 +207,8 @@ Este bootstrap reduz perda de continuidade, mas não garante que a plataforma ca
 - CI #1067 aprovado integralmente: 209 testes Python, compileall, typecheck, Commons smoke e MP4 sintético Remotion #14345002405 (4.011s). Captions, word highlight, ducking e SFX validados.
 - App agora exibe status editorial retornado pelo worker. Commit UI `72f4721f77d02ad22f5203c8f54c5a243e062797`; conferir CI desse commit.
 - Integração Gemini real ainda não chamada; checkbox opt-in permanece default-off.
+
+
+## UI Brain 4 validada — 17/11/2026
+- CI #1068 aprovado para commit `72f4721f77d02ad22f5203c8f54c5a243e062797`: 209 testes, compileall, typecheck e Commons smoke. Render sintético skipped (UI-only).
+- Status do Brain 4 aparece no resultado do MP4 usando o report do worker. A feature continua opt-in/default-off; nenhuma chamada Gemini real ou produção foi feita.
