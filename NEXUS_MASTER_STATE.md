@@ -2451,3 +2451,11 @@ Este protocolo prevalece sobre instruções antigas ou checkpoints históricos q
 - Nenhuma chamada real ao Gemini, nenhuma alteração na política de tentativas/custo, nenhum render ou deploy. Testes ainda pendentes; PR ainda não aberta.
 - Próxima ação: reler diff na branch, abrir PR, executar CI e corrigir qualquer falha antes de merge.
 - Timestamp: `2026-11-17T14:54:18-03:00` (UTC−03:00). Atualização documental `[skip ci]`.
+
+
+## Checkpoint — PR #4 para diagnóstico HTTP 503 aberto — 2026-11-17T14:55:07-03:00 (America/Sao_Paulo)
+- PR #4 aberta: https://github.com/porraloca42-stack/nexus-video-studio-/pull/4 ; branch `fix/brain4-smoke-503-message`, head `14268b3429497321be795871b8e24ad84f19fdab`, base `main` `04e980528d28f2ad9bfe2a328668411f2f3ef708`.
+- Alterações: `nexus/director.py` (mensagem específica e verdadeira para caminho com uma única chamada/modelo) e `tests/test_director_json_recovery.py` (teste 503, uma requisição e sem alegação falsa de retry/failover). Compare confirma branch 1 commit à frente, sem divergência; 2 arquivos, 35 adições.
+- PR criada; checks ainda não consultados/concluídos. Não fazer merge até CI verde. Nenhuma chamada Gemini real, nenhuma mudança de retry/custo, nenhum render ou deploy.
+- Próxima ação: aguardar workflow da PR #4, inspecionar todos os jobs e logs, então integrar somente se aprovado.
+- Timestamp: `2026-11-17T14:55:07-03:00` (UTC−03:00). Atualização documental `[skip ci]`.
