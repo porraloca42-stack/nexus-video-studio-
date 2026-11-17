@@ -160,8 +160,10 @@ pelos dados de alinhamento.
 
 Escolha âncoras de edição que reforcem mudança de ideia, palavra-chave, revelação ou ação
 visual. Cortes não precisam ocorrer em toda palavra. Prefira limites naturais e momentos
-de ênfase. Se o alinhamento for apenas por palavra, registre alinhamento word; não afirme
-sincronismo por fonema/sílaba. Se não houver evidência fonética, não invente sílaba tônica.
+de ênfase. Se houver somente alinhamento por palavra, registre word. Se houver saída de caracteres,
+registre character. Só registre phoneme quando houver tempos fonêmicos explícitos.
+Não afirme sincronismo por fonema/sílaba sem essa evidência. Se não houver evidência
+fonética, não invente sílaba tônica.
 Whoosh, bass e outros SFX são discretos e seletivos; silêncio também é decisão editorial.
 Sincronize captions e mixagem com a fala, preserve inteligibilidade e preveja ducking da
 música sob a voz. Se houver loop intencional, avalie a continuidade entre último e primeiro beat.
@@ -171,17 +173,20 @@ Retorne SOMENTE JSON válido no contrato:
   "contract_version":"1.0",
   "audio_asset_id":"...",
   "alignment_method":"...",
-  "alignment_level":"word|phoneme",
+  "alignment_level":"word|character|phoneme",
   "audio_duration_seconds":0.0,
   "word_timestamps":[
     {{"text":"...","start_seconds":0.0,"end_seconds":0.2,"confidence":0.0}}
   ],
+  "character_timestamps":[],
+  "phoneme_timestamps":[],
   "edit_anchors":[
     {{
       "block_id":"m1",
       "trigger_text":"...",
       "at_seconds":0.0,
       "alignment_level":"word|phoneme",
+      "character":"optional only with character-level evidence",
       "phoneme":"optional only with phoneme-level evidence",
       "visual_event":"...",
       "sfx":null
