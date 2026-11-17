@@ -1,6 +1,40 @@
 # NEXUS VIDEO STUDIO — CONTEXTO OPERACIONAL
 
-Última atualização: 17/11/2026
+# STATUS OPERACIONAL VIGENTE — SOBRESCREVE CHECKPOINTS HISTÓRICOS
+
+Atualizado em: 2026-11-17T16:52:25-03:00 (America/Sao_Paulo)
+HEAD da branch main no início desta atualização: 53f4769a8fd9827694e144be20ca4d42df695dc2
+Commit mais recente antes desta atualização: 53f4769a8fd9827694e144be20ca4d42df695dc2 — docs: add code audit findings for H100 investigation.
+
+**REGRA DE LEITURA:** este bloco é a fonte prioritária para o estado atual. Os registros cronológicos abaixo são histórico. Nunca retomar uma “próxima ação” antiga sem confrontá-la com este bloco e com o HEAD atual. Em especial, NÃO tratar tarefas do dia 16/11 nem checkpoints antigos sobre integração Brain 4/Remotion como pendências atuais.
+
+## Estado vigente em 17/11/2026 às 16:52 (BRT)
+- Quatro cérebros: contratos, validadores, prompts e runner implementados. Brain 4 isolado foi aprovado pelo usuário em execução real Gemini, validando timeline em fixture sintética de 4s; isso não valida vídeo completo.
+- Integração editorial no worker de produção existe como opt-in: usa narração Fish Audio e segmentos/timestamps do provedor, aplica Brain 4 quando habilitado, valida timeline e encaminha eventos para Remotion. Não confundir integração de código/testes com pipeline completo live.
+- Remotion multifaixa (captions, SFX, ducking/fades) implementado e validado em MP4 sintético de 4s; qualidade com voz/música reais e vídeo de 40–50s não validada.
+- Smoke live de uma cena Cloudflare → Modal/LTX → Remotion passou em 17/11 às 15:58:59 BRT: imagem Cloudflare, clipe LTX e MP4 Remotion gerados. Movimento observado foi mínimo/quase estático; não aprovar qualidade de movimento. gpu_name veio null nessa execução. O teste usou áudio sintético e não incluiu Fish Audio/Brain 4.
+- Produção real completa de 40–50s com Fish Audio + Brain 4 + cenas + Remotion ainda não executada/validada de ponta a ponta.
+- PR #9 (feat/ltx-low-cost-simple-motion) permanece aberta, não mergeada e não implantada. CI #1135/run 44159676828 passou nos testes Python, Commons smoke e Remotion typecheck; render sintético foi skipped. Não inferir GPU, custo ou qualidade por CI.
+- Modal: painel informado pelo usuário mostrou US$1.50 acumulados, majoritariamente H100. Código versionado declara L40S, mas deployment ativo/GPU real permanecem não identificados. Deploy é manual; não fazer deploy/inferência paga sem autorização. O cálculo em scripts/modal_smoke_test.py usa taxa L40S hardcoded e tempo de parede, portanto não é billing confiável.
+- Build indicator Streamlit: PR #6 integrada; Perfil deve mostrar SHA/origem ou “não identificado”. A leitura na instância publicada ainda não foi confirmada.
+
+## Próxima ação sem custo
+1. Verificar o HEAD atual e os checks/PRs diretamente no GitHub.
+2. Corrigir a documentação de continuidade (bootstrap/handoff) para que os novos chats leiam este estado atual antes de qualquer checkpoint histórico.
+3. Auditar e corrigir o defeito de estimativa de custo no smoke Modal e a observabilidade de GPU, com testes offline; não fazer deploy nem inferência.
+4. Manter a produção completa bloqueada até autorização explícita de custos e verificação do deployment Modal.
+
+## Separação de estados
+- Implementado/commitado: contratos dos cérebros, integração opt-in no worker, eventos multifaixa Remotion, diagnóstico de movimento, indicador de build.
+- Testado/CI: testes Python e Remotion typecheck em runs documentados; render sintético multifaixa aprovado; smoke live de uma cena Cloudflare/Modal/Remotion tecnicamente passou.
+- Implantado: Streamlit e deployment Modal atuais não confirmados independentemente.
+- Validado visualmente: MP4 sintético e frame do smoke de uma cena inspecionados; movimento LTX considerado insuficiente/quase estático.
+- Não validado: vídeo completo real de 40–50s com narração, timeline editorial e revisão final.
+
+---
+
+
+Última atualização: 17/11/2026 às 16:52:25 (America/Sao_Paulo)
 
 ## Objetivo
 Aplicativo pessoal em nuvem para transformar tema ou roteiro em vídeo vertical 9:16 de aproximadamente 40–60 segundos, com direção contextual por IA, narração, clipes coerentes, edição e exportação MP4. O NEXUS não gera legendas; o usuário as adiciona no editor final.
