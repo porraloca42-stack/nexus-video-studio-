@@ -456,3 +456,9 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - Teste cobre caminho opt-in de `apply_optional_brain4()` com executor mockado e confirma que o worker continua default-off no relatório.
 - CI #1037 / `44119171372` estava em execução; aguardar resultado.
 - Workflow Remotion #120 passou: MP4 sintético 4.011s H.264/AAC 720×1280, artifact #14344765828. É teste sintético, não produção.
+
+
+## CI #1037 e render Brain 4 sintético — 17/11/2026
+- CI #1037: 206 testes Python, typecheck e Commons smoke passaram. Hook worker testado com executor mockado; fluxo padrão continua disabled.
+- `scripts/validate_remotion_render.py` agora usa `run_brain4_for_storyboard()` e timeline simulada validada antes de gerar manifest e MP4 sintético; nenhum modelo/API externo.
+- Commit `e1f8737447fe14fb7114617dc9681200bf5742f0`. Próximo: executar com marcador `[run-remotion-validation]` e verificar MP4, captions, SFX e ducking.
