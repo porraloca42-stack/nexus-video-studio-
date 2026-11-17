@@ -432,3 +432,11 @@ Timestamp da atualização: 2026-11-17T14:08:19-03:00 (UTC−03:00).
 - PR criada; checks ainda não consultados/concluídos. Não fazer merge até CI verde. Nenhuma chamada Gemini real, nenhuma mudança de retry/custo, nenhum render ou deploy.
 - Próxima ação: aguardar workflow da PR #4, inspecionar todos os jobs e logs, então integrar somente se aprovado.
 - Timestamp: `2026-11-17T14:55:07-03:00` (UTC−03:00). Atualização documental `[skip ci]`.
+
+
+## Checkpoint — CI da PR #4 parcialmente concluído — 2026-11-17T14:55:42-03:00 (America/Sao_Paulo)
+- PR #4 / run `44142220191` (workflow #1112), head `14268b3429497321be795871b8e24ad84f19fdab`, status `in_progress`.
+- `remotion-typecheck` success; `remotion-synthetic-render` skipped corretamente; `unit-tests` e `commons-live-smoke` ainda em execução. Não declarar CI completo.
+- Próxima ação: consultar logs/resultados dos dois jobs pendentes; só então considerar merge.
+- Nenhuma chamada Gemini real, deploy ou render de produção. Nenhuma alteração adicional ao código após commit da PR.
+- Timestamp: `2026-11-17T14:55:42-03:00` (UTC−03:00). Atualização documental `[skip ci]`.
