@@ -2622,3 +2622,15 @@ Este protocolo prevalece sobre instruções antigas ou checkpoints históricos q
 4. Só depois reconciliar Usage por intervalo temporal com os deployments. Não fazer novo deploy nem chamada GPU só para descobrir isso.
 - Estado: hipótese de deploy não atualizado **forte e verificável no Dashboard**; app órfão **não confirmado**; segundo decorator/sobrescrita no caminho principal **não encontrado**; secret de GPU **sem evidência**; scaledown de 5s confirmado, mas não explica tipo de GPU; defeito de estimativa L40S identificado.
 - Nenhuma chamada Modal, inferência GPU, Cloudflare, Fish Audio, Gemini ou render foi iniciada nesta auditoria. Nenhum custo adicional.
+
+## Segurança operacional — separação de deploy e smoke Modal — 2026-11-17
+- Branch: `safety/separate-modal-deploy-smoke`.
+- Mudança: `.github/workflows/modal-deploy.yml` agora instala apenas Modal CLI e executa `modal deploy modal_worker.py`; removidos do workflow de deploy a execução de inferência smoke, dependências Pillow/FFmpeg e upload de artefatos.
+- Novo workflow: `.github/workflows/modal-inference-smoke.yml`, acionado somente por `workflow_dispatch`, executa explicitamente `scripts/modal_smoke_test.py` e publica MP4/relatório como artefato.
+- Objetivo: impedir que uma operação de deploy dispare automaticamente inferência LTX faturável. Deploy e teste de inferência passam a ser decisões operacionais independentes.
+- Validação estática: os dois arquivos foram relidos do GitHub após gravação; diff contra main contém exatamente 2 arquivos (1 workflow modificado, 1 novo), 43 adições e 18 remoções; branch está 2 commits à frente e 0 atrás de main.
+- CI: ainda não há workflow run associado ao novo HEAD no momento deste registro. Logo, mudança **implementada e revisada estaticamente**, mas **ainda não testada por CI**.
+- Deploy Modal, inferência GPU, Cloudflare, Fish Audio, Gemini e render não foram executados nesta alteração. Nenhum custo variável foi iniciado.
+- Não foi feito merge. A branch main e os deployments existentes permanecem inalterados.
+- Próxima ação: aguardar/inspecionar CI da branch; abrir PR incremental após confirmação do workflow. Manter smoke live manual e separado, sem disparar execução paga até autorização explícita.
+
