@@ -2356,3 +2356,10 @@ Este protocolo prevalece sobre instruções antigas ou checkpoints históricos q
 - Uma tentativa de montar o patch via ferramenta falhou por erro de sintaxe no script antes de qualquer escrita; script corrigido e commit efetivamente criado. Estado final da edição confirmado pelo retorno do GitHub: atualização da branch bem-sucedida.
 - Testes ainda não executados; CI ainda não disparado; nenhuma PR aberta; deploy não realizado. Próxima ação: reler os dois arquivos na branch, comparar diff com main, abrir PR para acionar CI e analisar todos os jobs.
 - Main no momento do checkpoint: `64cbeb496ff83d696a64011173ad41f0b7f90d25`. Timestamp: `2026-11-17T14:23:46-03:00` (UTC−03:00).
+
+
+## Checkpoint — sincronização da branch de correção com main — 2026-11-17T14:24:42-03:00 (America/Sao_Paulo)
+- O diff da branch inicial continha apenas os dois arquivos esperados (helper e teste), mas estava 2 commits documentais atrás da main. Uma atualização fast-forward foi rejeitada pelo GitHub (não alterou a branch); o conteúdo foi reaplicado sobre a árvore atual da main e a referência foi atualizada com force-with-lease/expected SHA, preservando o trabalho e incluindo os documentos atuais.
+- Branch `fix/brain4-reload-director-module` agora aponta para `72dc3138b473fe5ed3880521e829937b73e606c8`, baseado na main `405fb9f8ab62a510bbd22689c75635798855bddf` e contendo a alteração de código/teste.
+- Nenhum teste ou CI executado ainda; nenhuma PR, deploy, Gemini, GPU ou render. Próxima ação: confirmar compare branch/main (somente 1 commit à frente, sem divergência), revisar o diff completo e abrir PR.
+- Timestamp: `2026-11-17T14:24:42-03:00` (UTC−03:00).
