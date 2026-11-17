@@ -711,6 +711,7 @@ Sujeitos: {scene.get('subjects', '')}
 Ambiente: {scene.get('setting', '')}
 Justificativa semântica: {scene.get('semantic_reason', '')}
 Estilo visual obrigatório do vídeo: {scene.get('visual_style', scene.get('style_search_terms', ''))}
+Direção de arte completa do estilo: {build_visual_style_directive(scene.get('visual_style', 'Cinematográfico'))}
 Busca visual solicitada: {scene.get('asset_search_query', '')}
 
 CRITÉRIO DE DECISÃO:
