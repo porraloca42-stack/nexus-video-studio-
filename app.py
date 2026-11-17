@@ -149,7 +149,7 @@ def open_voice_picker():
         st.error(f"Não foi possível carregar as vozes: {catalog['error']}")
         if st.button("Tentar novamente", width="stretch"):
             st.session_state.pop(catalog_key, None)
-            st.rerun()
+            st.rerun(scope="fragment")
         return
 
     categories = ("CapCut", "ElevenLabs", "Licenciadas Fish")
@@ -220,7 +220,7 @@ def open_voice_picker():
                         st.session_state["nexus_pending_voice_id"] = voice_id
                         st.session_state["nexus_pending_voice_preview_source"] = preview_source
                         st.session_state["nexus_pending_voice_name"] = f"{category} · {voice_title}"
-                        st.rerun()
+                        st.rerun(scope="fragment")
                     except Exception as exc:
                         for key in (
                             "nexus_pending_voice_id",
