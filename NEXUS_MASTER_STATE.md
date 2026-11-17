@@ -1613,3 +1613,14 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - A inspeção do código no GitHub confirmou que `nexus/render_crypto.py` define a função e `nexus/github_renderer.py` a importa. O bloco de produção em `app.py` recarregava apenas `nexus.github_renderer`, sem recarregar primeiro sua dependência criptográfica; isso pode deixar a referência antiga em memória no processo Streamlit.
 - Commit `401ccb83343f90222678b64d475f6aade5a4c13d`: `app.py` agora recarrega `nexus.render_crypto` primeiro, verifica a presença de `decrypt_compressed_text` e só então recarrega `nexus.github_renderer`.
 - Verificação pós-commit: o bloco atualizado foi relido do GitHub e confirmado na branch `main`. A implantação no Streamlit e a produção MP4 ainda NÃO foram validadas. Não declarar resolvido até nova tentativa real.
+
+
+## Incidente de render — calibração de narração antes da geração visual (17/11/2026)
+- Evidência da execução real GitHub Actions `44055004220`: imagens e animações foram geradas; o worker falhou ao sincronizar áudio de 37,6s com a linha do tempo de 45,0s. A faixa segura de ajuste de 15% rejeitou a proporção 0,8356. Não foi falha de Cloudflare, Modal ou Remotion.
+- Causa arquitetural: `nexus/remote_render_job.py` gerava imagens e clipes I2V antes de sintetizar/medir a narração. O erro de duração só era descoberto depois de aproximadamente 10 minutos de processamento visual.
+- Correção enviada à branch `main`: a narração Fish Audio agora é gerada e medida antes de qualquer geração de imagem. Quando a duração real diverge mais de 10% da meta, o worker usa `revise_narration_for_duration` com Gemini para reescrever somente as falas, preservando a ordem e as cenas; sintetiza novamente e mede outra vez. São permitidas até duas calibrações. Se a narração permanecer fora da faixa segura de 15%, o trabalho falha antes de iniciar a geração visual.
+- O worker recalcula as durações das cenas após a revisão. A credencial Gemini, o tema e o estilo são enviados dentro do bloco de credenciais já criptografado; nenhuma chave é enviada em texto simples.
+- `app.py` agora encaminha `GEMINI_API_KEY`, tema e estilo ao dispatcher; `nexus/github_renderer.py` os inclui no pacote criptografado.
+- Testes atualizados para cobrir envio criptografado dos dados de calibração e o cenário de narração inicialmente curta (37,6s) revisada para a meta antes de iniciar imagens.
+- Commits: `871c542` (worker/preflight e calibração), `24f7f47` (dispatcher criptografado), `2d8dab8` (app), `48488bc` (teste do dispatcher), `8e25496` (teste de calibração), `81cec91` (fixture alinhada).
+- Estado: código e testes enviados à branch `main`. CI `44057057040` está em execução no momento deste registro. A nova execução real no Streamlit ainda NÃO foi validada; não declarar MP4 concluído até o vídeo ser produzido, recuperado e inspecionado.
