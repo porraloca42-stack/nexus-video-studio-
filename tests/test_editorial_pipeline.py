@@ -154,6 +154,44 @@ class EditorialPipelineContractTests(unittest.TestCase):
         data["edit_anchors"][0]["alignment_level"] = "phoneme"
         self.assertTrue(any(".phoneme:" in error for error in validate_edit_timeline(data)))
 
+
+    def test_pipeline_requires_visual_direction_for_every_micro_block(self):
+        pipeline = {
+            "hook_strategy": valid_hook_strategy(),
+            "micro_script": valid_micro_script(),
+            "visual_direction": valid_visual_direction(),
+            "edit_timeline": valid_edit_timeline(),
+        }
+        pipeline["visual_direction"]["beats"].pop()
+        from nexus.editorial_pipeline import validate_editorial_pipeline
+        errors = validate_editorial_pipeline(pipeline)
+        self.assertTrue(any("missing visual direction for micro block m2" in error for error in errors["visual_direction"]))
+
+    def test_pipeline_rejects_edit_anchor_for_unknown_micro_block(self):
+        pipeline = {
+            "hook_strategy": valid_hook_strategy(),
+            "micro_script": valid_micro_script(),
+            "visual_direction": valid_visual_direction(),
+            "edit_timeline": valid_edit_timeline(),
+        }
+        pipeline["edit_timeline"]["edit_anchors"][0]["block_id"] = "missing"
+        from nexus.editorial_pipeline import validate_editorial_pipeline
+        errors = validate_editorial_pipeline(pipeline)
+        self.assertTrue(any("unknown micro block reference" in error for error in errors["edit_timeline"]))
+
+    def test_selected_hook_must_open_the_micro_script(self):
+        pipeline = {
+            "hook_strategy": valid_hook_strategy(),
+            "micro_script": valid_micro_script(),
+            "visual_direction": valid_visual_direction(),
+            "edit_timeline": valid_edit_timeline(),
+        }
+        pipeline["micro_script"]["blocks"][0]["text"] = "Uma ideia completamente diferente."
+        pipeline["micro_script"]["full_narration"] = "Uma ideia completamente diferente. Comece com um passo pequeno."
+        from nexus.editorial_pipeline import validate_editorial_pipeline
+        errors = validate_editorial_pipeline(pipeline)
+        self.assertTrue(any("selected hook must appear" in error for error in errors["micro_script"]))
+
     def test_full_pipeline_reports_each_brain_independently(self):
         pipeline = {
             "hook_strategy": valid_hook_strategy(),
