@@ -121,3 +121,23 @@ Responder em português brasileiro, com clareza e sem exagerar. O usuário quer 
 - Sem deploy Streamlit ou validação visual mobile nesta etapa. Nenhuma chamada Gemini/Cloudflare/Fish, inferência Modal/GPU ou renderização paga foi iniciada; custo variável adicional US$0.
 - Próximo passo exato: localizar o run de push correspondente a `9b4326c` e confirmar os três jobs (`unit-tests`, `remotion-typecheck`, `commons-live-smoke`). Se CI verde, continuar a inteligência audiovisual apenas com mudanças locais/testes gratuitos. Não iniciar GPU ou APIs pagas sem nova autorização explícita.
 
+
+
+## Retomada posterior — pré-validação contra ações/buscas quase repetidas (17/11/2026)
+- HEAD observado antes desta alteração: `926bae8f5c0baad5077be45f232ad37ccc2fda0d`. O estado canônico foi relido diretamente de `main`; o anexo do chat estava desatualizado.
+- Problema identificado: a pré-validação existente detectava apenas repetição literal, permitindo que ações/buscas com pequenas diferenças de palavras passassem sem aviso.
+- Alteração em `nexus/director.py`: adicionada comparação lexical por sobreposição de conjuntos de termos informativos, com limiar conservador (4 termos compartilhados e 80% de sobreposição sobre o menor conjunto). Repetições exatamente iguais não geram aviso duplicado.
+- Relatório ampliado com cobertura de ações e prompts de movimento, pares de ações semelhantes e pares de buscas semelhantes. A heurística não entende sinônimos nem semântica e não reprova o storyboard automaticamente.
+- Alteração em `app.py`: interface apresenta cobertura e contagem de pares potencialmente semelhantes, mantendo a explicação de limitações.
+- Testes atualizados/adicionados em `tests/test_director_scene_count_repair.py` e `tests/test_app_import_resilience.py`.
+- Commits: `87380c4`, `f096421`, `6c2f931`, `7b50d6d`, `464ca0f`.
+- Código gravado em `main`: sim. Releitura pós-commit e CI ainda pendentes no momento deste registro. Não foi possível executar testes localmente porque o clone do repositório falhou por indisponibilidade de DNS; a integração GitHub disponível não lista execuções de Actions disparadas por push. Status CI: desconhecido, não aprovado.
+- Sem deploy Streamlit/Modal, sem teste visual mobile, sem chamadas pagas, sem GPU e sem MP4. Custo variável adicional: US$0.
+
+### Próximas ações
+1. Confirmar HEAD e reler os arquivos alterados na branch `main`.
+2. Verificar CI por qualquer endpoint/ação GitHub disponível que inclua eventos push. Se continuar inacessível, registrar como desconhecido.
+3. Corrigir qualquer falha de CI somente após obter logs concretos; não supor falhas.
+4. Próxima prioridade de engenharia: melhorar cobertura narrativa e especificidade filmável das cenas com verificações locais/testes determinísticos, sem alegar compreensão semântica real por heurística lexical.
+5. Manter LTX 0.9.8 como pipeline atual; protótipo LTX-2.5/ComfyUI permanece isolado e sem inferência paga.
+6. Nenhuma chamada Gemini/Cloudflare/Fish/Modal, geração GPU ou benchmark pago sem autorização explícita adicional.
