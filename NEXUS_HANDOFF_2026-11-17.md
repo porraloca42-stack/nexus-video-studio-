@@ -219,3 +219,11 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - CI #887, run 44092812673, no commit 2d0a806: 154 testes Python passaram, Remotion typecheck passou e Commons live smoke passou.
 - O workflow visual fixado contém seis subgrafos. Input Parameters inclui GemmaAPITextEncode e um caminho externo acionado por chave LTX; não configurar chave nem assumir custo zero. O caminho local também depende dos modelos Gemma encoder/enhancer.
 - Próximo bloqueio: obter um API prompt realmente exportado por uma instância ComfyUI compatível com as versões pinadas, ou executar fielmente o exportador oficial com o runtime gráfico e extensões corretas. Não gerar um grafo API manual a partir do JSON visual nem inventar node IDs/classes. Sem inferência/GPU/download/deploy/API paga; custo adicional US$0.
+
+
+
+## Correção da referência de frontend ComfyUI — 17/11/2026
+- O workflow visual original registra frontendVersion 1.48.7. A primeira investigação consultou uma revisão posterior (1.61.2), útil apenas como comparação, e não como referência de compatibilidade do workflow.
+- Referência correta confirmada: tag oficial ComfyUI_frontend v1.48.7, commit 6d6af63c00f132cd25dc29307fc56bd2c094fa22. A função graphToPrompt e a classe ExecutableNodeDTO foram relidas nessa revisão. O manifesto workflows/ltx25/source_manifest.json foi corrigido para essa versão.
+- O teste do manifesto agora verifica tag e versão. CI #895 (run 44094091786) e #896 (run 44094125992) passaram com 154 testes Python, Remotion typecheck e Commons live smoke. O run #894 falhou transitoriamente porque o manifesto foi atualizado antes do teste; a execução seguinte após atualizar o teste passou.
+- O código do cliente NEXUS continua compatível com o encapsulamento de widgets array como __value__. O API prompt real ainda não foi exportado; a integração segue bloqueada até exportação oficial/runtime e validação dos bindings. Sem GPU, download de pesos, deploy, API paga ou render. Custo variável adicional US$0.
