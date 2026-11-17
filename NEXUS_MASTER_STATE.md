@@ -1704,3 +1704,6 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Arquivos: `nexus/director.py`, `nexus/cloudflare_images.py`, `nexus/remote_render_job.py`; testes em `tests/test_cloudflare_images.py` e `tests/test_director_scene_count_repair.py`.
 - Custo adicional estimado da imagem de referência: uma geração 448×448; o custo exato depende da unidade faturada do Workers AI e será medido no relatório/conta Cloudflare. Não envolve Modal/LTX.
 - Estado: implementação enviada à branch main; CI pendente. Ainda não validada em MP4 real.
+
+- Ajuste de custo adicional: o worker Modal tinha `scaledown_window=60` apesar de cada render fazer uma única chamada em lote. Reduzido para 5s, preservando o tempo de execução do lote e evitando manter H100 ociosa por um minuto após o trabalho. O teto de economia por execução é 55s de GPU (aprox. US$0,060 em H100; US$0,038 em A100 80GB), antes de CPU/memória. Commit Modal: 5cb0ed112b00338ba8d56dd4d5d6f99821171adb.
+- Segurança da referência FLUX: valida MIME real PNG/JPEG/WebP e impede enviar referências para modelo diferente de FLUX.2 Klein 4B. Commit: a439eb3e8337c715a174d404e111dbb5af37a5c5.
