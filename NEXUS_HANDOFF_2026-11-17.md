@@ -515,3 +515,12 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - Nenhuma chamada Gemini real, produção, deploy, GPU ou serviço de mídia foi acionado. Deploy Streamlit não verificado.
 - Próxima ação: confirmar CI. Depois, o usuário pode acionar o botão no Streamlit para uma geração controlada com fixture sintético; não presumir que o app já recebeu deploy. Analisar o resultado e só então planejar primeiro render completo com orçamento explícito.
 - Limite: sucesso nesse smoke test valida o contrato do Brain 4 com entrada sintética, não qualidade de áudio real, edição perceptual, qualidade visual ou equivalência competitiva.
+
+
+
+## Direção competitiva e CI do smoke test — 17/11/2026
+- Benchmark Revid AI atualizado por pesquisa de fontes oficiais: script/link → vídeo, roteamento de mídia por cena, AI image/video/stock/motion graphics, vozes, captions, música, timeline editor, export até 4K, publicação, automação e API/MCP/CLI; fornecedor declara biblioteca de ~2,77M vídeos/posts com dados públicos de engajamento e 100+ ferramentas. Fontes: https://www.revid.ai/ai-instructions ; https://www.revid.ai/faq ; https://www.revid.ai/docs/workflows/script-to-video ; https://www.revid.ai/pricing. Tratar como claims do fornecedor, não avaliação independente.
+- Objetivo NEXUS: resultado profissional em cada etapa. Diferenciar qualidade editorial, semântica por cena, movimento físico observável, continuidade, áudio, edição e export. Não perseguir feature checklist antes de validar qualidade real.
+- Gap de produto relevante a médio prazo: editor/timeline visual para correção por cena, histórico, prévia e export multi-formato; não afirmar paridade/superioridade até comparação com renders equivalentes.
+- CI do smoke isolado: run #1081 / `44122780273`, commit `223f97a071befdfb18a0be5cf3393f9c59749753` passou: 212 testes Python, Remotion typecheck e Commons live smoke; synthetic render skipped. A falha em #1076/#1077 era apenas expectativa textual incorreta no teste de rejeição; correção aprovada em #1081.
+- Botão isolado está commitado e testado em CI, mas ainda depende do deploy Streamlit e do clique explícito do usuário para chamar Gemini. Nenhuma chamada real foi feita. Próximo: verificar deploy/instância; solicitar que o usuário acione o botão se estiver disponível; revisar JSON/contagens e erros. Depois planejar primeiro vídeo real com limite de custo aprovado.
