@@ -280,11 +280,54 @@ def validate_editorial_pipeline(data: Any) -> dict[str, list[str]]:
     if not _is_object(data):
         message = ["pipeline: expected object"]
         return {name: message for name in ("hook_strategy", "micro_script", "visual_direction", "edit_timeline")}
+    hook_errors = validate_hook_strategy(data.get("hook_strategy"))
+    script_errors = validate_micro_script(data.get("micro_script"))
+    visual_errors = validate_visual_direction(data.get("visual_direction"))
+    edit_errors = validate_edit_timeline(data.get("edit_timeline"))
+
+    script = data.get("micro_script")
+    visual = data.get("visual_direction")
+    edit = data.get("edit_timeline")
+    if _is_object(script) and _is_object(visual):
+        script_ids = {
+            block.get("id") for block in script.get("blocks", [])
+            if _is_object(block) and _is_nonempty_string(block.get("id"))
+        }
+        visual_ids = {
+            beat.get("block_id") for beat in visual.get("beats", [])
+            if _is_object(beat) and _is_nonempty_string(beat.get("block_id"))
+        }
+        for missing in sorted(script_ids - visual_ids):
+            visual_errors.append(f"visual_direction.beats: missing visual direction for micro block {missing}")
+        for extra in sorted(visual_ids - script_ids):
+            visual_errors.append(f"visual_direction.beats: unknown micro block reference {extra}")
+    if _is_object(script) and _is_object(edit):
+        script_ids = {
+            block.get("id") for block in script.get("blocks", [])
+            if _is_object(block) and _is_nonempty_string(block.get("id"))
+        }
+        for index, anchor in enumerate(edit.get("edit_anchors", [])):
+            if _is_object(anchor) and anchor.get("block_id") not in script_ids:
+                edit_errors.append(f"edit_timeline.edit_anchors[{index}].block_id: unknown micro block reference")
+
+    if _is_object(hook := data.get("hook_strategy")) and _is_object(script):
+        candidates = hook.get("hook_candidates", [])
+        selected = next(
+            (item.get("text") for item in candidates
+             if _is_object(item) and item.get("type") == hook.get("selected_hook_type")),
+            None,
+        ) if isinstance(candidates, list) else None
+        blocks = script.get("blocks", [])
+        if _is_nonempty_string(selected) and isinstance(blocks, list) and blocks and _is_object(blocks[0]):
+            first_text = str(blocks[0].get("text") or "").strip()
+            if selected.casefold() not in first_text.casefold():
+                script_errors.append("micro_script.blocks[0].text: selected hook must appear in the opening block")
+
     return {
-        "hook_strategy": validate_hook_strategy(data.get("hook_strategy")),
-        "micro_script": validate_micro_script(data.get("micro_script")),
-        "visual_direction": validate_visual_direction(data.get("visual_direction")),
-        "edit_timeline": validate_edit_timeline(data.get("edit_timeline")),
+        "hook_strategy": hook_errors,
+        "micro_script": script_errors,
+        "visual_direction": visual_errors,
+        "edit_timeline": edit_errors,
     }
 
 
