@@ -80,7 +80,7 @@ class VisualStyleLibraryTests(unittest.TestCase):
         result = apply_visual_style_lock(plan, "Quântico & Cósmico")
         self.assertEqual(result["style_lock"], "Quântico & Cósmico")
         self.assertEqual(result["style_profile_version"], "2.0")
-        self.assertIn("geometric", result["style_directive"].lower())
+        self.assertIn("luminous contrast", result["style_directive"].lower())
         for scene in result["scenes"]:
             self.assertEqual(scene["visual_style"], "Quântico & Cósmico")
             self.assertEqual(scene["style_search_terms"], STYLE_SEARCH_TERMS["Quântico & Cósmico"])
