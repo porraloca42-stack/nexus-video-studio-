@@ -3,103 +3,135 @@ import { AbsoluteFill, Audio, Img, OffthreadVideo, Sequence, interpolate, static
 import type { CaptionEvent, NexusScene, NexusVideoProps } from "./types";
 
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
+const mod = (value: number, divisor: number) => ((value % divisor) + divisor) % divisor;
+
+const keyLightPosition = (direction: string) => {
+  const value = (direction || "").toLowerCase();
+  if (value.includes("left") || value.includes("esquerda")) return "18% 42%";
+  if (value.includes("right") || value.includes("direita")) return "82% 42%";
+  if (value.includes("top") || value.includes("above") || value.includes("alto") || value.includes("cima")) return "50% 8%";
+  if (value.includes("back") || value.includes("behind") || value.includes("contra")) return "50% 18%";
+  return "50% 45%";
+};
+
+const moodFilter = (mood: string) => {
+  const value = (mood || "").toLowerCase();
+  if (/warm|golden|sunset|quente|dourad/.test(value)) return "saturate(1.07) sepia(0.035)";
+  if (/cool|cold|moon|night|blue|frio|azul|noturn/.test(value)) return "saturate(0.91) hue-rotate(4deg)";
+  if (/dramatic|high contrast|dram[aá]tic|contraste/.test(value)) return "contrast(1.055) saturate(0.94)";
+  return "none";
+};
 
 const SceneLayer: React.FC<{ scene: NexusScene; duration: number; overlapFrames: number }> = ({ scene, duration, overlapFrames }) => {
   const frame = useCurrentFrame();
   const { width, height } = useVideoConfig();
   const accent = scene.accent || "#e8b66b";
   const isGeneratedVideo = scene.visualMode === "video";
+  const isStill = !isGeneratedVideo;
   const direction = scene.sceneDirection;
   const camera = direction?.camera;
   const progress = clamp(frame / Math.max(1, duration - overlapFrames), 0, 1);
-  const move = camera?.move || scene.cameraMotion || "push_in";
-  const intensity = clamp(camera?.intensity ?? 0.82, 0.35, 1);
+  const move = camera?.move || scene.cameraMotion || "static";
+  const intensity = clamp(camera?.intensity ?? 0.45, 0, 1);
 
-  // Motion events are executable visual beats, not descriptive metadata.
-  // Gemini beats take precedence; otherwise distribute the scene's micro-events
-  // evenly through the shot and use them to trigger camera punches and accents.
-  const beats = (direction?.beats?.length
-    ? direction.beats
-    : (scene.motionEvents || []).slice(0, 3).map((event, index, all) => ({
-        at: (index + 1) / (all.length + 1),
-        event,
-        visualTarget: "subject",
-      }))).slice(0, 3);
-  const beatEnergy = isGeneratedVideo ? 0 : beats.reduce((energy, beat) => {
-    const center = clamp(beat.at, 0.08, 0.92) * duration;
-    const distance = Math.abs(frame - center);
-    const envelope = distance < 10 ? Math.sin((1 - distance / 10) * Math.PI / 2) : 0;
-    return Math.max(energy, envelope);
-  }, 0);
-
-  const defaultStart = move === "pull_out" ? 1.22 : 1.04;
-  const defaultEnd = move === "pull_out" ? 1.05 : move === "static" ? 1.10 : 1.22;
-  const startScale = clamp(camera?.startScale ?? defaultStart, 1.02, 1.28);
-  const endScale = clamp(camera?.endScale ?? defaultEnd, 1.02, 1.28);
-  const baseScale = interpolate(progress, [0, 1], [startScale, endScale]);
-  const scale = baseScale + beatEnergy * 0.035;
-
-  const pan = 132 * intensity;
-  const drift = Math.sin(frame / 19) * 3.5;
-  const beatShakeX = Math.sin(frame * 2.15) * beatEnergy * 6;
-  const beatShakeY = Math.cos(frame * 1.83) * beatEnergy * 4;
-  const x = (move === "pan_left" ? progress * pan : move === "pan_right" ? -progress * pan : 0) + drift + beatShakeX;
-  const y = (move === "tilt_up" ? progress * pan : move === "tilt_down" ? -progress * pan : move === "push_in" ? -progress * 34 * intensity : move === "pull_out" ? progress * 14 * intensity : 0) + beatShakeY;
-  const rotation = Math.sin(progress * Math.PI) * intensity * (move === "pan_left" || move === "pan_right" ? 0.42 : 0.18);
+  // Still-image motion is explicit and restrained. Generated footage is passed through.
+  const defaultStart = move === "pull_out" ? 1.08 : move === "static" ? 1 : 1.06;
+  const defaultEnd = move === "push_in" ? 1.08 : move === "pull_out" ? 1 : move === "static" ? 1 : 1.06;
+  const startScale = clamp(camera?.startScale ?? defaultStart, 1, 1.18);
+  const endScale = clamp(camera?.endScale ?? defaultEnd, 1, 1.18);
+  const scale = move === "static" ? 1 : interpolate(progress, [0, 1], [startScale, endScale]);
+  const travel = 42 * intensity;
+  const x = move === "pan_left" ? progress * travel : move === "pan_right" ? -progress * travel : 0;
+  const y = move === "tilt_up" ? progress * travel : move === "tilt_down" ? -progress * travel : 0;
+  const transform = "translate3d(" + x + "px, " + y + "px, 0) scale(" + scale + ")";
   const mediaStyle: React.CSSProperties = {
-    width: "100%", height: "100%", objectFit: "cover",
-    transform: isGeneratedVideo ? "none" : `translate(${x}px, ${y}px) scale(${scale}) rotate(${rotation}deg)`,
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+    transform: isGeneratedVideo || move === "static" ? "none" : transform,
     transformOrigin: camera?.focus === "foreground" ? "50% 75%" : camera?.focus === "background" ? "50% 25%" : "50% 50%",
-    willChange: "transform",
+    filter: isStill ? moodFilter(direction?.lighting?.mood || "") : "none",
+    willChange: isStill && move !== "static" ? "transform" : "auto",
   };
 
   const transitionFrames = clamp(direction?.transition?.durationFrames || overlapFrames || 8, 1, 12);
   const transitionIn = direction?.transition?.in || "cut";
   const transitionOut = direction?.transition?.out || "cut";
   const fadeIn = transitionIn === "crossfade" || transitionIn === "fade" || overlapFrames > 0 ? transitionFrames : 0;
-  const fadeOut = transitionOut === "fade" || transitionOut === "crossfade" ? transitionFrames : 0;
+  // Crossfades are handled by the incoming layer; fading both layers creates an unwanted dip.
+  const fadeOut = transitionOut === "fade" ? transitionFrames : 0;
   const fadeInOpacity = fadeIn ? interpolate(frame, [0, fadeIn], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) : 1;
   const fadeOutOpacity = fadeOut ? interpolate(frame, [duration - fadeOut, duration], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) : 1;
   const opacity = Math.min(fadeInOpacity, fadeOutOpacity);
 
-  // LTX-generated footage must remain untouched by generic 2D overlays.
-  // Atmosphere/light overlays belong to still-image treatments only; otherwise
-  // they read as arbitrary effects laid over real generated motion.
-  const allowStillImageOverlays = !isGeneratedVideo;
-  const lighting = allowStillImageOverlays ? (direction?.lighting?.change || "none") : "none";
-  const flicker = lighting === "subtle_flicker" ? 0.025 * Math.sin(frame * 0.72) : 0;
-  const exposure = lighting === "exposure_ramp" ? interpolate(progress, [0, 1], [0.035, -0.02]) : 0;
-  const atmosphere = allowStillImageOverlays ? (direction?.atmosphere?.effect || "none") : "none";
-  const strength = clamp(direction?.atmosphere?.intensity ?? 0, 0, 1);
-  const particleCount = atmosphere === "rain" ? 24 : ["dust", "embers", "particles"].includes(atmosphere) ? 16 : 0;
+  // Lighting and atmosphere are restrained finishing treatments for stills only.
+  // Never cover generated footage with synthetic particles, sweeps or fake fog.
+  const lighting = isStill ? (direction?.lighting?.change || "none") : "none";
+  const atmosphere = isStill ? (direction?.atmosphere?.effect || "none") : "none";
+  const strength = clamp(direction?.atmosphere?.intensity ?? 0, 0, 0.35);
+  const lightPosition = keyLightPosition(direction?.lighting?.keyDirection || "");
+  const fogX = 48 + Math.sin(frame / 95) * 5;
+  const fogY = 66 + Math.cos(frame / 120) * 3;
+  const particleCount = atmosphere === "rain" ? 18 : atmosphere === "embers" ? 8 : atmosphere === "dust" || atmosphere === "particles" ? 10 : 0;
 
   return <AbsoluteFill style={{ opacity, overflow: "hidden", background: "#0b111a" }}>
     {scene.visualMode === "video" && scene.asset ? <OffthreadVideo src={staticFile(scene.asset)} muted style={mediaStyle} /> :
       scene.visualMode === "image" && scene.asset ? <Img src={staticFile(scene.asset)} style={mediaStyle} /> :
       <AbsoluteFill style={{ background: "radial-gradient(ellipse at 70% 30%, #33485d 0%, #172330 36%, #090e15 78%)" }}>
-        <div style={{ position: "absolute", width: 680, height: 680, borderRadius: "50%", border: `1px solid ${accent}66`, right: -290 + Math.sin(frame / 32) * 18, top: 190, boxShadow: `0 0 100px ${accent}22, inset 0 0 100px ${accent}12` }} />
-        <div style={{ position: "absolute", width: 430, height: 430, borderRadius: "50%", border: `1px solid ${accent}55`, right: -165, top: 315, transform: `rotate(${frame * 0.2}deg)` }} />
+        <div style={{ position: "absolute", width: 680, height: 680, borderRadius: "50%", border: "1px solid " + accent + "44", right: -290 + Math.sin(frame / 32) * 8, top: 190, boxShadow: "0 0 80px " + accent + "18, inset 0 0 80px " + accent + "0d" }} />
+        <div style={{ position: "absolute", width: 430, height: 430, borderRadius: "50%", border: "1px solid " + accent + "33", right: -165, top: 315, transform: "rotate(" + frame * 0.08 + "deg)" }} />
       </AbsoluteFill>}
 
-    {beatEnergy > 0 ? <AbsoluteFill style={{
+    {isStill && lighting === "light_sweep" ? <AbsoluteFill style={{
       pointerEvents: "none",
-      opacity: beatEnergy * 0.20,
-      background: `radial-gradient(ellipse at 50% 48%, transparent 24%, ${accent}55 100%)`,
+      background: "radial-gradient(ellipse at " + lightPosition + ", rgba(255,244,220,0.16) 0%, rgba(255,244,220,0.055) 24%, transparent 62%)",
+      mixBlendMode: "screen",
+    }} /> : null}
+    {isStill && lighting === "exposure_ramp" ? <AbsoluteFill style={{
+      pointerEvents: "none",
+      background: "#fff4df",
+      opacity: interpolate(progress, [0, 1], [0.035, 0.005]),
+      mixBlendMode: "soft-light",
+    }} /> : null}
+    {isStill && lighting === "subtle_flicker" ? <AbsoluteFill style={{
+      pointerEvents: "none",
+      background: "#fff4df",
+      opacity: 0.008 + Math.sin(frame * 0.42) * 0.004,
       mixBlendMode: "screen",
     }} /> : null}
 
-    {atmosphere === "fog" ? <AbsoluteFill style={{ background: `radial-gradient(ellipse at 50% 70%, #dce8f0${Math.round(16 * strength).toString(16).padStart(2, "0")}, transparent 72%)`, opacity: 0.5 }} /> : null}
-    {particleCount > 0 ? <AbsoluteFill style={{ pointerEvents: "none", opacity: strength * 0.72 }}>
+    {isStill && atmosphere === "fog" && strength > 0 ? <AbsoluteFill style={{
+      pointerEvents: "none",
+      background: "radial-gradient(ellipse at " + fogX + "% " + fogY + "%, rgba(220,232,240," + strength * 0.42 + ") 0%, rgba(220,232,240," + strength * 0.12 + ") 28%, transparent 68%)",
+      mixBlendMode: "screen",
+    }} /> : null}
+    {isStill && particleCount > 0 && strength > 0 ? <AbsoluteFill style={{ pointerEvents: "none", opacity: strength * 1.35 }}>
       {Array.from({ length: particleCount }, (_, i) => {
-        const left = (i * 67 + 13) % width;
-        const top = (i * 113 + frame * (atmosphere === "rain" ? 12 : 0.9 + (i % 3) * 0.25)) % height;
-        const size = 2 + (i % 3);
-        return <div key={i} style={{ position: "absolute", left, top, width: atmosphere === "rain" ? 2 : size, height: atmosphere === "rain" ? 28 : size, borderRadius: 99, background: atmosphere === "embers" ? "#ffb45e" : "#ffffff", boxShadow: atmosphere === "embers" ? "0 0 10px #ff8b38" : "none", opacity: 0.25 + (i % 4) * 0.12 }} />;
+        const seedX = mod(i * 83 + 19, width);
+        const seedY = mod(i * 137 + 31, height);
+        const rain = atmosphere === "rain";
+        const ember = atmosphere === "embers";
+        const size = rain ? 1.5 : ember ? 3 + (i % 2) : 1.5 + (i % 2);
+        const left = rain ? mod(seedX - frame * (0.55 + (i % 3) * 0.12), width) : seedX + Math.sin(frame / (38 + i * 3) + i) * (ember ? 9 : 5);
+        const top = rain ? mod(seedY + frame * (5.5 + (i % 4) * 0.7), height) : ember ? mod(seedY - frame * (0.7 + (i % 3) * 0.18), height) : mod(seedY + Math.sin(frame / (45 + i * 4) + i) * 16 - frame * 0.12, height);
+        return <div key={i} style={{
+          position: "absolute",
+          left,
+          top,
+          width: size,
+          height: rain ? 22 + (i % 3) * 5 : size,
+          borderRadius: 99,
+          background: ember ? "#ffb45e" : "#ffffff",
+          boxShadow: ember ? "0 0 9px #ff8b38" : rain ? "0 0 3px #d9ecff" : "0 0 4px #ffffff",
+          opacity: rain ? 0.2 + (i % 3) * 0.07 : ember ? 0.24 + (i % 3) * 0.08 : 0.16 + (i % 3) * 0.05,
+          filter: ember ? "blur(0.4px)" : "none",
+        }} />;
       })}
     </AbsoluteFill> : null}
-    {lighting === "light_sweep" ? <div style={{ position: "absolute", top: "-20%", bottom: "-20%", width: "45%", background: "linear-gradient(90deg, transparent, #ffffff30, transparent)", transform: `translateX(${interpolate(frame, [0, duration], [-width, width * 2])}px) skewX(-18deg)`, mixBlendMode: "screen" }} /> : null}
-    {lighting === "subtle_flicker" || lighting === "exposure_ramp" ? <AbsoluteFill style={{ background: "#ffffff", opacity: clamp(0.012 + flicker + exposure, 0, 0.06) }} /> : null}
-    <AbsoluteFill style={{ background: "linear-gradient(180deg, #05080b44 0%, transparent 30%, #05080b66 100%)" }} />
+    {isStill ? <AbsoluteFill style={{
+      pointerEvents: "none",
+      background: "radial-gradient(ellipse at 50% 46%, transparent 48%, rgba(0,0,0,0.18) 100%)",
+    }} /> : null}
   </AbsoluteFill>;
 };
 
