@@ -7,7 +7,7 @@ import zipfile
 
 import requests
 
-from nexus.render_crypto import decrypt_bytes, decrypt_text, encrypt_text
+from nexus.render_crypto import decrypt_bytes, decrypt_text, decrypt_compressed_text, encrypt_compressed_text, encrypt_text
 
 
 API = "https://api.github.com"
@@ -40,8 +40,29 @@ def render_on_github(
     if not isinstance(plan, dict) or not plan.get("scenes"):
         raise ValueError("O storyboard não contém cenas.")
     manifest_json = json.dumps(plan, ensure_ascii=False, separators=(",", ":"))
-    if len(manifest_json) > 42000:
-        raise GitHubRenderError("O storyboard excede o limite seguro de envio ao GitHub Actions.")
+    manifest_encrypted = encrypt_compressed_text(manifest_json, encryption_secret)
+    fish_credentials_encrypted = encrypt_text(
+        json.dumps({
+            "api_key": fish_api_key or "",
+            "voice_id": fish_voice_id or "",
+        }, separators=(",", ":")),
+        encryption_secret,
+    )
+    dispatch_inputs = {
+        "job_id": f"nexus-{uuid.uuid4().hex[:12]}",
+        "manifest_encrypted": manifest_encrypted,
+        "fish_credentials_encrypted": fish_credentials_encrypted,
+        "voice": voice,
+    }
+    # Keep the complete workflow_dispatch input object below GitHub's payload
+    # ceiling with headroom for the surrounding event envelope.
+    dispatch_payload_chars = len(json.dumps(dispatch_inputs, ensure_ascii=False, separators=(",", ":")))
+    if dispatch_payload_chars > 60000:
+        raise GitHubRenderError(
+            "O storyboard continua grande demais mesmo após compressão segura "
+            f"({dispatch_payload_chars:,} caracteres no envio). Reduza apenas "
+            "descrições redundantes; nenhuma cena foi removida."
+        )
 
     client = session or requests
     headers = {
@@ -49,26 +70,12 @@ def render_on_github(
         "Accept": "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
     }
-    job_id = f"nexus-{uuid.uuid4().hex[:12]}"
+    job_id = dispatch_inputs["job_id"]
     workflow_url = f"{API}/repos/{repository}/actions/workflows/{WORKFLOW}/dispatches"
     dispatch = client.post(
         workflow_url,
         headers=headers,
-        json={
-            "ref": "main",
-            "inputs": {
-                "job_id": job_id,
-                "manifest_encrypted": encrypt_text(manifest_json, encryption_secret),
-                "fish_credentials_encrypted": encrypt_text(
-                    json.dumps({
-                        "api_key": fish_api_key or "",
-                        "voice_id": fish_voice_id or "",
-                    }, separators=(",", ":")),
-                    encryption_secret,
-                ),
-                "voice": voice,
-            },
-        },
+        json={"ref": "main", "inputs": dispatch_inputs},
         timeout=30,
     )
     if dispatch.status_code not in (201, 204):
