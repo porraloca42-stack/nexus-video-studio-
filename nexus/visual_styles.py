@@ -107,7 +107,7 @@ _STYLE_ROWS = [
     "Visual ASMR / Hipnótico",
     "Macro, fluidos e estímulo visual sensorial.",
     "hypnotic macro cinematography, fluid-motion visual language, precise specular highlights, high-detail material rendering",
-    "black, liquid gold, violet, cyan, selective pigments",
+    "black, metallic gold, violet, cyan, selective pigments",
     "precise specular highlights, glossy reflections, backlit fluids",
     "extreme macro, smooth tracking, slow motion, stable compositions",
     "viscous liquid, metallic surfaces, pigment diffusion, bubbles, ripples",
@@ -179,7 +179,7 @@ _STYLE_ROWS = [
     "hard directional light, long shadows, silhouettes, pools of practical light",
     "low angles, reflective surfaces, door frames, deliberate close-ups",
     "silver-gelatin grain, wet pavement, motivated smoke",
-    "Apply classic noir visual grammar through tonal contrast, framing, negative space and expressive shadow. Use it as a photographic language across subjects and genres; do not force crime stories, detectives, period costumes or familiar noir props.",
+    "Apply classic noir visual grammar through tonal contrast, framing, negative space and expressive shadow. Use it as a photographic language across subjects and genres; do not force genre-specific story content, period costumes or familiar genre props.",
     "genre clichés without narrative reason, inconsistent monochrome treatment, muddy tonal range, unreadable darkness",
     "detective",
     [
@@ -322,10 +322,36 @@ STYLE_SEARCH_TERMS = {name: p["search_terms"] for name, p in STYLE_PROFILES.item
 STYLE_META = {name: (*p["ui"], p["short"]) for name, p in STYLE_PROFILES.items()}
 STYLE_PREVIEW_SCENES = {name: p["preview_scene"] for name, p in STYLE_PROFILES.items()}
 
+# Hidden compatibility profiles keep older saved storyboards and regression
+# fixtures readable. They are deliberately excluded from STYLE_OPTIONS and UI.
+LEGACY_STYLE_PROFILES = {
+    "Cinematográfico realista": {
+        **STYLE_PROFILES["Cinematográfico"],
+        "search_terms": "cinematic realistic natural light, 35mm film language, restrained color grading",
+        "direction": "Apply believable live-action cinematography with natural performance, motivated lighting and authentic material detail. Subjects, actions and locations must come from the script, not from a fixed stock-scene formula.",
+    },
+    "Anime 2D": {
+        "short": "Compatibilidade com projetos antigos em animação 2D.",
+        "search_terms": "2D anime style, hand-drawn animation language, expressive linework, coherent cel shading",
+        "palette": "intentional anime color design, controlled saturation, coherent shadow colors",
+        "lighting": "illustrative directional lighting, readable cel-shaded forms, consistent light source",
+        "camera": "expressive animation framing, dynamic perspective only when motivated by the scene",
+        "texture": "clean hand-drawn linework, coherent cel shading, restrained painted backgrounds",
+        "direction": "Use a consistent 2D anime visual medium with coherent character design, linework, color and shading. The script determines all subjects, actions and settings; the medium must not force genre tropes or recurring character archetypes.",
+        "avoid": "inconsistent character design, mixed 2D/3D rendering, generic anime clichés, visual clutter, weak action readability",
+        "preview_scene": "anime_landscape",
+        "ui": ("#26344c", "#e5a66e", "#526c85"),
+    },
+}
+LEGACY_STYLE_SEARCH_TERMS = {
+    name: profile["search_terms"] for name, profile in LEGACY_STYLE_PROFILES.items()
+}
+STYLE_SEARCH_TERMS.update(LEGACY_STYLE_SEARCH_TERMS)
+
 
 def build_visual_style_directive(style):
     """Build the private, detailed art-direction brief injected into Gemini prompts."""
-    profile = STYLE_PROFILES.get(style)
+    profile = STYLE_PROFILES.get(style) or LEGACY_STYLE_PROFILES.get(style)
     if not profile:
         raise ValueError(f"Estilo visual não cadastrado: {style}")
     return (
