@@ -1,6 +1,6 @@
 # NEXUS VIDEO STUDIO — BOOTSTRAP PARA NOVOS CHATS
 
-Última revisão: 2026-11-17T17:50:00-03:00 (America/Sao_Paulo)
+Última revisão: 2026-11-17T17:53:45-03:00 (America/Sao_Paulo)
 Repositório: https://github.com/porraloca42-stack/nexus-video-studio-
 Branch oficial: main
 
@@ -37,7 +37,7 @@ Não peça ao usuário para repetir informações registradas. Não declare depl
 - Diferencie movimento real do sujeito, movimento de câmera e efeitos sintéticos. Não usar diferença de luminância start/end como prova suficiente de movimento.
 - Responder em português, com clareza e sem alegar tarefas concluídas sem validação.
 
-## Estado vigente resumido — 2026-11-17T17:50:00-03:00 (America/Sao_Paulo)
+## Estado vigente resumido — 2026-11-17T17:53:45-03:00 (America/Sao_Paulo)
 Consultar o bloco operacional completo no início de NEXUS_MASTER_STATE.md. Em resumo:
 - Brain 4 isolado: smoke real Gemini aprovado pelo usuário em fixture de 4s; não valida vídeo completo.
 - Remotion multifaixa: MP4 sintético de 4s validado.
@@ -45,7 +45,7 @@ Consultar o bloco operacional completo no início de NEXUS_MASTER_STATE.md. Em r
 - Produção completa de 40–50s com Fish Audio + Brain 4 + render: ainda não validada.
 - PR #9 continua aberta, não mergeada e não implantada; CI #1135 passou nos jobs aplicáveis, render sintético skipped.
 - PR #10 continua aberta, não mergeada e não implantada. A revisão detectou que a comparação antiga poderia confundir A10 e A100; foi substituída por padrões com limites de token e testes para A10G/A100.
-- CI #1154 falhou em commit intermediário por NameError (markers); CI #1155 / run 44165173593 passou no head eb7269bfa339dc13ff0704e6b5fa91c2fb8fbba7 nos três jobs executados; render sintético skipped. Depois, PR #10 recebeu correção para aceitar A10G como tipo solicitado e testes adicionais. Novo head 402323ac23cd30286bb634c3c3966725f185c351; oito testes do validador passaram em execução local isolada. CI do novo head ainda não confirmado.
+- CI #1154 falhou em commit intermediário por NameError (markers); CI #1155 / run 44165173593 passou no head eb7269bfa339dc13ff0704e6b5fa91c2fb8fbba7 nos três jobs executados; render sintético skipped. Depois, PR #10 recebeu correção para aceitar A10G como tipo solicitado e testes adicionais. Novo head 402323ac23cd30286bb634c3c3966725f185c351; oito testes do validador passaram em execução local isolada. CI #1163/run 44173764665 passou no novo head: unit-tests, remotion-typecheck e commons-live-smoke success; remotion-synthetic-render skipped.
 - PR #10 propõe validar identidade CUDA antes de carregar pesos e remover a estimativa de custo falsa do smoke. As alterações permanecem apenas na branch da PR até eventual merge.
 - Modal: painel do usuário mostrou gasto acumulado de US$1.50, majoritariamente H100; código versionado declara L40S; deployment ativo permanece não identificado. Deploy e nova inferência pagos bloqueados sem autorização.
 - Build indicator Streamlit integrado pela PR #6; confirmar SHA no app publicado.
