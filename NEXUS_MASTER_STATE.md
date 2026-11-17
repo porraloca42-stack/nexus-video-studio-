@@ -1431,3 +1431,10 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Versão identificadora do app: `NEXUS-2026.11.17-style-grammar-and-library-2`.
 - Commits finais de código: `9f6dd9d` (galeria em duas colunas), `6776d2f` (versão atualizada).
 - GitHub Actions foi acionado novamente pelo commit `6776d2f`; aguardar todos os jobs. Acessibilidade pública do Streamlit não pôde ser consultada pelo navegador disponível; implantação visual continua sem confirmação.
+
+
+## Correção de compatibilidade após CI — 17/11/2026
+- O run `43988866199` identificou falhas de regressão, não falhas de compilação: testes antigos ainda chamam os estilos `Cinematográfico realista` e `Anime 2D`, removidos da seleção visível. Também detectaram que dois perfis ainda citavam motivos concretos nas instruções (paleta ASMR e negação de clichê noir).
+- Correção aplicada: adicionados perfis de compatibilidade ocultos para os dois nomes antigos. Eles permanecem utilizáveis em storyboards salvos e testes, mas não entram em `STYLE_OPTIONS` e não aparecem na UI. Termos concretos foram removidos dos dois perfis que acionaram o teste.
+- Novo teste garante que aliases antigos continuam funcionando sem reaparecer na galeria. Commit de compatibilidade `e99df1d`; teste `075739b`.
+- Novo GitHub Actions run `43988997953` está em execução; aguardar o resultado antes de declarar a suíte aprovada.
