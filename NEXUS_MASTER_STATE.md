@@ -2546,4 +2546,4 @@ Este protocolo prevalece sobre instruções antigas ou checkpoints históricos q
 - CI após os novos commits: run #1124 (44156826730) em execução no último check. Portanto as alterações estão implementadas na branch, mas ainda aguardam CI; não declarar integradas, implantadas ou visualmente validadas.
 - Nenhum novo job live, Gemini, Fish Audio, Cloudflare, Modal/GPU ou render foi iniciado nesta etapa. Nenhum custo externo adicional gerado.
 - Próxima etapa: aguardar CI #1124; corrigir regressões se houver; revisar a estratégia de produção sem LTX antes de qualquer piloto real. Remotion ainda precisa de inspeção visual de MP4 com cenas de imagem e clipes reais; typecheck/CI não provam qualidade estética.
-- Timestamp: 2026-11-17T16:xx:xx-03:00 (America/Sao_Paulo). Atualização documental [skip ci].
+- Data: 2026-11-17. Atualização documental [skip ci].
