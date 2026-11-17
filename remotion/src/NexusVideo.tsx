@@ -171,10 +171,21 @@ export const NexusVideo: React.FC<NexusVideoProps> = (props) => {
         const activeMix = (props.audioMixEvents || []).filter(
           (event) => seconds >= event.startSeconds && seconds < event.endSeconds
         );
-        const requested = activeMix.length
-          ? Math.min(...activeMix.map((event) => event.musicVolume))
-          : (props.musicVolume ?? 0.12);
-        return clamp(requested, 0, 1);
+        const baseVolume = clamp(props.musicVolume ?? 0.12, 0, 1);
+        if (!activeMix.length) return baseVolume;
+        const duckedVolumes = activeMix.map((event) => {
+          const fadeIn = event.fadeInSeconds ?? 0.12;
+          const fadeOut = event.fadeOutSeconds ?? 0.12;
+          const fadeInProgress = fadeIn > 0
+            ? clamp((seconds - event.startSeconds) / fadeIn, 0, 1)
+            : 1;
+          const fadeOutProgress = fadeOut > 0
+            ? clamp((event.endSeconds - seconds) / fadeOut, 0, 1)
+            : 1;
+          const envelope = Math.min(fadeInProgress, fadeOutProgress);
+          return baseVolume + (event.musicVolume - baseVolume) * envelope;
+        });
+        return clamp(Math.min(...duckedVolumes), 0, 1);
       }}
     /> : null}
     {(props.soundEffects || []).map((event) => (
