@@ -440,3 +440,13 @@ Timestamp da atualização: 2026-11-17T14:08:19-03:00 (UTC−03:00).
 - Próxima ação: consultar logs/resultados dos dois jobs pendentes; só então considerar merge.
 - Nenhuma chamada Gemini real, deploy ou render de produção. Nenhuma alteração adicional ao código após commit da PR.
 - Timestamp: `2026-11-17T14:55:42-03:00` (UTC−03:00). Atualização documental `[skip ci]`.
+
+
+## Checkpoint final — PR #4 integrada e CI do merge aprovado — 2026-11-17T14:57:02-03:00 (America/Sao_Paulo)
+- PR #4 integrada por squash em `b38151058b0f6f53020542ff7fd6ffd79f2b410b`: https://github.com/porraloca42-stack/nexus-video-studio-/pull/4 .
+- CI da PR #4 / run `44142220191` (#1112): success em todos os jobs relevantes; `unit-tests` executou 214 testes / OK, incluindo regressão HTTP 503; `remotion-typecheck` success; `commons-live-smoke` success; `remotion-synthetic-render` skipped corretamente.
+- CI do commit de merge #1113 / run `44142405400`: `completed/success`.
+- `nexus/director.py` na main agora informa corretamente que o smoke Brain 4 faz uma única chamada ao modelo indicado e não tenta outros modelos em caso de HTTP 503; os caminhos com retry/failover multi-modelo preservam o comportamento anterior. Nenhuma ampliação de chamadas ou custo.
+- Estados: correção de import integrada e CI aprovada; correção textual 503 integrada e CI aprovada; deploy Streamlit não confirmado; teste real do Brain 4 ainda não passou devido indisponibilidade 503 do Gemini; vídeo de produção não renderizado/validado. Nenhuma chamada Gemini real iniciada pelo assistente.
+- Próxima ação: esperar o Gemini voltar e o usuário executar manualmente o botão de teste mais uma vez; conferir se recebe validação positiva. Não iniciar produção nem repetir chamadas automaticamente.
+- Timestamp: `2026-11-17T14:57:02-03:00` (UTC−03:00). Atualização documental `[skip ci]`.
