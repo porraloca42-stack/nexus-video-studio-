@@ -93,9 +93,11 @@ def main():
         narration = fixture / "narration.wav"
         music = fixture / "music.wav"
         sfx = fixture / "impact.wav"
-        write_tone(narration, 440, 0.07, DURATION)
+        # Keep fixture tones widely separated so narrow-band measurements do not
+        # mistake narration/SFX filter leakage for residual music during ducking.
+        write_tone(narration, 1100, 0.07, DURATION)
         write_tone(music, 220, 0.14, DURATION)
-        write_tone(sfx, 880, 0.22, 0.6)
+        write_tone(sfx, 3000, 0.22, 0.6)
 
         plan = {
             "seo": {"title": "NEXUS synthetic multitrack validation"},
@@ -184,8 +186,8 @@ def main():
             f"Music did not recover after ducking: before={music_before:.1f}dB, after={music_after:.1f}dB"
         )
 
-    sfx_before = mean_volume(OUTPUT, 0.25, 0.3, (760, 1000))
-    sfx_active = mean_volume(OUTPUT, 1.15, 0.3, (760, 1000))
+    sfx_before = mean_volume(OUTPUT, 0.25, 0.3, (2800, 3200))
+    sfx_active = mean_volume(OUTPUT, 1.15, 0.3, (2800, 3200))
     if sfx_active - sfx_before < 10:
         raise AssertionError(
             f"SFX not audible in its scheduled window: before={sfx_before:.1f}dB, active={sfx_active:.1f}dB"
