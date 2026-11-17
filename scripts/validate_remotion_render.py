@@ -10,14 +10,18 @@ import struct
 import subprocess
 import tempfile
 import wave
+import sys
 from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from PIL import Image
 
 from nexus.remotion_renderer import build_remotion_manifest
 
 
-ROOT = Path(__file__).resolve().parents[1]
 REMOTION = ROOT / "remotion"
 JOB_ID = "synthetic-validation"
 OUTPUT = REMOTION / "out" / "synthetic-validation.mp4"
