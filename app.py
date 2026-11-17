@@ -572,7 +572,13 @@ if active_view == "Criar":
                 else:
                     progress = st.progress(0.05, text="Enviando storyboard para o trabalhador audiovisual...")
                     try:
-                        from nexus.github_renderer import render_on_github
+                        # Streamlit Cloud may keep imported modules cached after a
+                        # GitHub sync. Reload the renderer so the latest payload-compression
+                        # fix is used by this production attempt.
+                        github_renderer_module = importlib.import_module("nexus.github_renderer")
+                        github_renderer_module = importlib.reload(github_renderer_module)
+                        render_on_github = github_renderer_module.render_on_github
+
                         def update_worker_progress(message):
                             progress.progress(0.55, text=message)
                         result = render_on_github(
