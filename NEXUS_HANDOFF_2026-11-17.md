@@ -450,3 +450,9 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 ## Resultado CI — Brain 4 → manifest — 17/11/2026
 - CI #1030: 205 testes Python passaram, typecheck e Commons smoke passaram. Teste de transporte de captions/word timing, SFX, ducking e fades do Brain 4 para o manifest Remotion aprovado.
 - Workflow demo #120 ainda executava MP4 sintético via Remotion; verificar o resultado antes de considerar o trajeto render validado.
+
+
+## Novo teste do hook de worker — 17/11/2026
+- Teste cobre caminho opt-in de `apply_optional_brain4()` com executor mockado e confirma que o worker continua default-off no relatório.
+- CI #1037 / `44119171372` estava em execução; aguardar resultado.
+- Workflow Remotion #120 passou: MP4 sintético 4.011s H.264/AAC 720×1280, artifact #14344765828. É teste sintético, não produção.
