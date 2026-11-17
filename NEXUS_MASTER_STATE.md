@@ -1438,3 +1438,12 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Correção aplicada: adicionados perfis de compatibilidade ocultos para os dois nomes antigos. Eles permanecem utilizáveis em storyboards salvos e testes, mas não entram em `STYLE_OPTIONS` e não aparecem na UI. Termos concretos foram removidos dos dois perfis que acionaram o teste.
 - Novo teste garante que aliases antigos continuam funcionando sem reaparecer na galeria. Commit de compatibilidade `e99df1d`; teste `075739b`.
 - Novo GitHub Actions run `43988997953` está em execução; aguardar o resultado antes de declarar a suíte aprovada.
+
+
+## Remoção de exemplos visuais fixos — 17/11/2026
+- Revisão pós-CI identificou que o prompt anti-template ainda carregava exemplos indiretos nos campos de paleta, luz, composição, textura e até nas frases negativas dos perfis. Esses elementos podiam continuar condicionando a geração mesmo quando descritos como algo a evitar.
+- Os 18 perfis foram reescritos para descrever apenas gramática formal: tratamento de cor, iluminação, fotografia, enquadramento, textura, meio artístico e atmosfera. Nenhum perfil prescreve personagens, objetos, locais ou ações.
+- A galeria “Estilos” deixou de exibir mini-cenas ilustrativas (pessoa, veículo, relógio, paisagem etc.). Agora mostra amostras abstratas de cor, luz, textura e composição — a prévia comunica a estética sem sugerir o conteúdo de um vídeo.
+- Compatibilidade com os nomes antigos “Cinematográfico realista” e “Anime 2D” permanece oculta na seleção, apenas para storyboards existentes.
+- Commits: `672277f` (perfis sem motivos narrativos), `e24c786` (amostras abstratas na galeria).
+- Revisão estática confirmou ausência dos termos de exemplo conhecidos nos perfis e remoção do catálogo de mini-cenas do app. GitHub Actions run `43989176956` acionado; aguardando testes.
