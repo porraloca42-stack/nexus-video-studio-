@@ -22,6 +22,12 @@ class VisualStyleLibraryTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             build_visual_style_directive("Estilo inventado")
 
+    def test_hidden_legacy_styles_remain_compatible_but_not_selectable(self):
+        self.assertNotIn("Anime 2D", STYLE_OPTIONS)
+        self.assertNotIn("Cinematográfico realista", STYLE_OPTIONS)
+        self.assertIn("2D anime style", build_visual_style_directive("Anime 2D"))
+        self.assertIn("cinematic realistic natural light", build_visual_style_directive("Cinematográfico realista"))
+
     def test_style_grammar_does_not_encode_fixed_scene_motifs(self):
         forbidden_motifs = (
             "man in front of mirror", "solitary silhouette", "detective",
