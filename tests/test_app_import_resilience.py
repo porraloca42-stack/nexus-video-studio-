@@ -114,7 +114,7 @@ class AppImportResilienceTests(unittest.TestCase):
         # Confirming is intentionally a full-app rerun so the dialog closes.
         self.assertIn('st.session_state["nexus_fish_voice_id"] = pending_id', dialog)
         self.assertIn('st.session_state.pop(key, None)', dialog)
-        self.assertIn('st.rerun()\n\n    for category in categories:', dialog)
+        self.assertIn('for category, gender in groups:', dialog)
 
     def test_header_uses_centered_user_supplied_nexus_mark(self):
         source = Path("app.py").read_text(encoding="utf-8")
