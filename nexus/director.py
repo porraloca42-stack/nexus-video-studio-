@@ -513,7 +513,7 @@ def apply_visual_style_lock(plan, style):
     """Enforce the selected global visual style on every scene, independent of LLM compliance."""
     plan["style_lock"] = style
     style_terms = STYLE_SEARCH_TERMS.get(style, f"{style}, consistent visual style")
-    plan["style_profile_version"] = "1.0"
+    plan["style_profile_version"] = "2.0"
     plan["style_directive"] = build_visual_style_directive(style)
     for scene in plan.get("scenes", []):
         scene["visual_style"] = style
