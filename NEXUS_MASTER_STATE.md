@@ -1424,3 +1424,10 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Limpeza das instruções negativas: removidas referências a objetos/cenas concretos dos campos `avoid` para reduzir ativação involuntária de clichês mesmo quando mencionados como algo a evitar.
 - Commits adicionais: `372eb3f` (restrições sem exemplos de cena), `2131a3f` (teste de não vazamento), `e6be587` (idempotência do lock), `789d294` (teste de idempotência).
 - Workflow atual: GitHub Actions run `43988771498` associado ao commit `789d294`; estado inicial queued. O run anterior `43988702350` havia avançado com typecheck Remotion concluído com sucesso; unit-tests e Commons smoke ainda estavam em andamento no último polling. Aguardar o run mais recente para conclusão dos testes.
+
+
+## Versão e responsividade da biblioteca de estilos — 17/11/2026
+- A galeria da aba “Estilos” foi ajustada para duas colunas, preservando legibilidade em telas móveis.
+- Versão identificadora do app: `NEXUS-2026.11.17-style-grammar-and-library-2`.
+- Commits finais de código: `9f6dd9d` (galeria em duas colunas), `6776d2f` (versão atualizada).
+- GitHub Actions foi acionado novamente pelo commit `6776d2f`; aguardar todos os jobs. Acessibilidade pública do Streamlit não pôde ser consultada pelo navegador disponível; implantação visual continua sem confirmação.
