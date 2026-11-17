@@ -126,3 +126,9 @@ Este bootstrap reduz perda de continuidade, mas não garante que a plataforma ca
 - Fish provider segments são preservados e promovidos a word timestamps apenas quando cada segmento é um token individual. Frases não são rotuladas como palavras; confidence não é inventada.
 - Contrato e prompt Brain 4 ajustados para confidence opcional e granularidade comprovada. CI #1002: 198 testes Python, typecheck e Commons smoke passaram; render sintético skipped.
 - Próxima ação: implementar executor Brain 4 no worker com mocks e sem chamada externa; manter Gemini real desabilitado até autorização explícita de custo. `edit_timeline` ainda não chega aos renders de produção.
+
+
+## Continuidade — executor Brain 4 — 17/11/2026
+- Runner puro dos quatro cérebros agora encaminha word timestamps validados ao executor Brain 4. Teste offline cobre a passagem dos dados.
+- CI #1007: testes Python e typecheck passaram; Commons smoke pendente na última consulta.
+- Ainda falta executor real Brain 4 e chamada no worker. Preparar com mocks; manter qualquer chamada Gemini extra desabilitada até autorização explícita.
