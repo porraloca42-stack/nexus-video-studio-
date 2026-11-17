@@ -10,6 +10,7 @@ from nexus.cloudflare_images import generate_scene_images
 from nexus.modal_i2v import animate_scene_images
 from nexus.remotion_renderer import render_video_remotion
 from nexus.render_crypto import decrypt_compressed_text, decrypt_text, encrypt_bytes, encrypt_text
+from nexus.video_quality import analyze_video_motion
 
 
 def generate_worker_narration(text, voice, output_path, fish_api_key="", fish_voice_id=""):
@@ -215,6 +216,7 @@ def main(project_root=None):
     # A Modal failure is fatal here: never silently ship a static-image slideshow.
     motion_clips = animate_scene_images(generated, scenes, work / "motion")
     animated_media = []
+    motion_quality = []
     for index, clip in enumerate(motion_clips, start=1):
         clip_path = Path(clip["path"])
         clip_probe = subprocess.run(
@@ -236,6 +238,22 @@ def main(project_root=None):
             raise RuntimeError(
                 f"Clipe I2V da cena {index} tem resolução inesperada "
                 f"{clip_stream.get('width')}x{clip_stream.get('height')}."
+            )
+        try:
+            quality = analyze_video_motion(clip_path, clip_duration)
+        except Exception as exc:
+            quality = {
+                "status": "unavailable",
+                "diagnostic": "analysis_unavailable",
+                "reason": str(exc)[:300],
+                "limitation": "A análise técnica não substitui revisão visual humana.",
+            }
+        quality["scene_index"] = index
+        motion_quality.append(quality)
+        if quality.get("diagnostic") == "low_motion_warning":
+            print(
+                f"AVISO DE QUALIDADE: cena {index} apresentou congelamento em "
+                f"{quality.get('freeze_ratio', 0):.0%} do clipe; não haverá retry automático."
             )
         animated_media.append({"path": str(clip_path)})
 
@@ -285,6 +303,9 @@ def main(project_root=None):
         "audio_codec": audio.get("codec_name"),
         "video_codec": video.get("codec_name"),
         "images": generated,
+        "motion_quality": motion_quality,
+        "low_motion_scene_count": sum(1 for item in motion_quality if item.get("diagnostic") == "low_motion_warning"),
+        "motion_quality_note": "Freezedetect identifica congelamento visual; não mede semântica, qualidade estética ou se o gesto corresponde à narração.",
         "motion_clips": [
             {key: value for key, value in clip.items() if key != "path"}
             for clip in motion_clips
