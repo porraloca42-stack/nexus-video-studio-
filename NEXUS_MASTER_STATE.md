@@ -2549,3 +2549,5 @@ Este protocolo prevalece sobre instruções antigas ou checkpoints históricos q
 - Data: 2026-11-17. Atualização documental [skip ci].
 
 - Solicitação de validação Remotion: executar também o render sintético real do job `remotion-synthetic-render` (não basta o typecheck), usando o gatilho `[run-remotion-validation]`; esse render é local no runner e não aciona LTX/GPU nem APIs pagas.
+
+- O job sintético permaneceu skipped no run #1125 porque a execução foi criada antes de o commit que habilitou pull requests como gatilho. Foi criada nova execução com o gatilho atualizado para confirmar o render isolado.
