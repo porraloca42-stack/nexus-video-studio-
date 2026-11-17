@@ -578,15 +578,18 @@ if active_view == "Criar":
                 st.caption("Busca visual: " + scene.get("asset_search_query", ""))
                 st.divider()
     
-        brain4_enabled = st.checkbox(
-            "Ativar Brain 4 — edição inteligente sincronizada",
-            value=False,
-            help=(
-                "Faz uma chamada Gemini por vídeo para planejar cortes, legendas, "
-                "efeitos e mixagem usando os timestamps reais da Fish Audio. "
-                "Pode gerar custo de API. Desativado por padrão."
-            ),
-        )
+        if render_mode == "Imagens originais · Cloudflare + Modal I2V + Remotion":
+            brain4_enabled = st.checkbox(
+                "Ativar Brain 4 — edição inteligente sincronizada",
+                value=False,
+                help=(
+                    "Faz uma chamada Gemini por vídeo para planejar cortes, legendas, "
+                    "efeitos e mixagem usando os timestamps reais da Fish Audio. "
+                    "Pode gerar custo de API. Desativado por padrão."
+                ),
+            )
+        else:
+            brain4_enabled = False
         if st.button("Produzir vídeo completo", type="primary", use_container_width=True):
             coverr_key = ""
             pixabay_key = secret("PIXABAY_API_KEY")
