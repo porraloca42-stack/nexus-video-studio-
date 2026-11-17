@@ -231,3 +231,12 @@ Este bootstrap reduz perda de continuidade, mas não garante que a plataforma ca
 - CI #1081 / run `44122780273`, commit `223f97a071befdfb18a0be5cf3393f9c59749753`: sucesso, 212 testes Python, typecheck e Commons smoke; synthetic render skipped.
 - O botão “Testar Brain 4 — sem produzir vídeo” está implementado e passou CI. Não foi executado contra Gemini real; deploy Streamlit não confirmado. O próximo chat deve verificar deploy e aguardar clique explícito do usuário antes de qualquer chamada Gemini.
 - Nenhum vídeo de produção, inferência GPU ou custo de serviços externos foi iniciado nesta etapa.
+
+
+## Checkpoint confirmado — 17/11/2026
+- HEAD `main`: `a9b3d4fd72eba3b81451034859a0791a30256656`.
+- CI documental #1082 (`44123082031`), #1083 (`44123091378`) e #1084 (`44123106001`) concluído com sucesso: testes Python, Remotion typecheck e Commons live smoke passaram; render sintético skipped.
+- #1076/#1077 falharam por asserção com texto esperado incorreto; correção em `223f97a` aprovada no CI #1081 (`44122780273`): 212 testes Python, typecheck e Commons smoke.
+- Botão `Testar Brain 4 — sem produzir vídeo` está no código da main, dentro do modo Cloudflare + Modal I2V + Remotion. Requer clique explícito e `GEMINI_API_KEY`; usa fixture sintético e não inicia serviços de mídia nem render.
+- Deploy Streamlit não confirmado e URL pública não identificada no repositório. Solicitar ao usuário a URL da instância antes de afirmar que o botão foi publicado.
+- Não executar Gemini sem clique explícito do usuário. Não iniciar vídeo completo, GPU ou serviços pagos sem autorização separada.
