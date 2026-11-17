@@ -2516,3 +2516,11 @@ Este protocolo prevalece sobre instruções antigas ou checkpoints históricos q
 - Nenhuma nova chamada Gemini live, Fish Audio, Cloudflare, Modal/GPU ou render foi iniciada pelo assistente. Nenhum custo novo foi gerado nesta etapa.
 - Próximo passo seguro: verificar que o app Streamlit carregou a versão integrada e então, com autorização explícita do usuário para eventuais custos, fazer uma única produção controlada. A correção só retenta Gemini uma vez; não garante que o serviço esteja saudável nem que o restante do pipeline esteja implantado.
 - Timestamp: 2026-11-17T15:26:48-03:00 (UTC−03:00). Atualização documental [skip ci].
+
+
+## Identificação do commit em execução no Streamlit — 17/11/2026
+- Implementado na branch `fix/streamlit-runtime-build-indicator`: módulo puro `nexus/build_info.py` identifica o SHA do checkout local via `git rev-parse HEAD`; se o diretório implantado não tiver metadados Git, tenta variáveis de ambiente conhecidas (`STREAMLIT_GIT_SHA`, `GIT_COMMIT_SHA`, `COMMIT_SHA`, `GITHUB_SHA`, `SOURCE_VERSION`).
+- A UI em Perfil mostra os 12 primeiros caracteres, a origem e um link para o commit completo. Se não houver SHA confiável, mostra explicitamente “não identificado”; não consulta nem substitui pelo HEAD remoto.
+- A consulta é local, com timeout de 2s, sem rede e sem secrets. Não aciona Gemini, Fish Audio, Cloudflare, Modal/GPU ou render.
+- Testes adicionados para SHA do checkout, fallback de variável, rejeição de valores inválidos e ausência do executável Git. CI ainda pendente nesta branch.
+- Estado: código implementado na branch; ainda não integrado à main, não implantado no Streamlit e não validado visualmente no app publicado.
