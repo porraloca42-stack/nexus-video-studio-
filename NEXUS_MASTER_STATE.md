@@ -2118,3 +2118,10 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 ## CI do teste Brain 4 → Remotion — resultado — 17/11/2026
 - CI #1030 / `44118607705`, commit `7e64dd543674f8b0e0001ba0002de32f22aa59bd`: 205 testes Python passaram; Remotion typecheck passou; Commons live smoke passou. Render sintético multifaixa foi skipped (sem mudança de renderer).
 - O teste Brain 4 → manifest está, portanto, aprovado em CI offline. Workflow demo #120 ainda executava a renderização sintética real do manifest na última consulta.
+
+
+## Verificação do ponto de injeção no worker — 17/11/2026
+- Adicionado teste de `apply_optional_brain4()` com executor explicitamente injetado: confirma que somente Brain 4 é chamado, o prompt começa por BRAIN 4, a timeline validada é anexada a uma cópia do plano e o estado `brain4_validated` é retornado.
+- Teste da execução normal do worker agora confirma que o relatório registra `editorial_pipeline.status=disabled` quando nenhum executor é injetado.
+- Commit `3f721da8890c5b12fe7b01690e6156378350159b`; CI #1037 / run `44119171372` em execução na última consulta. Não declarar aprovado até conclusão.
+- Workflow #120 concluído com sucesso: segundo MP4 sintético validado H.264 720×1280, AAC, 4.011s; artifact #14344765828 (retenção até 24/11/2026).
