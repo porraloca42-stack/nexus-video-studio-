@@ -921,7 +921,40 @@ def build_storyboard_preflight(plan):
         warnings.append("Mais da metade das cenas compartilha ambientes idênticos; verificar repetição visual.")
 
     action_coverage = sum(bool(value) for value in actions) / len(scenes) if scenes else 0.0
-    motion_coverage = sum(bool(str(scene.get("video_motion_prompt", "")).strip()) for scene in scenes) / len(scenes) if scenes else 0.0
+    motion_prompts = [str(scene.get("video_motion_prompt", "")).lower() for scene in scenes]
+    motion_coverage = sum(bool(value.strip()) for value in motion_prompts) / len(scenes) if scenes else 0.0
+    physical_motion_verbs = {
+        "move", "moves", "moving", "reach", "reaches", "reaching", "grasp", "grasps", "grab", "grabs",
+        "turn", "turns", "turning", "open", "opens", "opening", "close", "closes", "closing",
+        "lift", "lifts", "lifting", "lower", "lowers", "walk", "walks", "walking", "step", "steps",
+        "run", "runs", "running", "sit", "sits", "stand", "stands", "place", "places", "pull", "pulls",
+        "push", "pushes", "pour", "pours", "pick", "picks", "drop", "drops", "write", "writes",
+        "type", "types", "rotate", "rotates", "bend", "bends", "wave", "waves", "throw", "throws",
+        "catch", "catches", "climb", "climbs", "descend", "descends", "enter", "enters", "exit", "exits",
+        "unfold", "unfolds", "fold", "folds", "ignite", "ignites", "break", "breaks", "assemble", "assembles",
+        "remove", "removes", "insert", "inserts", "press", "presses", "squeeze", "squeezes", "stretch",
+        "stretches", "lean", "leans", "point", "points", "wipe", "wipes", "brush", "brushes", "carry",
+        "carries", "touch", "touches", "raise", "raises", "fall", "falls", "drift", "drifts", "flow",
+        "flows", "blow", "blows", "sway", "sways", "flutter", "flutters", "slide", "slides", "roll",
+        "rolls", "swing", "swings", "shake", "shakes", "stir", "stirs", "cut", "cuts", "slice", "slices",
+        "curl", "curls", "sprinkle", "sprinkles", "pouring",
+    }
+    motion_scenes_without_action = [
+        index for index, prompt in enumerate(motion_prompts, 1)
+        if not (set(normalized(prompt).split()) & physical_motion_verbs)
+    ]
+    motion_action_coverage = (
+        (len(scenes) - len(motion_scenes_without_action)) / len(scenes)
+        if scenes else 0.0
+    )
+    if motion_scenes_without_action:
+        shown = motion_scenes_without_action[:5]
+        warnings.append(
+            "Prompts sem verbo físico reconhecido nas cenas "
+            + ", ".join(map(str, shown))
+            + (" e outras." if len(motion_scenes_without_action) > 5 else "")
+            + " Verificar se descrevem uma ação observável, não apenas movimento de câmera."
+        )
 
     return {
         "scene_count": len(scenes),
@@ -929,6 +962,8 @@ def build_storyboard_preflight(plan):
         "unique_search_ratio": uniqueness("asset_search_query"),
         "action_coverage_ratio": round(action_coverage, 3),
         "motion_prompt_coverage_ratio": round(motion_coverage, 3),
+        "motion_action_coverage_ratio": round(motion_action_coverage, 3),
+        "motion_scenes_without_recognized_action": motion_scenes_without_action,
         "unique_shot_types": len(set(nonempty_shots)),
         "unique_settings": len(set(nonempty_settings)),
         "near_duplicate_action_pairs": action_near_duplicates,
