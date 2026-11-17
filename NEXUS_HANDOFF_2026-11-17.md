@@ -385,3 +385,12 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - Suspeita técnica: bandas de teste próximas (narração 440Hz, música 220Hz) e filtros de 190–250Hz podem contaminar a medição de música atenuada com vazamento da narração. Não alterar o algoritmo de ducking sem evidência.
 - Fixture ajustado no commit `549bb44e51e2375cf0f08b826749565bfc104c96`: narração 1100Hz, música 220Hz, SFX 3000Hz; banda SFX 2800–3200Hz. Commit contém o marcador para nova execução sintética.
 - Próximo passo: conferir run desse commit, logs, métricas, artifact; se passar, registrar os limites da validação sintética. Ainda não há validação do áudio multifaixa.
+
+
+## Marco validado — render sintético multifaixa — 17/11/2026
+- Run #977 / `44114553978`, commit `549bb44e51e2375cf0f08b826749565bfc104c96`: quatro jobs passaram (unit-tests, typecheck, Commons smoke, Remotion synthetic render).
+- Métricas do script: música -36.1dB antes, -50.6dB durante ducking, -36.1dB após; SFX -45.7dB antes e -30.0dB ativo; pixels dourados de destaque: 2249 e 1773; caption_off=0.
+- Artifact #14342476549 baixado e inspecionado. MP4 H.264 720x1280, 30fps, AAC estéreo 48kHz, 4.011s; frame com destaque de palavra conferido visualmente.
+- Conclusão: validação sintética multifaixa passou. Não extrapolar para voz real, sincronismo fonético, vídeos de 40–50s, integração Streamlit ou render de produção. O adapter Remotion segue isolado.
+- Nenhuma API paga, GPU, modelo, deploy ou render de produção foi acionado.
+- Próxima etapa de engenharia: planejar integração controlada do adapter Remotion ao fluxo do app, com teste de regressão e fallback preservado; não ativar APIs pagas sem orçamento/autorização.
