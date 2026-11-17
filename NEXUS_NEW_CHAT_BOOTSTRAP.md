@@ -79,3 +79,9 @@ Este bootstrap reduz perda de continuidade, mas não garante que a plataforma ca
 - Próximo passo imediato: criar push marker `[run-remotion-validation]` após a correção e então verificar a execução do job/artifact pelo GitHub Actions.
 
 - Solicitação de nova execução após a correção do teste: commit de push com marcador `[run-remotion-validation]` a ser consultado no Actions. A execução e o artifact só serão considerados confirmados após leitura do resultado real do job.
+
+### Último checkpoint de sessão — 17/11/2026
+- Push marker de reexecução após correção: `b5d374eaadc148260a78b8fc2d849d8af9b7c7e6`.
+- Master state atualizado: `e092eaccb8e03a0f5376e0617d336e8984476f12`.
+- Handoff atualizado: `f6ff90aa3fdf1d8abc915dfafa1868ed3c2975de`.
+- CI status combinado permaneceu vazio; a integração de GitHub não lista push workflow runs. O próximo chat precisa conferir manualmente Actions e artifact antes de qualquer declaração de validação.
