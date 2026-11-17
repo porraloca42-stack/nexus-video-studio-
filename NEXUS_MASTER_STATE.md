@@ -1937,3 +1937,24 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
   - WhisperX forced alignment and limitations: https://github.com/m-bain/whisperX
 - Nenhum endpoint Revid/Crayo foi chamado; nenhuma conta criada; nenhum modelo baixado; nenhuma chamada paga, GPU ou render foi executado.
 
+
+
+## Pesquisa complementar aprofundada — estrutura faceless e alinhamento pt-BR (17/11/2026)
+- A página pública do Revid Faceless descreve dois modos que não devem ser confundidos: Script-to-video lê o texto fornecido palavra por palavra; Prompt-to-video recebe um tema/ideia e escreve o roteiro. No fluxo script-first, o fornecedor declara que divide o texto em passagens curtas e dá a cada passagem um visual próprio.
+- A mesma página descreve uma estrutura editorial em quatro partes: Hook (10–20% do roteiro), Setup (15–20%), Payoff (50–60%) e Close (10–15%), com fechamento que pode apontar de volta para a abertura. Isso é uma recomendação pública de produto do Revid, não prova de quatro LLMs ou de uma cadeia interna de quatro agentes.
+- Revid também declara seleção de seis classes de mídia por vídeo (imagens IA animadas, AI video, stock, motion graphics, mídia própria e gameplay), estilo visual global, brand kit reutilizável, estimativa de créditos antes da geração e edição posterior para trocar/regenerar uma cena sem recomeçar o vídeo. Essas capacidades reforçam as prioridades de roteamento, pré-orçamento, continuidade de marca e regeneração seletiva no NEXUS.
+- Revid API docs atuais consultadas: v3.14.0. O endpoint de render recebe workflow e source; retorna PID e o processamento ocorre em background com webhook/polling. A API descreve uma chamada de render por vídeo coordenando visuais, voice-over, captions e música, além de endpoints separados para timeline/edit jobs, cálculo de créditos, arquivos e publicação. Isso é contrato público de API, não descrição do número de serviços/modelos privados.
+- WhisperX README atual: forced alignment com wav2vec2 produz word-level timing; o README explica que o alinhamento forçado gera segmentação phone-level internamente e admite saída de caracteres (return_char_alignments). O suporte de alinhador é específico por idioma.
+- WhisperX alignment.py inclui português (pt) com jonatasgrosman/wav2vec2-large-xlsr-53-portuguese como modelo HF padrão. Esse checkpoint é português geral (Common Voice), Apache-2.0, entrada 16 kHz e cerca de 1.26 GB segundo os arquivos públicos. Não presumir que seja otimizado para sotaque pt-BR.
+- Candidato alternativo pt-BR: ProgramadorArtificial/wav2vec2-large-xlsr-53-portuguese, Apache-2.0, declara treino com Common Voice 13, FalaBrasil, MLS Portuguese, TTS-Portuguese-Corpus, VoxForge e dados brasileiros adicionais; a página reporta WER 11.7% no teste e 9.5% na validação. Esses números são auto-relatados e medem reconhecimento, não precisão de forced alignment nem performance sobre a voz Fish Audio. É candidato para comparação, não escolha validada.
+- Decisão de engenharia: manter o contrato com níveis word/character/phoneme distintos. WhisperX pode fornecer word/character alignment; não declarar saída fonêmica apenas porque o modelo usa fonemas internamente. Para a sílaba tônica, ainda precisamos de detecção de acento lexical/prosódico e validação acústica; nem word timestamps nem character timestamps resolvem isso automaticamente.
+- Auditoria adicional do Remotion atual (remotion/src/NexusVideo.tsx): há uma trilha de narração e uma de música com volume fixo 0.12. Não há ainda trilha de captions, SFX, ducking dinâmico nem consumo dos caption_events/audio_mix_events do contrato editorial. A timeline visual de cenas já usa Sequence, mas os eventos de áudio/texto não existem no componente atual. Próximo trabalho de composição deve ser multifaixa com eventos explícitos, não efeitos indiscriminados.
+- Fontes públicas:
+  - Revid faceless workflow e estrutura editorial: https://www.revid.ai/tools/faceless-video
+  - Revid API v3.14.0: https://www.revid.ai/docs
+  - WhisperX README/alinhamento e limitações: https://github.com/m-bain/whisperX
+  - WhisperX alinhadores por idioma: https://github.com/m-bain/whisperX/blob/main/whisperx/alignment.py
+  - Modelo pt geral: https://huggingface.co/jonatasgrosman/wav2vec2-large-xlsr-53-portuguese
+  - Modelo pt-BR candidato: https://huggingface.co/ProgramadorArtificial/wav2vec2-large-xlsr-53-portuguese
+- Sem downloads de modelos, instalação de WhisperX, chamadas externas de API, GPU, deploy ou render real nesta pesquisa.
+
