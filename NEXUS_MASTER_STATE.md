@@ -2292,3 +2292,13 @@ Este protocolo prevalece sobre instruções antigas ou checkpoints históricos q
 - No encerramento, registrar também o estado final e a próxima ação. O chat novo deve ler o registro, mostrar os horários de atualização e consulta, apontar exatamente onde continuar e pedir confirmação antes de agir.
 - Não substituir esta ordem por expressões vagas como “etapas significativas”, “quando necessário” ou “ao final do trabalho”. A obrigação vale para **toda etapa/processo**, mesmo que pequeno.
 - Horário do checkpoint desta regra: `2026-11-17T14:08:02-03:00` (UTC−03:00, America/Sao_Paulo). Horário de consulta ao GitHub deve ser registrado separadamente.
+
+
+## Checkpoint de execução da regra absoluta — 17/11/2026, 14:08:32 (America/Sao_Paulo)
+- A ordem do usuário foi reforçada para exigir registro imediato após **todo processo/unidade de trabalho**, sem limitar a “etapas significativas”. Inclui consultas, análises, decisões, alterações, testes, workflows, revisões, correções e bloqueios.
+- Tentativa inicial de atualização do bootstrap falhou por ausência do SHA no argumento da operação; a falha foi identificada e corrigida consultando novamente o arquivo na main e atualizando com SHA atual. Não foi ocultada.
+- Bootstrap atualizado no commit `292218e008ef7f73e8a1d22bdcb80b6c3584b4bf`.
+- Master state e handoff receberam a regra estrita nesta sequência; confirmar SHAs atuais por leitura direta.
+- Nenhum código de produção, deploy, API paga, GPU ou render foi executado.
+- Próxima ação: verificar os três arquivos na main e o CI dos commits documentais; depois reportar evidências e o ponto exato de retomada.
+- Timestamp do checkpoint: 2026-11-17T14:08:32-03:00 (UTC−03:00).
