@@ -93,3 +93,9 @@ Este bootstrap reduz perda de continuidade, mas não garante que a plataforma ca
 - Run #973: testes unitários, typecheck e Commons smoke passaram; o job sintético foi ignorado por falta do marcador no commit.
 - O master state foi atualizado em `cc86d8b9ad78c2c0d3c9b2d081e481d741fd87c8`, cujo commit contém `[run-remotion-validation]` para disparar a validação restrita.
 - Próxima ação: consultar o run criado por esse push, validar conclusão de `remotion-synthetic-render`, obter o artifact e inspecionar o MP4. Não declarar validação até essa inspeção.
+
+
+## Estado mais recente — após primeira inspeção de MP4 — 17/11/2026
+- O run #974 gerou MP4 sintético, mas falhou na asserção de ducking: -34.6dB antes e -38.7dB durante. O artifact #14342431166 foi inspecionado: MP4 4s, 720x1280, 30fps, H.264/AAC. Legendas destacadas foram verificadas; teste SFX ainda não foi alcançado.
+- Hipótese de contaminação da medição por frequências próximas do fixture (narration 440Hz vs música 220Hz) foi tratada separando os tons: commit `549bb44e51e2375cf0f08b826749565bfc104c96` usa narração 1100Hz, música 220Hz e SFX 3000Hz, com banda SFX 2800–3200Hz.
+- Próxima ação: verificar run disparado pelo commit com marcador, conferir resultado das três verificações de áudio/legendas e inspecionar artifact. Não declarar validação multifaixa antes disso.
