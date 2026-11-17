@@ -2113,3 +2113,8 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - O teste é offline: não chama Gemini, Fish Audio, Cloudflare ou Modal. Ele verifica a ligação entre o contrato de Brain 4 e a estrutura consumida pelo renderer, não a qualidade perceptual do MP4.
 - CI #1030, run `44118607705`, commit `7e64dd543674f8b0e0001ba0002de32f22aa59bd`: em execução na última consulta; aguardar unit-tests/typecheck/Commons smoke antes de declarar aprovado.
 - Workflow Remotion demo #120, run `44118607421`: em execução; deverá repetir o render sintético de integração Python→Remotion. O render manual de 50s permanece skipped em eventos push.
+
+
+## CI do teste Brain 4 → Remotion — resultado — 17/11/2026
+- CI #1030 / `44118607705`, commit `7e64dd543674f8b0e0001ba0002de32f22aa59bd`: 205 testes Python passaram; Remotion typecheck passou; Commons live smoke passou. Render sintético multifaixa foi skipped (sem mudança de renderer).
+- O teste Brain 4 → manifest está, portanto, aprovado em CI offline. Workflow demo #120 ainda executava a renderização sintética real do manifest na última consulta.
