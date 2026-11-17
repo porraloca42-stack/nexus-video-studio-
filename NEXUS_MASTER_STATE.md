@@ -1735,3 +1735,13 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Log exato: Modal rejeitou `image.add_local_python_source("nexus")` porque havia passos de build depois dele. A exigência é que `add_local_*` seja o último passo da cadeia de imagem ou use `copy=True`.
 - Correção aplicada no commit `7f7626e758231c4b4f89e4ee9cf3a08fdbe15351`: movido `add_local_python_source("nexus")` para depois do último `.env(...)`, tornando-o o passo final do build.
 - Estado: correção enviada para main; novo CI e novo deploy ainda precisam ser executados. O pipeline LTX 0.9.8 multi-scale não foi carregado em GPU real; qualidade e custo permanecem não validados.
+
+
+## Diagnóstico gratuito de movimento por clipe — 17/11/2026
+- Implementado em `nexus/video_quality.py`: usa o filtro nativo FFmpeg `freezedetect` para medir intervalos de congelamento visual por clipe, duração congelada, proporção do clipe e maior intervalo congelado.
+- O worker `nexus/remote_render_job.py` executa a análise depois de receber cada MP4 LTX e inclui `motion_quality` e `low_motion_scene_count` no relatório de produção/logs.
+- Limite do diagnóstico: mede congelamento de pixels, não reconhece a ação, não confirma aderência à narração, não avalia estética, continuidade facial ou qualidade de movimento semântico. É um alarme técnico, não uma nota de qualidade.
+- O limiar inicial de aviso é 40% do clipe em congelamento. Não há retry automático nem nova chamada paga; a análise usa FFmpeg já presente no worker.
+- Testes adicionados em `tests/test_video_quality.py` para intervalos fechados, congelamento até EOF, proporção limitada e execução sem serviço externo.
+- Pesquisa oficial: LTX 0.9.8 recomenda ComfyUI para maior fidelidade; o modelo 2B distilled não tem workflow oficial ComfyUI listado. O perfil atual do NEXUS usa o YAML oficial 2B multi-scale, mas não equivale ao workflow recomendado para maior fidelidade. Fonte: README e config oficiais da Lightricks.
+- Estado: código e testes gravados na branch main; CI ainda precisa concluir. Não houve deploy Modal, inferência GPU, cobrança adicional ou validação visual de MP4 nesta etapa.
