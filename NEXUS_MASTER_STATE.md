@@ -2545,3 +2545,12 @@ Este protocolo prevalece sobre instruções antigas ou checkpoints históricos q
 - Estado: Cloudflare live image generation **executada com sucesso**; Modal/LTX live inference **executada com sucesso**; Remotion MP4 mux/render **executado e tecnicamente validado**; qualidade temporal/movimento **pendente**; identificação de GPU **pendente**; imagem-base como artefato **pendente**; produção audiovisual real de 40–50s **não executada/não validada**.
 - Próxima ação técnica: corrigir workflow para anexar `image.path` real, enriquecer relatório com custo estimado/GPU sem inventar valor, e investigar por que `gpu_name` chegou nulo; em seguida melhorar critério de avaliação temporal (frames start/mid/end) e repetir smoke só após aprovação explícita de novo consumo Cloudflare/Modal. Não disparar produção completa automaticamente.
 - Nenhuma chamada Fish Audio ou Gemini ocorreu nesta execução. Custos efetivos Cloudflare/Modal não foram quantificados no artefato; não afirmar valor.
+
+
+## Perfil econômico LTX — 17/11/2026
+- Solicitação do usuário: LTX deve produzir movimentos simples e legíveis (ex.: nuvens deslizando, uma pessoa executando um gesto curto), sem movimentos extraordinários, e gastar muito menos que o perfil anterior.
+- Branch de trabalho: `feat/ltx-low-cost-simple-motion`; não integrada.
+- Alterações propostas nesta branch: resolução de inferência reduzida de 512×896 para 384×672 (43,75% menos pixels por quadro); teto de GPU por batch reduzido de US$0,42 para US$0,15 (64,3% menor); 24 fps e agenda destilada oficial 7+3 preservados para não degradar também a qualidade temporal; smoke fixture simplificada para um único movimento de nuvens em 2 segundos, com personagem, montanha, estrelas e câmera parados.
+- `image_cond_noise_scale=0.025` foi mantido: a documentação do Diffusers recomenda esse valor para variantes LTX 0.9.1+ com VAE timestep-aware; não há evidência suficiente para alterá-lo como suposta causa da imagem estática. Fonte: https://huggingface.co/docs/diffusers/en/api/pipelines/ltx_video.
+- Economia de pixels e teto de orçamento são reduções de configuração, não economia real medida. Nenhuma inferência Modal/GPU foi iniciada; a validação de movimento e custo real depende de um único smoke live de 2s aprovado pelo usuário.
+- Testes CI devem validar configuração e fixture. Mesmo com CI verde, não declarar que LTX voltou a produzir movimento até assistir ao MP4 e medir o movimento de forma apropriada.
