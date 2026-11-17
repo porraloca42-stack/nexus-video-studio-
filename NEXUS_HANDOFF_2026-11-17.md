@@ -476,3 +476,9 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - Artifact #14343349831 foi baixado e frames em 0.8s, 1.5s e 2.7s foram vistos: highlight dourado alterna corretamente entre NEXUS/valida e some após a legenda. Fundo gráfico de teste estável.
 - FFprobe: H.264 720×1280, AAC, 4.011s. Ducking 14.5 dB; SFX +15.7 dB; recuperação da música confirmada.
 - Só valida fixture sintético; não comprova cenas reais nem sincronismo com fala Fish.
+
+
+## Brain 4 Gemini opt-in — implementação aguardando CI — 17/11/2026
+- Novo helper Gemini usa system prompt dedicado e limite de uma geração/um modelo por vídeo. Sem retry ou failover de geração para controlar custo.
+- UI Streamlit tem checkbox explícito, desmarcado por padrão, somente no modo de render compatível. Flag é enviada dentro das credenciais criptografadas; worker só cria executor se true. Sem chave, interrompe antes de gerar imagens.
+- Testes adicionados em director JSON recovery, worker e GitHub renderer. CI #1061 / run `44120993502` em andamento. Sem chamada real Gemini/produção até aprovação.
