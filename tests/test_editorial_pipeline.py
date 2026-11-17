@@ -252,6 +252,15 @@ class EditorialPipelineContractTests(unittest.TestCase):
         }]
         self.assertTrue(any("sound effect exceeds audio duration" in error for error in validate_edit_timeline(data)))
 
+
+    def test_edit_timeline_rejects_ducking_fade_longer_than_event(self):
+        data = valid_edit_timeline()
+        data["audio_mix_events"] = [{
+            "start_seconds": 0.0, "end_seconds": 0.5, "music_volume": 0.05,
+            "fade_in_seconds": 0.8, "fade_out_seconds": 0.1,
+        }]
+        self.assertTrue(any("fade duration cannot exceed" in error for error in validate_edit_timeline(data)))
+
     def test_edit_timeline_rejects_invalid_music_volume(self):
         data = valid_edit_timeline()
         data["audio_mix_events"] = [{
