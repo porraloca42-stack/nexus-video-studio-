@@ -19,6 +19,22 @@ class RemoteNarrationTests(unittest.TestCase):
         self.assertEqual(make.call_args.kwargs["fish_voice_id"], "voice-123")
         self.assertTrue(make.call_args.kwargs["return_provider"])
 
+    def test_worker_can_return_native_alignment_without_changing_default_tuple(self):
+        audio = Path("/tmp/nexus-test-aligned-narration.mp3")
+        segments = [{"text": "Olá", "start_seconds": 0.0, "end_seconds": 0.3, "chunk_seq": 0}]
+        with patch(
+            "nexus.remote_render_job.make_voice",
+            return_value=(audio, "Fish Audio", segments),
+        ) as make:
+            result = generate_worker_narration(
+                "Olá", "voice-123", audio,
+                fish_api_key="fish-key", fish_voice_id="voice-123",
+                return_alignment=True,
+            )
+        self.assertEqual(result, (audio, "Fish Audio", segments))
+        self.assertTrue(make.call_args.kwargs["return_provider"])
+        self.assertTrue(make.call_args.kwargs["return_alignment"])
+
     def test_worker_requires_fish_credentials_instead_of_using_robotic_fallback(self):
         from nexus.audio import FishAudioError
         audio = Path("/tmp/nexus-test-narration.mp3")
@@ -101,7 +117,10 @@ class RemoteNarrationTests(unittest.TestCase):
             with patch.dict(os.environ, env, clear=False), \
                  patch("nexus.remote_render_job.generate_scene_images", return_value=images) as gen_images, \
                  patch("nexus.remote_render_job.animate_scene_images", return_value=clips) as animate, \
-                 patch("nexus.remote_render_job.generate_worker_narration", return_value=(audio, "Fish Audio")) as gen_voice, \
+                 patch("nexus.remote_render_job.generate_worker_narration", return_value=(
+                     audio, "Fish Audio",
+                     [{"text": "Uma", "start_seconds": 0.0, "end_seconds": 0.25, "chunk_seq": 0}],
+                 )) as gen_voice, \
                  patch("nexus.remote_render_job.revise_narration_for_duration", side_effect=fake_revise_narration) as revise_narration, \
                  patch("nexus.remote_render_job.render_video_remotion", side_effect=fake_render) as render, \
                  patch("nexus.remote_render_job.analyze_video_motion", return_value={
@@ -131,6 +150,10 @@ class RemoteNarrationTests(unittest.TestCase):
             video_path = root / "worker_output" / "job-test" / "nexus_video.mp4.enc"
             report = json.loads(decrypt_text(report_path.read_text(encoding="ascii"), secret))
             self.assertEqual(report["narration_provider"], "Fish Audio")
+            self.assertEqual(report["narration_alignment"]["provider"], "Fish Audio")
+            self.assertEqual(report["narration_alignment"]["granularity"], "provider_segments")
+            self.assertEqual(report["narration_alignment"]["segment_count"], 1)
+            self.assertEqual(report["narration_alignment"]["segments"][0]["text"], "Uma")
             self.assertAlmostEqual(report["duration"], 37.6, places=1)
             self.assertEqual(report["requested_duration"], 40.0)
             self.assertEqual(report["maximum_duration"], 50.0)
