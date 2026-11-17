@@ -1509,3 +1509,5 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Narração e duração mantêm os dois popovers em colunas; ao remover o CSS que ampliava os ancestrais, os controles deixam de herdar largura artificial. Não foi introduzida rolagem horizontal global nem largura fixa na página.
 - Commits: `75870c1` (remoção do CSS invasivo e uso de wrap=False) e `dbd2738` (mínimo Streamlit 1.64.0).
 - Estado: código e dependência gravados em `main`. GitHub Actions run `43992412802` do commit `75870c1` e run `43992420470` do commit de dependência `dbd2738` foram acionados; confirmar os resultados. A validação visual no Streamlit mobile permanece pendente até nova captura do usuário.
+
+- Resultado parcial confirmado: run `43992412802` do commit de aplicação `75870c1` concluiu os três jobs com sucesso; `unit-tests` passou em 99 testes, além de `remotion-typecheck` e `commons-live-smoke`. O run `43992420470` referente ao commit de dependência `dbd2738` ainda tinha o job `commons-live-smoke` em execução no último polling; não registrar o ciclo da dependência como totalmente concluído até encerrar.
