@@ -243,11 +243,11 @@ html,body,.stApp,[data-testid="stAppViewContainer"]{background:#09090B!important
 .nexus-preview-stage svg{width:24%;height:auto;max-height:26%;opacity:.75}
 .nexus-preview-caption{text-align:center;color:#aaa5b4;font-size:.85rem;line-height:1.45;letter-spacing:.01em}
 .st-key-nexus-video-stage{margin-top:.25rem}
-.st-key-nexus-compact-controls{width:100%!important;margin:.35rem 0 .8rem!important}
-.st-key-nexus-compact-controls [data-testid="stHorizontalBlock"]{display:flex!important;flex-wrap:nowrap!important;align-items:stretch!important;gap:.65rem!important}
-.st-key-nexus-compact-controls [data-testid="column"]{flex:1 1 0!important;min-width:0!important;width:50%!important}
-.st-key-nexus-compact-controls [data-testid="stButton"]{width:100%!important}
-.st-key-nexus-compact-controls [data-testid="stButton"] button{width:100%!important;min-width:0!important;min-height:3.45rem!important;height:3.45rem!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;border:1px solid #51416e!important;border-radius:13px!important;background:linear-gradient(135deg,#1b1924,#15141b)!important;color:#f4f0ff!important;font-size:.82rem!important;font-weight:650!important;padding:.55rem .65rem!important}
+.st-key-nexus-compact-controls{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;overflow:hidden!important;margin:.35rem 0 .8rem!important;box-sizing:border-box!important}
+.st-key-nexus-compact-controls [data-testid="stHorizontalBlock"]{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;align-items:stretch!important;gap:.65rem!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;box-sizing:border-box!important}
+.st-key-nexus-compact-controls [data-testid="column"]{display:block!important;flex:none!important;width:auto!important;max-width:100%!important;min-width:0!important;padding:0!important;box-sizing:border-box!important}
+.st-key-nexus-compact-controls [data-testid="stButton"],.st-key-nexus-compact-controls [data-testid="stButton"]>div{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important}
+.st-key-nexus-compact-controls [data-testid="stButton"] button{display:flex!important;justify-content:center!important;width:100%!important;max-width:100%!important;min-width:0!important;min-height:3.45rem!important;height:3.45rem!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;border:1px solid #51416e!important;border-radius:13px!important;background:linear-gradient(135deg,#1b1924,#15141b)!important;color:#f4f0ff!important;font-size:.82rem!important;font-weight:650!important;padding:.55rem .45rem!important;box-sizing:border-box!important}
 .st-key-nexus-compact-controls [data-testid="stButton"] button:hover{border-color:#9b7bff!important;background:#211b31!important}
 .st-key-nexus-video-stage [data-testid="stVerticalBlock"]{gap:0!important}
 
