@@ -1971,3 +1971,17 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Nenhuma chamada Gemini/Fish/Cloudflare, download de modelo, inferência Modal/GPU, deploy ou render de produção executado. Custo variável adicional US$0.
 - Limite de autorização: a permissão de pesquisa cobre investigação pública aprofundada; não autoriza compras, assinaturas, API paga, inferência, download de pesos ou deploy com custo sem aprovação de orçamento específica.
 
+
+
+## Primeira integração audiovisual multifaixa no Remotion — 17/11/2026
+- Remotion agora aceita tipos opcionais para CaptionEvent/CaptionWord, SoundEffectEvent e AudioMixEvent, mantendo compatibilidade com manifestos antigos sem esses campos.
+- NexusVideo.tsx renderiza legendas sincronizadas em Sequence, com destaque da palavra ativa/ênfase e posições top/center/bottom; reproduz SFX em seus intervalos; aplica volumes de música por evento de mixagem, usando o menor volume quando eventos se sobrepõem e mantendo o padrão 0.12 fora dos eventos.
+- nexus/remotion_renderer.py transporta caption_events, sfx_events e audio_mix_events do edit_timeline para camelCase do manifesto, copia arquivos de música/SFX para a pasta do job e rejeita intervalos/arquivos inválidos. O manifesto também inclui musicVolume.
+- nexus/editorial_pipeline.py valida estrutura e limites de tempo para captions, palavras, SFX e mixagem; a prompt do Brain 4 agora pede explicitamente esses eventos.
+- Testes de regressão cobrem o mapeamento de manifestos, cópia de assets, intervalos de palavras, SFX fora da duração e volumes de mixagem.
+- CI #943, run 44100007415, commit 83083a7359419c97059c854760d1852cce26d793: **190 testes Python passaram**; Remotion typecheck passou; Commons live smoke passou. Execução concluída com sucesso.
+- A primeira execução #941 falhou por duas causas de teste/fixture: JSON literal não escapado em uma f-string de prompt e expectativa de nome de arquivo SFX anterior à normalização. Ambos foram corrigidos; #943 passou.
+- Estado: suporte de dados e renderização de captions/SFX/ducking implementado e validado por testes Python + typecheck. Ainda NÃO foi feito render real do Remotion com assets temporizados; portanto sincronismo visual/sonoro e qualidade final continuam não validados em MP4.
+- Não foram gerados áudio/visuais, nem chamados Gemini/Fish/Cloudflare, nem iniciada GPU, download de modelo, deploy ou render de produção. Custo variável adicional US$0.
+- Próximo passo: preparar um manifesto sintético com áudio e SFX de teste localizados, executar render local de validação e inspecionar sincronismo quadro a quadro. Isso não exige serviços pagos, mas só deve ser executado em ambiente local/CI com dependências Remotion disponíveis; não declarar a camada audiovisual validada até inspecionar o MP4.
+
