@@ -4,6 +4,7 @@ import requests
 import streamlit as st
 import streamlit.components.v1 as components
 from nexus.director import create_storyboard, validate_storyboard
+from nexus.build_info import get_runtime_build_info
 from nexus.assets import search_video_sources, download_file, diverse_candidate_shortlist
 import nexus.audio as fish_audio
 
@@ -1271,6 +1272,19 @@ elif active_view == "Perfil":
     st.markdown('<div class="nexus-kicker">CONFIGURAÇÃO</div>', unsafe_allow_html=True)
     st.subheader("Perfil e serviços")
     st.caption("Estado dos serviços. Os valores das chaves nunca são exibidos.")
+    st.markdown("**Versão em execução**")
+    runtime_sha, runtime_source = get_runtime_build_info()
+    if runtime_sha:
+        short_sha = runtime_sha[:12]
+        st.caption(f"Commit carregado: `{short_sha}` · origem: {runtime_source}")
+        st.markdown(
+            f"[Abrir este commit no GitHub](https://github.com/porraloca42-stack/nexus-video-studio-/commit/{runtime_sha})"
+        )
+    else:
+        st.warning(
+            "Commit em execução não identificado neste ambiente. "
+            "Nenhum SHA remoto é usado como substituto."
+        )
     with st.expander("Configurações avançadas de produção", expanded=False):
         st.markdown('<div class="nexus-kicker">PRODUÇÃO</div>', unsafe_allow_html=True)
         render_mode = st.selectbox(
