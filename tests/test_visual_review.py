@@ -86,7 +86,7 @@ class VisualReviewTests(unittest.TestCase):
         response.json = lambda: {
             "candidates": [{
                 "content": {"parts": [{
-                    "text": '{"reviews":[{"scene_number":1,"semantic_score":8,"matches_narration":true,"visual_quality":"Boa sequência","issues":[],"recommendation":"Manter."}]}'
+                    "text": '{"reviews":[{"scene_number":1,"semantic_score":8,"matches_narration":true,"motion_progression_score":9,"action_observed":true,"continuity_score":8,"temporal_progression":"A mão alcança, gira e abre a porta.","visual_quality":"Boa sequência","issues":[],"critical_issues":[],"recommendation":"Manter."}]}'
                 }]}
             }]
         }
@@ -104,6 +104,13 @@ class VisualReviewTests(unittest.TestCase):
                 "test-key", model="gemini-test", session=session
             )
         self.assertEqual(result[0]["semantic_score"], 8)
+        self.assertEqual(result[0]["motion_progression_score"], 9)
+        self.assertTrue(result[0]["action_observed"])
+        self.assertEqual(result[0]["continuity_score"], 8)
+        self.assertIn("alcança", result[0]["temporal_progression"])
+        prompt = session.post.call_args.kwargs["json"]["contents"][0]["parts"][0]["text"]
+        self.assertIn("motion_progression_score", prompt)
+        self.assertIn("critical_issues", prompt)
         self.assertEqual(len(session.post.call_args.kwargs["json"]["contents"][0]["parts"]), 5)
 
     def test_final_review_rejects_incomplete_temporal_frame_groups(self):
