@@ -449,20 +449,15 @@ if active_view == "Criar":
             st.error("O serviço de direção ainda não está conectado.")
         else:
             with st.spinner(
-                f"Escrevendo o roteiro para {duration}s, criando as cenas e ajustando a linha do tempo..."
+                f"Desenvolvendo o roteiro com liberdade editorial (referência {duration}s, limite {int(duration) + 10}s) e planejando as cenas..."
             ):
                 try:
                     plan = create_storyboard(topic, style, duration, secret)
                     errors = validate_storyboard(plan, duration)
-                    actual_duration = sum(
-                        float(scene.get("duration_seconds", 0) or 0)
-                        for scene in plan.get("scenes", [])
-                    )
-                    if abs(actual_duration - float(duration)) > 0.001:
-                        errors.append(
-                            f"Falha interna de duração: foram atribuídos {actual_duration:.1f}s "
-                            f"para uma solicitação de {duration}s."
-                        )
+                    actual_duration = float(plan.get(
+                        "estimated_duration_seconds",
+                        sum(float(scene.get("duration_seconds", 0) or 0) for scene in plan.get("scenes", [])),
+                    ))
                     if errors:
                         raise RuntimeError(
                             "O diretor não entregou um roteiro válido: " + " ".join(errors)
@@ -470,8 +465,10 @@ if active_view == "Criar":
                     st.session_state["nexus_plan"] = plan
                     st.session_state["nexus_errors"] = []
                     st.success(
-                        f"Roteiro criado: {len(plan['scenes'])} cenas · "
-                        f"{actual_duration:.0f}s, conforme solicitado."
+                        f"Planejamento criado: {len(plan['scenes'])} cenas · "
+                        f"estimativa de {actual_duration:.0f}s · "
+                        f"referência {int(duration)}s · limite {int(duration) + 10}s. "
+                        "A duração final será definida pela narração real da voz selecionada."
                     )
                 except Exception as exc:
                     st.error(str(exc))
@@ -481,8 +478,10 @@ if active_view == "Criar":
         ready_scenes = plan.get("scenes", [])
         ready_duration = sum(float(scene.get("duration_seconds", 0) or 0) for scene in ready_scenes)
         status_slot.info(
-            f"Planejamento pronto · {len(ready_scenes)} cenas · {ready_duration:.0f}s. "
-            "Confira o planejamento e toque em Produzir vídeo completo."
+            f"Planejamento pronto · {len(ready_scenes)} cenas · estimativa {ready_duration:.0f}s. "
+            f"Referência {int(plan.get('requested_duration_seconds', duration))}s · "
+            f"limite {int(plan.get('maximum_duration_seconds', int(duration) + 10))}s. "
+            "O vídeo final acompanhará a duração real da narração, sem esticar a voz."
         )
         scenes = plan.get("scenes", [])
         total_seconds = sum(float(scene.get("duration_seconds", 0) or 0) for scene in scenes)
