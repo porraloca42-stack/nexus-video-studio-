@@ -8,14 +8,14 @@ class NarrationDurationRevisionTests(unittest.TestCase):
     def test_shortens_only_when_measured_voice_exceeds_the_allowed_ceiling(self):
         plan = {
             "scenes": [
-                {"voiceover": "A ideia começa aqui.", "visual_action": "Pessoa abre a porta."},
-                {"voiceover": "E termina com uma escolha.", "visual_action": "Pessoa segue pela rua."},
+                {"voiceover": "Você sabe o que precisa fazer, mas continua adiando porque espera sentir confiança antes de dar o primeiro passo.", "visual_action": "Pessoa abre a porta."},
+                {"voiceover": "Enquanto isso, os dias passam, a insegurança cresce e o objetivo parece cada vez mais distante, embora nada tenha mudado além da sua decisão de esperar.", "visual_action": "Pessoa segue pela rua."},
             ]
         }
         revised = {
             "scenes": [
-                {"scene_number": 1, "voiceover": "A ideia começa aqui e ganha uma explicação concreta."},
-                {"scene_number": 2, "voiceover": "E termina com uma escolha consciente e uma ação possível."},
+                {"scene_number": 1, "voiceover": "Você sabe o que precisa fazer, mas adia o primeiro passo esperando sentir confiança."},
+                {"scene_number": 2, "voiceover": "Enquanto espera, os dias passam e o objetivo parece mais distante. A confiança pode surgir depois que você começa, não antes."},
             ]
         }
 
@@ -25,16 +25,16 @@ class NarrationDurationRevisionTests(unittest.TestCase):
                 lambda name, default=None: "test-key"
             )
 
-        self.assertIn("explicação concreta", result["scenes"][0]["voiceover"])
+        self.assertIn("adia o primeiro passo", result["scenes"][0]["voiceover"])
         self.assertEqual(len(result["scenes"]), 2)
-        self.assertIn("escolha consciente", result["full_narration"])
+        self.assertIn("confiança pode surgir", result["full_narration"])
         self.assertEqual(result["narration_calibration"]["previous_audio_seconds"], 66.1)
         prompt = request.call_args.args[0]
         self.assertIn("66.1 segundos", prompt)
         self.assertIn("velocidade NATURAL", prompt)
         self.assertIn("É PROIBIDO expandir o texto", prompt)
         self.assertIn("encurte SOMENTE", prompt)
-        self.assertIn("aproximadamente 8 palavras", prompt)
+        self.assertIn("aproximadamente 41 palavras", prompt)
 
     def test_rejects_missing_scene_voiceover(self):
         plan = {"scenes": [{"voiceover": "Fala um."}, {"voiceover": "Fala dois."}]}
