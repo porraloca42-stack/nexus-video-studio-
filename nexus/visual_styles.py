@@ -329,14 +329,14 @@ def build_visual_style_directive(style):
     if not profile:
         raise ValueError(f"Estilo visual não cadastrado: {style}")
     return (
-        f"ESTILO VISUAL BLOQUEADO: {style}\\n"
-        f"IDENTIDADE E INTENÇÃO: {profile['direction']}\\n"
-        f"PALETA: {profile['palette']}\\n"
-        f"ILUMINAÇÃO: {profile['lighting']}\\n"
-        f"FOTOGRAFIA E COMPOSIÇÃO: {profile['camera']}\\n"
-        f"TEXTURAS E ATMOSFERA: {profile['texture']}\\n"
-        f"TERMOS PARA BUSCA: {profile['search_terms']}\\n"
-        f"EVITAR: {profile['avoid']}\\n"
+        f"ESTILO VISUAL BLOQUEADO: {style}\n"
+        f"IDENTIDADE E INTENÇÃO: {profile['direction']}\n"
+        f"PALETA: {profile['palette']}\n"
+        f"ILUMINAÇÃO: {profile['lighting']}\n"
+        f"FOTOGRAFIA E COMPOSIÇÃO: {profile['camera']}\n"
+        f"TEXTURAS E ATMOSFERA: {profile['texture']}\n"
+        f"TERMOS PARA BUSCA: {profile['search_terms']}\n"
+        f"EVITAR: {profile['avoid']}\n"
         "CONTINUIDADE: mantenha a identidade artística em todas as cenas, variando "
         "pessoas, ambientes, planos, ações e enquadramentos. O estilo nunca substitui "
         "a correspondência semântica com a narração. Não inserir texto, legendas, "
