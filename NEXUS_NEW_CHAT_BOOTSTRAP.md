@@ -336,3 +336,10 @@ Timestamp da atualização: 2026-11-17T14:08:19-03:00 (UTC−03:00).
 - Branch `fix/brain4-reload-director-module` agora aponta para `72dc3138b473fe5ed3880521e829937b73e606c8`, baseado na main `405fb9f8ab62a510bbd22689c75635798855bddf` e contendo a alteração de código/teste.
 - Nenhum teste ou CI executado ainda; nenhuma PR, deploy, Gemini, GPU ou render. Próxima ação: confirmar compare branch/main (somente 1 commit à frente, sem divergência), revisar o diff completo e abrir PR.
 - Timestamp: `2026-11-17T14:24:42-03:00` (UTC−03:00).
+
+
+## Checkpoint — branch alinhada ao último checkpoint documental — 2026-11-17T14:25:19-03:00 (America/Sao_Paulo)
+- Após o checkpoint documental anterior, a main avançou somente com documentação. A branch foi novamente rebaseada sobre a main `43dfef3889bab15ee06f394a15b73e5a95a2ed62`, preservando os dois arquivos de código/teste; novo HEAD da branch `29d2fb01101570c3bd6caf6121d1700da8a77659`.
+- A tentativa de atualização sem force anteriormente foi rejeitada por não-fast-forward; nenhuma alteração foi perdida. A atualização seguinte usou `force=true` com `expected_sha` da branch, concluindo o force-with-lease.
+- Próxima ação: verificar compare branch/main e abrir PR. Testes/CI ainda pendentes; nenhuma chamada Gemini, deploy, GPU ou render.
+- Timestamp: `2026-11-17T14:25:19-03:00` (UTC−03:00).
