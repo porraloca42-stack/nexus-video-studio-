@@ -91,6 +91,7 @@ def main():
         "duration_seconds": duration,
         "inference_seconds": results[0].get("inference_seconds"),
         "model_load_seconds": results[0].get("model_load_seconds"),
+        "model_cache_metrics": results[0].get("model_cache_metrics"),
         "batch_wall_seconds": results[0].get("batch_wall_seconds"),
         "modal_call_wall_seconds": modal_call_wall_seconds,
         "estimated_gpu_only_cost_usd": None,
