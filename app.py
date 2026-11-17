@@ -174,28 +174,7 @@ html,body,.stApp,[data-testid="stAppViewContainer"]{background:#09090B!important
 .nexus-preview-caption{text-align:center;color:#aaa5b4;font-size:.85rem;line-height:1.45;letter-spacing:.01em}
 .st-key-nexus-video-stage{margin-top:.25rem}
 
-/* Compact, thumb-first controls and a true one-line style carousel */
-.st-key-nexus-style-carousel{width:100%!important;min-width:0!important;overflow:hidden!important;margin:.15rem 0 .35rem!important}
-.st-key-nexus-style-carousel [data-testid="stPills"]{width:100%!important;max-width:100%!important;overflow-x:auto!important;overflow-y:hidden!important;white-space:nowrap!important;scrollbar-width:none!important;overscroll-behavior-x:contain!important}
-.st-key-nexus-style-carousel [data-testid="stPills"]::-webkit-scrollbar{display:none!important}
-.st-key-nexus-style-carousel [data-testid="stPills"] div{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:center!important;width:max-content!important;min-width:max-content!important;max-width:none!important}
-.st-key-nexus-style-carousel [data-testid="stPills"] button{flex:0 0 auto!important;width:auto!important;min-width:max-content!important;white-space:nowrap!important}
-.st-key-nexus-compact-controls{width:100%!important;margin:.2rem 0 .8rem!important}
-.st-key-nexus-compact-controls [data-testid="stHorizontalBlock"]{display:flex!important;flex-wrap:nowrap!important;align-items:center!important;gap:.55rem!important}
-.st-key-nexus-compact-controls [data-testid="column"]{flex:1 1 0!important;min-width:0!important;width:50%!important}
-.st-key-nexus-compact-controls [data-testid="stPopover"]{width:100%!important}
-.st-key-nexus-compact-controls [data-testid="stPopover"]>button{width:100%!important;min-height:3.35rem!important;max-height:3.35rem!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;padding:.65rem .75rem!important;border:1px solid #51416e!important;border-radius:13px!important;background:linear-gradient(135deg,#1b1924,#15141b)!important;color:#f4f0ff!important;font-size:.82rem!important;font-weight:600!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)!important}
-.st-key-nexus-compact-controls [data-testid="stPopover"]>button p{overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
-.st-key-nexus-compact-controls [data-testid="stPopover"]>button:hover{border-color:#9b7bff!important;background:#211b31!important}
-.st-key-nexus-compact-controls [data-testid="stPopoverBody"]{max-width:min(92vw,520px)!important}
-@media(max-width:850px){
- .st-key-nexus-style-carousel [data-testid="stPills"]{padding-bottom:.25rem!important}
- .st-key-nexus-style-carousel [data-testid="stPills"] div{flex-wrap:nowrap!important}
- .st-key-nexus-compact-controls [data-testid="stHorizontalBlock"]{flex-wrap:nowrap!important}
- .st-key-nexus-compact-controls [data-testid="column"]{min-width:0!important}
- .st-key-nexus-compact-controls [data-testid="stPopover"]>button{font-size:.75rem!important;padding:.55rem .55rem!important}
-}
-
+/* Native Streamlit overflow behavior is used for mobile controls. */
 .st-key-nexus-video-stage [data-testid="stVerticalBlock"]{gap:0!important}
 
 .nexus-logo-mark{display:grid;place-items:center;width:clamp(58px,16vw,76px);height:clamp(58px,16vw,76px);flex:0 0 auto;border-radius:18px;background:linear-gradient(145deg,#21163e,#101019);border:1px solid #6245a2;box-shadow:0 0 28px rgba(139,92,246,.22),inset 0 1px 0 rgba(255,255,255,.12)}.nexus-logo-mark svg{width:66%;height:66%;filter:drop-shadow(0 0 9px rgba(167,139,250,.45))}
@@ -281,7 +260,7 @@ if active_view == "Criar":
         style = st.pills(
             "Estilo visual", STYLE_OPTIONS, selection_mode="single",
             default=st.session_state["nexus_style"], key="nexus_style",
-            label_visibility="collapsed",
+            label_visibility="collapsed", width="stretch", wrap=False,
         ) or st.session_state["nexus_style"]
 
     fish_api_key = secret("FISH_API_KEY")
