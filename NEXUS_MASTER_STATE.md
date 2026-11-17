@@ -1554,3 +1554,12 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Teste de regressão em `tests/test_app_import_resilience.py` cobre as três categorias, exibição das contagens, opções em duas colunas e seleção sem seletor/confirmador extra. O teste existente em `tests/test_audio.py` já valida os 40 IDs e as quantidades por categoria.
 - Commits: `f9d0e3a` (interface de seleção direta) e `89c5b24` (teste de regressão).
 - Estado: código e teste enviados à branch `main`. CI do commit final ainda precisa ser consultado; não declarar validado até todos os jobs concluírem. A atualização visual no Streamlit mobile ainda depende de nova captura após deploy.
+
+## Prévia de áudio individual para cada voz — 17/11/2026
+- Solicitação/capturas: usuário aprovou a lista por provedor e pediu um botão pequeno ao lado de cada nome para ouvir a voz antes de selecioná-la.
+- Em `app.py`: cada opção agora é renderizada em linha com botão de seleção e controle circular compacto ▶ ao lado. Ouvir não altera a voz selecionada; tocar no nome continua sendo a única ação de seleção.
+- Vozes com `sample_audio` usam a amostra publicada diretamente. Se não houver amostra, ▶ chama `fish_audio.generate_fish_preview` sob demanda; o MP3 resultante fica em `st.session_state` e aparece no mesmo controle compacto para reprodução. Não são geradas amostras para as 40 vozes automaticamente.
+- Segurança/robustez: URL de áudio escapada para HTML; somente fontes http/https/data são aceitas no player. Falhas de geração são mostradas sem impedir seleção da voz.
+- Teste de regressão adicionado em `tests/test_app_import_resilience.py` para presença do botão junto ao nome, player compacto, uso da amostra publicada e geração sob demanda.
+- Commits: `627d2cf` (player e prévia sob demanda), `aea5de0` (teste de regressão).
+- Estado: enviado à branch `main`; CI do commit final ainda pendente. O funcionamento de reprodução no navegador móvel depende de confirmação visual/funcional após o deploy; os testes estáticos não substituem essa verificação.
