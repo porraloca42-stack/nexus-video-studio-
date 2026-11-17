@@ -35,6 +35,18 @@ class RemoteNarrationTests(unittest.TestCase):
         self.assertTrue(make.call_args.kwargs["return_provider"])
         self.assertTrue(make.call_args.kwargs["return_alignment"])
 
+    def test_brain4_worker_hook_is_disabled_without_explicit_executor(self):
+        from nexus.remote_render_job import apply_optional_brain4
+
+        plan = {"scenes": [{"voiceover": "Narração existente."}]}
+        result = apply_optional_brain4(
+            plan, Path("/tmp/narration.mp3"), 3.0,
+            [{"text": "Narração", "start_seconds": 0.0, "end_seconds": 0.5}],
+        )
+        self.assertEqual(result["editorial_pipeline"]["status"], "disabled")
+        self.assertNotIn("edit_timeline", result)
+        self.assertNotIn("editorial_pipeline", plan)
+
     def test_worker_requires_fish_credentials_instead_of_using_robotic_fallback(self):
         from nexus.audio import FishAudioError
         audio = Path("/tmp/nexus-test-narration.mp3")
