@@ -1,4 +1,4 @@
-import base64, json, os, shutil, subprocess, tempfile, inspect, importlib
+import base64, json, os, shutil, subprocess, tempfile, inspect, importlib, time
 from pathlib import Path
 import requests
 import streamlit as st
@@ -303,8 +303,8 @@ html,body,.stApp,[data-testid="stAppViewContainer"]{background:#09090B!important
 [data-testid="stSidebar"],[data-testid="collapsedControl"],[data-testid="stHeader"],[data-testid="stToolbar"],[data-testid="manage-app-button"],[data-testid="stFooter"],[data-testid="stBottom"],#MainMenu,header,footer,.stApp>footer,div[class*="viewerBadge"],div[class*="ViewerBadge"],div[class*="viewer-badge"]{display:none!important;visibility:hidden!important;height:0!important;min-height:0!important;padding:0!important;margin:0!important;border:0!important}
 .block-container{padding-top:1rem!important;padding-bottom:8rem!important;max-width:1280px!important}
 .nexus-hero{position:relative;overflow:hidden;padding:1.45rem 1.65rem;border:1px solid #30234d;border-radius:22px;background:linear-gradient(115deg,rgba(24,18,43,.98),rgba(18,18,22,.96) 65%,rgba(30,24,52,.95));box-shadow:0 18px 48px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.06);margin-bottom:1rem}
-.st-key-nexus-header{position:relative!important;width:100%!important;min-height:5.2rem!important;margin:0 0 .85rem!important}
-.nexus-brand-lockup{display:flex;align-items:center;justify-content:center;gap:.72rem;width:100%;min-width:0;margin:.2rem auto .35rem}
+.st-key-nexus-header{position:relative!important;width:100%!important;min-height:4.1rem!important;margin:0 0 .35rem!important}
+.nexus-brand-lockup{display:flex;align-items:center;justify-content:center;gap:.72rem;width:100%;min-width:0;margin:0 auto .12rem}
 .nexus-brand-lockup svg{display:block;width:48px!important;height:58px!important;flex:0 0 48px!important;object-fit:contain;filter:drop-shadow(0 0 10px rgba(167,139,250,.4))}
 .nexus-brand-name{font-family:Georgia,serif!important;font-size:1.8rem!important;letter-spacing:.035em!important;font-weight:700!important;color:#f4f4f5!important;white-space:nowrap}
 .st-key-nexus-header .st-key-nexus-open-settings{position:absolute!important;right:.1rem!important;top:.25rem!important;z-index:5!important;width:42px!important}
@@ -357,7 +357,7 @@ div[data-testid="stButton"] button[kind="primary"]:hover{box-shadow:0 8px 25px r
 [data-testid="stAlert"]{border-radius:13px!important}
 [data-testid="stProgress"]>div>div{background:linear-gradient(90deg,#6366F1,#8B5CF6)!important}
 hr{border-color:#27272A!important}
-@media(max-width:850px){.block-container{padding:.75rem .8rem 8rem!important}.nexus-hero{padding:1rem .7rem;border-radius:17px}.st-key-nexus-header{min-height:4.6rem!important}.nexus-brand-lockup{gap:.55rem}.nexus-brand-lockup svg{width:42px!important;height:50px!important;flex-basis:42px!important}.nexus-brand-name{font-size:1.5rem!important}.st-key-nexus-header .st-key-nexus-open-settings{right:0!important;top:.1rem!important}.nexus-preview-stage{width:min(100%,300px)}.st-key-nexus-compact-controls [data-testid="stButton"] button{font-size:.76rem!important;padding:.5rem .45rem!important}}
+@media(max-width:850px){.block-container{padding:.75rem .8rem 8rem!important}.nexus-hero{padding:1rem .7rem;border-radius:17px}.st-key-nexus-header{min-height:3.7rem!important;margin-bottom:.25rem!important}.nexus-brand-lockup{gap:.55rem}.nexus-brand-lockup svg{width:42px!important;height:50px!important;flex-basis:42px!important}.nexus-brand-name{font-size:1.5rem!important}.st-key-nexus-header .st-key-nexus-open-settings{right:0!important;top:.1rem!important}.nexus-preview-stage{width:min(100%,300px)}.st-key-nexus-compact-controls [data-testid="stButton"] button{font-size:.76rem!important;padding:.5rem .45rem!important}}
 </style>
 """, unsafe_allow_html=True)
 
@@ -430,6 +430,10 @@ if active_view == "Criar":
 
     voice = st.session_state.get("nexus_fish_voice_id", "")
 
+    # Fixed-position slot in the creation flow: planning and render feedback
+    # are populated here instead of appearing far below the preview.
+    status_slot = st.empty()
+
     with st.container(key="nexus-video-stage"):
         if st.session_state.get("nexus_rendered_video"):
             st.video(st.session_state["nexus_rendered_video"])
@@ -488,6 +492,12 @@ if active_view == "Criar":
     
     if "nexus_plan" in st.session_state:
         plan = st.session_state["nexus_plan"]
+        ready_scenes = plan.get("scenes", [])
+        ready_duration = sum(float(scene.get("duration_seconds", 0) or 0) for scene in ready_scenes)
+        status_slot.info(
+            f"Planejamento pronto · {len(ready_scenes)} cenas · {ready_duration:.0f}s. "
+            "Confira o planejamento e toque em Produzir vídeo completo."
+        )
         scenes = plan.get("scenes", [])
         total_seconds = sum(float(scene.get("duration_seconds", 0) or 0) for scene in scenes)
         with st.expander(
@@ -567,10 +577,31 @@ if active_view == "Criar":
                 github_token = secret("GITHUB_ACTIONS_TOKEN")
                 cloudflare_token = secret("CLOUDFLARE_API_TOKEN")
                 if not github_token or not cloudflare_token or not fish_api_key or not voice:
-                    st.error("Configure GITHUB_ACTIONS_TOKEN, CLOUDFLARE_API_TOKEN e FISH_API_KEY, e selecione uma voz da biblioteca Fish Audio.")
-                    st.info("O repositório GitHub também precisa dos Secrets CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN, MODAL_TOKEN_ID e MODAL_TOKEN_SECRET. O worker Modal deve estar implantado. O manifesto e o MP4 trafegam criptografados.")
+                    with status_slot.container():
+                        st.error("Configure GITHUB_ACTIONS_TOKEN, CLOUDFLARE_API_TOKEN e FISH_API_KEY, e selecione uma voz da biblioteca Fish Audio.")
+                        st.info("O repositório GitHub também precisa dos Secrets CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN, MODAL_TOKEN_ID e MODAL_TOKEN_SECRET. O worker Modal deve estar implantado. O manifesto e o MP4 trafegam criptografados.")
                 else:
-                    progress = st.progress(0.05, text="Enviando storyboard para o trabalhador audiovisual...")
+                    with status_slot.container():
+                        st.markdown("**Produção do vídeo**")
+                        st.caption("Acompanhe a etapa atual, o tempo decorrido e a estimativa de conclusão.")
+                        progress = st.progress(0.03, text="Preparando envio seguro do storyboard...")
+                        status_detail = st.empty()
+
+                    def update_worker_progress(message, fraction=0.05, elapsed_seconds=0, remaining_seconds=600):
+                        percent = max(1, min(96, int(round(float(fraction) * 100)))
+                        elapsed_seconds = max(0, int(elapsed_seconds or 0))
+                        remaining_seconds = max(0, int(remaining_seconds or 0))
+                        elapsed_label = f"{elapsed_seconds // 60}min {elapsed_seconds % 60:02d}s"
+                        remaining_label = f"{remaining_seconds // 60}min" if remaining_seconds else "quase concluído"
+                        progress.progress(
+                            max(0.01, min(0.96, float(fraction))),
+                            text=f"{percent}% · {message}",
+                        )
+                        status_detail.caption(
+                            f"Decorrido: {elapsed_label} · restante estimado: {remaining_label}. "
+                            "A porcentagem é aproximada durante as etapas internas da Modal."
+                        )
+
                     try:
                         # Streamlit Cloud may retain stale dependencies after a GitHub sync.
                         # Reload the crypto module first, then reload the renderer that imports it.
@@ -585,8 +616,6 @@ if active_view == "Criar":
                         github_renderer_module = importlib.reload(github_renderer_module)
                         render_on_github = github_renderer_module.render_on_github
 
-                        def update_worker_progress(message):
-                            progress.progress(0.55, text=message)
                         result = render_on_github(
                             plan, voice, github_token, encryption_secret=cloudflare_token,
                             fish_api_key=fish_api_key,
@@ -651,11 +680,12 @@ if active_view == "Criar":
                         except Exception as review_error:
                             st.session_state["nexus_rendered_info"]["visual_review_status"] = "failed"
                             st.warning(f"MP4 produzido, mas a auditoria visual não pôde ser concluída: {review_error}")
-                        progress.progress(1.0, text="Render e verificações concluídos.")
+                        progress.progress(1.0, text="100% · Render e verificações concluídos.")
+                        status_detail.caption("Concluído · MP4 recuperado e verificações técnicas finalizadas.")
                         st.success("Vídeo MP4 produzido. O trabalhador verificou vídeo, áudio, resolução e duração.")
                     except Exception as exc:
-                        progress.empty()
-                        st.error(f"Produção Cloudflare + Remotion interrompida: {exc}")
+                        with status_slot.container():
+                            st.error(f"Produção Cloudflare + Remotion interrompida: {exc}")
             elif not configured_libraries:
                 st.error("Nenhuma biblioteca de vídeo está disponível para pesquisa.")
             else:
