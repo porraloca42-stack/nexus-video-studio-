@@ -38,7 +38,6 @@ model_cache = modal.Volume.from_name("nexus-ltx-model-cache", create_if_missing=
 
 image = (
     modal.Image.debian_slim(python_version="3.12")
-    .add_local_python_source("nexus")
     .apt_install("git", "ffmpeg")
     .uv_pip_install(
         "accelerate==1.4.0",
@@ -61,6 +60,7 @@ image = (
         f"git+https://github.com/Lightricks/LTX-Video.git@{MODEL_CODE_REVISION}"
     )
     .env({"HF_XET_HIGH_PERFORMANCE": "1", "HF_HUB_CACHE": MODEL_CACHE})
+    .add_local_python_source("nexus")
 )
 
 MINUTES = 60
