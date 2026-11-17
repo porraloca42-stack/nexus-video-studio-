@@ -122,6 +122,76 @@ def secret(name, default=""):
     except Exception:
         return os.getenv(name, default)
 
+@st.dialog("Escolher narração", width="large", icon=":material/record_voice_over:")
+def open_voice_picker():
+    api_key = secret("FISH_API_KEY")
+    if not api_key:
+        st.warning("A narração ainda não está conectada. Configure FISH_API_KEY nos Secrets do Streamlit.")
+        return
+    catalog_key = "nexus_curated_voice_catalog_v1"
+    if catalog_key not in st.session_state:
+        try:
+            with st.spinner("Carregando o catálogo de vozes..."):
+                st.session_state[catalog_key] = fish_audio.list_curated_voice_catalog(api_key, max_workers=8)
+        except Exception as exc:
+            st.session_state[catalog_key] = {"error": str(exc)}
+    catalog = st.session_state[catalog_key]
+    if isinstance(catalog, dict) and catalog.get("error"):
+        st.error(f"Não foi possível carregar as vozes: {catalog['error']}")
+        if st.button("Tentar novamente", width="stretch"):
+            st.session_state.pop(catalog_key, None)
+            st.rerun()
+        return
+    voice_items = []
+    for category in ("CapCut", "ElevenLabs", "Licenciadas Fish"):
+        for item in catalog.get(category, []):
+            voice_items.append({**item, "category": category})
+    if not voice_items:
+        st.info("Nenhuma voz disponível no catálogo.")
+        return
+    voice_by_id = {item["id"]: item for item in voice_items}
+    voice_ids = list(voice_by_id)
+    current_id = st.session_state.get("nexus_fish_voice_id", "")
+    if current_id not in voice_by_id:
+        current_id = voice_ids[0]
+    st.caption("Pesquise e escolha uma voz. A amostra, quando disponível, aparece abaixo.")
+    selected_id = st.selectbox(
+        "Voz disponível", voice_ids,
+        index=voice_ids.index(current_id),
+        format_func=lambda value: f"{voice_by_id[value]['category']} · {voice_by_id[value]['title']}",
+        key="nexus_voice_picker_choice",
+        width="stretch",
+    )
+    selected = voice_by_id[selected_id]
+    if selected.get("description"):
+        st.caption(selected["description"][:220])
+    if selected.get("sample_audio"):
+        st.audio(selected["sample_audio"], format="audio/mp3")
+    else:
+        st.caption("Amostra de áudio indisponível para esta voz.")
+    if st.button("Usar esta voz", type="primary", width="stretch", key="nexus-confirm-voice"):
+        st.session_state["nexus_fish_voice_id"] = selected_id
+        st.session_state["nexus_fish_voice_name"] = f"{selected['category']} · {selected['title']}"
+        st.rerun()
+
+
+@st.dialog("Duração do vídeo", width="small", icon=":material/schedule:")
+def open_duration_picker():
+    st.caption("Escolha o tempo total do vídeo.")
+    st.session_state.setdefault("nexus_duration_choice", int(st.session_state.get("nexus_duration", 45)))
+    chosen = st.pills(
+        "Duração", [40, 45, 50, 60], selection_mode="single",
+        default=st.session_state["nexus_duration_choice"],
+        format_func=lambda value: f"{value}s",
+        key="nexus_duration_choice", width="stretch", wrap=False,
+        label_visibility="collapsed",
+    )
+    chosen = chosen if chosen is not None else st.session_state.get("nexus_duration", 45)
+    if st.button("Confirmar duração", type="primary", width="stretch", key="nexus-confirm-duration"):
+        st.session_state["nexus_duration"] = int(chosen)
+        st.rerun()
+
+
 st.set_page_config(page_title="NEXUS VIDEO STUDIO", page_icon="🎬", layout="wide", initial_sidebar_state="collapsed")
 
 from nexus.visual_styles import STYLE_OPTIONS, STYLE_META, STYLE_PROFILES
@@ -160,27 +230,26 @@ html,body,.stApp,[data-testid="stAppViewContainer"]{background:#09090B!important
 [data-testid="stSidebar"],[data-testid="collapsedControl"],[data-testid="stHeader"],[data-testid="stToolbar"],[data-testid="manage-app-button"],[data-testid="stFooter"],[data-testid="stBottom"],#MainMenu,header,footer,.stApp>footer,div[class*="viewerBadge"],div[class*="ViewerBadge"],div[class*="viewer-badge"]{display:none!important;visibility:hidden!important;height:0!important;min-height:0!important;padding:0!important;margin:0!important;border:0!important}
 .block-container{padding-top:1rem!important;padding-bottom:8rem!important;max-width:1280px!important}
 .nexus-hero{position:relative;overflow:hidden;padding:1.45rem 1.65rem;border:1px solid #30234d;border-radius:22px;background:linear-gradient(115deg,rgba(24,18,43,.98),rgba(18,18,22,.96) 65%,rgba(30,24,52,.95));box-shadow:0 18px 48px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.06);margin-bottom:1rem}
-.nexus-brand-lockup{display:flex;align-items:center;justify-content:center;gap:clamp(.65rem,2.8vw,1.15rem);width:100%;min-width:0;margin:0 auto}
-.nexus-brand-lockup{display:flex;align-items:center;justify-content:flex-start;gap:.7rem;width:100%;min-width:0;margin:.35rem 0 1.1rem}
-.nexus-brand-lockup .nexus-logo-mark{width:44px!important;height:44px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
-.nexus-brand-lockup .nexus-logo-mark svg{width:100%!important;height:100%!important}
-.nexus-brand-copy .nexus-brand-name{font-family:Georgia,serif!important;font-size:1.55rem!important;letter-spacing:.02em!important;font-weight:700!important}
+.nexus-brand-lockup{display:flex;align-items:center;justify-content:center;gap:.7rem;width:100%;min-width:0;margin:.35rem auto 1.1rem}
+.nexus-brand-lockup .nexus-logo-mark{display:block;width:42px!important;height:48px!important;flex:0 0 42px!important;object-fit:contain;filter:drop-shadow(0 0 8px rgba(167,139,250,.32))}
+.nexus-brand-name{font-family:Georgia,serif!important;font-size:1.7rem!important;letter-spacing:.03em!important;font-weight:700!important;color:#f4f4f5!important;white-space:nowrap}
 .st-key-nexus-open-settings button{width:42px!important;height:42px!important;min-height:42px!important;border-radius:50%!important;background:#24232b!important;border:1px solid #38343f!important;font-size:1.2rem!important;padding:0!important}
-.nexus-brand-subtitle{display:none!important}
 .nexus-prompt-label,.nexus-section-label{font-size:.78rem;letter-spacing:.12em;font-weight:750;color:#aaa0c5;margin:0 0 .65rem}
 .nexus-control-eyebrow{font-size:.68rem;letter-spacing:.1em;font-weight:750;color:#a78bfa;margin:0 0 .5rem}
-.nexus-preview-stage{width:100%;aspect-ratio:1.08/1;min-height:270px;border:1px solid #51416e;border-radius:18px;background:linear-gradient(145deg,#1a1920,#121116);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.75rem;margin:.6rem 0 1rem;box-shadow:inset 0 0 42px rgba(124,58,237,.06)}
-.nexus-preview-stage svg{width:86px;height:164px;opacity:.75}
+.nexus-preview-stage{width:min(100%,340px);aspect-ratio:9/16;min-height:0;border:1px solid #51416e;border-radius:22px;background:linear-gradient(145deg,#1a1920,#121116);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.75rem;margin:.6rem auto 1rem;padding:1rem;box-sizing:border-box;box-shadow:inset 0 0 42px rgba(124,58,237,.06)}
+.nexus-preview-stage svg{width:24%;height:auto;max-height:26%;opacity:.75}
 .nexus-preview-caption{text-align:center;color:#aaa5b4;font-size:.85rem;line-height:1.45;letter-spacing:.01em}
 .st-key-nexus-video-stage{margin-top:.25rem}
-
-/* Native Streamlit overflow behavior is used for mobile controls. */
+.st-key-nexus-compact-controls{width:100%!important;margin:.35rem 0 .8rem!important}
+.st-key-nexus-compact-controls [data-testid="stHorizontalBlock"]{display:flex!important;flex-wrap:nowrap!important;align-items:stretch!important;gap:.65rem!important}
+.st-key-nexus-compact-controls [data-testid="column"]{flex:1 1 0!important;min-width:0!important;width:50%!important}
+.st-key-nexus-compact-controls [data-testid="stButton"]{width:100%!important}
+.st-key-nexus-compact-controls [data-testid="stButton"] button{width:100%!important;min-width:0!important;min-height:3.45rem!important;height:3.45rem!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;border:1px solid #51416e!important;border-radius:13px!important;background:linear-gradient(135deg,#1b1924,#15141b)!important;color:#f4f0ff!important;font-size:.82rem!important;font-weight:650!important;padding:.55rem .65rem!important}
+.st-key-nexus-compact-controls [data-testid="stButton"] button:hover{border-color:#9b7bff!important;background:#211b31!important}
 .st-key-nexus-video-stage [data-testid="stVerticalBlock"]{gap:0!important}
 
 .nexus-logo-mark{display:grid;place-items:center;width:clamp(58px,16vw,76px);height:clamp(58px,16vw,76px);flex:0 0 auto;border-radius:18px;background:linear-gradient(145deg,#21163e,#101019);border:1px solid #6245a2;box-shadow:0 0 28px rgba(139,92,246,.22),inset 0 1px 0 rgba(255,255,255,.12)}.nexus-logo-mark svg{width:66%;height:66%;filter:drop-shadow(0 0 9px rgba(167,139,250,.45))}
-.nexus-brand-copy{display:flex;flex:0 1 auto;min-width:0;flex-direction:column;align-items:flex-start;justify-content:center;line-height:1.05;white-space:nowrap}
-.nexus-brand-name{font-size:clamp(1.55rem,6.2vw,2.25rem);font-weight:800;letter-spacing:.10em;color:#f4f4f5;white-space:nowrap}
-.nexus-brand-subtitle{font-size:clamp(.78rem,3.2vw,1.08rem);font-weight:650;letter-spacing:.18em;color:#b9a0ff;margin-top:.38rem;white-space:nowrap}
+.nexus-brand-name{font-size:clamp(1.55rem,6.2vw,2.25rem);font-weight:700;letter-spacing:.03em;color:#f4f4f5;white-space:nowrap}
 .nexus-kicker{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:#a78bfa;font-weight:800;margin:0 0 .8rem}
 .nexus-preview{display:flex;gap:13px;align-items:center;padding:12px;border:1px solid #30234d;border-radius:15px;background:linear-gradient(140deg,rgba(124,58,237,.12),rgba(18,18,22,.7));margin:.4rem 0 .8rem}
 .nexus-preview img{width:136px;max-width:42%;aspect-ratio:16/9;object-fit:cover;border-radius:10px}
@@ -213,16 +282,16 @@ div[data-testid="stButton"] button[kind="primary"]:hover{box-shadow:0 8px 25px r
 [data-testid="stAlert"]{border-radius:13px!important}
 [data-testid="stProgress"]>div>div{background:linear-gradient(90deg,#6366F1,#8B5CF6)!important}
 hr{border-color:#27272A!important}
-@media(max-width:850px){.block-container{padding:.75rem .8rem 8rem!important}.nexus-hero{padding:1rem .7rem;border-radius:17px}.nexus-brand-lockup{gap:.55rem}.nexus-brand-name{font-size:1.45rem!important;letter-spacing:.02em!important}.nexus-preview-stage{min-height:245px}.nexus-preview-stage svg{width:76px;height:146px}}
+@media(max-width:850px){.block-container{padding:.75rem .8rem 8rem!important}.nexus-hero{padding:1rem .7rem;border-radius:17px}.nexus-brand-lockup{gap:.55rem}.nexus-brand-lockup .nexus-logo-mark{width:36px!important;height:42px!important;flex-basis:36px!important}.nexus-brand-name{font-size:1.45rem!important}.nexus-preview-stage{width:min(100%,300px)}.st-key-nexus-compact-controls [data-testid="stButton"] button{font-size:.76rem!important;padding:.5rem .45rem!important}}
 </style>
 """, unsafe_allow_html=True)
 
-header_brand, header_settings = st.columns([5, 0.65], vertical_alignment="center")
+header_left, header_brand, header_settings = st.columns([1, 4, 1], vertical_alignment="center")
 with header_brand:
-    st.markdown("""
+    st.markdown(f"""
     <div class="nexus-brand-lockup">
-      <div class="nexus-logo-mark" aria-label="NEXUS"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 3 39 23 59 32 39 39 32 61 24 40 4 32 24 24Z" fill="#9B7BFF"/><path d="M32 17 36 28 47 32 36 36 32 47 28 36 17 32 28 28Z" fill="#E9DFFF"/></svg></div>
-      <div class="nexus-brand-copy"><div class="nexus-brand-name">NEXUS</div><div class="nexus-brand-subtitle">VIDEO STUDIO</div></div>
+      <svg class="nexus-logo-mark" viewBox="0 0 958 1174" role="img" aria-label="Símbolo N NEXUS"><path d="{markPath}" fill="#F7F5FA"/></svg>
+      <span class="nexus-brand-name">NEXUS</span>
     </div>
     """, unsafe_allow_html=True)
 with header_settings:
@@ -268,93 +337,23 @@ if active_view == "Criar":
         st.session_state["nexus_fish_voice_id"] = secret("FISH_VOICE_ID")
     if "nexus_fish_voice_name" not in st.session_state:
         st.session_state["nexus_fish_voice_name"] = ""
-    selected_name = st.session_state.get("nexus_fish_voice_name") or ""
-    voice_button_label = selected_name if selected_name else "Escolher voz"
     st.session_state.setdefault("nexus_duration", 45)
-    duration = st.session_state.get("nexus_duration", 45)
+    selected_voice_name = st.session_state.get("nexus_fish_voice_name") or ""
+    voice_button_label = selected_voice_name.split(" · ")[-1] if selected_voice_name else "Escolher voz"
+    if len(voice_button_label) > 19:
+        voice_button_label = voice_button_label[:18].rstrip() + "…"
+    duration = int(st.session_state.get("nexus_duration", 45))
 
     with st.container(key="nexus-compact-controls"):
-        voice_col, duration_col = st.columns([1.2, 0.9], gap="small", vertical_alignment="center")
+        voice_col, duration_col = st.columns([1, 1], gap="small", vertical_alignment="center")
         with voice_col:
-            with st.popover(f"🎙️ {voice_button_label}", use_container_width=True):
-                st.markdown("**NARRAÇÃO**")
-                if not fish_api_key:
-                    st.warning("Configure FISH_API_KEY nos Secrets do Streamlit para carregar as vozes.")
-                else:
-                    st.caption("40 modelos selecionados manualmente · IDs preservados por categoria")
-                    st.caption("As categorias seguem sua lista. A separação masculino/feminino é feita somente quando os metadados identificam o gênero; os demais ficam em Não identificado.")
-                    catalog_key = "nexus_curated_voice_catalog_v1"
-                    if catalog_key not in st.session_state:
-                        try:
-                            with st.spinner("Consultando os metadados das 40 vozes selecionadas..."):
-                                st.session_state[catalog_key] = fish_audio.list_curated_voice_catalog(
-                                    fish_api_key, max_workers=8
-                                )
-                        except Exception as catalog_error:
-                            st.session_state[catalog_key] = {"error": str(catalog_error)}
-                    narrator_catalog = st.session_state[catalog_key]
-                    if isinstance(narrator_catalog, dict) and narrator_catalog.get("error"):
-                        st.error(f"Não foi possível carregar o catálogo: {narrator_catalog['error']}")
-                        if st.button("Tentar novamente", key="retry_curated_voices"):
-                            st.session_state.pop(catalog_key, None)
-                            st.rerun()
-                    else:
-                        gender_groups = (
-                            ("male", "Masculinas"),
-                            ("female", "Femininas"),
-                            ("unknown", "Gênero não identificado"),
-                        )
-                        for category in ("CapCut", "ElevenLabs", "Licenciadas Fish"):
-                            category_voices = narrator_catalog.get(category, [])
-                            with st.expander(f"{category} · {len(category_voices)} modelos", expanded=False):
-                                for gender, gender_label in gender_groups:
-                                    voices = [item for item in category_voices if item.get("gender") == gender]
-                                    st.markdown(f"**{gender_label} · {len(voices)}**")
-                                    if not voices:
-                                        st.caption("Nenhuma voz identificada nesta divisão.")
-                                    for voice_option in voices:
-                                        voice_col, sample_col = st.columns([1.1, 1.5], vertical_alignment="center")
-                                        with voice_col:
-                                            is_selected = voice_option["id"] == st.session_state.get("nexus_fish_voice_id", "")
-                                            st.markdown(f"**{voice_option['title']}**")
-                                            st.caption(f"ID: {voice_option['id']}")
-                                            details = []
-                                            source_label = str(voice_option.get("source") or "").casefold()
-                                            if "pvc" in source_label:
-                                                details.append("Professional Voice Clone")
-                                            if voice_option.get("licensed"):
-                                                details.append("Licenciada pela Fish Audio")
-                                            if voice_option.get("author"):
-                                                details.append(voice_option["author"])
-                                            if details:
-                                                st.caption(" · ".join(details))
-                                            if voice_option.get("description"):
-                                                st.caption(voice_option["description"][:150])
-                                            if not voice_option.get("metadata_available"):
-                                                st.caption("Metadados indisponíveis; ID mantido conforme sua lista.")
-                                            if st.button(
-                                                "Selecionada" if is_selected else "Usar esta voz",
-                                                key=f"curated_voice_pick_{voice_option['id']}",
-                                                use_container_width=True,
-                                                type="primary" if is_selected else "secondary",
-                                            ):
-                                                st.session_state["nexus_fish_voice_id"] = voice_option["id"]
-                                                st.session_state["nexus_fish_voice_name"] = f"{category} · {voice_option['title']}"
-                                                st.rerun()
-                                        with sample_col:
-                                            if voice_option.get("sample_audio"):
-                                                st.audio(voice_option["sample_audio"], format="audio/mp3")
-                                            else:
-                                                st.caption("Amostra não publicada ou indisponível.")
-
-            voice = st.session_state.get("nexus_fish_voice_id", "")
+            if st.button(f"🎙️  {voice_button_label}", key="nexus-open-voice-picker", width="stretch"):
+                open_voice_picker()
         with duration_col:
-            with st.popover(f"◷  {duration}s", use_container_width=True):
-                duration = st.selectbox(
-                    "Duração do vídeo", [40, 45, 50, 60], index=1,
-                    format_func=lambda value: f"{value}s",
-                    key="nexus_duration",
-                )
+            if st.button(f"◷  {duration}s", key="nexus-open-duration-picker", width="stretch"):
+                open_duration_picker()
+
+    voice = st.session_state.get("nexus_fish_voice_id", "")
 
     with st.container(key="nexus-video-stage"):
         if st.session_state.get("nexus_rendered_video"):
