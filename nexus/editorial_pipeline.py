@@ -542,6 +542,7 @@ def run_four_brain_pipeline(
     photographer,
     editor,
     narration_audio: dict,
+    word_timestamps: list[dict] | None = None,
 ) -> dict:
     """Run injected stage functions in order; safe for mocks and offline tests.
 
@@ -556,6 +557,7 @@ def run_four_brain_pipeline(
         raise ValueError("narration_audio.audio_asset_id: expected non-empty string")
     if not _is_number(narration_audio.get("duration_seconds")) or narration_audio["duration_seconds"] <= 0:
         raise ValueError("narration_audio.duration_seconds: expected positive number")
+    aligned_words = provider_segments_to_word_timestamps(word_timestamps or [])
 
     hook = strategist(brief)
     errors = validate_hook_strategy(hook)
@@ -589,6 +591,7 @@ def run_four_brain_pipeline(
         "micro_script": script,
         "visual_direction": visual,
         "narration_audio": narration_audio,
+        "word_timestamps": aligned_words,
     })
     errors = validate_edit_timeline(edit)
     if errors:
