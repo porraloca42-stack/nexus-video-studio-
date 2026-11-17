@@ -784,3 +784,13 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - Nenhuma nova chamada Gemini live, Fish Audio, Cloudflare, Modal/GPU ou render foi iniciada pelo assistente. Nenhum custo novo foi gerado nesta etapa.
 - Próximo passo seguro: verificar que o app Streamlit carregou a versão integrada e então, com autorização explícita do usuário para eventuais custos, fazer uma única produção controlada. A correção só retenta Gemini uma vez; não garante que o serviço esteja saudável nem que o restante do pipeline esteja implantado.
 - Timestamp: 2026-11-17T15:26:48-03:00 (UTC−03:00). Atualização documental [skip ci].
+
+
+## Continuidade — identificador de build do Streamlit — 2026-11-17
+- O usuário confirmou que o app não possui informação de versão visível; pedir screenshot sem identificador não permite comprovar qual commit está rodando.
+- Criada a branch `fix/streamlit-runtime-build-indicator`.
+- `nexus/build_info.py`: identifica primeiro o SHA do checkout local por `git rev-parse HEAD`; usa variáveis de ambiente conhecidas apenas como fallback; não consulta o HEAD remoto.
+- `app.py`: Perfil passa a exibir SHA curto, origem e link para o commit completo; sem fonte confiável, informa que a versão não foi identificada.
+- `tests/test_build_info.py`: quatro casos unitários cobrindo checkout, fallback, valor inválido e ausência do Git.
+- Não houve chamadas externas pagas, produção, deploy ou GPU. CI ainda precisa executar; a alteração ainda não foi integrada nem observada no Streamlit.
+- Próxima ação: abrir PR, aguardar CI, corrigir eventuais falhas e integrar apenas com checks aprovados. Depois da sincronização automática do Streamlit, conferir o SHA no Perfil.
