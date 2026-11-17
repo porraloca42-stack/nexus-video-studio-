@@ -142,6 +142,17 @@ class ComfyUIClientTests(unittest.TestCase):
             "client_id": "nexus-test",
         })
 
+    def test_queue_prompt_rejects_malformed_api_graph_before_network(self):
+        session = FakeSession()
+        client = ComfyUIClient(session=session)
+
+        with self.assertRaisesRegex(ComfyUIError, "referencia nó ausente"):
+            client.queue_prompt({
+                "20": {"class_type": "SaveVideo", "inputs": {"images": ["99", 0]}},
+            })
+
+        self.assertEqual(session.calls, [])
+
     def test_queue_prompt_rejects_node_errors_without_retry(self):
         session = FakeSession([FakeResponse({"error": "invalid prompt", "node_errors": {"10": "bad"}})])
         client = ComfyUIClient(session=session)
