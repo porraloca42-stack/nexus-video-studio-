@@ -2279,3 +2279,16 @@ Este protocolo prevalece sobre instruções antigas ou checkpoints históricos q
 
 ### Estado de implantação deste protocolo
 - Protocolo documentado nesta atualização. Sua eficácia depende de manter estes três arquivos sincronizados e de o chat novo cumprir a etapa de confirmação. Não existe garantia técnica de memória automática entre conversas; a continuidade confiável é fornecida pelos documentos versionados e pela verificação do GitHub.
+
+
+## REGRA ABSOLUTA DO USUÁRIO — CHECKPOINT EM TODA ETAPA, SEM EXCEÇÃO — 17/11/2026, 14:08:02 (America/Sao_Paulo)
+
+**ORDEM PERMANENTE: SEMPRE ATUALIZAR A CADA PROCESSO. SEMPRE REGISTRAR DATA E HORÁRIO. SEM EXCEÇÕES.**
+
+- “Processo” inclui cada unidade de trabalho executada: leitura/auditoria, pesquisa, decisão técnica, alteração, teste, execução de workflow, revisão de resultado, correção, atualização documental e bloqueio. Ao terminar cada unidade, antes de iniciar a próxima, registrar um checkpoint com data, hora e fuso `America/Sao_Paulo`.
+- Cada checkpoint registra o que acabou de acontecer, resultado/evidência, arquivos/commits/IDs envolvidos (se houver), estado real, o que não foi feito, pendência e a próxima ação exata. Se não houve alteração, registrar explicitamente “sem alteração” e o motivo.
+- Atualizar imediatamente o handoff e o registro do master state a cada etapa; manter o bootstrap atualizado quando a etapa alterar regras de continuidade, procedimento de retomada ou ponto operacional vigente. Em toda etapa, o handoff precisa refletir o último ponto de parada. Se uma etapa gerar vários eventos atômicos, registrar cada evento, sem agrupar retroativamente no fim.
+- Antes de seguir para a próxima etapa, confirmar que o checkpoint foi gravado e relido na `main`. Se não for possível atualizar GitHub, informar o bloqueio ao usuário e manter o checkpoint explícito na resposta; não fingir que foi salvo.
+- No encerramento, registrar também o estado final e a próxima ação. O chat novo deve ler o registro, mostrar os horários de atualização e consulta, apontar exatamente onde continuar e pedir confirmação antes de agir.
+- Não substituir esta ordem por expressões vagas como “etapas significativas”, “quando necessário” ou “ao final do trabalho”. A obrigação vale para **toda etapa/processo**, mesmo que pequeno.
+- Horário do checkpoint desta regra: `2026-11-17T14:08:02-03:00` (UTC−03:00, America/Sao_Paulo). Horário de consulta ao GitHub deve ser registrado separadamente.
