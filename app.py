@@ -304,7 +304,7 @@ with tab_create:
                 unsafe_allow_html=True
             )
             with st.expander("Escolher estilo visual · 18 estilos", expanded=False):
-                st.caption("Exemplos ilustrativos · toque para selecionar.")
+                st.caption("Referências visuais simplificadas · toque para selecionar.")
                 with st.container(key="nexus-style-gallery"):
                     for row_start in range(0, len(STYLE_OPTIONS), 2):
                         cols = st.columns(2)
