@@ -2386,3 +2386,11 @@ Este protocolo prevalece sobre instruções antigas ou checkpoints históricos q
 - Nenhum job foi declarado aprovado/reprovado ainda. Próxima ação: consultar conclusão do run e inspecionar logs de `unit-tests` primeiro; corrigir qualquer falha antes de merge.
 - Nenhuma chamada Gemini real, render de produção, GPU ou serviços de mídia foi acionada.
 - Timestamp: `2026-11-17T14:26:25-03:00` (UTC−03:00). Atualização documental usa `[skip ci]` para não criar workflow concorrente.
+
+
+## Checkpoint — primeira execução do CI do PR #3 falhou no teste novo — 2026-11-17T14:27:10-03:00 (America/Sao_Paulo)
+- Run #1108 / `44136877385`, commit da PR `29d2fb01101570c3bd6caf6121d1700da8a77659`: `unit-tests` **failure**, `remotion-typecheck` **success**, `commons-live-smoke` ainda `in_progress` no momento da consulta, `remotion-synthetic-render` **skipped**.
+- Log do job `unit-tests` (ID `134228700402`) inspecionado: 213 testes executados; 1 erro no teste novo `test_live_smoke_reloads_cached_director_before_resolving_generator`. O mock de `importlib.import_module` afetou a resolução do segundo patch, que tentou acessar `reload` no objeto simulado (`AttributeError: namespace ... does not have attribute 'reload'`). A falha está no harness do teste, não no código de produção. Nenhuma chamada Gemini foi feita.
+- Correção planejada: no teste, usar `patch.object` diretamente no objeto `importlib` para mockar `import_module` e `reload`, evitando resolução de targets por caminho enquanto o próprio import está sendo simulado. Depois, atualizar a branch/PR e aguardar CI completo novamente.
+- PR #3 permanece aberto e não pode ser mergeado. Nenhum deploy de produção, GPU ou render de vídeo foi iniciado.
+- Timestamp: `2026-11-17T14:27:10-03:00` (UTC−03:00). Atualização documental `[skip ci]` para não disparar workflow concorrente.
