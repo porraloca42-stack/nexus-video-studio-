@@ -615,3 +615,12 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - Nenhum arquivo de código foi alterado ainda; nenhuma execução de teste, chamada Gemini, deploy, GPU ou render foi iniciada.
 - Próxima ação: aplicar alteração mínima em `nexus/brain4_smoke_test.py` e teste de regressão em `tests/test_brain4_smoke_test.py`; revisar diff antes de abrir PR.
 - Timestamp: `2026-11-17T14:23:04-03:00` (UTC−03:00).
+
+
+## Checkpoint — correção e teste de regressão implementados em branch — 2026-11-17T14:23:46-03:00 (America/Sao_Paulo)
+- Branch `fix/brain4-reload-director-module`; commit `633beed014fb05fd586d510fe1d3fa2e31b92127` (`fix: reload cached director for Brain 4 smoke test`).
+- Arquivos alterados na branch: `nexus/brain4_smoke_test.py` (importa e recarrega `nexus.director` antes de resolver `generate_editorial_json`; valida callable e apresenta erro diagnóstico com caminho do módulo se ausente) e `tests/test_brain4_smoke_test.py` (novo teste mockado que simula módulo antigo em cache e exige exatamente uma invocação do gerador fake).
+- O caminho de teste com `model_call` injetado permanece sem reload e sem rede. O caminho live continua com uma única geração Gemini; nenhuma chamada real foi feita. Nenhum vídeo, serviço de mídia, GPU ou render iniciado.
+- Uma tentativa de montar o patch via ferramenta falhou por erro de sintaxe no script antes de qualquer escrita; script corrigido e commit efetivamente criado. Estado final da edição confirmado pelo retorno do GitHub: atualização da branch bem-sucedida.
+- Testes ainda não executados; CI ainda não disparado; nenhuma PR aberta; deploy não realizado. Próxima ação: reler os dois arquivos na branch, comparar diff com main, abrir PR para acionar CI e analisar todos os jobs.
+- Main no momento do checkpoint: `64cbeb496ff83d696a64011173ad41f0b7f90d25`. Timestamp: `2026-11-17T14:23:46-03:00` (UTC−03:00).
