@@ -247,3 +247,23 @@ Este bootstrap reduz perda de continuidade, mas não garante que a plataforma ca
 - CI #1085, #1086 e #1087 dos três commits documentais concluiu com sucesso.
 - A raiz do app e `/_stcore/health` não puderam ser acessadas pelas ferramentas disponíveis; falha de acesso/DNS no ambiente não comprova que o serviço esteja fora do ar.
 - O botão Brain 4 consta no código da main, mas a publicação da versão e sua visibilidade ainda não foram confirmadas. Próxima etapa: confirmar o último deploy no Streamlit Cloud ou obter acesso observável à UI; depois aguardar clique explícito do usuário para Gemini.
+
+
+## REGRA CRÍTICA — RELATÓRIO DE RETOMADA E CONFIRMAÇÃO OBRIGATÓRIA
+
+Antes de qualquer alteração em todo chat novo:
+1. Ler os três documentos canônicos diretamente da `main`: master state, handoff mais recente e este bootstrap.
+2. Verificar HEAD, commits recentes, arquivos alterados e GitHub Actions/checks. Investigar logs de falhas e estados pendentes.
+3. Não confiar em anexos antigos, memória ou resumos como fonte principal. Não misturar datas; em conflito, prevalece a evidência atual da `main` e do Actions.
+4. Exibir relatório de retomada contendo: horário atual da consulta ao GitHub em America/Sao_Paulo; horário do último checkpoint documental; HEAD/commit; último trabalho concluído; testes e resultados; estados separados (implementado, commitado, CI, deploy, render, validação); pendências; bloqueios; ponto exato e próxima ação.
+5. Perguntar literalmente se o estado e o ponto de continuação estão corretos e se pode prosseguir. **Esperar confirmação explícita.** Até lá, não fazer alterações, commits, dispatches, chamadas externas, deploy ou render. Apenas leitura/auditoria para montar o relatório.
+6. Se houver divergência, CI pendente/falho ou ponto de retomada incerto, declarar isso e não inventar resposta.
+
+## REGISTRO DE CADA ETAPA
+- Após cada etapa significativa, criar checkpoint com data/hora completa e fuso America/Sao_Paulo, ação, arquivos, commit, testes, evidências, limitações, estado real e próxima ação.
+- Sincronizar master state, handoff e bootstrap; conferir os três arquivos na main e registrar SHAs. Se qualquer atualização falhar, declarar sincronização parcial.
+- No encerramento, registrar exatamente onde parou, inclusive quando bloqueado.
+- Diferenciar horário da consulta atual e horário da última atualização documental. Nunca inventar timestamps.
+- Este mecanismo é continuidade versionada por GitHub, não promessa de memória automática entre chats.
+
+O protocolo detalhado e prevalente está no fim do `NEXUS_MASTER_STATE.md`. O handoff deve conter sempre o checkpoint mais recente.
