@@ -525,11 +525,11 @@ def apply_visual_style_lock(plan, style):
         )
         # The image worker consumes image_prompt directly; carry the full internal
         # art direction into that exact prompt rather than relying only on metadata.
-        image_marker = "\\n\\nNEXUS STYLE DIRECTION:"
+        image_marker = "\n\nNEXUS STYLE DIRECTION:"
         image_prompt = str(scene.get("image_prompt") or "").split(image_marker, 1)[0].rstrip()
         if image_prompt:
             scene["image_prompt"] = (
-                image_prompt + image_marker + "\\n" + plan["style_directive"]
+                image_prompt + image_marker + "\n" + plan["style_directive"]
             )
     return plan
 
