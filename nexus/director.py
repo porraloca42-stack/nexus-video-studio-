@@ -207,7 +207,7 @@ Não reescreva a narração nem invente alinhamento temporal, confiança ou prec
 
 
 def generate_editorial_json(prompt, api_key, requested_model="auto"):
-    """Make one bounded Gemini generation request for an editorial stage."""
+    """Make a bounded Gemini request, retrying one transient outage on the same model."""
     if not api_key:
         raise RuntimeError("Configure GEMINI_API_KEY para ativar o Brain 4.")
     result = _request(
@@ -218,8 +218,10 @@ def generate_editorial_json(prompt, api_key, requested_model="auto"):
             else default
         ),
         system_instruction=EDITORIAL_MODEL_SYSTEM,
+        # Keep Brain 4 on the explicitly selected model; retry only a transient
+        # service outage once, without silently switching editorial models.
         max_models=1,
-        attempts_per_model=1,
+        attempts_per_model=2,
         require_scenes=False,
     )
     result.pop("director_model", None)
@@ -397,11 +399,17 @@ def _request(
 
     tried = ", ".join(attempted) if attempted else "nenhum modelo"
     if last_status == 503 or last_status in (500, 502, 504):
-        if max_models == 1 and attempts_per_model == 1:
+        if max_models == 1:
+            if attempts_per_model == 1:
+                raise RuntimeError(
+                    "O Gemini está temporariamente sobrecarregado ou indisponível. "
+                    f"O Brain 4 fez uma única chamada ao modelo selecionado ({tried}) "
+                    "e não tentou outros modelos. Aguarde alguns minutos e execute novamente."
+                )
             raise RuntimeError(
-                "O Gemini está temporariamente sobrecarregado ou indisponível. "
-                f"O teste Brain 4 faz uma única chamada ao modelo selecionado ({tried}) "
-                "e não tentou outros modelos. Aguarde alguns minutos e execute o teste novamente."
+                "O Gemini continuou temporariamente indisponível após duas tentativas "
+                f"no mesmo modelo selecionado ({tried}). Nenhum outro modelo foi acionado. "
+                "Aguarde alguns minutos e tente novamente."
             )
         raise RuntimeError(
             "O Gemini está temporariamente sobrecarregado ou indisponível. "
