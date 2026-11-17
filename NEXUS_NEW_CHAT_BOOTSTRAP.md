@@ -99,3 +99,11 @@ Este bootstrap reduz perda de continuidade, mas não garante que a plataforma ca
 - O run #974 gerou MP4 sintético, mas falhou na asserção de ducking: -34.6dB antes e -38.7dB durante. O artifact #14342431166 foi inspecionado: MP4 4s, 720x1280, 30fps, H.264/AAC. Legendas destacadas foram verificadas; teste SFX ainda não foi alcançado.
 - Hipótese de contaminação da medição por frequências próximas do fixture (narration 440Hz vs música 220Hz) foi tratada separando os tons: commit `549bb44e51e2375cf0f08b826749565bfc104c96` usa narração 1100Hz, música 220Hz e SFX 3000Hz, com banda SFX 2800–3200Hz.
 - Próxima ação: verificar run disparado pelo commit com marcador, conferir resultado das três verificações de áudio/legendas e inspecionar artifact. Não declarar validação multifaixa antes disso.
+
+
+## Último checkpoint validado — 17/11/2026
+- Run #977 / `44114553978`, commit `549bb44e51e2375cf0f08b826749565bfc104c96`: unit-tests, Remotion typecheck, Commons smoke e render sintético multifaixa passaram.
+- Métricas: ducking da música -36.1dB → -50.6dB → -36.1dB; SFX -45.7dB → -30.0dB; pixels de destaque word_one=2249, word_two=1773, caption_off=0.
+- Artifact #14342476549 foi baixado e inspecionado: MP4 H.264 720x1280, 30fps, AAC 48kHz, 4.011s; frame de palavra destacada verificado visualmente.
+- Estado: render sintético multifaixa validado. Não confundir com voz real, alinhamento fonético, vídeo final de 40–50s, integração com Streamlit, deploy ou produção. O adapter Remotion continua isolado.
+- Próxima direção: estudar integração gradual do adapter ao app, preservando fallback, antes de qualquer alteração de fluxo produtivo; sem APIs pagas sem autorização explícita.
