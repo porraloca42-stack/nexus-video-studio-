@@ -1531,3 +1531,6 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Commits: `2d32c09` (estrutura de cabeçalho e seleção de duração), `06f67fd` (asset SVG vetorizado da marca), `dc884b7` (testes de contrato), `cba7adf` (diálogo de voz compacto/pesquisável).
 - Validação intermediária: o run `43993995236` do commit `2d32c09` falhou apenas porque o teste antigo ainda esperava as colunas removidas; o teste foi atualizado no commit `dc884b7`. Runs `43994072632` e `43994103531` acionados para os commits de teste e app final; consultar resultado antes de declarar CI aprovado.
 - Limite: alterações estão em `main`; aparência publicada no Streamlit mobile ainda não foi confirmada. A validação automatizada não comprova alinhamento/renderização do SVG nem comportamento real do modal no dispositivo.
+
+- Validação confirmada: run `43994072632` do commit `dc884b7` passou nos três jobs; suíte unitária executou 102 testes e terminou em `OK`, além de Remotion typecheck e Commons live smoke aprovados.
+- Run `43994103531` do commit final de aplicação `cba7adf`: Remotion typecheck já aprovado; unit-tests e Commons smoke ainda estavam em execução no último polling. Não declarar o código final totalmente validado até a conclusão desses dois jobs.
