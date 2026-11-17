@@ -572,9 +572,15 @@ if active_view == "Criar":
                 else:
                     progress = st.progress(0.05, text="Enviando storyboard para o trabalhador audiovisual...")
                     try:
-                        # Streamlit Cloud may keep imported modules cached after a
-                        # GitHub sync. Reload the renderer so the latest payload-compression
-                        # fix is used by this production attempt.
+                        # Streamlit Cloud may retain stale dependencies after a GitHub sync.
+                        # Reload the crypto module first, then reload the renderer that imports it.
+                        render_crypto_module = importlib.import_module("nexus.render_crypto")
+                        render_crypto_module = importlib.reload(render_crypto_module)
+                        if not hasattr(render_crypto_module, "decrypt_compressed_text"):
+                            raise RuntimeError(
+                                "Módulo de criptografia desatualizado ou incompatível: "
+                                "decrypt_compressed_text não está disponível."
+                            )
                         github_renderer_module = importlib.import_module("nexus.github_renderer")
                         github_renderer_module = importlib.reload(github_renderer_module)
                         render_on_github = github_renderer_module.render_on_github
