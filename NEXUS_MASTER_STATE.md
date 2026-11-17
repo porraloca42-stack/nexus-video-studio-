@@ -1534,3 +1534,7 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 
 - Validação confirmada: run `43994072632` do commit `dc884b7` passou nos três jobs; suíte unitária executou 102 testes e terminou em `OK`, além de Remotion typecheck e Commons live smoke aprovados.
 - Run `43994103531` do commit final de aplicação `cba7adf`: Remotion typecheck já aprovado; unit-tests e Commons smoke ainda estavam em execução no último polling. Não declarar o código final totalmente validado até a conclusão desses dois jobs.
+
+- Run `43994160209` do commit `56f7c8d` concluiu com sucesso nos três jobs: unit-tests, Remotion typecheck e Commons live smoke. O run anterior `43994072632` também passou com 102 testes.
+- Ajuste final de robustez do cabeçalho: removido `display:flex` do contêiner Streamlit externo para não interferir no DOM interno; o lockup centraliza por largura total própria e o botão de configurações fica em posicionamento absoluto. Commit `a53364c`.
+- Run `43994261797` foi acionado para esse último ajuste; estava em fila no último polling. A validação do layout publicado segue pendente.
