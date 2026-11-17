@@ -985,8 +985,8 @@ with tab_styles:
     st.markdown('<div class="nexus-kicker">BIBLIOTECA VISUAL</div>', unsafe_allow_html=True)
     st.subheader("Explore os estilos")
     st.caption("Cada estilo define uma linguagem estética. O conteúdo das cenas continua sendo criado a partir do seu roteiro — nenhum estilo obriga a IA a repetir personagens, objetos ou cenários.")
-    for row_start in range(0, len(STYLE_OPTIONS), 3):
-        cols = st.columns(3, gap="medium")
+    for row_start in range(0, len(STYLE_OPTIONS), 2):
+        cols = st.columns(2, gap="medium")
         for offset, col in enumerate(cols):
             index = row_start + offset
             if index >= len(STYLE_OPTIONS):
