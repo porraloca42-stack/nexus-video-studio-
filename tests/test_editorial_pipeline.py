@@ -78,6 +78,7 @@ def valid_edit_timeline():
             {"block_id": "m1", "trigger_text": "problema", "at_seconds": 0.11, "alignment_level": "word", "visual_event": "Corte para o plano de porta", "sfx": None},
         ],
         "caption_events": [],
+        "sfx_events": [],
         "audio_mix_events": [],
     }
 
@@ -213,6 +214,50 @@ class EditorialPipelineContractTests(unittest.TestCase):
         errors = validate_editorial_pipeline(pipeline)
         self.assertTrue(any("selected hook must appear" in error for error in errors["micro_script"]))
 
+
+
+    def test_edit_timeline_accepts_caption_sfx_and_music_ducking_events(self):
+        data = valid_edit_timeline()
+        data["caption_events"] = [{
+            "id": "cap-1", "start_seconds": 0.0, "end_seconds": 1.0,
+            "text": "O problema", "position": "bottom",
+            "words": [
+                {"text": "O", "start_seconds": 0.0, "end_seconds": 0.1, "emphasis": False},
+                {"text": "problema", "start_seconds": 0.11, "end_seconds": 0.8, "emphasis": True},
+            ],
+        }]
+        data["sfx_events"] = [{
+            "id": "sfx-1", "asset_path": "sfx/whoosh.wav",
+            "start_seconds": 1.0, "duration_seconds": 0.5, "volume": 0.2,
+        }]
+        data["audio_mix_events"] = [{
+            "start_seconds": 0.0, "end_seconds": 2.0, "music_volume": 0.05,
+        }]
+        self.assertEqual(validate_edit_timeline(data), [])
+
+    def test_edit_timeline_rejects_caption_word_outside_cue(self):
+        data = valid_edit_timeline()
+        data["caption_events"] = [{
+            "id": "cap-1", "start_seconds": 0.0, "end_seconds": 0.5,
+            "text": "Problema", "position": "bottom",
+            "words": [{"text": "Problema", "start_seconds": 0.1, "end_seconds": 0.8}],
+        }]
+        self.assertTrue(any("word ends after caption cue" in error for error in validate_edit_timeline(data)))
+
+    def test_edit_timeline_rejects_sfx_outside_audio_duration(self):
+        data = valid_edit_timeline()
+        data["sfx_events"] = [{
+            "id": "sfx-1", "asset_path": "sfx/hit.wav",
+            "start_seconds": 5.8, "duration_seconds": 0.5, "volume": 0.5,
+        }]
+        self.assertTrue(any("sound effect exceeds audio duration" in error for error in validate_edit_timeline(data)))
+
+    def test_edit_timeline_rejects_invalid_music_volume(self):
+        data = valid_edit_timeline()
+        data["audio_mix_events"] = [{
+            "start_seconds": 0.0, "end_seconds": 1.0, "music_volume": 1.5,
+        }]
+        self.assertTrue(any("music_volume" in error for error in validate_edit_timeline(data)))
 
     def test_micro_script_duration_guidance_is_advisory(self):
         data = valid_micro_script()
