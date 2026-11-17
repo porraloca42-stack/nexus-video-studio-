@@ -192,3 +192,11 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - Commits: `8cea3cc` (contrato), `3ef2c0d` (testes), `a2ca6c4` (orquestrador usa contrato).
 - Próximo passo: exportar/versionar o workflow ComfyUI em formato API, validar o grafo e implementar o adaptador LTX-2.5 dentro do mesmo repositório/contrato. O workflow visual não é API prompt; não inventar IDs de nós nem bindings.
 - Validação: commits gravados; releitura pós-commit e execução dos testes/CI ainda pendentes. Deploy, GPU, download de pesos, benchmark e MP4 não executados. Custo variável adicional: US$0.
+
+
+### Fonte LTX-2.5 fixada no repositório oficial — 17/11/2026
+- Fixada a revisão upstream `db476dacc1469b2f17ccc5735693916afcb6fac1` do workflow oficial two-stage distilled em `workflows/ltx25/source_manifest.json`. O manifesto registra a URL de origem/licença, ID do workflow, 20 nós de topo, 34 links, seis subgrafos, defaults de 24 fps/121 frames/960×544 e a restrição `1 + 8n`.
+- A inspeção do JSON upstream confirmou que o arquivo é um workflow visual com seis subgrafos, não um API prompt pronto. Por segurança, o manifesto marca `api_prompt_exported=false`; o patcher não será executado contra o grafo visual nem serão inventados IDs/inputs.
+- A adaptação NEXUS registrada mantém 9:16, clipes de 2–5s, Fish Audio como voz oficial, descarte do áudio LTX e composição Remotion.
+- Testes em `tests/test_ltx25_workflow_manifest.py` protegem a revisão fixada, a distinção visual/API e os requisitos de adaptação.
+- Commits: `dbbaf1b` (manifesto) e `71d5a61` (testes). A execução CI do commit ainda precisa ser consultada; nenhum modelo foi baixado e nenhuma GPU/ComfyUI foi iniciada.
