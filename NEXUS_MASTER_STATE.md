@@ -3,8 +3,8 @@
 # STATUS OPERACIONAL VIGENTE — SOBRESCREVE CHECKPOINTS HISTÓRICOS
 
 Atualizado em: 2026-11-17T18:14:17-03:00 (America/Sao_Paulo)
-HEAD da branch main no início desta atualização: 198cc21e7a2a39aff49db20fdfd9938ab7731521
-Último commit de main antes desta atualização documental: 198cc21e7a2a39aff49db20fdfd9938ab7731521.
+HEAD da branch main no início desta atualização: 1922407e433825d99d2d716d01b100fd92cb447b
+Último commit de main antes desta atualização documental: 1922407e433825d99d2d716d01b100fd92cb447b.
 
 **REGRA DE LEITURA:** este bloco é a fonte prioritária para o estado atual. Os registros cronológicos abaixo são histórico. Nunca retomar uma “próxima ação” antiga sem confrontá-la com este bloco e com o HEAD atual. Em especial, NÃO tratar tarefas do dia 16/11 nem checkpoints antigos sobre integração Brain 4/Remotion como pendências atuais.
 
