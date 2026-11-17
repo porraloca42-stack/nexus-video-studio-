@@ -440,3 +440,8 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - CI #1022: 203 testes passaram, typecheck e Commons smoke passaram; synthetic multitrack skipped.
 - Workflow #119 também passou: adapter Python → Remotion produziu MP4 sintético 4.011s H.264/AAC 720×1280, artifact #14344496316.
 - Próxima etapa técnica: teste de integração offline que alimenta uma timeline Brain 4 válida no `build_remotion_manifest()`, incluindo captions, SFX e ducking, para provar a passagem dos dados ao manifest sem Gemini/serviços pagos.
+
+
+## Etapa seguinte — teste Brain 4 → Remotion — 17/11/2026
+- Novo teste offline conecta timeline Brain 4 simulada ao `build_remotion_manifest()` e verifica captions/word timing, SFX, ducking e fades no manifest.
+- CI #1030 e workflow Remotion demo #120 estavam em execução na última consulta. Não marcar a integração como validada até ambos terminarem.
