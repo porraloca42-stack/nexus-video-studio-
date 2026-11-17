@@ -180,3 +180,15 @@ Próximo passo exato: confirmar HEAD, reler todos os arquivos alterados e consul
 
 
 Nota de CI: o workflow de regressão usa Python 3.11, compila `nexus` e executa descoberta unittest em `tests/`; a inclusão dos novos testes está coberta pela configuração, mas a execução real ainda não foi consultada/confirmada.
+
+
+## Decisão arquitetural definitiva — sem projeto paralelo (17/11/2026)
+A decisão anterior de “worker/protótipo isolado” foi refinada após alinhamento com o usuário. LTX-2.5/ComfyUI é o destino definitivo dentro do NEXUS oficial. Não criar outro repositório, produto duplicado ou etapa futura de portabilidade. Um runtime/worker separado pode existir por isolamento técnico, mas seu código, workflow, testes, deploy e telemetria ficam no mesmo repositório e sob o mesmo contrato do NEXUS. LTX-0.9.8 é somente fallback temporário até validação do novo motor.
+
+### Contrato comum de motor implementado
+- Novo `nexus/video_engine.py`: Protocol `VideoEngine`, adaptador `LTX098VideoEngine` e resolução explícita de motores. O motor padrão continua sendo LTX 0.9.8; selecionar LTX-2.5 antes da integração do workflow API gera erro explícito. Nenhum fallback silencioso.
+- `nexus/remote_render_job.py` passa a delegar a animação através do contrato comum, mantendo um wrapper de compatibilidade para o ponto de chamada existente.
+- Novo `tests/test_video_engine.py`: quatro testes determinísticos do contrato e da resolução.
+- Commits: `8cea3cc` (contrato), `3ef2c0d` (testes), `a2ca6c4` (orquestrador usa contrato).
+- Próximo passo: exportar/versionar o workflow ComfyUI em formato API, validar o grafo e implementar o adaptador LTX-2.5 dentro do mesmo repositório/contrato. O workflow visual não é API prompt; não inventar IDs de nós nem bindings.
+- Validação: commits gravados; releitura pós-commit e execução dos testes/CI ainda pendentes. Deploy, GPU, download de pesos, benchmark e MP4 não executados. Custo variável adicional: US$0.
