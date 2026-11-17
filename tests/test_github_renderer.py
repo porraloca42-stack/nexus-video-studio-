@@ -75,6 +75,7 @@ class GitHubRendererTests(unittest.TestCase):
     def test_dispatches_encrypted_manifest_and_recovers_encrypted_mp4(self):
         secret = "cloudflare-api-token"
         session = FakeGitHubSession(secret)
+        progress_events = []
         result = render_on_github(
             {"scenes": [{"voiceover": "sensitive narration", "duration_seconds": 50}]},
             "pt-BR-AntonioNeural",
@@ -87,7 +88,11 @@ class GitHubRendererTests(unittest.TestCase):
             style="Cinematográfico",
             session=session,
             poll_interval=0,
+            progress_callback=lambda *event: progress_events.append(event),
         )
+        self.assertTrue(progress_events)
+        self.assertEqual(progress_events[-1][1], 0.96)
+        self.assertGreaterEqual(len(progress_events[-1]), 4)
         self.assertEqual(result["video"], b"private-mp4")
         self.assertEqual(result["report"]["duration"], 50)
         self.assertEqual(result["run_id"], 123)
