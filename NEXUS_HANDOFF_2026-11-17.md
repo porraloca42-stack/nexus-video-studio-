@@ -210,3 +210,12 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - CI GitHub Actions #878, run `44091549701`, commit `6731ed34867b08b1c63f62354167c200f854811b`: **148 testes Python passaram**; `remotion-typecheck` passou; `commons-live-smoke` passou. Execução concluída com sucesso.
 - A validação acima cobre o HEAD `6731ed3`. Commits documentais posteriores podem disparar nova execução e devem ser verificados separadamente.
 - Investigação do export API: a implementação oficial do ComfyUI frontend `graphToPrompt` (revisão `196dd85cde3314dffdc33b41caa3e5d9be432ffb`) expande subgrafos via `ExecutableNodeDTO.getInnerNodes()`, resolve conexões/widget values e emite `class_type` + `inputs`. Isso confirma que o grafo visual com seis subgrafos não pode ser convertido por simples renomeação de campos; a exportação/API deve preservar a resolução de conexões e nós internos.
+
+
+## Retomada — exportador API e regressão de arrays (17/11/2026)
+- HEAD de entrada: e5eadb605609cacd5c0d8544f267029e0e073204. CI #885 confirmou 153 testes Python, Remotion typecheck e Commons smoke com sucesso.
+- A implementação oficial graphToPrompt foi lida na revisão ComfyUI frontend 196dd85cde3314dffdc33b41caa3e5d9be432ffb. A exportação expande subgrafos por ExecutableNodeDTO.getInnerNodes(), resolve links e widget values, ignora nós bypass/never/virtual e serializa widgets de array em objeto com __value__.
+- O patcher do cliente NEXUS foi ajustado para preservar esse contrato em bindings que atualizem widgets de array. Teste determinístico incluído. Commits: e5b3246e71660ccc9800fb3e5c65c9db610fc838 e 2d0a8068c72430cc4dd6cded0f5d49a981968ccd.
+- CI #887, run 44092812673, no commit 2d0a806: 154 testes Python passaram, Remotion typecheck passou e Commons live smoke passou.
+- O workflow visual fixado contém seis subgrafos. Input Parameters inclui GemmaAPITextEncode e um caminho externo acionado por chave LTX; não configurar chave nem assumir custo zero. O caminho local também depende dos modelos Gemma encoder/enhancer.
+- Próximo bloqueio: obter um API prompt realmente exportado por uma instância ComfyUI compatível com as versões pinadas, ou executar fielmente o exportador oficial com o runtime gráfico e extensões corretas. Não gerar um grafo API manual a partir do JSON visual nem inventar node IDs/classes. Sem inferência/GPU/download/deploy/API paga; custo adicional US$0.
