@@ -135,7 +135,7 @@ def main(project_root=None):
         topic = str(fish_credentials.get("topic") or plan.get("topic") or "")
         plan = revise_narration_for_duration(
             plan, expected_duration, actual_audio_duration, topic, style,
-            lambda name: gemini_api_key if name == "GEMINI_API_KEY" else "",
+            lambda name, default="": gemini_api_key if name == "GEMINI_API_KEY" else default,
         )
         scenes = plan.get("scenes") or []
         _fit_scene_durations(scenes, expected_duration)
