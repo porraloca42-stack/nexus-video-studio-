@@ -32,6 +32,8 @@ export type AudioMixEvent = {
   startSeconds: number;
   endSeconds: number;
   musicVolume: number;
+  fadeInSeconds?: number;
+  fadeOutSeconds?: number;
 };
 export type NexusScene = {
   id: string; durationSeconds: number; narration: string; visualMode: "graphic" | "image" | "video";
