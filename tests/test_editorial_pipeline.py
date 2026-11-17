@@ -148,7 +148,26 @@ class EditorialPipelineContractTests(unittest.TestCase):
     def test_phoneme_anchor_requires_phoneme_level_alignment(self):
         data = valid_edit_timeline()
         data["edit_anchors"][0].update({"alignment_level": "phoneme", "phoneme": "ˈp"})
-        self.assertTrue(any("requires phoneme-level alignment" in error for error in validate_edit_timeline(data)))
+        self.assertTrue(any("anchor precision exceeds available alignment level" in error for error in validate_edit_timeline(data)))
+
+
+    def test_character_alignment_requires_character_timestamps(self):
+        data = valid_edit_timeline()
+        data["alignment_level"] = "character"
+        self.assertTrue(any("required for character-level alignment" in error for error in validate_edit_timeline(data)))
+
+    def test_character_anchor_requires_a_matching_character_timestamp(self):
+        data = valid_edit_timeline()
+        data["alignment_level"] = "character"
+        data["character_timestamps"] = [
+            {"text": "p", "start_seconds": 0.2, "end_seconds": 0.3, "confidence": 0.9}
+        ]
+        data["edit_anchors"][0].update({
+            "alignment_level": "character",
+            "character": "p",
+            "at_seconds": 0.25,
+        })
+        self.assertEqual(validate_edit_timeline(data), [])
 
     def test_phoneme_anchor_requires_phoneme_label(self):
         data = valid_edit_timeline()
