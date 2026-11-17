@@ -407,11 +407,17 @@ def validate_edit_timeline(data: Any) -> list[str]:
         _require_number(event, "start_seconds", item_path, errors, minimum=0)
         _require_number(event, "end_seconds", item_path, errors, minimum=0)
         _require_number(event, "music_volume", item_path, errors, minimum=0, maximum=1)
+        for fade_field in ("fade_in_seconds", "fade_out_seconds"):
+            if fade_field in event:
+                _require_number(event, fade_field, item_path, errors, minimum=0, maximum=2)
         if _is_number(event.get("start_seconds")) and _is_number(event.get("end_seconds")):
             if event["end_seconds"] <= event["start_seconds"]:
                 errors.append(f"{item_path}: end_seconds must be after start_seconds")
             if _is_number(data.get("audio_duration_seconds")) and event["end_seconds"] > data["audio_duration_seconds"] + 0.05:
                 errors.append(f"{item_path}: mix event exceeds audio duration")
+            duration = event["end_seconds"] - event["start_seconds"]
+            if any(_is_number(event.get(field)) and event[field] > duration for field in ("fade_in_seconds", "fade_out_seconds")):
+                errors.append(f"{item_path}: fade duration cannot exceed mix event duration")
     return errors
 
 
