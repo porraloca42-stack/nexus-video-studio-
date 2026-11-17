@@ -109,3 +109,12 @@ Após autorização específica:
 ## 10. Decisão arquitetural atualizada — 17/11/2026
 
 A proposta anterior de “protótipo isolado” não significa projeto paralelo e está formalmente substituída: todo o desenvolvimento ocorre diretamente no NEXUS oficial. A implementação já começou com `nexus/video_engine.py` e a delegação do orquestrador `nexus/remote_render_job.py` ao contrato comum. O adaptador LTX 0.9.8 preserva o fluxo atual. O nome `ltx25_comfyui` é deliberadamente bloqueado até existir workflow API versionado e adaptador validado. O próximo incremento é adicionar o workflow API exportado e seus testes de contrato no mesmo repositório. Nenhuma migração/portabilidade futura será necessária.
+
+
+## 11. Fonte upstream fixada e estrutura verificada — 17/11/2026
+- Revisão pinada: `db476dacc1469b2f17ccc5735693916afcb6fac1`.
+- Manifesto versionado em `workflows/ltx25/source_manifest.json`: registra URL/licença, ID do workflow, 20 nós de topo, 34 links e seis subgrafos. A inspeção do arquivo original confirmou formato visual, não API prompt.
+- Não enviar o JSON visual diretamente a `POST /prompt`. É necessário obter/exportar o API prompt verdadeiro e validar IDs/classes/inputs; a conversão de subgrafos é um item técnico explícito, não uma suposição.
+- O manifesto fixa os requisitos NEXUS: 9:16, 2–5s, Fish Audio como voz oficial, áudio LTX descartado e Remotion como compositor final.
+- Testes do manifesto em `tests/test_ltx25_workflow_manifest.py`. Commits: `dbbaf1b` e `71d5a61`.
+- Estado: fonte fixada e estrutura verificada; API prompt, bindings, worker e GPU ainda não implementados/testados.
