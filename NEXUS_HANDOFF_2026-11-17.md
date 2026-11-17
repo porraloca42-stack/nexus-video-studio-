@@ -248,3 +248,20 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - Implementação em código: não. Teste com áudio real, teste de retenção/A-B, deploy e MP4: não. Nenhuma API paga, GPU, download de pesos ou render de produção foi executado; custo variável adicional US$0.
 - Próxima etapa gratuita: especificar schemas JSON e testes determinísticos por estágio, depois integrar um cérebro de cada vez. Preservar motor atual e roteamento híbrido; não reativar gasto de GPU sem autorização explícita.
 
+
+
+## Implementação inicial dos contratos dos quatro cérebros — 17/11/2026
+- Criado `nexus/editorial_pipeline.py`, módulo stdlib-only e sem efeitos externos, com contratos versionados e validadores independentes para: estrategista de retenção, roteirista de micro-ritmo, diretor de fotografia e editor de sincronização.
+- Brain 1 valida três ângulos distintos de hook (curiosidade, perda/oportunidade e quebra de padrão), seleção, justificativa, promessa, payoff e arco.
+- Brain 2 valida blocos de fala, duração-alvo (0,5–8s aceita para não transformar a heurística 2,5–3,5s em bloqueio rígido), função narrativa, intenção vocal, ênfases, pausas e reconstrução fiel de full_narration.
+- Brain 3 valida bíblia visual e direção por beat, incluindo metáfora, ação observável, continuidade e rota de mídia híbrida.
+- Brain 4 valida duração do áudio, alinhamento por palavra/fonema, timestamps ordenados, âncoras de edição, eventos de legenda e mixagem. Uma âncora fonêmica é rejeitada se o artefato declarar apenas alinhamento por palavra; isso evita prometer precisão que a ferramenta não forneceu.
+- Validação cruzada: cada micro-bloco deve ter direção visual; âncoras devem apontar para blocos existentes; o hook selecionado deve aparecer na fala de abertura.
+- Criado `tests/test_editorial_pipeline.py` com fixtures determinísticas e cobertura dos quatro contratos e das referências cruzadas.
+- Commits: `76c0b57` (contratos), `f19748f` (testes iniciais), `fe586c0` (validação cruzada), `b2631cf` (testes cruzados).
+- CI #908, run `44098118981`, no commit `f19748f`: 170 testes Python passaram; Remotion typecheck e Commons smoke passaram. A suíte desse run antecede os três testes de validação cruzada adicionados nos commits seguintes.
+- CI #910, run `44098265445`, commit `b2631cf`: unit-tests e Remotion typecheck concluídos com sucesso; Commons live smoke ainda estava em andamento na última consulta. Resultado final do run ainda pendente.
+- Estado: contratos e testes implementados no GitHub; ainda não integrados ao fluxo de geração Gemini nem ao Remotion; sem teste com áudio real, sem retenção A/B, sem deploy ou MP4 validado.
+- Nenhuma API Gemini/Fish/Cloudflare, inferência Modal/GPU, download de modelo ou render de produção foi executado por esta etapa. Custo variável adicional US$0.
+- Próxima etapa: pesquisar e especificar os artefatos reais de cada cérebro e integrar primeiro Brain 1 em modo shadow/dry-run, mantendo o storyboard atual como fonte de produção até comparar e aprovar resultados. Não introduzir chamadas adicionais de API nem custo variável sem autorização específica.
+
