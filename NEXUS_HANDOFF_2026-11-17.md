@@ -845,3 +845,15 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - Nenhum merge, deploy, chamada Modal, inferência GPU, Cloudflare, Fish Audio, Gemini ou render de produção foi executado. Nenhum custo variável foi gerado nesta etapa.
 - Documentação sincronizada em main: `NEXUS_MASTER_STATE.md` commit `465d517b32f4059bc0ebdf7547219ac1623add9f`; `NEXUS_NEW_CHAT_BOOTSTRAP.md` commit `b37a8919e27219634dbd9e3d29b138713c8932b2`; este checkpoint está sendo gravado agora.
 - Próxima ação sem custo: revisão técnica final do diff da PR #10 contra o código atual, procurando falhas de integração/contrato. Manter PR aberta; não fazer merge sem pedido explícito. A auditoria do deployment Modal continua bloqueada para qualquer ação que gere custo.
+
+
+## CHECKPOINT — REVISÃO DE IDENTIDADE GPU E CI DE RETESTE — 2026-11-17T17:03:58-03:00 (America/Sao_Paulo)
+- Consulta GitHub: 2026-11-17T17:03:58-03:00. HEAD de main antes deste checkpoint: ec6d21123600172cac26b9a380a7548cb13558f2.
+- Na revisão da PR #10 foi encontrado um falso positivo potencial: marcador textual `A10` também ocorre no nome `A100`, permitindo aceitar GPU diferente da solicitada.
+- Correção na branch `fix/modal-gpu-identity-and-cost-report`: `nexus/gpu_identity.py` agora usa padrões com limites de token; A10 aceita A10/A10G, mas não A100. Testes adicionais cobrem aceitação de A10G e rejeição de A100.
+- Head atual da PR #10: `eb7269bfa339dc13ff0704e6b5fa91c2fb8fbba7`. Commits recentes incluem `2ec0f317` (matcher exato), `0a0a0ef7` (testes A10/A100) e `eb7269bf` (correção do nome da variável usada pelo matcher).
+- CI #1154 / run `44165139133` falhou no job unit-tests porque foi iniciado no commit intermediário `0a0a0ef7`, antes da correção `eb7269bf`; logs confirmaram `NameError: markers is not defined`. Não ocultar esse resultado histórico. O defeito foi corrigido na branch.
+- CI #1155 / run `44165173593`, head `eb7269bf`: Remotion typecheck success; unit-tests e Commons live smoke ainda in_progress; render sintético skipped. Aguardar conclusão antes de declarar CI final verde.
+- CI anterior #1143 / #1144 passou para a versão anterior da PR, mas não substitui o reteste do head atual.
+- PR #10 segue aberta, não mergeada e não implantada. Nenhum deploy, inferência Modal/GPU, API paga ou render de produção foi executado.
+- Próxima ação: acompanhar #1155, inspecionar logs se necessário, então revisar o diff final. Não fazer merge sem pedido explícito.
