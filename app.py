@@ -2,6 +2,7 @@ import base64, json, os, shutil, subprocess, tempfile, inspect, importlib
 from pathlib import Path
 import requests
 import streamlit as st
+import streamlit.components.v1 as components
 from nexus.director import create_storyboard, validate_storyboard
 from nexus.assets import search_video_sources, download_file, diverse_candidate_shortlist
 import nexus.audio as fish_audio
@@ -128,6 +129,8 @@ from nexus.visual_styles import STYLE_OPTIONS, STYLE_META, STYLE_PROFILES
 
 @st.dialog("Escolher narração", width="medium", icon=":material/record_voice_over:")
 def open_voice_picker():
+    import html
+
     api_key = secret("FISH_API_KEY")
     if not api_key:
         st.warning("A narração ainda não está conectada. Configure FISH_API_KEY nos Secrets do Streamlit.")
@@ -152,41 +155,81 @@ def open_voice_picker():
     categories = ("CapCut", "ElevenLabs", "Licenciadas Fish")
     total_voices = sum(len(catalog.get(category, [])) for category in categories)
     st.caption(
-        f"{total_voices} vozes cadastradas · toque em uma opção para selecioná-la. "
-        "As vozes estão separadas por provedor."
+        f"{total_voices} vozes cadastradas · toque no nome para selecionar. "
+        "Use ▶ para ouvir uma amostra."
     )
     current_id = st.session_state.get("nexus_fish_voice_id", "")
-    current_name = st.session_state.get("nexus_fish_voice_name", "")
+
+    def render_preview_player(audio_source):
+        safe_source = html.escape(str(audio_source), quote=True)
+        player_html = f"""
+        <html><head><style>
+          * {{ box-sizing: border-box; }}
+          html, body {{ margin: 0; padding: 0; background: transparent; overflow: hidden; }}
+          button {{ width: 38px; height: 38px; border: 1px solid #6650a4;
+            border-radius: 50%; background: #211d2b; color: #eee7ff;
+            font: 18px sans-serif; cursor: pointer; display: block; margin: 1px auto; }}
+          button:active {{ background: #7650e8; }}
+        </style></head><body>
+          <button type="button" aria-label="Ouvir amostra" title="Ouvir amostra"
+            onclick="const a=document.getElementById('voice-preview');a.currentTime=0;a.play();">▶</button>
+          <audio id="voice-preview" preload="none" src="{safe_source}"></audio>
+        </body></html>
+        """
+        components.html(player_html, height=42, width=52, scrolling=False)
 
     for category in categories:
         category_voices = catalog.get(category, [])
         if not category_voices:
             continue
         with st.expander(f"{category} · {len(category_voices)} vozes", expanded=True):
-            for row_start in range(0, len(category_voices), 2):
-                columns = st.columns(2, gap="small")
-                for column, item in zip(columns, category_voices[row_start:row_start + 2]):
-                    voice_id = item["id"]
-                    voice_title = item.get("title") or f"Voz {voice_id[:8]}"
-                    selected = voice_id == current_id
-                    with column:
+            for item in category_voices:
+                voice_id = item["id"]
+                voice_title = item.get("title") or f"Voz {voice_id[:8]}"
+                selected = voice_id == current_id
+                preview_key = f"nexus_voice_preview_audio_{voice_id}"
+                preview_audio = st.session_state.get(preview_key)
+                sample_audio = item.get("sample_audio") or ""
+
+                name_col, play_col = st.columns([0.86, 0.14], gap="small", vertical_alignment="center")
+                with name_col:
+                    if st.button(
+                        f"{'✓ ' if selected else ''}{voice_title}",
+                        type="primary" if selected else "secondary",
+                        width="stretch",
+                        key=f"nexus-select-voice-{voice_id}",
+                        help=f"Selecionar · {category} · {voice_title}",
+                    ):
+                        st.session_state["nexus_fish_voice_id"] = voice_id
+                        st.session_state["nexus_fish_voice_name"] = f"{category} · {voice_title}"
+                        st.rerun()
+
+                with play_col:
+                    if preview_audio:
+                        render_preview_player(f"data:audio/mpeg;base64,{preview_audio}")
+                    elif sample_audio.startswith(("https://", "http://", "data:")):
+                        render_preview_player(sample_audio)
+                    else:
                         if st.button(
-                            f"{'✓ ' if selected else ''}{voice_title}",
-                            type="primary" if selected else "secondary",
+                            "▶",
+                            key=f"nexus-generate-voice-preview-{voice_id}",
+                            help="Gerar uma amostra curta desta voz",
                             width="stretch",
-                            key=f"nexus-select-voice-{voice_id}",
-                            help=f"{category} · {voice_title}",
                         ):
-                            st.session_state["nexus_fish_voice_id"] = voice_id
-                            st.session_state["nexus_fish_voice_name"] = f"{category} · {voice_title}"
-                            st.rerun()
+                            try:
+                                with st.spinner("Preparando amostra..."):
+                                    audio_bytes = fish_audio.generate_fish_preview(api_key, voice_id)
+                                st.session_state[preview_key] = base64.b64encode(audio_bytes).decode("ascii")
+                                st.rerun()
+                            except Exception as exc:
+                                st.error(f"Não foi possível gerar a amostra de {voice_title}: {str(exc)[:180]}")
 
     if total_voices != 40:
         st.warning(
             f"O catálogo retornou {total_voices} de 40 vozes cadastradas. "
             "As opções com metadados indisponíveis continuam selecionáveis."
         )
-
+    st.caption("Quando uma voz não tem áudio de demonstração publicado, ▶ gera uma prévia curta sob demanda.")
 
 @st.dialog("Duração do vídeo", width="small", icon=":material/schedule:")
 def open_duration_picker():
