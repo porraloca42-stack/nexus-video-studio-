@@ -4,7 +4,7 @@ import unittest
 import zipfile
 
 from nexus.github_renderer import render_on_github
-from nexus.render_crypto import encrypt_bytes, encrypt_text
+from nexus.render_crypto import decrypt_compressed_text, encrypt_bytes, encrypt_text
 
 
 class Response:
@@ -92,6 +92,28 @@ class GitHubRendererTests(unittest.TestCase):
         dispatch_inputs = next(call[2]["json"]["inputs"] for call in session.calls if call[0] == "POST")
         fish = json.loads(decrypt_text(dispatch_inputs["fish_credentials_encrypted"], secret))
         self.assertEqual(fish, {"api_key": "fish-private-key", "voice_id": "fish-private-voice"})
+
+    def test_large_storyboard_is_compressed_before_dispatch(self):
+        secret = "cloudflare-api-token"
+        session = FakeGitHubSession(secret)
+        plan = {"scenes": [
+            {
+                "voiceover": f"Trecho narrado da cena {index}.",
+                "duration_seconds": 4.5,
+                "image_prompt": (f"Direção visual detalhada da cena {index}; luz, lente, composição, textura. " * 180),
+            }
+            for index in range(10)
+        ]}
+        raw_size = len(json.dumps(plan, ensure_ascii=False, separators=(",", ":")))
+        self.assertGreater(raw_size, 42000)
+        result = render_on_github(
+            plan, "pt-BR-AntonioNeural", "github-token",
+            encryption_secret=secret, session=session, poll_interval=0,
+        )
+        inputs = next(call[2]["json"]["inputs"] for call in session.calls if call[0] == "POST")
+        recovered = json.loads(decrypt_compressed_text(inputs["manifest_encrypted"], secret))
+        self.assertEqual(recovered, plan)
+        self.assertEqual(result["video"], b"private-mp4")
 
     def test_requires_encryption_secret(self):
         with self.assertRaisesRegex(RuntimeError, "CLOUDFLARE_API_TOKEN"):
