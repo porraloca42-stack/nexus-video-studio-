@@ -109,6 +109,64 @@ class RemotionManifestTests(unittest.TestCase):
             self.assertEqual(manifest["durationInFrames"], 90)
             self.assertTrue(path.is_file())
 
+
+    def test_manifest_copies_and_maps_captions_sfx_music_and_ducking(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            voice = root / "voice.wav"
+            music = root / "music.mp3"
+            sfx = root / "whoosh.wav"
+            voice.write_bytes(b"voice")
+            music.write_bytes(b"music")
+            sfx.write_bytes(b"sound-effect")
+            plan = {
+                "music_audio_path": str(music),
+                "music_volume": 0.12,
+                "scenes": [{"duration_seconds": 4, "voiceover": "O problema começa aqui."}],
+                "edit_timeline": {
+                    "caption_events": [{
+                        "id": "cap-1", "start_seconds": 0, "end_seconds": 2,
+                        "text": "O problema", "position": "bottom",
+                        "words": [
+                            {"text": "O", "start_seconds": 0, "end_seconds": 0.2},
+                            {"text": "problema", "start_seconds": 0.21, "end_seconds": 0.9, "emphasis": True},
+                        ],
+                    }],
+                    "sfx_events": [{
+                        "id": "sfx-1", "asset_path": str(sfx),
+                        "start_seconds": 1.0, "duration_seconds": 0.6, "volume": 0.3,
+                    }],
+                    "audio_mix_events": [{
+                        "start_seconds": 0, "end_seconds": 2.5, "music_volume": 0.04,
+                    }],
+                },
+            }
+            _, manifest = build_remotion_manifest(
+                plan, [], voice, root / "public", job_id="timeline"
+            )
+            self.assertEqual(manifest["musicAudio"], "jobs/timeline/music.mp3")
+            self.assertEqual(manifest["captionEvents"][0]["words"][1]["emphasis"], True)
+            self.assertEqual(manifest["soundEffects"][0]["asset"], "jobs/timeline/sfx_01.wav")
+            self.assertEqual(manifest["audioMixEvents"][0]["musicVolume"], 0.04)
+            self.assertTrue((root / "public/jobs/timeline/whoosh.wav").is_file())
+            self.assertTrue((root / "public/jobs/timeline/music.mp3").is_file())
+
+    def test_manifest_rejects_caption_word_outside_caption_interval(self):
+        with tempfile.TemporaryDirectory() as temp:
+            plan = {
+                "scenes": [{"duration_seconds": 3, "voiceover": "Teste."}],
+                "edit_timeline": {
+                    "caption_events": [{
+                        "id": "cap-1", "start_seconds": 0, "end_seconds": 1,
+                        "text": "Teste", "words": [
+                            {"text": "Teste", "start_seconds": 0.2, "end_seconds": 1.5},
+                        ],
+                    }],
+                },
+            }
+            with self.assertRaisesRegex(ValueError, "Palavra temporizada fora"):
+                build_remotion_manifest(plan, [], None, Path(temp), job_id="bad-caption")
+
     def test_invalid_duration_is_rejected(self):
         with tempfile.TemporaryDirectory() as temp:
             with self.assertRaises(ValueError):
