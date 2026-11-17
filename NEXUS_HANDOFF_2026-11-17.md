@@ -936,3 +936,13 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - Revisão estática sem defeito impeditivo. O deploy permanece sem chamada ao smoke; o workflow de inferência é manual e separado. O CI não executa deploy Modal, inferência GPU ou render de produção.
 - Estado: PR aberta, não mergeada e não implantada. Nenhum deploy Modal, smoke de inferência, GPU, Cloudflare, Fish Audio, Gemini ou render foi iniciado; custo variável adicional US$0.
 - Próxima ação: aguardar autorização explícita para merge. Antes de integrar, conferir novamente a base e os checks caso a main avance.
+
+## PR #11 — merge concluído e verificado — 2026-11-17T18:20:48-03:00 (America/Sao_Paulo)
+- Usuário autorizou prosseguir e concluir. PR #11 foi mergeada por squash.
+- Merge commit: `10ea042ac9fb3d68636edbe28ccb331f0cd47ca5`; head integrado: `a2b5d2c3a668cf36db0ee891854d3bb457ad8534`.
+- GitHub confirma `state=closed`, `merged=true`. Diff funcional: `.github/workflows/modal-deploy.yml` e `.github/workflows/modal-inference-smoke.yml`.
+- Arquivos conferidos novamente em main após merge: deploy Modal manual e isolado; smoke LTX separado e manual, com validação dos secrets e artifact por 3 dias.
+- CI #1190 / run `44177875187` no head anterior ao merge: unit-tests, commons-live-smoke e remotion-typecheck success; remotion-synthetic-render skipped. Nenhum run foi encontrado associado diretamente ao merge commit; não declarar CI pós-merge.
+- Nenhum deploy Modal, inferência GPU, API paga, ou render de produção foi acionado. Nenhum custo variável novo foi gerado por esta integração.
+- Estado final desta tarefa: PR integrada e workflows presentes em main; CI do head pré-merge aprovado; deploy e smoke pagos continuam não executados e exigem autorização específica.
+- Próxima tarefa sem custo: auditoria estática da PR #10/telemetria e revisão da documentação operacional. Não retomar PR #11 como pendente.
