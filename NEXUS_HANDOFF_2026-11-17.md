@@ -108,3 +108,16 @@ Os testes ainda NÃO foram executados/confirmados por CI.
 
 ## Orientação de comunicação ao usuário
 Responder em português brasileiro, com clareza e sem exagerar. O usuário quer que o assistente seja o engenheiro responsável, não quer instruções para programar. Reportar sempre o que foi feito e o que continua pendente. Não dizer “concluído” quando só está implementado.
+
+## Retomada posterior — exposição da pré-validação do storyboard (17/11/2026, 09:56 BRT)
+- Foram lidos integralmente, diretamente de `main`, este handoff e o `NEXUS_MASTER_STATE.md` (1784 linhas na versão consultada).
+- HEAD antes das alterações: `50a0a70c51de9c40648218772f672a362f1cecc9`.
+- A pré-validação já existia em `nexus/director.py`, mas não aparecia na interface. Foi inspecionado o fluxo do expander de planejamento em `app.py`.
+- Implementado: seção compacta **Pré-validação audiovisual** no expander existente, com variedade textual de ações/buscas, tipos de plano, ambientes e avisos. A UI explicita que a análise é heurística, não inspeciona quadros e não substitui a revisão visual.
+- Teste de contrato adicionado em `tests/test_app_import_resilience.py`.
+- Commits: `355d493ba1047e34a9df9d0a8fb8f7aec852f4fa` e `9b4326ced1eb14f34fb055512aec8aab4f82a839`.
+- Releitura pós-commit confirmou os dois arquivos atualizados na branch `main`. O commit mais recente observado após os patches era `9b4326c`; a atualização documental subsequente do master state gerou commit `17373a6d3b7bba80e22c17c7755884edcd25761c1`.
+- CI: ainda não confirmado. `get_commit_combined_status` retornou lista vazia para `9b4326c`; o wrapper `fetch_commit_workflow_runs` disponível filtra execuções de pull request e também retornou vazio. O workflow de regressão contém gatilho push para `main`, mas não foi possível obter a execução de push nem os logs com as ferramentas disponíveis.
+- Sem deploy Streamlit ou validação visual mobile nesta etapa. Nenhuma chamada Gemini/Cloudflare/Fish, inferência Modal/GPU ou renderização paga foi iniciada; custo variável adicional US$0.
+- Próximo passo exato: localizar o run de push correspondente a `9b4326c` e confirmar os três jobs (`unit-tests`, `remotion-typecheck`, `commons-live-smoke`). Se CI verde, continuar a inteligência audiovisual apenas com mudanças locais/testes gratuitos. Não iniciar GPU ou APIs pagas sem nova autorização explícita.
+
