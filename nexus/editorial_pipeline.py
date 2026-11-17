@@ -236,6 +236,8 @@ def validate_edit_timeline(data: Any) -> list[str]:
             errors.append(f"{item_path}: expected object")
             continue
         _require_string(word, "text", item_path, errors)
+        if _is_nonempty_string(word.get("text")) and len(word["text"].split()) != 1:
+            errors.append(f"{item_path}.text: word timestamp must contain exactly one token")
         start = word.get("start_seconds")
         end = word.get("end_seconds")
         if not _is_number(start) or not _is_number(end):
@@ -248,8 +250,11 @@ def validate_edit_timeline(data: Any) -> list[str]:
         previous_end = end
         if _is_number(data.get("audio_duration_seconds")) and end > data["audio_duration_seconds"] + 0.05:
             errors.append(f"{item_path}: timestamp exceeds audio duration")
-        if not _is_number(word.get("confidence")) or not 0 <= word["confidence"] <= 1:
-            errors.append(f"{item_path}.confidence: expected value between 0 and 1")
+        confidence = word.get("confidence")
+        if confidence is not None and (
+            not _is_number(confidence) or not 0 <= confidence <= 1
+        ):
+            errors.append(f"{item_path}.confidence: expected value between 0 and 1 when supplied")
 
     def validate_fine_timestamps(items, field_name):
         previous = 0.0
