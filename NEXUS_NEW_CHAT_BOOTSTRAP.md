@@ -174,3 +174,11 @@ Este bootstrap reduz perda de continuidade, mas não garante que a plataforma ca
 - CI #1037 aprovado: 206 testes Python, typecheck e Commons smoke. Teste do hook confirma injeção explícita e estado disabled por padrão.
 - Script sintético agora passa pelo adapter Brain 4 com resposta determinística/mockada e render Remotion multifaixa. Commit `e1f8737447fe14fb7114617dc9681200bf5742f0`.
 - Próxima ação: disparar workflow com marcador `[run-remotion-validation]`; verificar MP4 e métricas de legenda/SFX/ducking. Sem chamadas pagas.
+
+
+## Último checkpoint validado — Brain 4 sintético → MP4 — 17/11/2026
+- CI #1045 aprovado: 206 testes Python, typecheck, Commons smoke e render sintético Remotion.
+- Pipeline exercitado: Brain 4 adapter com resposta mockada → validação de contrato → manifest Python → MP4 H.264/AAC 720×1280, 4.011s.
+- Asserções de mídia: destaque captions 2249/1773 pixels, caption off 0; ducking música 14.5 dB com recuperação ao nível original; SFX 15.7 dB acima do nível de fundo. Artifact #14343349831.
+- Workflow demo #121 também passou; render manual 50s skipped.
+- Limite: não é Gemini real nem vídeo de produção. Próxima etapa: revisão visual do MP4 e plano de integração real condicionado a autorização de custo.
