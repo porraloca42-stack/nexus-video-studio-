@@ -588,7 +588,7 @@ if active_view == "Criar":
                         status_detail = st.empty()
 
                     def update_worker_progress(message, fraction=0.05, elapsed_seconds=0, remaining_seconds=600):
-                        percent = max(1, min(96, int(round(float(fraction) * 100)))
+                        percent = max(1, min(96, int(round(float(fraction) * 100))))
                         elapsed_seconds = max(0, int(elapsed_seconds or 0))
                         remaining_seconds = max(0, int(remaining_seconds or 0))
                         elapsed_label = f"{elapsed_seconds // 60}min {elapsed_seconds % 60:02d}s"
