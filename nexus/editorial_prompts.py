@@ -208,7 +208,7 @@ Retorne SOMENTE JSON válido no contrato:
     {{"id":"sfx-1","asset_path":"...","start_seconds":1.2,"duration_seconds":0.8,"volume":0.25}}
   ],
   "audio_mix_events":[
-    {{"start_seconds":0.0,"end_seconds":2.5,"music_volume":0.06}}
+    {{"start_seconds":0.0,"end_seconds":2.5,"music_volume":0.06,"fade_in_seconds":0.12,"fade_out_seconds":0.12}}
   ]
 }}
 
