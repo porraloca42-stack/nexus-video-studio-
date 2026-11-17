@@ -170,3 +170,13 @@ Próximo passo exato: confirmar HEAD, reler todos os arquivos alterados e consul
 3. Obter/exportar o workflow oficial para formato API e fixar IDs/nós usados; criar patcher de parâmetros e testes de contrato, sem executar ComfyUI.
 4. Criar worker Modal isolado somente após testes de contrato e revisão de dependências/pesos. Não fazer deploy ou download de modelos sem autorização explícita.
 5. Preservar LTX 0.9.8 como fallback e não alterar o pipeline padrão.
+
+
+### Complemento — patch seguro de workflow API (17/11/2026)
+- `nexus/comfyui_client.py` agora inclui `patch_api_workflow(workflow, bindings)`: cria cópia profunda do grafo e altera somente inputs explicitamente mapeados. Rejeita nós/inputs inexistentes, bindings incompletos e inputs que já estejam conectados por links, evitando quebrar silenciosamente a topologia.
+- Testes adicionais verificam isolamento do grafo original, alteração de widgets, rejeição de links e referências desconhecidas.
+- Commits: `273c047` (patcher), `9cb0830` (testes).
+- O arquivo `.github/workflows/tests.yml` foi inspecionado: a job de regressão compila `nexus` e executa `python -m unittest discover -s tests -v`, portanto o novo arquivo de teste entra na descoberta padrão. Isso confirma a configuração do workflow, não o resultado de uma execução.
+
+
+Nota de CI: o workflow de regressão usa Python 3.11, compila `nexus` e executa descoberta unittest em `tests/`; a inclusão dos novos testes está coberta pela configuração, mas a execução real ainda não foi consultada/confirmada.
