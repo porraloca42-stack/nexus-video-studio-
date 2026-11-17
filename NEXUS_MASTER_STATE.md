@@ -1545,3 +1545,12 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Teste de regressão adicionado em `tests/test_app_import_resilience.py` para verificar a grade 50/50 e as restrições contra overflow.
 - Commits: `e4bcbbc` (CSS de layout) e `bafb49f` (teste de regressão).
 - Estado: alteração enviada à branch `main`; CI do commit final ainda precisa ser consultado. A captura do usuário confirma o problema original; a aparência após deploy ainda depende de nova captura.
+
+## Correção do seletor de narração: catálogo completo e escolha em um toque — 17/11/2026
+- Evidência: captura mobile mostrou que o seletor nativo abria uma lista suspensa interna, exibindo inicialmente apenas as primeiras vozes CapCut e exigindo um toque adicional para abrir a lista. Isso ocultava visualmente os demais provedores.
+- Catálogo verificado em `nexus/voice_catalog.py`: 40 IDs preservados e agrupados em CapCut (14), ElevenLabs (4) e Licenciadas Fish (22). `nexus/audio.py:list_curated_voice_catalog` enriquece os IDs com metadados sem descartar opções quando uma consulta individual falha.
+- Alteração em `app.py`: removido o `st.selectbox` nativo do diálogo. O painel agora mostra os três provedores com contagem, seções abertas por padrão e opções em duas colunas. Cada voz é um botão direto; um toque grava o ID e o nome exatos no estado da sessão e fecha o diálogo por rerun. As 40 entradas permanecem selecionáveis mesmo quando os metadados não estão disponíveis.
+- Transparência: o painel informa o total carregado e alerta se o serviço devolver menos de 40 entradas; não mascara falhas parciais como catálogo completo.
+- Teste de regressão em `tests/test_app_import_resilience.py` cobre as três categorias, exibição das contagens, opções em duas colunas e seleção sem seletor/confirmador extra. O teste existente em `tests/test_audio.py` já valida os 40 IDs e as quantidades por categoria.
+- Commits: `f9d0e3a` (interface de seleção direta) e `89c5b24` (teste de regressão).
+- Estado: código e teste enviados à branch `main`. CI do commit final ainda precisa ser consultado; não declarar validado até todos os jobs concluírem. A atualização visual no Streamlit mobile ainda depende de nova captura após deploy.
