@@ -377,3 +377,11 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - Run #973 (44113431413): unit-tests, Remotion typecheck e Commons live smoke passaram; render sintético foi skipped porque o commit de correção não continha o marcador requerido.
 - Commit de documentação/disparo: `cc86d8b9ad78c2c0d3c9b2d081e481d741fd87c8`, com `[run-remotion-validation]`. Aguardar e inspecionar o job e artifact antes de afirmar sucesso.
 - Nenhum serviço pago, GPU, deploy ou render de produção foi acionado. Runner hospedado pode consumir minutos da franquia.
+
+
+## Continuação — diagnóstico do MP4 sintético — 17/11/2026
+- Run #974: MP4 sintético foi gerado e anexado como artifact #14342431166, mas o job falhou no critério de ducking (antes -34.6dB; durante -38.7dB). Unit tests, typecheck e Commons smoke passaram.
+- MP4 inspecionado: H.264 720x1280, 30fps, 4s, AAC 48kHz. Frame de palavra destacada conferido visualmente; as verificações de legenda passaram. Teste SFX não foi alcançado.
+- Suspeita técnica: bandas de teste próximas (narração 440Hz, música 220Hz) e filtros de 190–250Hz podem contaminar a medição de música atenuada com vazamento da narração. Não alterar o algoritmo de ducking sem evidência.
+- Fixture ajustado no commit `549bb44e51e2375cf0f08b826749565bfc104c96`: narração 1100Hz, música 220Hz, SFX 3000Hz; banda SFX 2800–3200Hz. Commit contém o marcador para nova execução sintética.
+- Próximo passo: conferir run desse commit, logs, métricas, artifact; se passar, registrar os limites da validação sintética. Ainda não há validação do áudio multifaixa.
