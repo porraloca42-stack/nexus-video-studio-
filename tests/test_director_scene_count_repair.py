@@ -86,7 +86,7 @@ class SceneCountRepairTests(unittest.TestCase):
         self.assertTrue(any("pelo menos 10" in error for error in errors))
 
     def test_keeps_valid_storyboard_without_extra_model_request(self):
-        plan = make_plan(10)
+        plan = make_plan(12)
 
         def secret_reader(name, default=None):
             return "test-key" if name == "GEMINI_API_KEY" else "auto"
