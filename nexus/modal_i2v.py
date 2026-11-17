@@ -1,5 +1,6 @@
 """Client adapter for the NEXUS Modal image-to-video service."""
 from pathlib import Path
+import time
 
 
 class ModalVideoError(RuntimeError):
@@ -7,33 +8,20 @@ class ModalVideoError(RuntimeError):
 
 
 def build_motion_prompt(scene):
-    """Prefer explicit motion direction; otherwise derive a conservative prompt."""
+    """Require a dedicated action-first English I2V prompt; never recycle the still-image prompt."""
     explicit = str(
         scene.get("video_motion_prompt")
         or scene.get("motion_prompt")
         or scene.get("prompt_movimento_ingles")
         or ""
     ).strip()
-    if explicit:
-        return explicit[:1800]
-
-    image_prompt = str(scene.get("image_prompt") or "").strip()
-    visual_action = str(scene.get("visual_action") or "").strip()
-    direction = scene.get("scene_direction") or {}
-    camera = direction.get("camera") or {}
-    move = str(camera.get("move") or scene.get("camera_motion") or "subtle push-in")
-    motion_events = scene.get("motion_events") or []
-    events = "; ".join(str(event).strip() for event in motion_events[:2] if str(event).strip())
-    pieces = [
-        image_prompt,
-        "Animate the exact scene shown in the reference image.",
-        f"Natural visible action: {visual_action}" if visual_action else "",
-        f"Subtle cinematic camera movement: {move.replace('_', ' ')}.",
-        f"Specific motion beats: {events}." if events else "",
-        "Preserve the same subject identity, face, clothing, composition, environment, and visual style. "
-        "Use physically plausible motion, stable anatomy, natural timing, and no cuts or scene changes.",
-    ]
-    return " ".join(piece for piece in pieces if piece)[:1800]
+    if len(explicit) < 40:
+        raise ModalVideoError(
+            "Prompt de movimento LTX ausente ou insuficiente. "
+            "A cena foi bloqueada antes de consumir GPU; o prompt da imagem estática "
+            "não será reutilizado como instrução de vídeo."
+        )
+    return explicit[:1800]
 
 
 def animate_scene_images(generated_images, scenes, output_dir, *, modal_cls=None, progress_callback=None):
@@ -52,9 +40,10 @@ def animate_scene_images(generated_images, scenes, output_dir, *, modal_cls=None
             raise ModalVideoError(f"Duração inválida na cena {index}.") from exc
         if not 2.0 <= duration <= 5.0:
             raise ModalVideoError(f"Cena {index}: duração de {duration:g}s fora da faixa I2V de 2–5s.")
+        motion_prompt = build_motion_prompt(scene)
         payload.append({
             "image_bytes": image_path.read_bytes(),
-            "prompt": build_motion_prompt(scene),
+            "prompt": motion_prompt,
             "duration_seconds": duration,
         })
 
@@ -65,7 +54,9 @@ def animate_scene_images(generated_images, scenes, output_dir, *, modal_cls=None
             import modal
             modal_cls = modal.Cls
         inference = modal_cls.from_name("nexus-video-i2v", "Inference")()
+        modal_call_started = time.monotonic()
         results = inference.run_batch.remote(payload)
+        modal_call_wall_seconds = round(time.monotonic() - modal_call_started, 3)
     except Exception as exc:
         raise ModalVideoError(
             "Falha ao gerar movimento orgânico no Modal. O NEXUS interrompeu o render "
@@ -92,6 +83,12 @@ def animate_scene_images(generated_images, scenes, output_dir, *, modal_cls=None
             "inference_seconds": result.get("inference_seconds"),
             "frames": result.get("frames"),
             "model": result.get("model", "Lightricks/LTX-Video"),
+            "motion_prompt": payload[index - 1]["prompt"],
+            "model_load_seconds": result.get("model_load_seconds"),
+            "batch_wall_seconds": result.get("batch_wall_seconds"),
+            "modal_call_wall_seconds": modal_call_wall_seconds,
+            "gpu_name": result.get("gpu_name"),
+            "num_inference_steps": result.get("num_inference_steps"),
         })
         if progress_callback:
             progress_callback(f"Cena {index}/{len(results)} animada e recebida do Modal.")
