@@ -7,13 +7,15 @@ from pathlib import Path
 
 SYSTEM = """
 Você é o DIRETOR E ROTEIRISTA AUDIOVISUAL do NEXUS VIDEO STUDIO.
-Sua primeira obrigação é entregar um ROTEIRO NARRADO COMPLETO, dimensionado para a duração escolhida pelo usuário. Em seguida, transforme esse roteiro em cenas filmáveis. Não trate duração como sugestão.
+Sua primeira obrigação é entregar um ROTEIRO NARRADO COMPLETO, priorizando qualidade editorial e coerência com o briefing. Em seguida, transforme esse roteiro em cenas filmáveis. A duração escolhida é uma referência editorial com margem superior de até 10 segundos, não um número para o qual se deve mutilar ou inflar o texto.
 
 DURAÇÃO E TEXTO:
-- O usuário escolhe a duração final. Ela é um requisito obrigatório.
-- Para narração natural em português brasileiro, escreva aproximadamente 2,2 a 2,5 palavras por segundo: 40s ≈ 88–100 palavras; 50s ≈ 110–125 palavras; 60s ≈ 132–150 palavras.
-- Se o usuário fornecer apenas um tema/ideia, desenvolva o roteiro completo com essa extensão, começo forte, progressão lógica e fechamento.
-- Se fornecer um roteiro completo, preserve sua mensagem e os pontos essenciais; ajuste a redação para caber no tempo, sem simplesmente copiar um texto curto ou ignorar a duração.
+- O usuário escolhe uma duração de referência. O limite máximo permitido é essa duração + 10 segundos: 30s permite até 40s; 40s permite até 50s; 60s permite até 70s.
+- Mire naturalmente a duração escolhida. Use a margem adicional somente quando o raciocínio, os exemplos e a conclusão realmente precisarem dela. Não prolongue um roteiro que já está completo.
+- A qualidade, clareza, progressão e força da narração têm prioridade sobre atingir um segundo exato. Não corte uma ideia importante apenas para acertar o cronômetro.
+- Para estimar a fala, considere aproximadamente 2,2 a 2,5 palavras por segundo, mas a duração definitiva será medida pela voz selecionada. Essa estimativa não é uma meta rígida.
+- Se o usuário fornecer apenas um tema/ideia, desenvolva o roteiro completo com começo forte, progressão lógica e fechamento, sem enchimento.
+- Se fornecer um roteiro completo, preserve sua mensagem e os pontos essenciais. Não resuma nem acrescente frases vazias para manipular duração.
 - Distribua TODO o texto narrado entre as cenas. Cada cena precisa ter voiceover não vazio, em português brasileiro natural. A soma das falas deve formar o roteiro completo, sem lacunas, repetições ou frases soltas.
 - Não tente resolver duração escrevendo menos cenas ou deixando cenas sem fala.
 
@@ -383,58 +385,49 @@ def _request(prompt, secret_reader):
         f"Último detalhe: {last_detail}"
     )
 
-def _fit_scene_durations(scenes, requested_duration):
-    """Assign the exact requested runtime using each scene's narration length."""
-    target = int(round(float(requested_duration)))
+def _fit_scene_durations(scenes, measured_duration):
+    """Allocate the measured narration runtime across scenes without changing the audio."""
+    total = float(measured_duration)
     count = len(scenes)
-    if not count or target < 2 * count or target > 5 * count:
+    minimum_per_scene = 1.5
+    maximum_per_scene = 5.0
+    if not count or total < minimum_per_scene * count or total > maximum_per_scene * count:
         raise ValueError(
-            f"O diretor criou {count} cenas, mas {target}s exige entre "
-            f"{(target + 4) // 5} e {target // 2} cenas para clipes de 2–5s. "
-            "Peça um novo planejamento."
+            f"A narração medida ({total:.1f}s) não cabe nas {count} cenas "
+            f"com duração visual entre {minimum_per_scene:.1f}s e {maximum_per_scene:.1f}s. "
+            "O planejamento precisa de uma segmentação diferente."
         )
 
-    # Narration length is a better pacing signal than Gemini's rough duration guess.
-    weights = []
-    for scene in scenes:
-        words = len(str(scene.get("voiceover", "")).split())
-        weights.append(float(max(words, 1)))
-    durations = [2] * count
-    remaining = target - 2 * count
-    capacities = [3] * count
+    weights = [
+        float(max(1, len(str(scene.get("voiceover", "")).split())))
+        for scene in scenes
+    ]
+    durations = [minimum_per_scene] * count
+    capacities = [maximum_per_scene - minimum_per_scene] * count
+    remaining = total - minimum_per_scene * count
 
-    while remaining > 0:
-        active = [i for i, capacity in enumerate(capacities) if capacity > 0]
+    while remaining > 1e-8:
+        active = [i for i, capacity in enumerate(capacities) if capacity > 1e-8]
         if not active:
-            raise ValueError("As cenas não comportam a duração solicitada.")
+            raise ValueError("As cenas não comportam a duração medida da narração.")
         weight_sum = sum(weights[i] for i in active)
         shares = {i: remaining * weights[i] / weight_sum for i in active}
-        allocated = 0
-        for i in active:
-            whole = min(capacities[i], int(shares[i]))
-            if whole:
-                durations[i] += whole
-                capacities[i] -= whole
-                allocated += whole
-        remaining -= allocated
-        if remaining <= 0:
-            break
-        ranked = sorted(
-            (i for i in active if capacities[i] > 0),
-            key=lambda i: (shares[i] - int(shares[i]), weights[i]),
-            reverse=True,
-        )
-        for i in ranked:
-            if remaining <= 0:
-                break
-            durations[i] += 1
-            capacities[i] -= 1
-            remaining -= 1
+        saturated = [i for i in active if shares[i] >= capacities[i] - 1e-8]
+        if saturated:
+            for i in saturated:
+                allocation = capacities[i]
+                durations[i] += allocation
+                remaining -= allocation
+                capacities[i] = 0.0
+        else:
+            for i in active:
+                durations[i] += shares[i]
+                capacities[i] -= shares[i]
+            remaining = 0.0
 
     for scene, seconds in zip(scenes, durations):
-        scene["duration_seconds"] = seconds
-    return durations
-
+        scene["duration_seconds"] = round(seconds, 4)
+    return [scene["duration_seconds"] for scene in scenes]
 
 def _repair_semantic_justifications(plan, topic, style, target, secret_reader):
     """Repair weak scene-to-narration links without rewriting approved narration."""
@@ -536,14 +529,15 @@ def apply_visual_style_lock(plan, style):
 
 def create_storyboard(topic, style, duration, secret_reader):
     target = int(round(float(duration)))
-    minimum_scenes = max(10, (target + 4) // 5)
+    maximum_duration = target + 10
+    minimum_scenes = max(10, (maximum_duration + 4) // 5)
     preferred_scenes = max(minimum_scenes, (target + 3) // 4)
-    min_words = int(round(target * 2.2))
-    max_words = int(round(target * 2.5))
+    min_words = int(round(target * 2.1))
+    max_words = int(round(maximum_duration * 2.4))
     prompt = f"""PEDIDO/ROTEIRO DO USUÁRIO:
 {topic}
 
-DURAÇÃO FINAL ESCOLHIDA: {target} segundos (OBRIGATÓRIA).
+DURAÇÃO DE REFERÊNCIA: {target} segundos. LIMITE MÁXIMO: {maximum_duration} segundos (margem editorial de até +10s).
 ESTILO VISUAL: {style}
 DIREÇÃO DE ARTE OBRIGATÓRIA (instruções internas; não mostrar ao usuário):
 {build_visual_style_directive(style)}
@@ -551,12 +545,12 @@ DIREÇÃO DE ARTE OBRIGATÓRIA (instruções internas; não mostrar ao usuário)
 REGRA DE LIBERDADE CRIATIVA:
 O estilo define a gramática visual, não define o conteúdo da cena. Não use um personagem, objeto, cenário ou metáfora como resposta automática ao estilo. Não copie motivos de descrições ou referências como se fossem exemplos obrigatórios. Interprete cada trecho de forma independente, determine o que precisa ser comunicado e invente uma solução visual nova e específica. Ao longo do vídeo, monitore a variedade: não repita protagonista, gesto, objeto simbólico, ambiente ou composição sem necessidade narrativa. A mesma identidade estética deve comportar muitas soluções visuais diferentes.
 
-Primeiro interprete o briefing completo (assunto/roteiro, estilo visual e {target}s) e defina público provável, promessa, hook inicial, progressão de retenção, insight/entrega e CTA adequado.
-Escreva um roteiro narrado completo de aproximadamente {min_words} a {max_words} palavras, adequado a {target}s de fala natural em português brasileiro. A velocidade do sintetizador permanece natural: dimensione o texto, não a voz.
-Se o usuário forneceu apenas um tema, crie o roteiro completo. Se forneceu um texto, preserve as ideias essenciais e adapte a extensão ao tempo.
+Primeiro interprete o briefing completo (assunto/roteiro, estilo visual e duração de referência de {target}s, com teto de {maximum_duration}s) e defina público provável, promessa, hook inicial, progressão de retenção, insight/entrega e CTA adequado.
+Escreva o melhor roteiro narrado completo para esse briefing. Como referência, use aproximadamente {min_words} a {max_words} palavras, sem tratar essa faixa como obrigação matemática: mire perto de {target}s e use até {maximum_duration}s somente se o desenvolvimento realmente precisar. A velocidade do sintetizador permanece natural. Nunca acelere, desacelere, repita, invente enchimento ou corte uma ideia importante apenas para atingir um tempo.
+Se o usuário forneceu apenas um tema, crie o roteiro completo com raciocínio e conclusão suficientes. Se forneceu um texto, preserve as ideias essenciais; só reduza conteúdo redundante se ultrapassar o limite máximo.
 O hook precisa estar na primeira fala. O CTA deve estar integrado à conclusão. Use palavras-chave SEO semanticamente relevantes de modo natural na narração. Gere título, descrição e poucas hashtags coerentes com o roteiro, sem keyword stuffing.
-Depois divida esse roteiro em {minimum_scenes} a {preferred_scenes + 3} cenas narrativas. Meta: cerca de {preferred_scenes} cenas. Cada cena deve ter voiceover preenchido e conter um trecho contínuo do roteiro. O campo full_narration deve ser exatamente a concatenação das falas das cenas, com pontuação natural.
-As durações de cena são estimativas; NÃO tente fechar a soma matemática. O sistema atribuirá a duração exata depois. Não encurte a narração para fazer a soma bater.
+Depois divida esse roteiro em {minimum_scenes} a {preferred_scenes + 3} cenas narrativas. Meta: cerca de {preferred_scenes} cenas, considerando que o teto de {maximum_duration}s precisa caber em clipes de no máximo 5 segundos. Cada cena deve ter voiceover preenchido e conter um trecho contínuo do roteiro. O campo full_narration deve ser exatamente a concatenação das falas das cenas, com pontuação natural.
+As durações de cena retornadas são apenas estimativas. O sistema medirá a duração real da narração na voz selecionada e distribuirá esse tempo entre as cenas. Não tente fazer a soma bater com {target}s, não encurte a narração e não acrescente texto para preencher segundos.
 Cada cena deve mostrar ação concreta diretamente ligada à fala, com duas buscas visuais diferentes e específicas em inglês, estilo aplicado e pelo menos dois microeventos. Garanta hook, retenção, CTA e SEO preenchidos e coerentes com a narração. Retorne o JSON completo conforme o esquema do sistema."""
 
     plan = _request(prompt, secret_reader)
@@ -578,10 +572,10 @@ Cada cena deve mostrar ação concreta diretamente ligada à fala, com duas busc
         repair_attempt += 1
         repair_prompt = f"""PROTOCOLO OBRIGATÓRIO DO NEXUS — NÃO IGNORE:
 O storyboard está REPROVADO: contém {len(scenes)} cenas. É proibido entregar 6, 7, 8 ou 9 cenas.
-A duração de {target}s exige NO MÍNIMO ABSOLUTO {minimum_scenes} CENAS. A quantidade mínima é uma regra rígida, não uma sugestão.
-Reestruture o storyboard em pelo menos {minimum_scenes} cenas distintas e filmáveis, sem criar cenas artificiais ou repetidas. Para 40s, use no mínimo 10 cenas; para durações maiores, respeite também o limite de no máximo 5s por cena.
+A janela editorial vai até {maximum_duration}s e exige NO MÍNIMO ABSOLUTO {minimum_scenes} CENAS para que nenhum clipe ultrapasse 5s. A quantidade mínima é uma regra rígida, não uma sugestão.
+Reestruture o storyboard em pelo menos {minimum_scenes} cenas distintas e filmáveis, sem criar cenas artificiais ou repetidas. Respeite o teto de {maximum_duration}s e o limite de no máximo 5s por cena.
 Preserve integralmente a narração, a ordem narrativa, a ideia e a progressão. Divida trechos longos em beats visuais menores; cada cena precisa ter voiceover não vazio, ação filmável própria, image_prompt, semantic_reason com pelo menos 80 caracteres, camera_motion, asset_search_query, fallback_search_query e pelo menos dois motion_events.
-Não apague nem resuma falas. A concatenação das falas deve preservar o roteiro completo sem omissões ou repetições. Retorne o JSON COMPLETO com pelo menos {minimum_scenes} cenas. Tema: {topic}. Duração: {target}s. Estilo: {style}.
+Não apague nem resuma falas. A concatenação das falas deve preservar o roteiro completo sem omissões ou repetições. Retorne o JSON COMPLETO com pelo menos {minimum_scenes} cenas. Tema: {topic}. Duração de referência: {target}s; teto: {maximum_duration}s. Estilo: {style}.
 Esta é a tentativa automática de correção {repair_attempt} de 3.
 Storyboard reprovado:
 {json.dumps(plan, ensure_ascii=False)}
@@ -608,9 +602,9 @@ Retorne somente o JSON completo no formato do sistema."""
         if not missing:
             break
         repair_prompt = f"""Você é roteirista. Corrija o storyboard abaixo.
-Duração final escolhida: {target}s. Tema/roteiro original: {topic}
+Duração de referência: {target}s; teto absoluto: {maximum_duration}s. Tema/roteiro original: {topic}
 As cenas sem narração são: {", ".join(map(str, missing))}.
-Reescreva o storyboard COMPLETO, mantendo a ordem e as cenas, mas preenchendo TODAS as falas voiceover com texto natural em português brasileiro. Distribua a narração de forma contínua, sem falas vazias. Escreva uma narração total de aproximadamente {min_words}–{max_words} palavras adequada a {target}s. Inclua full_narration como concatenação exata das falas. Não use duration_seconds para limitar o roteiro; o sistema atribuirá os tempos.
+Reescreva o storyboard COMPLETO, mantendo a ordem e as cenas, mas preenchendo TODAS as falas voiceover com texto natural em português brasileiro. Distribua a narração de forma contínua, sem falas vazias. Complete as falas sem inventar enchimento. Mire {target}s e nunca ultrapasse {maximum_duration}s. Preserve o sentido e a progressão. Inclua full_narration como concatenação exata das falas. Não use duration_seconds para limitar o roteiro; o sistema medirá a voz e atribuirá os tempos.
 Estilo visual: {style}
 Storyboard a corrigir:
 {json.dumps(plan, ensure_ascii=False)}
@@ -634,24 +628,36 @@ Retorne somente JSON válido no formato do sistema."""
     _repair_semantic_justifications(plan, topic, style, target, secret_reader)
     apply_visual_style_lock(plan, style)
 
-    # The AI creates the script and narrative structure; code owns exact timing.
+    # This is a planning estimate only. The selected TTS voice determines
+    # the final runtime later; no text or audio is stretched to hit the target.
     original_total = sum(float(scene.get("duration_seconds", 0) or 0) for scene in scenes)
-    fitted = _fit_scene_durations(scenes, target)
+    word_count = sum(len(str(scene.get("voiceover", "")).split()) for scene in scenes)
+    estimated_duration = word_count / 2.35
+    if estimated_duration > maximum_duration + 0.75:
+        raise RuntimeError(
+            f"O roteiro estimado ficou em {estimated_duration:.1f}s, acima do teto de "
+            f"{maximum_duration}s. O diretor precisa condensar redundâncias sem perder a ideia."
+        )
+    fitted = _fit_scene_durations(scenes, estimated_duration)
     plan["requested_duration_seconds"] = target
+    plan["maximum_duration_seconds"] = maximum_duration
+    plan["estimated_duration_seconds"] = round(sum(fitted), 2)
     plan["full_narration"] = " ".join(
         str(scene["voiceover"]).strip() for scene in scenes
     )
     plan["duration_adjustment"] = {
         "ai_estimated_seconds": round(original_total, 2),
         "requested_seconds": target,
+        "maximum_seconds": maximum_duration,
+        "estimated_speech_seconds": round(estimated_duration, 2),
         "scene_durations": fitted,
-        "timing_source": "narration_weighted_exact_allocation",
+        "timing_source": "word_count_estimate_then_measured_tts",
     }
     return plan
 
 
 def revise_narration_for_duration(plan, target_duration, actual_duration, topic, style, secret_reader):
-    """Ask the director to revise narration using the selected voice's measured speaking rate."""
+    """Only shorten narration that exceeds the allowed ceiling; never pad to a target."""
     scenes = plan.get("scenes", [])
     if not scenes or float(actual_duration) <= 0 or float(target_duration) <= 0:
         raise ValueError("Não há dados suficientes para calibrar a duração da narração.")
@@ -671,13 +677,12 @@ def revise_narration_for_duration(plan, target_duration, actual_duration, topic,
     prompt = f"""Você é o roteirista responsável por adequar a narração ao tempo real de locução.
 Tema original: {topic}
 Estilo: {style}
-Duração escolhida pelo usuário: {target_duration:.1f} segundos.
-A voz selecionada, em velocidade NATURAL, leu a versão atual em {actual_duration:.1f} segundos.
-A versão atual tem {current_words} palavras. Com a velocidade REAL medida dessa voz, a estimativa inicial para a nova versão é aproximadamente {target_words} palavras.
+Teto máximo permitido pelo usuário: {target_duration:.1f} segundos.
+A voz selecionada, em velocidade NATURAL, leu a versão atual em {actual_duration:.1f} segundos, acima do teto.
+A versão atual tem {current_words} palavras. Com a velocidade REAL medida dessa voz, a estimativa inicial para ficar abaixo do teto é aproximadamente {target_words} palavras.
 
-Reescreva a narração para que, falada naturalmente pela mesma voz e sem acelerar ou desacelerar o sintetizador, fique próxima de {target_duration:.1f} segundos (tolerância editorial desejada: cerca de 10%).
-Se ficou curta, desenvolva melhor o raciocínio com explicações, exemplos concretos, transições e uma conclusão que feche a ideia. Se ficou longa, corte redundâncias sem perder a mensagem.
-NÃO acrescente frases vazias, repetições, enchimento, pausas artificiais ou instruções de silêncio. Preserve gancho, progressão lógica e conclusão.
+Faça uma edição de contenção: encurte SOMENTE o necessário para ficar abaixo de {target_duration:.1f}s, preservando gancho, raciocínio, exemplos indispensáveis, progressão e conclusão. Remova redundâncias, não ideias centrais. Não reescreva por preferência estilística e não tente atingir um segundo exato.
+É PROIBIDO expandir o texto, acrescentar exemplos novos, repetir ideias, criar pausas ou preencher duração. Se a mensagem não puder ser preservada dentro do teto, mantenha a integridade editorial e deixe a validação interromper o trabalho antes de gerar imagens.
 Mantenha exatamente {len(scenes)} cenas e a mesma ordem. Distribua o texto entre elas de forma contínua. Cada fala precisa corresponder à ação visual da própria cena; ajuste a fala para manter coerência semântica. Não altere as ações visuais, buscas, estilo ou estrutura das cenas.
 Use português brasileiro falado. Preserve e refine a pontuação como partitura de interpretação vocal: vírgulas para continuidade/respiração curta, pontos para fechamento e queda, dois-pontos para preparar revelação, travessões para apartes/contraste, interrogações para perguntas reais e exclamações com moderação. Varie frases curtas, médias e longas para cadência humana. Leia mentalmente em voz alta e mantenha a pontuação expressiva sem exageros. Não remova pontuação significativa na revisão.
 Retorne somente JSON válido no formato:
@@ -708,7 +713,7 @@ Contexto das cenas:
     plan["full_narration"] = " ".join(mapped[index] for index in range(1, len(scenes) + 1))
     plan["narration_calibration"] = {
         "previous_audio_seconds": round(float(actual_duration), 2),
-        "target_audio_seconds": round(float(target_duration), 2),
+        "maximum_audio_seconds": round(float(target_duration), 2),
         "previous_word_count": current_words,
         "estimated_target_word_count": target_words,
     }
@@ -828,7 +833,8 @@ def validate_storyboard(plan, requested_duration=None):
     if not scenes:
         return ["O diretor não criou cenas."]
     total = 0
-    minimum_scenes = max(10, int((float(requested_duration) + 4) // 5)) if requested_duration else 10
+    maximum_duration = float(requested_duration) + 10 if requested_duration else None
+    minimum_scenes = max(10, int((maximum_duration + 4) // 5)) if maximum_duration else 10
     if len(scenes) < minimum_scenes:
         errors.append(f"O diretor criou {len(scenes)} cenas, mas são necessárias pelo menos {minimum_scenes} para cobrir {requested_duration}s sem segmentos longos.")
     for index, scene in enumerate(scenes, 1):
@@ -841,8 +847,11 @@ def validate_storyboard(plan, requested_duration=None):
         if len(scene.get("motion_events", [])) < 2:
             errors.append(f"Cena {index}: faltam microeventos.")
     if requested_duration:
-        if abs(total - float(requested_duration)) > 0.75:
-            errors.append(f"A soma das cenas é {total:.1f}s; a duração solicitada é {requested_duration}s.")
+        if total > maximum_duration + 0.75:
+            errors.append(
+                f"A estimativa de narração é {total:.1f}s, acima do teto editorial "
+                f"de {maximum_duration:.0f}s ({requested_duration}s + 10s)."
+            )
         if any(float(scene.get("duration_seconds", 0) or 0) > 5.0 for scene in scenes):
             errors.append("Há cenas acima de 5 segundos. Divida a ação em mais clipes específicos.")
     return errors
