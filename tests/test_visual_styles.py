@@ -37,6 +37,21 @@ class VisualStyleLibraryTests(unittest.TestCase):
                     self.assertNotIn(motif, directive)
                 self.assertIn("anti-template", directive)
 
+    def test_full_art_direction_is_attached_to_worker_image_prompt_idempotently(self):
+        plan = {
+            "scenes": [{
+                "voiceover": "Cena",
+                "image_prompt": "A person taking a meaningful action in a specific setting",
+            }]
+        }
+        first = apply_visual_style_lock(plan, "Dark Psychology")
+        prompt_once = first["scenes"][0]["image_prompt"]
+        self.assertIn("NEXUS STYLE DIRECTION:", prompt_once)
+        self.assertIn("REGRA ANTI-TEMPLATE", prompt_once)
+        second = apply_visual_style_lock(first, "Dark Psychology")
+        prompt_twice = second["scenes"][0]["image_prompt"]
+        self.assertEqual(prompt_once, prompt_twice)
+
     def test_scene_specific_style_terms_are_preserved_and_formal_terms_appended(self):
         plan = {
             "scenes": [{
