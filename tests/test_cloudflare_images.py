@@ -47,6 +47,23 @@ class CloudflareImageTests(unittest.TestCase):
             self.assertEqual(session.calls[0][1]["files"]["height"], (None, "910"))
             self.assertEqual(result["steps"], 4)
 
+    def test_generate_image_sends_flux_multi_reference_images(self):
+        with tempfile.TemporaryDirectory() as temp:
+            session = FakeSession()
+            generate_image(
+                "Same protagonist opening a notebook in a new room.",
+                Path(temp) / "scene.png",
+                account_id="account",
+                api_token="secret",
+                width=512,
+                height=910,
+                reference_images=[PNG],
+                session=session,
+            )
+            files = session.calls[0][1]["files"]
+            self.assertEqual(files["input_image_0"], ("reference_0.png", PNG, "image/png"))
+            self.assertEqual(files["prompt"][1].split(".")[0], "Same protagonist opening a notebook in a new room")
+
     def test_json_base64_jpeg_response_uses_matching_extension(self):
         with tempfile.TemporaryDirectory() as temp:
             jpeg = b"\xff\xd8\xff" + b"nexus-jpeg"
@@ -119,6 +136,27 @@ class CloudflareImageTests(unittest.TestCase):
             self.assertIn('fictional traveler', retry_prompt)
             self.assertTrue(result[0]['moderation_retry'])
             self.assertEqual(result[0]['scene_index'], 1)
+
+    def test_scene_generation_creates_one_shared_character_reference(self):
+        with tempfile.TemporaryDirectory() as temp:
+            session = FakeSession()
+            scenes = [
+                {"image_prompt": "The same person opens a notebook at a desk."},
+                {"image_prompt": "The same person stands and walks toward the door."},
+            ]
+            results = generate_scene_images(
+                scenes, temp,
+                visual_continuity={
+                    "lead_character": "same adult person",
+                    "character_reference_prompt": "Square realistic portrait of the same adult person, neutral pose, simple background.",
+                },
+                account_id="account", api_token="secret", session=session,
+            )
+            self.assertEqual(len(session.calls), 3)
+            self.assertEqual(session.calls[0][1]["files"]["width"], (None, "448"))
+            self.assertEqual(session.calls[1][1]["files"]["input_image_0"][1], PNG)
+            self.assertEqual(session.calls[2][1]["files"]["input_image_0"][1], PNG)
+            self.assertTrue(all(item["continuity_reference_used"] for item in results))
 
     def test_scene_does_not_retry_non_moderation_cloudflare_errors(self):
         class ErrorSession:
