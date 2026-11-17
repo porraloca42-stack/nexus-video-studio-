@@ -1572,3 +1572,11 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Teste de regressão substitui o teste anterior do iframe e verifica botões alinhados em colunas, toggle ▶/⏸, player compartilhado único e remoção do iframe/player individual.
 - Commits: `d08a57e` (interface e player único), `968fd6f` (teste de regressão).
 - Estado: enviado à branch `main`; CI do commit final pendente. A captura do usuário confirma a falha anterior; a nova disposição e autoplay/pausa ainda dependem de confirmação no navegador móvel após deploy.
+
+## Fluxo de narração: ouvir primeiro e confirmar a escolha — 17/11/2026
+- Evidência da captura mobile: controles de prévia e seleção em colunas empilharam; tocar no nome alterava imediatamente a voz e fechava o diálogo, enquanto o player compartilhado ficava separado da lista.
+- Mudança em `app.py`: cada voz agora é um único botão de largura total. Tocar no nome prepara/reproduz a amostra e mantém o diálogo aberto. A escolha fica em estado pendente (`nexus_pending_voice_*`), sem alterar a voz usada na produção.
+- Quando há voz pendente, o diálogo mostra um único player nativo e um botão explícito **Confirmar voz [nome]**. Só esse botão grava `nexus_fish_voice_id/name` e encerra o diálogo via rerun. Tocar em outro nome troca a prévia pendente; a seleção confirmada anterior é preservada até nova confirmação.
+- Removidos os botões ▶/⏸ individuais e o layout de duas colunas que o Streamlit empilhava em telas estreitas. O player nativo fornece pausa/reprodução.
+- Teste de regressão verifica prévia ao tocar no nome, estado pendente, player único e confirmação explícita antes de atualizar a voz final.
+- Estado: implementação e teste enviados à branch `main`; CI e comportamento mobile após deploy ainda pendentes. Autoplay pode ser restringido pelo navegador; o player nativo permanece disponível para iniciar/pausar manualmente.
