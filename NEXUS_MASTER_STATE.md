@@ -2235,3 +2235,14 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Verificação externa da URL Streamlit: tanto a página raiz quanto o endpoint `/_stcore/health` não puderam ser acessados pelas ferramentas de navegação disponíveis; a tentativa de resolução DNS no ambiente de execução também falhou. Isso é uma limitação do ambiente de verificação e **não prova que o app esteja fora do ar**.
 - O botão `Testar Brain 4 — sem produzir vídeo` está presente no código da branch `main` em `app.py`; sua presença na instância publicada permanece não verificada. Não afirmar deploy concluído.
 - Próximo passo operacional: obter uma resposta observável da instância publicada (abrir a URL em navegador acessível ou confirmar no painel Streamlit Cloud o último deploy/commit). Quando a UI estiver acessível, localizar o botão e aguardar o clique explícito do usuário. Nenhuma chamada Gemini real ou produção iniciada.
+
+
+## Continuidade — CI documental #1088–#1090 concluído — 17/11/2026
+- Conferidos diretamente no GitHub Actions os três commits de checkpoint documental:
+  - #1088 / run `44130565205`, commit `dee866c0d5db1382606b96c6db15a75df43581f9`: unit-tests, Remotion typecheck e Commons live smoke concluídos com sucesso; render sintético skipped.
+  - #1089 / run `44130573720`, commit `d7f01a17ca53286144a48b812a3bb7f2e66de70a`: unit-tests, Remotion typecheck e Commons live smoke concluídos com sucesso; render sintético skipped.
+  - #1090 / run `44130582256`, commit `d3d0effbaf019057afb78adf87947a1e128fddce`: unit-tests, Remotion typecheck e Commons live smoke concluídos com sucesso; render sintético skipped.
+- Estado do botão Brain 4: implementado em `app.py` na branch `main`, sem URL própria (é um controle Streamlit renderizado dentro da página). Sua presença no deploy continua não comprovada. Não anunciar link direto do botão nem confundir link da aplicação com link do controle.
+- A tentativa anterior de acessar a raiz Streamlit e `/_stcore/health` não foi conclusiva; não prova indisponibilidade do app. Não há evidência suficiente neste ambiente para afirmar qual commit está ativo na instância publicada.
+- Próximo passo permanece: confirmar deployment/commit ativo do Streamlit. Só depois, com UI observável, executar o smoke Gemini mediante clique explícito do usuário. Não iniciar Gemini, worker, Fish Audio, Cloudflare, Modal, GPU ou render de produção automaticamente.
+- Estado separado: código do smoke Brain 4 implementado e aprovado em CI; CIs documentais #1088–#1090 aprovados; deploy não verificado; Gemini real não executado; vídeo de produção não iniciado.
