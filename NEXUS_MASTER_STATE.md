@@ -1588,3 +1588,11 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Teste de regressão adicionado para distinguir o rerun local de prévia do rerun global de confirmação.
 - Commits: `b1753c4` (correção) e `1db54dd` (teste).
 - Estado: enviado à branch `main`; CI ainda precisa concluir. A validação final de manter o diálogo aberto e tocar a amostra depende de teste no navegador móvel após deploy.
+
+## Galeria de estilos com prévias visuais distintas — 17/11/2026
+- Solicitação/captura mobile: a aba Modelos já apresentava imagens SVG abstratas, mas todas repetiam a mesma composição orbital; o usuário pediu uma imagem que mostre melhor a identidade de cada estilo.
+- Em `app.py`: `style_preview_svg()` agora cria 18 amostras SVG distintas, uma por estilo, variando composição, contraste, luz, textura e tratamento gráfico. As amostras demonstram gramática visual e não prescrevem personagens, objetos ou cenários para os vídeos.
+- Teste de regressão verifica cobertura dos 18 estilos e a manutenção da galeria com imagens por cartão.
+- Também foi corrigido um teste legado do seletor de narração que ainda esperava seleção imediata; agora ele valida prévia pendente e confirmação explícita.
+- Commits: `33e5af2` (pré-visualizações distintas), `8e14ffa` (teste da galeria) e commit subsequente de ajuste do teste do fluxo de voz.
+- Estado: código enviado à branch `main`; CI ainda precisa concluir. A aparência final no navegador mobile depende de nova captura após deploy.
