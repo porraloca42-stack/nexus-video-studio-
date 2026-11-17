@@ -168,3 +168,9 @@ Este bootstrap reduz perda de continuidade, mas não garante que a plataforma ca
 - Teste novo comprova executor explicitamente injetado em `apply_optional_brain4()` e status disabled no relatório quando não há executor.
 - Commit `3f721da8890c5b12fe7b01690e6156378350159b`; CI #1037 em andamento, conferir antes de prosseguir.
 - Workflow Remotion #120 passou com MP4 sintético H.264/AAC 720×1280, 4.011s; artifact #14344765828.
+
+
+## Checkpoint — validação sintética ponta a ponta Brain 4 — 17/11/2026
+- CI #1037 aprovado: 206 testes Python, typecheck e Commons smoke. Teste do hook confirma injeção explícita e estado disabled por padrão.
+- Script sintético agora passa pelo adapter Brain 4 com resposta determinística/mockada e render Remotion multifaixa. Commit `e1f8737447fe14fb7114617dc9681200bf5742f0`.
+- Próxima ação: disparar workflow com marcador `[run-remotion-validation]`; verificar MP4 e métricas de legenda/SFX/ducking. Sem chamadas pagas.
