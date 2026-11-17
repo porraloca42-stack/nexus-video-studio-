@@ -1378,3 +1378,11 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Criado `.github/workflows/deploy-mobile-shell.yml` (commit `7bbee1b`) para publicar o shell em GitHub Pages; deploy requer Pages habilitado com GitHub Actions nas configurações do repositório. Atualizado o padding inferior mobile em `app.py` (commit `2f2c4f5`) para preservar espaço de rolagem atrás da máscara.
 - Estado: arquivos gravados em `main`; workflow ainda não foi confirmado como executado, GitHub Pages ainda não foi confirmado como habilitado e a máscara ainda não foi validada no celular. Não declarar missão concluída até abrir a URL Pages e conferir visualmente.
 - URL esperada após habilitar Pages: `https://porraloca42-stack.github.io/nexus-video-studio-/`.
+
+
+## Identidade visual — cabeçalho com logo NEXUS (16/11/2026)
+- Solicitação aprovada: cabeçalho centralizado em composição horizontal, com a logo original completa à esquerda e o nome à direita em duas linhas: “NEXUS” e “VIDEO STUDIO”. O nome deve permanecer inteiro em uma linha por título, inclusive em telas móveis.
+- `app.py` atualizado no commit `e024807`: substituído o cabeçalho anterior por um lockup horizontal; logo original incorporada em PNG otimizado (256×256, fundo preto), exibida com `object-fit: contain`, dimensões responsivas e sem recorte; tipografia com `white-space: nowrap` para impedir quebra do nome; conjunto centralizado e adaptado para mobile.
+- Versão visual identificadora: `NEXUS-2026.11.16-brand-header-1`.
+- Escopo: somente cabeçalho/CSS e identificação visual; não altera o pipeline de roteiro, narração, geração, animação ou montagem.
+- Estado: commit gravado em `main`; confirmação por leitura posterior do arquivo é necessária. Deploy e validação visual em celular ainda pendentes.
