@@ -124,7 +124,7 @@ def render_on_github(
                 "Aguardando o GitHub iniciar o renderizador...",
                 min(0.04, 0.01 + elapsed / estimated_render_seconds * 0.03),
                 elapsed,
-                max(0.0, estimated_render_seconds - elapsed),
+                remaining_seconds if status == "completed" else max(0.0, estimated_render_seconds - elapsed),
             )
         time.sleep(poll_interval)
 
@@ -145,7 +145,8 @@ def render_on_github(
         elapsed = time.monotonic() - started
         if status == "completed":
             fraction = 0.96
-            message = "Renderização concluída; recuperando e validando o MP4..."
+            remaining_seconds = 0
+            message = "Worker finalizado; verificando resultado e recuperando o MP4..."
         elif status == "queued" or status == "waiting":
             fraction = 0.05
             message = "Trabalho na fila do GitHub; aguardando um executor..."
