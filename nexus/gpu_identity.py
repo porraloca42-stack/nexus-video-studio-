@@ -26,7 +26,7 @@ def validate_gpu_identity(requested_gpu_type: str, actual_gpu_name: str) -> dict
             "Modelo não será carregado."
         )
     patterns = _GPU_NAME_PATTERNS.get(requested)
-    if not markers:
+    if not patterns:
         raise RuntimeError(
             f"Tipo de GPU solicitado sem regra de validação: {requested or 'vazio'}. "
             "Modelo não será carregado."
