@@ -1,11 +1,11 @@
-# NEXUS — Plano isolado de protótipo ComfyUI + LTX-2.5
+# NEXUS — Plano de integração ComfyUI + LTX-2.5 no repositório oficial
 
 Data da pesquisa: 17/11/2026  
 Status: pesquisa técnica e arquitetura propostas; **não implementado, não implantado e não executado em GPU**.
 
-## 1. Objetivo
+## 1. Objetivo e decisão de arquitetura
 
-Avaliar LTX-2.5 como alternativa de maior qualidade ao worker atual LTX-Video 0.9.8 2B. A integração deve nascer como worker independente, mantendo o worker existente como fallback. Nenhuma inferência, benchmark ou implantação que possa gerar custo variável será iniciada sem autorização explícita.
+Integrar LTX-2.5 + ComfyUI como motor-alvo definitivo diretamente no repositório oficial NEXUS (`porraloca42-stack/nexus-video-studio-`, branch `main`). Não criar projeto/repositório paralelo nem prever portabilidade posterior. Um processo/worker isolado pode ser usado por segurança e dependências, mas será um componente do próprio NEXUS, com código, workflow, testes, deploy e telemetria versionados no mesmo repositório. LTX-Video 0.9.8 permanece apenas como fallback temporário até os portões de validação serem aprovados. Nenhuma inferência, benchmark ou implantação que possa gerar custo variável será iniciada sem autorização explícita.
 
 ## 2. Evidências oficiais consultadas
 
@@ -27,7 +27,7 @@ Fontes oficiais:
 
 ## 3. Arquitetura proposta — worker separado
 
-1. Criar uma aplicação Modal independente, por exemplo `nexus-comfy-ltx25-i2v`; não alterar `nexus-video-i2v` nem o fluxo padrão atual.
+1. Implementar o worker ComfyUI como componente do NEXUS oficial. O runtime pode ser isolado (por exemplo, uma aplicação Modal dedicada) para controlar dependências e segurança, mas seu código e ciclo de vida permanecem neste repositório; não criar produto paralelo.
 2. Fixar versões/SHAs de ComfyUI e `ComfyUI-LTXVideo`; não usar `master` flutuante em produção.
 3. Construir a imagem do worker com Python/CUDA compatíveis, ComfyUI, custom nodes e dependências explicitamente pinadas.
 4. Manter os pesos num Modal Volume persistente. Verificar gating/licença e necessidade de `HF_TOKEN` sem expor segredos.
@@ -36,7 +36,7 @@ Fontes oficiais:
 7. Enviar keyframe por `POST /upload/image`; submeter o grafo por `POST /prompt`; acompanhar a execução via WebSocket ou polling de `/history/{prompt_id}`; baixar o resultado via `/view`.
 8. Normalizar o MP4 com FFmpeg: H.264, dimensões verticais, fps definido, sem áudio LTX. Validar arquivo, codec, duração, frames e stream de vídeo antes de devolver bytes.
 9. Retornar telemetria por cena: modelo/revisão, GPU, cold start, tempo de carregamento, tempo de fila, inferência, duração/frames, memória máxima, tempo total faturável estimado e custo GPU estimado.
-10. Adicionar seleção por feature flag apenas para testes internos. O pipeline atual continua sendo o padrão e fallback.
+10. Integrar o adaptador ao contrato comum `nexus/video_engine.py`. Durante a transição, a seleção interna mantém LTX 0.9.8 como padrão/fallback; só depois dos portões de validação LTX-2.5 poderá assumir o padrão.
 
 ## 4. Compatibilidade com o NEXUS
 
@@ -104,3 +104,8 @@ Após autorização específica:
 - Testes adicionais verificam isolamento do grafo original, alteração de widgets, rejeição de links e referências desconhecidas.
 - Commits: `273c047` (patcher), `9cb0830` (testes).
 - O arquivo `.github/workflows/tests.yml` foi inspecionado: a job de regressão compila `nexus` e executa `python -m unittest discover -s tests -v`, portanto o novo arquivo de teste entra na descoberta padrão. Isso confirma a configuração do workflow, não o resultado de uma execução.
+
+
+## 10. Decisão arquitetural atualizada — 17/11/2026
+
+A proposta anterior de “protótipo isolado” não significa projeto paralelo e está formalmente substituída: todo o desenvolvimento ocorre diretamente no NEXUS oficial. A implementação já começou com `nexus/video_engine.py` e a delegação do orquestrador `nexus/remote_render_job.py` ao contrato comum. O adaptador LTX 0.9.8 preserva o fluxo atual. O nome `ltx25_comfyui` é deliberadamente bloqueado até existir workflow API versionado e adaptador validado. O próximo incremento é adicionar o workflow API exportado e seus testes de contrato no mesmo repositório. Nenhuma migração/portabilidade futura será necessária.
