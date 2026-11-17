@@ -42,6 +42,11 @@ def make_plan(count):
 
 
 class SceneCountRepairTests(unittest.TestCase):
+    def test_director_prioritizes_one_observable_action_over_competing_microevents(self):
+        self.assertIn("UMA ação principal com progressão visual clara", director.SYSTEM)
+        self.assertIn("início → execução → resultado", director.SYSTEM)
+        self.assertIn("Não empilhe gestos diferentes", director.SYSTEM)
+
     def test_automatically_repairs_undersegmented_50_second_storyboard(self):
         short_plan = make_plan(8)
         repaired_plan = make_plan(12)
