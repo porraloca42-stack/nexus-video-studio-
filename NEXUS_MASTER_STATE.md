@@ -1659,3 +1659,16 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 
 - Atualização CI: execução `44064383883` (inclui teste da função de leitura com 2 argumentos) concluiu `unit-tests`, `remotion-typecheck` e `commons-live-smoke` com sucesso. Execução `44064401470` para o rearranjo visual concluiu `unit-tests` e `remotion-typecheck` com sucesso; `commons-live-smoke` ainda estava em andamento no último acompanhamento. Execuções de render de integração `44064355595` e `44064418134` ainda em andamento no último acompanhamento.
 - O deploy/sincronização do Streamlit e a validação visual no celular ainda dependem do CI terminar e da atualização do app. Não pedir nova produção real enquanto isso não for confirmado.
+
+
+## Mudança de política de duração — janela editorial +10s (17/11/2026)
+- Solicitação: abandonar a duração exata como obrigação do Gemini. A duração escolhida passa a ser referência editorial, com teto de +10s (30→40s; 40→50s; 60→70s), priorizando qualidade, clareza, progressão, narração natural e coerência entre voz e cenas.
+- `nexus/director.py`: SYSTEM e prompt do storyboard agora orientam mirar a duração escolhida e usar a margem apenas quando o raciocínio precisar; proibido encher texto, repetir ou cortar ideias essenciais para bater segundo exato. A quantidade mínima de cenas é calculada pelo teto, mantendo clipes de até 5s. Planejamento mostra estimativa preliminar por contagem de palavras.
+- `validate_storyboard` valida teto requested+10s em vez de soma exata com a duração escolhida.
+- `_fit_scene_durations` agora distribui uma duração medida/estimada proporcionalmente às palavras de cada cena, com clipes entre 1,5 e 5s, sem forçar a duração solicitada.
+- `nexus/remote_render_job.py`: Fish Audio é fonte de verdade. Mede o áudio natural; se estiver dentro do teto, usa exatamente essa duração. Não estica nem comprime a voz. Só chama revisão editorial se exceder o teto, permitindo uma única edição para remover redundâncias sem acrescentar conteúdo; se ainda exceder, interrompe antes de gerar imagens. Recalcula os tempos de cena com a duração real medida e valida o MP4 contra essa duração.
+- `app.py`: planejamento informa estimativa, referência e limite máximo; deixa claro que a duração final acompanhará a voz real.
+- Testes alterados para verificar alocação proporcional ao áudio medido, margem de +10s e ausência de time-stretch no worker.
+- Commits principais: `41b5a3e` (diretor/janela), `fc038c9` (worker), `ccc77f9` (UI), `09c8bab` e `cb6f8e3` (cobertura de cenas), `1480cc7` (revisão somente para teto), `c0289fb` e `3a742e4` (teste worker), `f2c7ca9` (timeline medida), `dfb48d2` (instruções SYSTEM), `87a4877` (fixture de teste).
+- CI consolidado do commit `87a4877`: execução `44066397504` ainda em andamento no último acompanhamento. Execuções intermediárias falharam por fixture de teste com newline escapado duas vezes; corrigido no commit `87a4877`. Aguardar CI final.
+- Não há render real validado com esta política ainda. Não consumir créditos da Modal até CI passar; depois realizar teste controlado e conferir duração real do MP4.
