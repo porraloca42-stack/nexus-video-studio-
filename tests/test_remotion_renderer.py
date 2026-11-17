@@ -148,7 +148,7 @@ class RemotionManifestTests(unittest.TestCase):
             self.assertEqual(manifest["captionEvents"][0]["words"][1]["emphasis"], True)
             self.assertEqual(manifest["soundEffects"][0]["asset"], "jobs/timeline/sfx_01.wav")
             self.assertEqual(manifest["audioMixEvents"][0]["musicVolume"], 0.04)
-            self.assertTrue((root / "public/jobs/timeline/whoosh.wav").is_file())
+            self.assertTrue((root / "public/jobs/timeline/sfx_01.wav").is_file())
             self.assertTrue((root / "public/jobs/timeline/music.mp3").is_file())
 
     def test_manifest_rejects_caption_word_outside_caption_interval(self):
