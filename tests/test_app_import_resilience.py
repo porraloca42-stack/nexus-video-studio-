@@ -40,7 +40,8 @@ class AppImportResilienceTests(unittest.TestCase):
         self.assertIn('categories = ("CapCut", "ElevenLabs", "Licenciadas Fish")', dialog)
         self.assertIn('total_voices = sum(len(catalog.get(category, [])) for category in categories)', dialog)
         self.assertIn('with st.expander(f"{category} · {len(category_voices)} vozes", expanded=True):', dialog)
-        self.assertIn('for row_start in range(0, len(category_voices), 2):', dialog)
+        self.assertIn('for item in category_voices:', dialog)
+        self.assertIn('st.rerun(scope="fragment")', dialog)
         self.assertIn('st.session_state["nexus_fish_voice_id"] = voice_id', dialog)
         self.assertIn('st.session_state["nexus_fish_voice_name"] = f"{category} · {voice_title}"', dialog)
         self.assertIn('st.rerun()', dialog)
@@ -62,6 +63,24 @@ class AppImportResilienceTests(unittest.TestCase):
         self.assertNotIn('name_col, play_col = st.columns', dialog)
         self.assertNotIn('nexus_active_voice_preview_id', dialog)
         self.assertIn('fish_audio.generate_fish_preview(api_key, voice_id)', dialog)
+
+    def test_visual_style_gallery_uses_distinct_visual_language_previews(self):
+        source = Path("app.py").read_text(encoding="utf-8")
+        preview_start = source.index("def style_preview_svg(style):")
+        preview_end = source.index("\nst.markdown(\"\"\"", preview_start)
+        preview = source[preview_start:preview_end]
+        for style in (
+            "Quântico & Cósmico", "Sonho Lúcido", "Dark Psychology",
+            "Épico Espiritual", "Aura Neon", "Hermetismo Clássico",
+            "Visual ASMR / Hipnótico", "Cinematográfico", "Dark Cinematográfico",
+            "Ilustração Editorial", "Filme Noir", "Aquarela Artística",
+            "Fantasia Cinematográfica", "Graphic Novel", "Minimalista Clean",
+            "Realismo Humano Emocional", "Reconstituição Histórica",
+            "Natureza Contemplativa",
+        ):
+            self.assertIn(f'"{style}":', preview)
+        self.assertIn("A visual-language sample, not a scene template", preview)
+        self.assertIn("st.image(style_preview_svg(option), use_container_width=True)", source)
 
     def test_voice_preview_uses_fragment_rerun_without_closing_dialog(self):
         source = Path("app.py").read_text(encoding="utf-8")
