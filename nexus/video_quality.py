@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 _FREEZE_EVENT = re.compile(
-    r"lavfi\\.freezedetect\\.(freeze_start|freeze_end|freeze_duration):\\s*([0-9.]+)"
+    r"lavfi\.freezedetect\.(freeze_start|freeze_end|freeze_duration):\s*([0-9.]+)"
 )
 
 
