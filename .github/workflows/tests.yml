@@ -42,6 +42,42 @@ jobs:
         working-directory: remotion
         run: npm run typecheck
 
+
+  remotion-synthetic-render:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install FFmpeg and image inspection dependency
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          python -m pip install pillow
+      - name: Install Remotion dependencies
+        working-directory: remotion
+        run: npm install --no-audit --no-fund
+      - name: Ensure headless browser
+        working-directory: remotion
+        run: npx remotion browser ensure
+      - name: Render and inspect synthetic multitrack MP4
+        run: python scripts/validate_remotion_render.py
+      - name: Preserve validation MP4
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexus-remotion-synthetic-validation
+          path: remotion/out/synthetic-validation.mp4
+          if-no-files-found: ignore
+          retention-days: 7
+
   commons-live-smoke:
     runs-on: ubuntu-latest
     continue-on-error: true
