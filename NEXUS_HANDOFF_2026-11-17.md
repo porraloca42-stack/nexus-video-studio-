@@ -891,3 +891,15 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - O CI não executou render sintético, deploy, Modal/GPU, Cloudflare, Fish Audio, Gemini ou produção audiovisual. Não comprova GPU real, billing ou movimento de LTX.
 - Próxima ação sem custo: auditoria estática final do diff #10 e desenho de telemetria/cache. Manter PR aberta; não fazer merge sem pedido explícito.
 - Custo variável adicional nesta etapa: US$0.
+
+
+## CHECKPOINT — TELEMETRIA DE CACHE HF E CI #1174 VERDE — 2026-11-17T17:56:28-03:00 (America/Sao_Paulo)
+- Consulta GitHub: 2026-11-17T17:56:28-03:00 (America/Sao_Paulo). HEAD de main antes desta atualização documental: 45d9f7d53140039c2daf2e848e4d6453e77fac0e.
+- PR #10, branch fix/modal-gpu-identity-and-cost-report, novo head ef102d4116da01e67c829efc0af7832b8510fd5c. Continua aberta, não mergeada e não implantada; GitHub reporta mergeable=true.
+- Além do guard fail-closed de identidade GPU e remoção da estimativa de custo incorreta no smoke, foi adicionada telemetria de cache de pesos Hugging Face.
+- Novo helper nexus/hf_cache.py tenta primeiro hf_hub_download(local_files_only=True). Em cache miss real (LocalEntryNotFoundError), executa o download remoto uma única vez. Erros de autenticação/rede/outros erros não são mascarados nem repetidos.
+- Worker agora registra hit/miss separadamente para checkpoint e upscaler, total de hits/misses, tempo de lookup local e tempo de download. Os mesmos dados são retornados por cena e incluídos em scripts/modal_smoke_test.py report.json.
+- Três testes novos cobrem cache hit sem download, cache miss com download único e propagação de falhas não relacionadas ao cache. O teste local isolado combinado de identidade/cache passou em 11/11 testes.
+- CI #1174 / run 44174426029 no head ef102d4116da01e67c829efc0af7832b8510fd5c concluiu: unit-tests success, remotion-typecheck success, commons-live-smoke success; remotion-synthetic-render skipped. Todos os jobs executados passaram; render sintético não foi executado.
+- CI não valida o runtime Modal ativo, GPU real, billing, movimento LTX ou MP4 de produção. Nenhum deploy, Modal/GPU, Cloudflare, Fish Audio, Gemini ou render pago foi executado. Custo variável adicional: US$0.
+- Próxima ação: revisar contrato de relatório e auditar implantação/billing de forma documental/estática. Manter PR aberta até pedido explícito de merge.
