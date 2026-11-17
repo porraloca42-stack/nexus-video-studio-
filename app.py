@@ -162,14 +162,15 @@ html,body,.stApp,[data-testid="stAppViewContainer"]{background:#09090B!important
 .nexus-hero{position:relative;overflow:hidden;padding:1.45rem 1.65rem;border:1px solid #30234d;border-radius:22px;background:linear-gradient(115deg,rgba(24,18,43,.98),rgba(18,18,22,.96) 65%,rgba(30,24,52,.95));box-shadow:0 18px 48px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.06);margin-bottom:1rem}
 .nexus-brand-lockup{display:flex;align-items:center;justify-content:center;gap:clamp(.65rem,2.8vw,1.15rem);width:100%;min-width:0;margin:0 auto}
 .nexus-brand-lockup{display:flex;align-items:center;justify-content:flex-start;gap:.7rem;width:100%;min-width:0;margin:.35rem 0 1.1rem}
-.nexus-logo-mark{width:44px!important;height:44px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
-.nexus-logo-mark svg{width:100%!important;height:100%!important}
-.nexus-brand-name{font-family:Georgia,serif!important;font-size:1.55rem!important;letter-spacing:.02em!important;font-weight:700!important}
+.nexus-brand-lockup .nexus-logo-mark{width:44px!important;height:44px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+.nexus-brand-lockup .nexus-logo-mark svg{width:100%!important;height:100%!important}
+.nexus-brand-copy .nexus-brand-name{font-family:Georgia,serif!important;font-size:1.55rem!important;letter-spacing:.02em!important;font-weight:700!important}
+.st-key-nexus-open-settings button{width:42px!important;height:42px!important;min-height:42px!important;border-radius:50%!important;background:#24232b!important;border:1px solid #38343f!important;font-size:1.2rem!important;padding:0!important}
 .nexus-brand-subtitle{display:none!important}
 .nexus-prompt-label,.nexus-section-label{font-size:.78rem;letter-spacing:.12em;font-weight:750;color:#aaa0c5;margin:0 0 .65rem}
 .nexus-control-eyebrow{font-size:.68rem;letter-spacing:.1em;font-weight:750;color:#a78bfa;margin:0 0 .5rem}
 .nexus-preview-stage{width:100%;aspect-ratio:1.08/1;min-height:270px;border:1px solid #51416e;border-radius:18px;background:linear-gradient(145deg,#1a1920,#121116);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.75rem;margin:.6rem 0 1rem;box-shadow:inset 0 0 42px rgba(124,58,237,.06)}
-.nexus-preview-stage svg{width:78px;height:150px;opacity:.75}
+.nexus-preview-stage svg{width:86px;height:164px;opacity:.75}
 .nexus-preview-caption{text-align:center;color:#aaa5b4;font-size:.85rem;line-height:1.45;letter-spacing:.01em}
 .st-key-nexus-video-stage{margin-top:.25rem}
 .st-key-nexus-video-stage [data-testid="stVerticalBlock"]{gap:0!important}
@@ -190,7 +191,7 @@ html,body,.stApp,[data-testid="stAppViewContainer"]{background:#09090B!important
 .st-key-nexus-bottom-nav{position:fixed!important;z-index:9999!important;left:0!important;right:0!important;bottom:0!important;width:100%!important;padding:.45rem .7rem!important;background:rgba(12,12,18,.97)!important;border-top:1px solid #30234d!important;border-bottom:1px solid #30234d!important;backdrop-filter:blur(18px)!important}
 .st-key-nexus-bottom-nav [data-testid="stPills"]{margin:0!important}
 .st-key-nexus-bottom-nav [data-testid="stPills"] [role="group"]{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;justify-content:space-between!important;gap:.35rem!important;scrollbar-width:none!important}
-.st-key-nexus-bottom-nav [data-testid="stPills"] button{flex:1 0 auto!important;min-width:max-content!important;justify-content:center!important;padding:.45rem .75rem!important;border-radius:12px!important;font-size:.8rem!important}
+.st-key-nexus-bottom-nav [data-testid="stPills"] button{flex:1 0 auto!important;min-width:max-content!important;justify-content:center!important;padding:.45rem .5rem!important;border-radius:12px!important;font-size:.76rem!important}
 [data-testid="stPills"]{width:100%!important;min-width:0!important}
 [data-testid="stPills"] [role="group"]{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;gap:.5rem!important;padding:.3rem .1rem .65rem!important;scrollbar-width:thin!important;overscroll-behavior-x:contain!important}
 [data-testid="stPills"] [role="group"] button{flex:0 0 auto!important;width:auto!important;min-width:max-content!important;max-width:none!important;white-space:nowrap!important;word-break:keep-all!important;overflow-wrap:normal!important;writing-mode:horizontal-tb!important;padding:.5rem .9rem!important;border:1px solid #34303f!important;border-radius:999px!important;background:#18181d!important;color:#d4d4d8!important}
@@ -210,7 +211,7 @@ div[data-testid="stButton"] button[kind="primary"]:hover{box-shadow:0 8px 25px r
 [data-testid="stAlert"]{border-radius:13px!important}
 [data-testid="stProgress"]>div>div{background:linear-gradient(90deg,#6366F1,#8B5CF6)!important}
 hr{border-color:#27272A!important}
-@media(max-width:850px){.block-container{padding:.75rem .8rem 8rem!important}.nexus-hero{padding:1rem .7rem;border-radius:17px}.nexus-brand-lockup{gap:.55rem}.nexus-brand-name{font-size:1.45rem!important;letter-spacing:.02em!important}.nexus-preview-stage{min-height:245px}.nexus-preview-stage svg{width:68px;height:132px}}
+@media(max-width:850px){.block-container{padding:.75rem .8rem 8rem!important}.nexus-hero{padding:1rem .7rem;border-radius:17px}.nexus-brand-lockup{gap:.55rem}.nexus-brand-name{font-size:1.45rem!important;letter-spacing:.02em!important}.nexus-preview-stage{min-height:245px}.nexus-preview-stage svg{width:76px;height:146px}}
 </style>
 """, unsafe_allow_html=True)
 
@@ -224,15 +225,19 @@ with header_brand:
     """, unsafe_allow_html=True)
 with header_settings:
     if st.button("⚙", key="nexus-open-settings", help="Abrir perfil e configurações"):
-        st.session_state["nexus_navigation"] = "Perfil"
+        st.session_state["nexus_navigation"] = "⚙ Perfil"
 
-# Mobile-first navigation; the production pipeline is preserved.
+# Mobile-first navigation; icon labels follow the supplied reference.
+nav_map = {"＋ Criar": "Criar", "▱ Biblioteca": "Biblioteca", "▣ Modelos": "Modelos", "♙ Perfil": "Perfil", "⚙ Perfil": "Perfil"}
+if st.session_state.get("nexus_navigation") not in nav_map:
+    st.session_state["nexus_navigation"] = "＋ Criar"
 with st.container(key="nexus-bottom-nav"):
-    active_view = st.pills(
-        "Navegação", ["Criar", "Biblioteca", "Modelos", "Perfil"],
-        selection_mode="single", default="Criar", key="nexus_navigation",
+    active_nav = st.pills(
+        "Navegação", ["＋ Criar", "▱ Biblioteca", "▣ Modelos", "♙ Perfil"],
+        selection_mode="single", default="＋ Criar", key="nexus_navigation",
         label_visibility="collapsed",
-    ) or "Criar"
+    ) or "＋ Criar"
+active_view = nav_map.get(active_nav, "Criar")
 
 if active_view == "Criar":
     if "nexus_style" not in st.session_state or st.session_state["nexus_style"] not in STYLE_OPTIONS:
@@ -241,7 +246,6 @@ if active_view == "Criar":
     # Primary creation flow follows the mobile reference: prompt, style, voice/duration, preview.
     render_mode = st.session_state.get("nexus_render_mode", "Imagens originais · Cloudflare + Modal I2V + Remotion")
     with st.container(border=True):
-        st.markdown('<div class="nexus-prompt-label">DESCREVA SEU VÍDEO</div>', unsafe_allow_html=True)
         topic = st.text_area(
             "Assunto ou roteiro", height=92,
             placeholder="Descreva o tema do vídeo ou cole seu roteiro completo...",
