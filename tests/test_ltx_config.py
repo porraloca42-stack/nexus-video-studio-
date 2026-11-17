@@ -29,7 +29,7 @@ class LTXPipelineConfigTests(unittest.TestCase):
         self.assertTrue(MODEL_CODE_REVISION.startswith("50f0aef"))
         self.assertEqual(GPU_TYPE, "L40S")
         self.assertLess(GPU_RATE_USD_PER_SECOND, 0.0006)
-        self.assertEqual(GPU_COST_BUDGET_USD, 0.15)
+        self.assertEqual(GPU_COST_BUDGET_USD, 0.08)
         self.assertEqual(WIDTH, 384)
         self.assertEqual(HEIGHT, 672)
         self.assertEqual(SCALEDOWN_WINDOW_SECONDS, 5)
