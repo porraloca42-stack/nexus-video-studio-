@@ -152,3 +152,21 @@ Responder em português brasileiro, com clareza e sem exagerar. O usuário quer 
 
 
 Próximo passo exato: confirmar HEAD, reler todos os arquivos alterados e consultar novamente o CI. A integração atual não lista runs de push; se não houver evidência nova, CI permanece desconhecido. Não executar chamadas pagas, deploy Modal ou render de produção sem autorização adicional.
+
+
+## Continuação — base ComfyUI para protótipo LTX-2.5 sem GPU (17/11/2026)
+- Pesquisa oficial registrada em `NEXUS_LTX25_COMFYUI_PLAN.md`. O workflow oficial I2V two-stage usa LTX-2.5 22B BF16, upscale espacial 2×, refine 3 passos, imagem inicial opcional e gera áudio/vídeo. Frames devem ser 1+8n; defaults consultados são 24 fps e 960×544 paisagem. O NEXUS precisará adaptar para vertical.
+- LTX-2.5 requer pelo menos 32 GB VRAM; A100 80 GB/H100 são recomendadas. A L40S 48 GB atual está acima do mínimo, mas não há prova de que o workflow caiba com margem ou atenda o orçamento. Não executar inferência sem autorização explícita.
+- Criado `nexus/comfyui_client.py`, cliente HTTP isolado e mockável, com upload, submit, history polling, timeout sem retry automático, extração de vídeo e download.
+- Criado `tests/test_comfyui_client.py` com testes sem rede/GPU.
+- Commit base do cliente: `92a9001`; testes: `2a126e5`; plano: `70f47fc`; adendo de estado do plano: `c236599`.
+- Cliente genérico implementado; LTX-2.5 NÃO está integrado. Workflow API exportado, patcher de nós, worker Modal, custom node pins, deploy e teste de inferência ainda não existem.
+- CI permanece desconhecido: status combinado sem registros e wrapper de runs filtra apenas PR; clone local falhou por DNS. Não declarar testes aprovados.
+- Custo: sem downloads de pesos, sem ComfyUI iniciado, sem Modal/GPU, sem API paga e sem MP4. Custo variável adicional: US$0.
+
+### Próximos passos sem custo
+1. Verificar HEAD e reler módulo/testes/documentação.
+2. Confirmar CI quando houver endpoint disponível; caso contrário, manter como desconhecido.
+3. Obter/exportar o workflow oficial para formato API e fixar IDs/nós usados; criar patcher de parâmetros e testes de contrato, sem executar ComfyUI.
+4. Criar worker Modal isolado somente após testes de contrato e revisão de dependências/pesos. Não fazer deploy ou download de modelos sem autorização explícita.
+5. Preservar LTX 0.9.8 como fallback e não alterar o pipeline padrão.
