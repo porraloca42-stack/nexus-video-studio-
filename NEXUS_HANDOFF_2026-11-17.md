@@ -550,3 +550,13 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - Regra durante o trabalho: checkpoint timestampado após cada etapa significativa; manter master, handoff e bootstrap sincronizados; registrar evidências e estados separados; não declarar concluído sem validação.
 - Estado desta atualização: protocolo em documentação; ainda depende da confirmação de CI dos commits documentais. Não altera código de produção, não dispara APIs pagas, deploy ou render.
 - Próxima ação: verificar os três commits e respectivos checks no GitHub Actions; então informar ao usuário os SHAs e o resultado real. O chat seguinte deve executar o relatório de retomada e aguardar confirmação antes de qualquer alteração.
+
+
+## ORDEM PERMANENTE — CHECKPOINT A CADA PROCESSO — 17/11/2026, 14:08:02 (America/Sao_Paulo)
+
+**Sempre atualizar a cada processo e sempre registrar data e horário. Sem exceção.** Cada unidade de trabalho (consulta, análise, decisão, edição, teste, workflow, revisão, correção ou bloqueio) exige checkpoint imediatamente ao terminar e antes de iniciar a próxima. Registrar timestamp America/Sao_Paulo, ação, resultado/evidência, arquivos/commits/IDs, estado real, limitações, pendências e próxima ação. Atualizar o handoff e master state; manter bootstrap sincronizado quando mudar o procedimento ou ponto operacional. Relê-los na main. Se GitHub estiver indisponível, declarar o bloqueio e manter registro visível na resposta; nunca fingir salvamento. Não limitar a regra a “etapas significativas” ou ao encerramento.
+
+- Timestamp da ordem: 2026-11-17T14:08:02-03:00 (UTC−03:00).
+- Confirmação de leitura do estado anterior: os três documentos foram consultados diretamente na main; SHAs antes desta atualização: master `465714c25013b41e4c1451640854a225403bd75a`, handoff `0d150d61349e2a892019b4cb47300006a4654a49`, bootstrap `9dd8880cd531171150bce4ba0e5da8d554e71bf0`.
+- Commits de protocolo já gravados antes desta regra estrita: `82d7f52` (master), `3a8a0fa` (handoff), `0fd6ae7` (bootstrap).
+- Estado: regra estrita sendo persistida nesta etapa; não houve alteração de código de produção nem execução paga.
