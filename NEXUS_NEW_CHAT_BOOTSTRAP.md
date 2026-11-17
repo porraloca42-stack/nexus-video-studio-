@@ -157,3 +157,8 @@ Este bootstrap reduz perda de continuidade, mas não garante que a plataforma ca
 ## Trabalho em andamento — Brain 4 → Remotion manifest — 17/11/2026
 - Novo teste em `tests/test_remotion_renderer.py` verifica que a timeline validada do Brain 4 chega ao manifest Remotion com captions, palavras temporizadas, SFX e fades/ducking.
 - CI #1030 e workflow demo #120 estão em execução; verificar resultados antes de prosseguir. Sem APIs pagas ou render de produção.
+
+
+## Resultado mais recente — teste Brain 4 → manifest — 17/11/2026
+- CI #1030 aprovado: 205 testes Python, Remotion typecheck e Commons smoke. A timeline Brain 4 validada chega ao manifest com captions, timestamps, SFX e fades/ducking.
+- Workflow Remotion demo #120 ainda em andamento na última consulta; verificar MP4 sintético.
