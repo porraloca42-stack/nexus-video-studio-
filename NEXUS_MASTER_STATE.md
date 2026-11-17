@@ -1423,7 +1423,7 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - `apply_visual_style_lock()` também evita duplicar os modificadores formais em `style_search_terms` quando o storyboard é reprocessado; o teste agora verifica idempotência tanto da direção anexada ao `image_prompt` quanto dos termos de busca.
 - Limpeza das instruções negativas: removidas referências a objetos/cenas concretos dos campos `avoid` para reduzir ativação involuntária de clichês mesmo quando mencionados como algo a evitar.
 - Commits adicionais: `372eb3f` (restrições sem exemplos de cena), `2131a3f` (teste de não vazamento), `e6be587` (idempotência do lock), `789d294` (teste de idempotência).
-- Workflow atual: GitHub Actions run `43988771498` associado ao commit `789d294`; estado inicial queued. O run anterior `43988702350` havia avançado com typecheck Remotion concluído com sucesso; unit-tests e Commons smoke ainda estavam em andamento no último polling. Aguardar o run mais recente para conclusão dos testes.
+- Workflow atual: GitHub Actions run `43988866199` associado ao commit `6776d2f`; estado `in_progress` no último polling. O run anterior `43988771498` concluiu com sucesso o smoke de Wikimedia Commons e o typecheck Remotion; compilação Python também concluiu, enquanto a suíte unitária ainda estava em execução. Aguardar o run mais recente para conclusão integral.
 
 
 ## Versão e responsividade da biblioteca de estilos — 17/11/2026
