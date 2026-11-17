@@ -82,6 +82,9 @@ class GitHubRendererTests(unittest.TestCase):
             encryption_secret=secret,
             fish_api_key="fish-private-key",
             fish_voice_id="fish-private-voice",
+            gemini_api_key="gemini-private-key",
+            topic="Tema de teste",
+            style="Cinematográfico",
             session=session,
             poll_interval=0,
         )
@@ -91,7 +94,13 @@ class GitHubRendererTests(unittest.TestCase):
         from nexus.render_crypto import decrypt_text
         dispatch_inputs = next(call[2]["json"]["inputs"] for call in session.calls if call[0] == "POST")
         fish = json.loads(decrypt_text(dispatch_inputs["fish_credentials_encrypted"], secret))
-        self.assertEqual(fish, {"api_key": "fish-private-key", "voice_id": "fish-private-voice"})
+        self.assertEqual(fish, {
+            "api_key": "fish-private-key",
+            "voice_id": "fish-private-voice",
+            "gemini_api_key": "gemini-private-key",
+            "topic": "Tema de teste",
+            "style": "Cinematográfico",
+        })
 
     def test_large_storyboard_is_compressed_before_dispatch(self):
         secret = "cloudflare-api-token"
