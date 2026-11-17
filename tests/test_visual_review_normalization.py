@@ -57,9 +57,9 @@ class VisualReviewTests(unittest.TestCase):
         self.assertEqual(result[0]["motion_progression_score"], 8)
         self.assertTrue(result[0]["action_observed"])
         self.assertEqual(result[0]["continuity_score"], 9)
+        self.assertEqual(result[0]["temporal_progression"], "A mão alcança a maçaneta, gira e abre a janela.")
         payload = session.post.call_args.kwargs["json"]
-        image_part = payload["contents"][0]["parts"][1]
-        self.assertIn("inlineData", image_part)
+        image_part = next(part for part in payload["contents"][0]["parts"] if "inlineData" in part)
         self.assertEqual(image_part["inlineData"]["mimeType"], "image/jpeg")
 
 
