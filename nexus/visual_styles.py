@@ -10,7 +10,7 @@ _STYLE_ROWS = [
     "monumental wides, human silhouettes, slow orbital moves, measured push-ins",
     "cosmic dust, layered nebula clouds, subtle sacred geometry",
     "Express scale, interconnection, uncertainty and wonder through a sophisticated cosmic visual language. Use celestial and geometric visual vocabulary only when it strengthens the scene's specific meaning. The style governs atmosphere and visual treatment, never the subject matter.",
-    "horoscope graphics, random equations, busy HUD, rainbow galaxies, generic stars, alegações de prova científica",
+    "horoscope-like graphics, pseudo-scientific claims, cluttered interface elements, oversaturation, generic stock imagery",
     "spaceship",
     [
       "#11152f",
@@ -27,7 +27,7 @@ _STYLE_ROWS = [
     "slow dolly through impossible spaces, deliberate reveals, uncanny symmetry",
     "thin mist, glass reflections, floating dust, cloud layers",
     "Use dream logic, spatial ambiguity, symbolic transformation and controlled impossibility to express the exact psychological or narrative state. Surreal elements must emerge from the scene's meaning; no fixed dream motifs or recurring prop formula.",
-    "random collages, melting faces, childish fantasy, visual glitches, kaleidoscope excess",
+    "random surreal collage, incoherent transformations, excessive distortion, childish rendering, visual noise",
     "surreal",
     [
       "#26213f",
@@ -44,7 +44,7 @@ _STYLE_ROWS = [
     "controlled close-ups, over-shoulder, negative space, slow push-ins",
     "subtle grain, rain on glass, tactile concrete and dark wood",
     "Explore psychological tension, inner conflict, ambiguity, vulnerability, control and emotional subtext through composition, contrast, gesture, distance and environment. The style does not prescribe a character type, prop, location or action; derive those independently from the script.",
-    "gore, demonic clichés, hooded hackers, red eyes, sensational manipulation, crushed blacks",
+    "sensationalized menace, horror exaggeration, stereotyped characters, manipulative tropes, unreadable shadows",
     "detective",
     [
       "#10141d",
@@ -61,7 +61,7 @@ _STYLE_ROWS = [
     "extreme wide shots, slow crane/aerial reveals, tiny human figures",
     "windblown sand, weathered stone, drifting dust",
     "Convey significance and emotional scale through composition, perspective, production design, atmosphere and visual rhythm. Monumentality is an expressive tool, not a requirement to use temples, deserts, heroic figures or any recurring setting.",
-    "imposed religious icons, game castles, random planets, lens flare excess, landscape filler",
+    "unmotivated spectacle, fantasy-game rendering, forced religious coding, empty grandeur, excessive lens effects",
     "castle",
     [
       "#292238",
@@ -78,7 +78,7 @@ _STYLE_ROWS = [
     "slow macro pushes, symmetry, fluid lateral and orbital motion",
     "bioluminescent filaments, particles, translucent energy waves",
     "Translate internal or energetic ideas into a controlled luminous visual language. The form may be abstract, environmental, material or human depending on the narrative. Do not default to glowing bodies, chakra diagrams or a fixed color-coded figure.",
-    "cheap chakra charts, rainbow gradients everywhere, nightclub, neon clutter, pseudo-science as fact",
+    "diagrammatic explanations, pseudo-scientific presentation, uncontrolled neon, rainbow overload, visual clutter",
     "neon_city",
     [
       "#10172a",
@@ -95,7 +95,7 @@ _STYLE_ROWS = [
     "painterly frames, slow push-ins, still-life inserts, classical geometry",
     "oil brushwork, aged canvas, carved wood, parchment, patinated metal",
     "Use the visual sophistication of classical painting: deliberate composition, tonal hierarchy, material richness, symbolic restraint and painterly texture. Historical or esoteric references must be relevant to the script, not decorative defaults.",
-    "random occult sigils, wizard props, modern objects, fake readable text, excessive gold, symbolism as scientific evidence",
+    "random esoteric decoration, fantasy illustration clichés, anachronistic styling, excessive ornament, illegible details",
     "watch",
     [
       "#211a17",
@@ -112,7 +112,7 @@ _STYLE_ROWS = [
     "extreme macro, smooth tracking, slow motion, stable compositions",
     "viscous liquid, metallic surfaces, pigment diffusion, bubbles, ripples",
     "Prioritize precise material behavior, tactile detail, rhythm and controlled visual fascination. Macro abstraction is appropriate only when it communicates the scene's idea; do not default to liquid metal, droplets or endlessly repeating fluid patterns.",
-    "kaleidoscope loops, abstract filler, impossible physics, repeated gold liquid, flashing/strobing",
+    "abstract filler without narrative purpose, implausible material behavior, repetitive motion, sensory overload, strobing",
     "droplet",
     [
       "#11151c",
@@ -129,7 +129,7 @@ _STYLE_ROWS = [
     "24–50mm perspective, intentional medium/wide shots, restrained dolly/handheld",
     "organic grain, realistic skin/materials, subtle atmospheric depth",
     "Apply believable live-action cinematography. Let the script determine subjects, actions, locations and emotional register; use lensing, motivated light, composition and restrained movement to make the scene feel photographed rather than templated.",
-    "plastic CGI, excessive teal-orange, artificial flares, generic stock poses, fake text",
+    "plastic rendering, excessive color grading, artificial effects, generic stock-photo staging, visual inconsistency",
     "mountain",
     [
       "#182638",
@@ -146,7 +146,7 @@ _STYLE_ROWS = [
     "measured push-ins, silhouettes, selective close-ups, layered frames",
     "subtle grain, motivated haze/rain/smoke",
     "Use shadow, selective visibility, contrast and controlled atmosphere to establish a darker emotional register. Preserve clear visual storytelling. Darkness is a treatment, not a mandate for night scenes, anonymous figures or thriller props.",
-    "underexposure, horror clichés, constant smoke, crushed blacks, arbitrary neon",
+    "unreadable underexposure, horror exaggeration, gratuitous atmosphere, crushed shadows, arbitrary color accents",
     "silhouette",
     [
       "#101522",
@@ -163,7 +163,7 @@ _STYLE_ROWS = [
     "graphic composition, strong silhouette, clear hierarchy",
     "paper grain, screenprint or painterly digital texture",
     "Translate the scene's meaning into a concise, high-concept editorial image with clear hierarchy and intentional shape language. The metaphor must be specific to the narration, not a recurring icon or generic infographic.",
-    "clip-art, generic icons, school infographic, text-heavy poster, inconsistent technique",
+    "generic clip-art, explanatory infographic layouts, excessive detail, weak hierarchy, decorative metaphors without meaning",
     "editorial",
     [
       "#e4d6b9",
@@ -180,7 +180,7 @@ _STYLE_ROWS = [
     "low angles, reflective surfaces, door frames, deliberate close-ups",
     "silver-gelatin grain, wet pavement, motivated smoke",
     "Apply classic noir visual grammar through tonal contrast, framing, negative space and expressive shadow. Use it as a photographic language across subjects and genres; do not force crime stories, detectives, period costumes or familiar noir props.",
-    "color neon, cyberpunk, fedora clichés, unreadable darkness, random crime props",
+    "genre clichés without narrative reason, inconsistent monochrome treatment, muddy tonal range, unreadable darkness",
     "detective",
     [
       "#101319",
@@ -197,7 +197,7 @@ _STYLE_ROWS = [
     "illustrative framing, breathing room, clear focal point",
     "pigment blooms, granulation, paper fibers, wet-on-wet edges",
     "Preserve the scene's recognizable subject and action while translating surfaces, edges, light and color into a coherent watercolor medium. The medium is constant; subject matter remains entirely script-led.",
-    "photorealistic inserts, muddy colors, splashes hiding subjects, childish clip-art",
+    "mixed incompatible media, muddy pigment, excessive decorative texture, loss of subject readability",
     "vase",
     [
       "#c4d9d2",
@@ -214,7 +214,7 @@ _STYLE_ROWS = [
     "immersive wides, character-led tracking, revealing moves, depth",
     "weathered stone, organic landscapes, mist, embers, tactile costumes",
     "Create a coherent cinematic fantasy treatment only when the narrative supports it. Establish believable visual rules, tactile environments and purposeful extraordinary elements; never inject fantasy creatures, castles or magic simply because the style is selected.",
-    "generic game art, random dragons/castles, particle excess, cartoon proportions",
+    "unmotivated spectacle, incoherent world rules, generic game-art finish, excessive decorative effects",
     "castle",
     [
       "#29264c",
@@ -231,7 +231,7 @@ _STYLE_ROWS = [
     "dynamic perspective, expressive angles, single-frame storytelling",
     "ink hatching, brush strokes, restrained halftone, paper texture",
     "Use a unified graphic-novel drawing language, expressive line, deliberate shadow shapes and strong readable staging. Render a single cinematic scene, not a comic page; do not default to action poses, speech bubbles or superhero conventions.",
-    "comic panels, speech bubbles, captions, lettering, sound effects, collage",
+    "comic-page layouts, lettering, inconsistent line language, cluttered composition, weak action readability",
     "comic",
     [
       "#252b38",
@@ -248,7 +248,7 @@ _STYLE_ROWS = [
     "restrained movement, negative space, precise subject placement",
     "matte surfaces, subtle natural materials, low visual noise",
     "Reduce visual noise and retain only the elements essential to communicate the scene. Minimalism governs hierarchy, spacing and restraint, not emptiness; preserve the concrete action and context required by the narration.",
-    "empty decorative frames, generic gradients, excess props, tiny subjects, UI mockups, text overlays",
+    "empty minimalism, generic gradients, weak focal hierarchy, excessive decoration, loss of narrative context",
     "vase",
     [
       "#dce5e8",
@@ -265,7 +265,7 @@ _STYLE_ROWS = [
     "intimate close-ups, observational medium shots, eye-level, subtle handheld",
     "real skin, natural imperfections, tactile clothing, lived-in spaces",
     "Prioritize credible human behavior, nuanced emotion, natural physical detail and lived-in environments. Derive people, gestures and settings from the actual story; avoid stock-photo expressions and repeated generic protagonists.",
-    "plastic retouching, stock smiles, staged handshakes, melodrama, uncanny faces, anonymous same person",
+    "beauty retouching, exaggerated acting, stock-photo emotion, artificial skin, repetitive protagonist casting",
     "silhouette",
     [
       "#302b2a",
@@ -282,7 +282,7 @@ _STYLE_ROWS = [
     "observational wides, medium character scenes, tactile tool/manuscript inserts",
     "aged paper, worn stone, hand-forged metal, woven fabrics",
     "Reconstruct a historical period only when supported by the script or verified context. Maintain consistency in materials, clothing, architecture and technology; when details are uncertain, avoid invented specificity.",
-    "anachronisms, fantasy armor, fake manuscript text, unsupported likenesses, mixing centuries",
+    "anachronistic details, unsupported historical specificity, mixed-period design, fantasy embellishment",
     "watch",
     [
       "#342a24",
@@ -299,7 +299,7 @@ _STYLE_ROWS = [
     "slow stable tracking, landscape reveals, water-level details",
     "moving leaves, ripples, mist, wet stone, natural surface detail",
     "Use the natural world as subject, setting or metaphor only when it supports the narration. Emphasize observed movement, atmosphere and ecological plausibility; do not substitute generic landscapes for specific human or narrative actions.",
-    "repeated generic sunsets, fantasy glowing forests, oversaturated greens, unrelated wallpaper landscapes",
+    "generic scenic filler, oversaturated grading, artificial natural effects, repetitive compositions, lack of narrative connection",
     "waterfall",
     [
       "#193b35",
