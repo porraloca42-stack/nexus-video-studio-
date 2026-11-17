@@ -2,12 +2,12 @@
 
 ECONOMY_MODE = "Bibliotecas de vídeo · econômico (sem Modal)"
 AI_VIDEO_MODE = "IA original · Cloudflare + Modal (usa créditos)"
-RENDER_MODE_OPTIONS = (ECONOMY_MODE, AI_VIDEO_MODE)
+RENDER_MODE_OPTIONS = (AI_VIDEO_MODE, ECONOMY_MODE)
 
 
 def default_render_mode() -> str:
-    """Avoid GPU and image-generation usage unless the user explicitly opts in."""
-    return ECONOMY_MODE
+    """Prioritize original AI visuals; users can choose libraries to avoid variable GPU spend."""
+    return AI_VIDEO_MODE
 
 
 def mode_uses_modal(mode: str) -> bool:
