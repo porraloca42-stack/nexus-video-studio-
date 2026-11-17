@@ -134,6 +134,76 @@ def build_remotion_manifest(plan, media, audio_path, public_dir, job_id="nexus-j
         return f"jobs/{job_id}/{destination.name}"
 
     narration_ref = copy_audio(audio_path, "narration.mp3")
+    music_ref = copy_audio(plan.get("music_audio_path"), "music.mp3")
+    timeline = plan.get("edit_timeline") if isinstance(plan.get("edit_timeline"), dict) else {}
+
+    caption_events = []
+    for index, event in enumerate(timeline.get("caption_events") or [], 1):
+        if not isinstance(event, dict):
+            raise ValueError(f"Evento de legenda {index} inválido.")
+        start = float(event.get("start_seconds") or 0)
+        end = float(event.get("end_seconds") or 0)
+        text = str(event.get("text") or "").strip()
+        if not text or start < 0 or end <= start or end > total_seconds + 0.05:
+            raise ValueError(f"Evento de legenda {index} tem texto ou intervalo inválido.")
+        words = []
+        for word in event.get("words") or []:
+            if not isinstance(word, dict):
+                raise ValueError(f"Palavra temporizada inválida na legenda {index}.")
+            word_start = float(word.get("start_seconds") or 0)
+            word_end = float(word.get("end_seconds") or 0)
+            word_text = str(word.get("text") or "").strip()
+            if not word_text or word_start < start - 0.05 or word_end <= word_start or word_end > end + 0.05:
+                raise ValueError(f"Palavra temporizada fora do intervalo da legenda {index}.")
+            words.append({
+                "text": word_text,
+                "startSeconds": word_start,
+                "endSeconds": word_end,
+                "emphasis": bool(word.get("emphasis", False)),
+            })
+        caption_events.append({
+            "id": str(event.get("id") or f"caption-{index}"),
+            "startSeconds": start,
+            "endSeconds": end,
+            "text": text,
+            "position": event.get("position") if event.get("position") in {"top", "center", "bottom"} else "bottom",
+            "words": words,
+        })
+
+    sfx_events = []
+    for index, event in enumerate(timeline.get("sfx_events") or [], 1):
+        if not isinstance(event, dict):
+            raise ValueError(f"Evento SFX {index} inválido.")
+        start = float(event.get("start_seconds") or 0)
+        duration = float(event.get("duration_seconds") or 0)
+        source_path = event.get("asset_path")
+        if start < 0 or duration <= 0 or start + duration > total_seconds + 0.05:
+            raise ValueError(f"Evento SFX {index} tem intervalo inválido.")
+        asset_ref = copy_audio(source_path, f"sfx_{index:02d}.wav")
+        if not asset_ref:
+            raise FileNotFoundError(f"Arquivo SFX da timeline {index} não encontrado.")
+        sfx_events.append({
+            "id": str(event.get("id") or f"sfx-{index}"),
+            "asset": asset_ref,
+            "startSeconds": start,
+            "durationSeconds": duration,
+            "volume": _bounded_number(event.get("volume"), 0.25, 0.0, 1.0),
+        })
+
+    audio_mix_events = []
+    for index, event in enumerate(timeline.get("audio_mix_events") or [], 1):
+        if not isinstance(event, dict):
+            raise ValueError(f"Evento de mixagem {index} inválido.")
+        start = float(event.get("start_seconds") or 0)
+        end = float(event.get("end_seconds") or 0)
+        if start < 0 or end <= start or end > total_seconds + 0.05:
+            raise ValueError(f"Evento de mixagem {index} tem intervalo inválido.")
+        audio_mix_events.append({
+            "startSeconds": start,
+            "endSeconds": end,
+            "musicVolume": _bounded_number(event.get("music_volume"), 0.06, 0.0, 1.0),
+        })
+
     manifest = {
         "width": 720,
         "height": 1280,
@@ -141,6 +211,11 @@ def build_remotion_manifest(plan, media, audio_path, public_dir, job_id="nexus-j
         "durationInFrames": round(total_seconds * fps),
         "title": str(plan.get("seo", {}).get("title") or plan.get("topic_interpretation") or "NEXUS VIDEO"),
         "narrationAudio": narration_ref,
+        "musicAudio": music_ref,
+        "musicVolume": _bounded_number(plan.get("music_volume"), 0.12, 0.0, 1.0),
+        "captionEvents": caption_events,
+        "soundEffects": sfx_events,
+        "audioMixEvents": audio_mix_events,
         "scenes": scenes,
     }
     manifest_path = job_dir / "manifest.json"
