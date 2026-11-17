@@ -343,11 +343,75 @@ def validate_edit_timeline(data: Any) -> list[str]:
         if sfx is not None and not _is_nonempty_string(sfx):
             errors.append(f"{item_path}.sfx: expected non-empty string or null")
 
-    for field in ("caption_events", "audio_mix_events"):
-        events = _require_list(data, field, path, errors)
-        for index, event in enumerate(events):
-            if not _is_object(event):
-                errors.append(f"{path}.{field}[{index}]: expected object")
+    caption_events = _require_list(data, "caption_events", path, errors)
+    for index, event in enumerate(caption_events):
+        item_path = f"{path}.caption_events[{index}]"
+        if not _is_object(event):
+            errors.append(f"{item_path}: expected object")
+            continue
+        _require_string(event, "id", item_path, errors)
+        _require_string(event, "text", item_path, errors)
+        _require_number(event, "start_seconds", item_path, errors, minimum=0)
+        _require_number(event, "end_seconds", item_path, errors, minimum=0)
+        if _is_number(event.get("start_seconds")) and _is_number(event.get("end_seconds")):
+            if event["end_seconds"] <= event["start_seconds"]:
+                errors.append(f"{item_path}: end_seconds must be after start_seconds")
+            if _is_number(data.get("audio_duration_seconds")) and event["end_seconds"] > data["audio_duration_seconds"] + 0.05:
+                errors.append(f"{item_path}: caption exceeds audio duration")
+        if event.get("position", "bottom") not in {"top", "center", "bottom"}:
+            errors.append(f"{item_path}.position: expected top, center or bottom")
+        words = event.get("words", [])
+        if not isinstance(words, list):
+            errors.append(f"{item_path}.words: expected array")
+            continue
+        previous_word_end = event.get("start_seconds", 0)
+        for word_index, word in enumerate(words):
+            word_path = f"{item_path}.words[{word_index}]"
+            if not _is_object(word):
+                errors.append(f"{word_path}: expected object")
+                continue
+            _require_string(word, "text", word_path, errors)
+            start, end = word.get("start_seconds"), word.get("end_seconds")
+            if not _is_number(start) or not _is_number(end):
+                errors.append(f"{word_path}: start_seconds and end_seconds must be numbers")
+                continue
+            if start < previous_word_end - 0.02 or end <= start:
+                errors.append(f"{word_path}: invalid or unordered word interval")
+            if _is_number(event.get("start_seconds")) and start < event["start_seconds"] - 0.05:
+                errors.append(f"{word_path}: word starts before caption cue")
+            if _is_number(event.get("end_seconds")) and end > event["end_seconds"] + 0.05:
+                errors.append(f"{word_path}: word ends after caption cue")
+            previous_word_end = end
+
+    sfx_events = _require_list(data, "sfx_events", path, errors)
+    for index, event in enumerate(sfx_events):
+        item_path = f"{path}.sfx_events[{index}]"
+        if not _is_object(event):
+            errors.append(f"{item_path}: expected object")
+            continue
+        for field in ("id", "asset_path"):
+            _require_string(event, field, item_path, errors)
+        _require_number(event, "start_seconds", item_path, errors, minimum=0)
+        _require_number(event, "duration_seconds", item_path, errors, minimum=0.01)
+        _require_number(event, "volume", item_path, errors, minimum=0, maximum=1)
+        if _is_number(event.get("start_seconds")) and _is_number(event.get("duration_seconds")) and _is_number(data.get("audio_duration_seconds")):
+            if event["start_seconds"] + event["duration_seconds"] > data["audio_duration_seconds"] + 0.05:
+                errors.append(f"{item_path}: sound effect exceeds audio duration")
+
+    mix_events = _require_list(data, "audio_mix_events", path, errors)
+    for index, event in enumerate(mix_events):
+        item_path = f"{path}.audio_mix_events[{index}]"
+        if not _is_object(event):
+            errors.append(f"{item_path}: expected object")
+            continue
+        _require_number(event, "start_seconds", item_path, errors, minimum=0)
+        _require_number(event, "end_seconds", item_path, errors, minimum=0)
+        _require_number(event, "music_volume", item_path, errors, minimum=0, maximum=1)
+        if _is_number(event.get("start_seconds")) and _is_number(event.get("end_seconds")):
+            if event["end_seconds"] <= event["start_seconds"]:
+                errors.append(f"{item_path}: end_seconds must be after start_seconds")
+            if _is_number(data.get("audio_duration_seconds")) and event["end_seconds"] > data["audio_duration_seconds"] + 0.05:
+                errors.append(f"{item_path}: mix event exceeds audio duration")
     return errors
 
 
