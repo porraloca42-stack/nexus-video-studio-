@@ -903,3 +903,13 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - CI #1174 / run 44174426029 no head ef102d4116da01e67c829efc0af7832b8510fd5c concluiu: unit-tests success, remotion-typecheck success, commons-live-smoke success; remotion-synthetic-render skipped. Todos os jobs executados passaram; render sintético não foi executado.
 - CI não valida o runtime Modal ativo, GPU real, billing, movimento LTX ou MP4 de produção. Nenhum deploy, Modal/GPU, Cloudflare, Fish Audio, Gemini ou render pago foi executado. Custo variável adicional: US$0.
 - Próxima ação: revisar contrato de relatório e auditar implantação/billing de forma documental/estática. Manter PR aberta até pedido explícito de merge.
+
+## PR #11 — revisão técnica concluída — 2026-11-17T18:11:28-03:00 (America/Sao_Paulo)
+- PR: https://github.com/porraloca42-stack/nexus-video-studio-/pull/11; branch `safety/separate-modal-deploy-smoke`; head `75cdb246c80d7ad5d9e4059e215fbad1e07741a5`; base main `198cc21e7a2a39aff49db20fdfd9938ab7731521`.
+- Revisão direta dos dois workflows na branch: `.github/workflows/modal-deploy.yml` permanece manual (`workflow_dispatch`), instala apenas Modal CLI e executa `modal deploy modal_worker.py`; não chama o smoke. `.github/workflows/modal-inference-smoke.yml` é separado, manual, valida `MODAL_TOKEN_ID` e `MODAL_TOKEN_SECRET`, executa `scripts/modal_smoke_test.py` e publica MP4/relatório como artifact por 3 dias.
+- Diff conferido: 3 arquivos no PR (dois workflows e este registro no Master State); nenhuma alteração em `modal_worker.py` ou no pipeline editorial. Revisão estática sem defeito impeditivo identificado.
+- CI #1178 / run `44175647626` no head da PR: `unit-tests`, `commons-live-smoke` e `remotion-typecheck` concluídos com success; `remotion-synthetic-render` skipped. O CI não valida deploy Modal nem inferência GPU.
+- Descrição da PR atualizada para registrar revisão e resultado real do CI.
+- Estado: implementação na branch e revisão estática concluídas; CI dos jobs executados aprovado; PR aberta, não mergeada; não implantada. Main e deployments existentes permanecem inalterados.
+- Nenhum deploy Modal, smoke de inferência, GPU, Cloudflare, Fish Audio, Gemini ou render foi acionado. Nenhum custo variável adicional gerado.
+- Próxima ação: aguardar autorização explícita para merge; após eventual merge, deploy e inferência continuam sendo operações independentes e exigem autorização própria.
