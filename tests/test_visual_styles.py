@@ -22,6 +22,33 @@ class VisualStyleLibraryTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             build_visual_style_directive("Estilo inventado")
 
+    def test_style_grammar_does_not_encode_fixed_scene_motifs(self):
+        forbidden_motifs = (
+            "man in front of mirror", "solitary silhouette", "detective",
+            "liquid gold", "ancient temple", "floating clocks",
+        )
+        for name in STYLE_OPTIONS:
+            with self.subTest(style=name):
+                profile = STYLE_PROFILES[name]
+                terms = profile["search_terms"].lower()
+                directive = build_visual_style_directive(name).lower()
+                for motif in forbidden_motifs:
+                    self.assertNotIn(motif, terms)
+                    self.assertNotIn(motif, directive)
+                self.assertIn("anti-template", directive)
+
+    def test_scene_specific_style_terms_are_preserved_and_formal_terms_appended(self):
+        plan = {
+            "scenes": [{
+                "voiceover": "Cena específica",
+                "style_search_terms": "documentary lensing, desaturated color treatment",
+            }]
+        }
+        result = apply_visual_style_lock(plan, "Dark Psychology")
+        terms = result["scenes"][0]["style_search_terms"]
+        self.assertIn("documentary lensing", terms)
+        self.assertIn(STYLE_SEARCH_TERMS["Dark Psychology"], terms)
+
     def test_director_locks_profile_and_search_terms(self):
         plan = {"scenes": [{"voiceover": "Cena um"}, {"voiceover": "Cena dois"}]}
         result = apply_visual_style_lock(plan, "Quântico & Cósmico")
