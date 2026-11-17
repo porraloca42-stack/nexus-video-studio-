@@ -85,3 +85,11 @@ Este bootstrap reduz perda de continuidade, mas não garante que a plataforma ca
 - Master state atualizado: `e092eaccb8e03a0f5376e0617d336e8984476f12`.
 - Handoff atualizado: `f6ff90aa3fdf1d8abc915dfafa1868ed3c2975de`.
 - CI status combinado permaneceu vazio; a integração de GitHub não lista push workflow runs. O próximo chat precisa conferir manualmente Actions e artifact antes de qualquer declaração de validação.
+
+
+## Checkpoint atualizado — 17/11/2026
+- A falha do run #969 foi diagnosticada nos logs: `ModuleNotFoundError: No module named 'nexus'` no script de render sintético.
+- Correção de `sys.path` commitada em `178ffe1bcb26a5a9ebbbbf69c08979ebfb555df7`.
+- Run #973: testes unitários, typecheck e Commons smoke passaram; o job sintético foi ignorado por falta do marcador no commit.
+- O master state foi atualizado em `cc86d8b9ad78c2c0d3c9b2d081e481d741fd87c8`, cujo commit contém `[run-remotion-validation]` para disparar a validação restrita.
+- Próxima ação: consultar o run criado por esse push, validar conclusão de `remotion-synthetic-render`, obter o artifact e inspecionar o MP4. Não declarar validação até essa inspeção.
