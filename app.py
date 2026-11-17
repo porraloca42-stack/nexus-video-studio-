@@ -6,6 +6,7 @@ import streamlit.components.v1 as components
 from nexus.director import create_storyboard, validate_storyboard
 from nexus.build_info import get_runtime_build_info
 from nexus.assets import search_video_sources, download_file, diverse_candidate_shortlist
+from nexus.render_modes import ECONOMY_MODE, RENDER_MODE_OPTIONS, default_render_mode, mode_uses_modal
 import nexus.audio as fish_audio
 
 # Streamlit Cloud can retain a stale imported module across source syncs.
@@ -390,8 +391,31 @@ if active_view == "Criar":
     if "nexus_style" not in st.session_state or st.session_state["nexus_style"] not in STYLE_OPTIONS:
         st.session_state["nexus_style"] = "Cinematográfico"
     
-    # Primary creation flow follows the mobile reference: prompt, style, voice/duration, preview.
-    render_mode = st.session_state.get("nexus_render_mode", "Imagens originais · Cloudflare + Modal I2V + Remotion")
+    # Primary creation flow makes the credit-sensitive visual engine visible.
+    if st.session_state.get("nexus_render_mode") not in RENDER_MODE_OPTIONS:
+        st.session_state["nexus_render_mode"] = default_render_mode()
+    render_mode = st.radio(
+        "Motor visual",
+        RENDER_MODE_OPTIONS,
+        horizontal=True,
+        key="nexus_render_mode",
+        help=(
+            "O modo econômico usa bibliotecas de vídeo e evita Cloudflare/Modal. "
+            "Gemini e Fish Audio continuam sujeitos às cotas e planos das respectivas contas. "
+            "O modo de IA original envia cenas para geração e animação e consome créditos."
+        ),
+    )
+    if mode_uses_modal(render_mode):
+        st.warning(
+            "IA original usa créditos da Cloudflare e da Modal. O custo total de um vídeo "
+            "de 40–50s ainda não foi validado; o limite interno do worker não representa "
+            "uma garantia de cobrança máxima do Workspace."
+        )
+    else:
+        st.caption(
+            "Modo econômico selecionado: não aciona geração Cloudflare nem GPU Modal. "
+            "Chamadas Gemini/Fish Audio ainda dependem das cotas das suas contas."
+        )
     with st.container(border=True):
         topic = st.text_area(
             "Assunto ou roteiro", height=92,
@@ -579,7 +603,7 @@ if active_view == "Criar":
                 st.caption("Busca visual: " + scene.get("asset_search_query", ""))
                 st.divider()
     
-        if render_mode == "Imagens originais · Cloudflare + Modal I2V + Remotion":
+        if mode_uses_modal(render_mode):
             brain4_enabled = st.checkbox(
                 "Ativar Brain 4 — edição inteligente sincronizada",
                 value=False,
@@ -639,7 +663,7 @@ if active_view == "Criar":
                     ("Wikimedia Commons", True), ("Pixabay", pixabay_key), ("Pexels", pexels_key)
                 ) if key
             ]
-            if render_mode == "Bibliotecas de vídeo (alternativo)" and len(configured_libraries) == 1:
+            if render_mode == ECONOMY_MODE and len(configured_libraries) == 1:
                 st.warning(
                     f"Somente {configured_libraries[0]} está configurada. "
                     "O NEXUS fará revisão visual dos clipes, mas a variedade de bibliotecas "
@@ -649,7 +673,7 @@ if active_view == "Criar":
                 st.error("O storyboard precisa ser corrigido antes da produção.")
             elif brain4_enabled and not secret("GEMINI_API_KEY"):
                 st.error("Brain 4 foi ativado, mas GEMINI_API_KEY não está configurada. Nenhum trabalho foi enviado.")
-            elif render_mode == "Imagens originais · Cloudflare + Modal I2V + Remotion":
+            elif mode_uses_modal(render_mode):
                 github_token = secret("GITHUB_ACTIONS_TOKEN")
                 cloudflare_token = secret("CLOUDFLARE_API_TOKEN")
                 if not github_token or not cloudflare_token or not fish_api_key or not voice:
@@ -1287,12 +1311,9 @@ elif active_view == "Perfil":
         )
     with st.expander("Configurações avançadas de produção", expanded=False):
         st.markdown('<div class="nexus-kicker">PRODUÇÃO</div>', unsafe_allow_html=True)
-        render_mode = st.selectbox(
-            "Motor de produção visual",
-            ["Imagens originais · Cloudflare + Modal I2V + Remotion", "Bibliotecas de vídeo (alternativo)"],
-            index=0,
-            key="nexus_render_mode",
-            help="Fluxo principal: Cloudflare gera o keyframe de cada cena, Modal/LTX-Video anima cada keyframe em um clipe MP4 e Remotion monta o vídeo final. Requer MODAL_TOKEN_ID e MODAL_TOKEN_SECRET nos GitHub Actions Secrets e o worker Modal implantado. Bibliotecas de vídeo permanecem como alternativa.",
+        st.caption(
+            "O modo visual é escolhido na tela Criar. O modo econômico evita GPU Modal; "
+            "IA original usa créditos Cloudflare e Modal."
         )
         with st.expander("Ferramentas avançadas · diagnóstico das bibliotecas de vídeo"):
             st.caption("Testa busca, licença, download e leitura do vídeo no Wikimedia Commons, Pixabay e Pexels. As chaves nunca são exibidas.")
@@ -1369,5 +1390,11 @@ elif active_view == "Perfil":
             st.warning(f"{label} · não configurado")
     st.divider()
     st.markdown("**Motor visual**")
-    st.caption("Padrão: keyframes FLUX.2 Klein, animação Modal/LTX-Video e composição Remotion.")
+    current_mode = st.session_state.get("nexus_render_mode", default_render_mode())
+    st.caption(f"Modo selecionado: {current_mode}")
+    st.caption(
+        "Bibliotecas de vídeo evita GPU Modal e geração Cloudflare. "
+        "IA original usa créditos variáveis; custo do vídeo completo ainda não foi validado."
+    )
     st.markdown("[Abrir o repositório do NEXUS](https://github.com/porraloca42-stack/nexus-video-studio-)")
+
