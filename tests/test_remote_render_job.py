@@ -56,10 +56,14 @@ class RemoteNarrationTests(unittest.TestCase):
             audio.parent.mkdir(parents=True, exist_ok=True)
             audio.write_bytes(b"fish-audio")
             output = root / "worker_output" / "job-test" / "nexus_video.mp4"
-            plan = {"scenes": [
-                {"duration_seconds": 5, "voiceover": "Uma fala completa.", "image_prompt": "A cinematic portrait."}
-                for _ in range(10)
-            ]}
+            plan = {
+                "requested_duration_seconds": 40,
+                "maximum_duration_seconds": 50,
+                "scenes": [
+                    {"duration_seconds": 4, "voiceover": "Uma fala completa.", "image_prompt": "A cinematic portrait."}
+                    for _ in range(10)
+                ],
+            }
             secret = "cloudflare-encryption-secret"
             env = {
                 "NEXUS_MANIFEST_ENCRYPTED": encrypt_compressed_text(json.dumps(plan), secret),
@@ -81,7 +85,7 @@ class RemoteNarrationTests(unittest.TestCase):
             audio_short = Mock(returncode=0, stdout="37.6\n", stderr="")
             audio_result = Mock(returncode=0, stdout="50.0\n", stderr="")
             final_result = Mock(returncode=0, stdout=json.dumps({
-                "format": {"duration": 50.0, "size": 123456},
+                "format": {"duration": 37.6, "size": 123456},
                 "streams": [
                     {"codec_type": "video", "codec_name": "h264", "width": 720, "height": 1280},
                     {"codec_type": "audio", "codec_name": "aac"},
@@ -102,7 +106,7 @@ class RemoteNarrationTests(unittest.TestCase):
                  patch("nexus.remote_render_job.revise_narration_for_duration", side_effect=fake_revise_narration) as revise_narration, \
                  patch("nexus.remote_render_job.render_video_remotion", side_effect=fake_render) as render, \
                  patch("nexus.remote_render_job.subprocess.run", side_effect=(
-                     [audio_short, audio_result] + [image_result] * 10 + [clip_result] * 10 + [final_result]
+                     [audio_measured] + [image_result] * 10 + [clip_result] * 10 + [final_result]
                  )):
                 from nexus.remote_render_job import main
                 main(project_root=root)
@@ -111,15 +115,22 @@ class RemoteNarrationTests(unittest.TestCase):
             self.assertEqual(len(animate.call_args.args[1]), 10)
             self.assertEqual(gen_voice.call_args.kwargs["fish_api_key"], "fish-secret")
             self.assertEqual(gen_voice.call_args.kwargs["fish_voice_id"], "voice-369")
-            self.assertEqual(gen_voice.call_count, 2)
-            revise_narration.assert_called_once()
-            self.assertEqual(revise_narration.call_args.args[1:3], (50, 37.6))
+            self.assertEqual(gen_voice.call_count, 1)
+            revise_narration.assert_not_called()
+            self.assertAlmostEqual(
+                sum(scene["duration_seconds"] for scene in render.call_args.args[3]["scenes"]),
+                37.6,
+                places=2,
+            )
+            self.assertEqual(render.call_args.args[3]["actual_duration_seconds"], 37.6)
             self.assertEqual(render.call_args.kwargs, {"project_dir": root / "remotion", "job_id": "job-test"})
             report_path = root / "worker_output" / "job-test" / "render-report.json.enc"
             video_path = root / "worker_output" / "job-test" / "nexus_video.mp4.enc"
             report = json.loads(decrypt_text(report_path.read_text(encoding="ascii"), secret))
             self.assertEqual(report["narration_provider"], "Fish Audio")
-            self.assertEqual(report["duration"], 50.0)
+            self.assertAlmostEqual(report["duration"], 37.6, places=1)
+            self.assertEqual(report["requested_duration"], 40.0)
+            self.assertEqual(report["maximum_duration"], 50.0)
             self.assertEqual(report["visual_source"], "Cloudflare FLUX.2 Klein + Modal LTX-Video I2V + Remotion")
             self.assertEqual(len(report["motion_clips"]), 10)
             self.assertEqual(decrypt_bytes(video_path.read_bytes(), secret), b"realistic-mocked-mp4")
