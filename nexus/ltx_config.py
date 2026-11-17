@@ -8,11 +8,11 @@ MODEL_CHECKPOINT = "ltxv-2b-0.9.8-distilled.safetensors"
 SPATIAL_UPSCALER = "ltxv-spatial-upscaler-0.9.8.safetensors"
 GPU_TYPE = "L40S"
 GPU_RATE_USD_PER_SECOND = 0.000542
-GPU_COST_BUDGET_USD = 0.42  # Reserve 0.08 for CPU, memory and billing variance.
+GPU_COST_BUDGET_USD = 0.15  # Hard GPU cap; reserve separately for CPU, memory and billing variance.
 SCALEDOWN_WINDOW_SECONDS = 5
 
-WIDTH = 512
-HEIGHT = 896
+WIDTH = 384
+HEIGHT = 672
 FPS = 24
 INFERENCE_STEP_COUNT = 10
 GUIDANCE_SCALE = 1.0
