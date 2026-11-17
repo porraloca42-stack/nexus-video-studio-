@@ -52,6 +52,10 @@ class VisualStyleLibraryTests(unittest.TestCase):
         second = apply_visual_style_lock(first, "Dark Psychology")
         prompt_twice = second["scenes"][0]["image_prompt"]
         self.assertEqual(prompt_once, prompt_twice)
+        self.assertEqual(
+            first["scenes"][0]["style_search_terms"],
+            second["scenes"][0]["style_search_terms"],
+        )
 
     def test_scene_specific_style_terms_are_preserved_and_formal_terms_appended(self):
         plan = {
