@@ -10,11 +10,11 @@ from nexus.render_modes import (
 
 
 class RenderModeTests(unittest.TestCase):
-    def test_economy_mode_is_the_default(self):
-        self.assertEqual(default_render_mode(), ECONOMY_MODE)
-        self.assertFalse(mode_uses_modal(default_render_mode()))
+    def test_ai_visuals_are_the_quality_first_default(self):
+        self.assertEqual(default_render_mode(), AI_VIDEO_MODE)
+        self.assertTrue(mode_uses_modal(default_render_mode()))
 
-    def test_modal_requires_explicit_ai_video_mode(self):
+    def test_economy_mode_is_an_explicit_lower_cost_option(self):
         self.assertIn(AI_VIDEO_MODE, RENDER_MODE_OPTIONS)
         self.assertTrue(mode_uses_modal(AI_VIDEO_MODE))
         self.assertFalse(mode_uses_modal(ECONOMY_MODE))
