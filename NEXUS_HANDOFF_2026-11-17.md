@@ -407,3 +407,10 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - Worker remoto inclui os segmentos no relatório criptografado, sem chamada adicional de API. Granularidade registrada como `provider_segments`, sem fingir confiança, palavra ou fonema.
 - CI #991 / `44115678230`: 193 testes passaram, typecheck passou e Commons smoke passou. Commits da etapa: `ee917342`, `b5eb9d81`, `0b7d840d`, `a672b4bc`, `a6711e61`.
 - Brain 4 ainda não consome esses segmentos. Próximo: ajustar o contrato para aceitar evidência sem confidence e classificar apenas segmentos realmente unitários como word-level; depois preparar o executor com mocks. Não adicionar chamada Gemini real sem autorização específica.
+
+
+## Checkpoint — ponte de alinhamento para Brain 4 — 17/11/2026
+- Worker preserva segmentos Fish e só os converte para `word_timestamps` quando cada item é uma palavra individual; frases e pontuação isolada não são promovidas. Sem confidence inventada.
+- Contrato e prompt Brain 4 ajustados: confidence opcional, um token por word timestamp, instrução explícita para não inventar precisão/confiança.
+- CI #1002 / `44116215338`: 198 testes Python passaram, typecheck e Commons smoke passaram; render sintético skipped (sem alteração de renderer).
+- Próximo: executor Brain 4 testável com mocks, conectado ao worker após áudio Fish. A chamada real Gemini deve ficar desabilitada até autorização de custo; produção ainda não gera `edit_timeline`.
