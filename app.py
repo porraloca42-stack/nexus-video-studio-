@@ -624,6 +624,8 @@ if active_view == "Criar":
                             "size_mb": len(video_bytes) / (1024 * 1024),
                             "scene_count": len(plan.get("scenes", [])),
                             "motion_clip_count": len(report.get("motion_clips") or []),
+                            "motion_quality": report.get("motion_quality") or [],
+                            "low_motion_scene_count": int(report.get("low_motion_scene_count") or 0),
                             "total_i2v_seconds": float(report.get("total_i2v_seconds") or 0),
                             "total_i2v_inference_seconds": float(report.get("total_i2v_inference_seconds") or 0),
                             "visual_source": report.get("visual_source", "Cloudflare + Modal I2V + Remotion"),
@@ -631,6 +633,35 @@ if active_view == "Criar":
                             "visual_reviews": [],
                             "source_credits": [],
                         }
+                        motion_diagnostics = st.session_state["nexus_rendered_info"].get("motion_quality") or []
+                        if motion_diagnostics:
+                            low_motion_count = st.session_state["nexus_rendered_info"]["low_motion_scene_count"]
+                            if low_motion_count:
+                                st.warning(
+                                    f"Diagnóstico de movimento: {low_motion_count} cena(s) tiveram "
+                                    "congelamento visual prolongado. Consulte os detalhes antes de publicar."
+                                )
+                            else:
+                                st.caption(
+                                    "Diagnóstico de movimento: nenhum congelamento prolongado foi detectado. "
+                                    "Isso não substitui a revisão da ação e da aderência à narração."
+                                )
+                            with st.expander("Diagnóstico técnico de movimento por cena"):
+                                st.dataframe([
+                                    {
+                                        "Cena": item.get("scene_index"),
+                                        "Congelamento": (
+                                            f'{item.get("freeze_ratio", 0):.0%}'
+                                            if item.get("status") == "analyzed" else "Indisponível"
+                                        ),
+                                        "Maior trecho congelado": (
+                                            f'{item.get("longest_freeze_seconds", 0):.2f}s'
+                                            if item.get("status") == "analyzed" else "—"
+                                        ),
+                                        "Diagnóstico": item.get("diagnostic", "Indisponível"),
+                                    }
+                                    for item in motion_diagnostics
+                                ], use_container_width=True, hide_index=True)
                         # Final editorial QA: inspect one representative frame from every scene.
                         # This review is advisory and never discards a technically valid render.
                         try:
