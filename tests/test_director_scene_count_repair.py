@@ -35,6 +35,7 @@ def make_plan(count):
         "retention_strategy": "Progressão",
         "cta": "Salve",
         "seo": {"primary_keyword": "teste"},
+        "visual_continuity": {"visual_arc": "hesitação para ação", "lead_character": "adult person", "character_reference_prompt": "A realistic cinematic square portrait of the same adult protagonist, neutral pose, simple background, consistent hair and clothing."},
         "full_narration": " ".join(scene["voiceover"] for scene in scenes),
         "scenes": scenes,
     }
