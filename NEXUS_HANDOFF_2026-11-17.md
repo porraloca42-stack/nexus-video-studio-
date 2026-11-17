@@ -394,3 +394,9 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - Conclusão: validação sintética multifaixa passou. Não extrapolar para voz real, sincronismo fonético, vídeos de 40–50s, integração Streamlit ou render de produção. O adapter Remotion segue isolado.
 - Nenhuma API paga, GPU, modelo, deploy ou render de produção foi acionado.
 - Próxima etapa de engenharia: planejar integração controlada do adapter Remotion ao fluxo do app, com teste de regressão e fallback preservado; não ativar APIs pagas sem orçamento/autorização.
+
+
+## Correção arquitetural e próximo passo — 17/11/2026
+- Correção: Remotion já está no caminho padrão indireto: `app.py` → `render_on_github()` → workflow `nexus-render-worker.yml` → `nexus.remote_render_job.main()` → `render_video_remotion()`. Não descrever o adapter como desconectado; produção externa ainda não foi validada.
+- Lacuna real: app.py não chama o runner/prompts dos quatro cérebros; director.py não monta `edit_timeline`. Sem esse campo, `build_remotion_manifest()` recebe timeline vazia, então o teste sintético de captions/SFX/ducking ainda não prova que esses eventos chegam aos vídeos reais.
+- Próxima tarefa: desenhar e testar offline a ponte entre o plano atual e os contratos dos quatro cérebros, mantendo fallback atual e sem chamadas pagas. Só habilitar executores externos após autorização específica.
