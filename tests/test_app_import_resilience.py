@@ -13,6 +13,13 @@ class AppImportResilienceTests(unittest.TestCase):
         self.assertIn("Modo Bibliotecas:", source)
         self.assertNotIn('st.selectbox(\n            "Motor de produção visual"', source)
 
+    def test_modal_gpu_estimate_is_carried_to_the_video_result(self):
+        source = Path("app.py").read_text(encoding="utf-8")
+        self.assertIn('"estimated_ltx_gpu_cost_usd": report.get("estimated_ltx_gpu_cost_usd")', source)
+        self.assertIn("projeção para 22 vídeos", source)
+        self.assertIn("somente GPU", source)
+        self.assertIn("Não inclui CPU, memória", source)
+
     def test_optional_narration_calibrator_is_not_imported_at_startup(self):
         tree = ast.parse(Path("app.py").read_text(encoding="utf-8"))
         top_level_imports = [
