@@ -304,3 +304,12 @@ Timestamp da atualização: 2026-11-17T14:08:19-03:00 (UTC−03:00).
 - Evidência do usuário: a UI publicada mostrou botão e devolveu `cannot import name 'generate_editorial_json' from 'nexus.director'`. Isso comprova falha real em runtime; não comprova chamada Gemini. Nenhum vídeo, GPU ou serviço de mídia foi iniciado pelo assistente.
 - Estado: hipótese registrada; nenhuma alteração de código, deploy, chamada paga, GPU ou render nesta etapa. Próxima ação: inspecionar testes existentes do smoke e o carregamento/import do pacote; desenhar correção mínima com teste de regressão para módulo já carregado e só então editar em branch/PR.
 - Timestamp deste checkpoint: `2026-11-17T14:22:02-03:00` (UTC−03:00).
+
+
+## Checkpoint de inspeção dos testes e desenho da correção — 2026-11-17T14:22:37-03:00 (America/Sao_Paulo)
+- Consulta GitHub: `2026-11-17T14:22:37-03:00`; HEAD `0c8167cfdf5a81a6bc036b8e4a9f52d7e01ed7f0` (checkpoint documental anterior). Master `5742fc5219209aa07692464d28e67521220c2e64`, handoff `2a04d5ed8767af73e729e0764791c57355b09e8e`, bootstrap `7822afa71a2403b9fbd8ef5b3200acfc46774634`; os três contêm o checkpoint de 14:22:02.
+- Inspecionados `tests/test_brain4_smoke_test.py`, `tests/test_app_import_resilience.py`, `nexus/brain4_smoke_test.py`, `nexus/__init__.py` e cabeçalho de `app.py`. Testes atuais cobrem geração mockada, validação do fixture e chave ausente, mas não simulam módulo diretor antigo em cache.
+- `app.py` já tem comentário/precedente explícito de Streamlit Cloud manter módulo importado antigo e usa `importlib.reload` para `nexus.audio`. A tela recarrega o helper Brain 4, porém o helper faz `from nexus.director import generate_editorial_json` sem recarregar `nexus.director`. Isso fortalece a hipótese de cache de módulo como causa provável.
+- Correção planejada: no caminho live do helper, importar `nexus.director` por `importlib`, recarregar o módulo e validar que `generate_editorial_json` é callable antes de montar o `model_call`; manter o caminho injetado/mockado sem reload nem rede. Acrescentar teste de regressão que simule o módulo cached sem o símbolo e confirme que a recarga fornece a função, com exatamente uma chamada mockada e zero Gemini real.
+- Nenhum código alterado, nenhuma chamada API paga, nenhum deploy ou render. Próxima ação: criar branch, aplicar mudança mínima no helper e teste, revisar diff e disparar CI.
+- Timestamp: `2026-11-17T14:22:37-03:00` (UTC−03:00).
