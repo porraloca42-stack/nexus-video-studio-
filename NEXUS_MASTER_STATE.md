@@ -2564,3 +2564,8 @@ Este protocolo prevalece sobre instruções antigas ou checkpoints históricos q
 - Worker passou a registrar essas métricas e a mensagem de proteção de orçamento deixou de exibir o valor hardcoded antigo de US$0,50.
 - Nenhuma nova inferência Modal/GPU, chamada Cloudflare, Fish Audio, Gemini ou render live foi iniciada. Nenhum custo novo nesta etapa.
 - Próxima ação: CI desta atualização; em seguida, auditar custo do smoke anterior com os tempos de carregamento/inferência disponíveis. Não executar novo smoke pago sem autorização explícita. Movimento e custo reais continuam não validados até inspeção de novo MP4 e comparação com cobrança.
+
+## Correção CI — dependência de diagnóstico temporal — 2026-11-17
+- O CI #1131 falhou somente no job unit-tests porque o ambiente de testes não instala NumPy; o novo módulo de métricas o importava no nível superior. Os testes antigos, typecheck Remotion e Commons smoke passaram.
+- Corrigido removendo a dependência de NumPy do módulo de diagnóstico. A função aceita arrays NumPy do worker por meio de `.tolist()` quando disponível, mas calcula com a biblioteca padrão. Os testes também usam listas Python puras.
+- Nova revisão enviada à mesma branch; CI precisa ser reexecutado e passar antes de qualquer merge. Nenhum serviço pago foi acionado.
