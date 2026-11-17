@@ -1646,3 +1646,13 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Deploy Streamlit e validação visual em dispositivo móvel ainda pendentes.
 
 - Atualização de validação: o job `render-demo` da execução `44062631615` terminou `success`; o teste de integração gerou e validou MP4 sintético via adaptador Python + Remotion. Isso não é ainda uma produção real usando Cloudflare + Modal LTX/Fish Audio no app.
+
+
+## Incidente de calibração Gemini e reorganização do fluxo Criar — 17/11/2026
+- Render real `44063454151` falhou durante a calibração de narração, antes da geração de imagens e Modal I2V. A Fish Audio produziu 49,6s para uma meta de 45,0s; o worker chamou `revise_narration_for_duration`, mas o callback de leitura de secrets aceitava só um argumento e `director._request` solicitou `secret_reader("GEMINI_MODEL", "auto")`. Erro exato: `TypeError: lambda() takes 1 positional argument but 2 were given`.
+- Correção: `nexus/remote_render_job.py` agora usa callback compatível com argumento opcional `default`, preservando o default de `GEMINI_MODEL`. Commit `d339186`.
+- Teste de regressão: `tests/test_remote_render_job.py` simula a calibração e verifica tanto `secret_reader("GEMINI_API_KEY")` quanto `secret_reader("GEMINI_MODEL", "auto")`. Commit `13afbbc`.
+- UX: o bloco de prévia do vídeo estava antes do storyboard e do botão de produção, empurrando o planejamento para muito abaixo da tela no celular. O bloco de prévia foi movido para depois do planejamento/produção; assim o roteiro, expander e botão ficam logo depois dos controles de voz/duração, antes da prévia vertical. Erros de render agora substituem a barra de progresso no próprio painel superior em vez de surgir como alerta separado; commit `f9e992f`.
+- Barra: ao terminar o worker, o texto passa a indicar recuperação/validação do MP4 e o restante estimado zera; não exibe mais minutos restantes estimados após o worker concluir. Commit `812b763`.
+- CI das correções está em execução: runs `44064355595`, `44064383883`, `44064401470`, `44064418134`. Aguardando todos os checks antes de nova tentativa real.
+- Ainda não há vídeo MP4 real validado. Não iniciar nova produção até CI aprovado e sincronização Streamlit.
