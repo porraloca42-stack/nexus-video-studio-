@@ -1806,3 +1806,11 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Validação desta etapa: alterações gravadas no GitHub e precisam de releitura pós-commit. Os testes automatizados ainda NÃO foram executados/confirmados por CI. A integração GitHub disponível não expõe listagem de Actions para eventos push; o status combinado consultado anteriormente veio vazio. Tentativa de clone para execução local falhou por indisponibilidade de DNS no ambiente. Não declarar CI aprovado.
 - Deploy Streamlit, validação mobile, produção MP4, inferência Gemini/Cloudflare/Fish/Modal e qualidade audiovisual real não foram executados nesta etapa. Custo variável adicional: US$0.
 - Próximo passo: verificar HEAD e releitura dos arquivos; tentar confirmar CI com os recursos GitHub disponíveis. Se não houver evidência, manter CI como desconhecido. Depois, evoluir validação semântica do diretor sem chamadas externas pagas, com testes determinísticos e contratos claros.
+
+
+### Complemento — verificação de ação física explícita (17/11/2026)
+- A pré-validação também identifica prompts `video_motion_prompt` sem nenhum verbo de movimento físico reconhecido por uma lista lexical controlada. Retorna `motion_action_coverage_ratio` e `motion_scenes_without_recognized_action`, além de aviso com os números das cenas.
+- A interface mostra a proporção de prompts com verbo físico reconhecido. Isso é apenas uma triagem lexical: não prova que o sujeito se move, que a ação é coerente com a fala, nem que o vídeo gerado executa o movimento. Um verbo pode se referir à câmera ou ao ambiente; sinônimos não listados podem ser falsos negativos.
+- A normalização foi ajustada para preservar letras acentuadas do português. Teste adicionado para pares semelhantes com termos como “portão metálico” e para prompt sem verbo físico reconhecido.
+- Commits adicionais: `6769d06` (normalização Unicode), `f8af365` (teste de português acentuado), `8161dd2` (detecção lexical de ação física), `875ea44` (teste do prompt estático), `3bf05cd` (métrica na UI), `6b8accc` (contrato UI).
+- Código e testes foram gravados na branch main. Ainda não há execução de testes/CI confirmada, deploy ou validação visual. Nenhuma API paga, GPU ou renderização foi chamada; custo variável adicional: US$0.
