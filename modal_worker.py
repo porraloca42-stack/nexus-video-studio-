@@ -1,7 +1,7 @@
 """Serverless LTX image-to-video worker deployed on Modal.
 
 Deploy with: modal deploy modal_worker.py
-The GPU is loaded once per container and scaled to zero after 60 seconds idle.
+The GPU is loaded once per container and scaled to zero after 5 seconds idle.
 """
 import io
 import random
@@ -55,7 +55,7 @@ app = modal.App(APP_NAME)
     image=image,
     gpu="H100",
     timeout=45 * MINUTES,
-    scaledown_window=60,
+    scaledown_window=5,
     volumes={MODEL_CACHE: model_cache},
 )
 class Inference:
