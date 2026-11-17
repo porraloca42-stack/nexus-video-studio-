@@ -397,6 +397,12 @@ def _request(
 
     tried = ", ".join(attempted) if attempted else "nenhum modelo"
     if last_status == 503 or last_status in (500, 502, 504):
+        if max_models == 1 and attempts_per_model == 1:
+            raise RuntimeError(
+                "O Gemini está temporariamente sobrecarregado ou indisponível. "
+                f"O teste Brain 4 faz uma única chamada ao modelo selecionado ({tried}) "
+                "e não tentou outros modelos. Aguarde alguns minutos e execute o teste novamente."
+            )
         raise RuntimeError(
             "O Gemini está temporariamente sobrecarregado ou indisponível. "
             f"Tentei novamente e recorri a outros modelos compatíveis ({tried}), "
