@@ -194,3 +194,10 @@ Este bootstrap reduz perda de continuidade, mas não garante que a plataforma ca
 - Helper Gemini Brain 4 dedicado, uma geração por vídeo (um modelo, sem retry/failover); retorno JSON timeline, não storyboard.
 - Checkbox no app desmarcado por padrão; flag e modelo seguem criptografados ao worker. Worker recusa flag ativa sem GEMINI_API_KEY antes da geração de imagens.
 - Testes adicionados; CI #1061 / `44120993502` em execução. Não houve chamada Gemini real nem render de produção. Conferir CI antes de prosseguir.
+
+
+## CI aprovado — Brain 4 Gemini opt-in — 17/11/2026
+- CI #1061 aprovado: 209 testes Python, compileall, Remotion typecheck e Commons smoke. Synthetic render skipped.
+- Gemini Brain 4: helper dedicado com 1 modelo/1 geração por vídeo; worker lê flag criptografada; checkbox app desmarcado por padrão; exige chave quando habilitado.
+- Testes de contrato JSON, uma única chamada, default-off, chave ausente e transporte criptografado aprovados.
+- Nenhuma chamada Gemini real nem render de produção ocorreu. Próxima ação: regressão sintética Remotion, depois teste controlado com autorização explícita do uso da chave.
