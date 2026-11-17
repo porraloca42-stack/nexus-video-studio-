@@ -1745,3 +1745,10 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Testes adicionados em `tests/test_video_quality.py` para intervalos fechados, congelamento até EOF, proporção limitada e execução sem serviço externo.
 - Pesquisa oficial: LTX 0.9.8 recomenda ComfyUI para maior fidelidade; o modelo 2B distilled não tem workflow oficial ComfyUI listado. O perfil atual do NEXUS usa o YAML oficial 2B multi-scale, mas não equivale ao workflow recomendado para maior fidelidade. Fonte: README e config oficiais da Lightricks.
 - Estado: código e testes gravados na branch main; CI ainda precisa concluir. Não houve deploy Modal, inferência GPU, cobrança adicional ou validação visual de MP4 nesta etapa.
+
+## Validação do diagnóstico de movimento e exposição na interface — 17/11/2026
+- O diagnóstico FFmpeg por clipe foi integrado ao relatório do worker e agora também é exibido no Streamlit, com aviso quando há congelamento prolongado e tabela por cena.
+- A interface deixa explícito que ausência de congelamento não significa que a ação corresponde à narração; o diagnóstico não é uma nota estética nem semântica.
+- Teste de integração do worker atualizado para simular o analisador sem alterar a sequência de chamadas FFprobe/FFmpeg do teste. A tentativa inicial revelou essa interferência no mock; corrigida sem mudar o pipeline de produção.
+- CI da revisão final `32dceb2ee206fd054dd2e2c7538a4064223ed286`, execução `44078360380`: 120 testes Python aprovados, Remotion typecheck aprovado e Commons live smoke aprovado.
+- Código gravado na branch main. Não houve deploy no Streamlit/Modal, chamada Gemini adicional, inferência GPU ou produção de MP4 nesta etapa. Portanto, implementação e CI estão validados; deploy e comportamento visual na app publicada ainda não.
