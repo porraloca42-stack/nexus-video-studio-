@@ -1695,3 +1695,12 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Referência de preço Modal publicada: H100 US$0,001097/s; A100 80GB US$0,000694/s; L40S US$0,000542/s. Não mudar GPU apenas com base em preço nominal: medir tempo real, memória, inicialização e custo total. Fonte: Modal pricing.
 - Regra financeira: nenhum teste de render completo ou retry automático deve ser iniciado sem estimativa de custo compatível com teto de US$0,50; não gerar novamente os 10 clipes para testar pequenas alterações. Preferir testes unitários/estáticos e um teste controlado aprovado pelo usuário.
 - Estado inicial desta auditoria: hipóteses e causas de código documentadas; alterações corretivas de prompt, montagem e telemetria em andamento. Ainda não há novo MP4 de qualidade validado nem custo real reconciliado.
+
+
+## Continuidade de personagem via FLUX.2 Klein — 17/11/2026
+- Pesquisa oficial Cloudflare confirmou que FLUX.2 Klein 4B aceita até quatro imagens de referência via multipart `input_image_0` ... `input_image_3`, cada uma menor que 512×512. Isso permite ancorar identidade do protagonista em vez de pedir consistência apenas por texto.
+- Implementação: o diretor define `visual_continuity.visual_arc`, `lead_character` e `character_reference_prompt`. Quando há protagonista recorrente, o worker gera uma referência 448×448 e a envia para cada imagem de cena; o prompt instrui o FLUX a preservar identidade, mas variar pose, ação, enquadramento e ambiente.
+- O diretor agora privilegia continuidade de protagonista quando o roteiro segue uma jornada individual; variedade deve vir da fotografia e dos inserts, não da troca arbitrária de pessoas.
+- Arquivos: `nexus/director.py`, `nexus/cloudflare_images.py`, `nexus/remote_render_job.py`; testes em `tests/test_cloudflare_images.py` e `tests/test_director_scene_count_repair.py`.
+- Custo adicional estimado da imagem de referência: uma geração 448×448; o custo exato depende da unidade faturada do Workers AI e será medido no relatório/conta Cloudflare. Não envolve Modal/LTX.
+- Estado: implementação enviada à branch main; CI pendente. Ainda não validada em MP4 real.
