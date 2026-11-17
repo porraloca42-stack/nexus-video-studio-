@@ -140,3 +140,8 @@ Este bootstrap reduz perda de continuidade, mas não garante que a plataforma ca
 - CI #1017: 202 testes Python, typecheck e Commons smoke passaram. Synthetic multitrack skipped.
 - Workflow Remotion demo #119: adapter tests/typecheck passaram; demo manual 50s skipped; render sintético de integração 4s ainda em andamento.
 - Estado: integração validada com mocks, não conectada ao app e sem Gemini real. Próximo: conferir MP4 sintético; manter chamadas pagas desabilitadas sem autorização.
+
+
+## Validação do adapter Remotion — 17/11/2026
+- Workflow #119 passou: manifest gerado pelo adapter Python real, render Remotion validado por FFprobe (H.264 720×1280, AAC, 4.011s). Artifact #14344496316.
+- Render 50s manual skipped. Teste 4s sintético não representa produção real nem timeline Brain 4.
