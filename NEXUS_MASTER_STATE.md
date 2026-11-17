@@ -2560,3 +2560,31 @@ Este protocolo prevalece sobre instruções antigas ou checkpoints históricos q
 - Nenhuma inferência Modal/GPU, chamada Cloudflare, Fish Audio, Gemini ou render foi iniciada durante esta auditoria documental. Nenhum custo adicional foi gerado.
 - Timestamp do registro: 2026-11-17 (UTC−03:00).
 
+
+
+## Auditoria das hipóteses Gemini — causa da cobrança H100 — 2026-11-17
+### 1. Deploy antigo / aplicação órfã
+- Confirmado no código: `.github/workflows/modal-deploy.yml` usa apenas `workflow_dispatch`; não há deploy automático no push/merge. O workflow executa `modal deploy modal_worker.py` e depois chama o smoke de uma cena.
+- `modal_worker.py` declara `APP_NAME = "nexus-video-i2v"` e `app = modal.App(APP_NAME)`. O adaptador `nexus/modal_i2v.py` e o smoke `scripts/modal_smoke_test.py` procuram exatamente esse mesmo nome e a classe `Inference`.
+- Não foi encontrada evidência no histórico de commits consultado de renomeação de APP_NAME. A hipótese de aplicação antiga/órfã é possível se houve deploys anteriores com outro nome ou manualmente, mas isso ainda precisa ser verificado no Dashboard > Apps. Não declarar que existe app órfão.
+- Não foi possível consultar a conta Modal do usuário, listar apps implantados ou confirmar o timestamp/commit do deployment ativo por meio do GitHub.
+### 2. Múltiplos decoradores / sobrescrita dinâmica
+- Auditoria do worker e dos caminhos de integração: o worker LTX tem uma única declaração `modal.App("nexus-video-i2v")` e uma única classe `@app.cls(..., gpu=GPU_TYPE)`; não há `.with_options(gpu=...)`, `modal.Sandbox.create()`, `keep_warm` nem segundo decorator GPU nos arquivos operacionais examinados (`modal_worker.py`, `nexus/ltx_config.py`, `nexus/modal_i2v.py`, `scripts/modal_smoke_test.py` e workflows de deploy/render).
+- Resultado reduz a probabilidade de sobrescrita no caminho principal auditado; não é prova de ausência absoluta em todos os artefatos remotos ou deploys manuais antigos.
+### 3. Variáveis de ambiente / Secrets
+- O workflow de deploy injeta somente `MODAL_TOKEN_ID` e `MODAL_TOKEN_SECRET`; não injeta variável de GPU. O worker lê `GPU_TYPE` do módulo `nexus.ltx_config` empacotado na imagem, atualmente L40S em main e na PR #9.
+- Não há no worker examinado leitura de variável de ambiente para substituir GPU_TYPE. Os secrets do Modal/GitHub não foram inspecionados e não devem ser expostos; não há evidência de que algum secret defina GPU.
+### 4. Scaledown / atraso de billing
+- O worker configura `scaledown_window=5` segundos e não configura `keep_warm`. Isso explica uma pequena cauda de cobrança após atividade, mas não explica sozinho H100 em vez de L40S.
+- A possibilidade de atraso/agrupamento do painel deve ser considerada ao comparar janelas curtas; o painel acumulado enviado pelo usuário não identifica por si só qual deployment gerou cada unidade faturada. Não há evidência de container H100 ainda ativo ou de que o atraso de billing seja a causa.
+### Defeito adicional encontrado — estimativa de custo usa GPU configurada, não GPU real
+- `scripts/modal_smoke_test.py` calcula `estimated_gpu_only_cost_usd` com uma constante nomeada `L40S_RATE_USD_PER_SECOND`, multiplicada pelo tempo de parede da chamada Modal + 5s. Embora o relatório também registre `gpu_name` retornado pelo worker, a taxa não é selecionada com base nessa GPU. Se o runtime ativo for H100, o valor reportado como estimativa L40S será inadequado.
+- O worker também calcula proteções/estimativas usando `GPU_RATE_USD_PER_SECOND` da configuração versionada. Se o deployment ativo não corresponder à configuração atual, a proteção de US$0,08 da PR #9 pode subestimar a cobrança efetiva.
+- A estimativa do smoke usa tempo de parede da chamada remota, que pode incluir latência de rede/espera e não equivale necessariamente a tempo faturável de GPU; ela não deve ser tratada como billing real.
+### Conclusão e sequência de verificação sem custo
+1. No Modal Dashboard > Apps, conferir todos os apps relacionados ao worker, nome, estado e último deployment; verificar se há um app antigo além de `nexus-video-i2v`.
+2. Abrir o deployment ativo e conferir o commit/código implantado, GPU solicitada e classe/função.
+3. Conferir logs de inicialização do container; a versão recente do worker imprime `gpu_name` via `torch.cuda.get_device_name(0)`. Comparar com o deployment e com a janela de Usage.
+4. Só depois reconciliar Usage por intervalo temporal com os deployments. Não fazer novo deploy nem chamada GPU só para descobrir isso.
+- Estado: hipótese de deploy não atualizado **forte e verificável no Dashboard**; app órfão **não confirmado**; segundo decorator/sobrescrita no caminho principal **não encontrado**; secret de GPU **sem evidência**; scaledown de 5s confirmado, mas não explica tipo de GPU; defeito de estimativa L40S identificado.
+- Nenhuma chamada Modal, inferência GPU, Cloudflare, Fish Audio, Gemini ou render foi iniciada nesta auditoria. Nenhum custo adicional.
