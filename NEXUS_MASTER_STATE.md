@@ -1480,3 +1480,10 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Requisito mínimo do Streamlit elevado para `>=1.40`, versão que inclui `st.pills`.
 - Revisão estática dos arquivos no GitHub confirmou: ambos os seletores usam `st.pills`; o antigo `st.radio` do estilo foi removido; o cartão-resumo foi removido; o placeholder ficou limitado a 220px.
 - Estado: commits gravados em `main`. GitHub Actions run `43990510784` está em execução; ainda não declarar CI aprovado. A aparência final no Streamlit mobile precisa ser confirmada por nova captura após o deploy.
+
+## Composição da tela Criar conforme referência mobile — 17/11/2026
+- Referência visual recebida novamente: marca e botão de configurações no cabeçalho; campo de tema/roteiro com ação principal dentro do mesmo cartão; estilos em chips horizontais logo abaixo; narração e duração lado a lado; palco de prévia de vídeo abaixo; navegação inferior com quatro destinos.
+- Commits incrementais: `03ecf31` (estrutura de cabeçalho, prompt, estilos, voz/duração e prévia); `4742897` (remoção de fragmentos duplicados do layout anterior); `1b4da95` (mover configurações avançadas para Perfil e mostrar o MP4 no palco de prévia); `69ccb98` e `542616e` (correções de indentação do bloco de configurações); `80e9647` e `42a2eea` (polimento de marca, botão de configurações e navegação com ícones).
+- O fluxo funcional foi preservado: o botão superior solicita o storyboard; após o planejamento, o fluxo existente ainda oferece a etapa separada de produção/renderização do MP4. A prévia passa a hospedar o MP4 quando ele existe; sem vídeo, exibe placeholder vertical 9:16. A biblioteca e as opções avançadas continuam disponíveis nas áreas inferiores.
+- Motor de produção e diagnósticos foram movidos para Perfil > Configurações avançadas; a seleção fica guardada em `nexus_render_mode` e é recuperada na tela Criar.
+- Estado: código atualizado no GitHub `main`. Run mais recente `43991099437` está em execução nos três jobs; ainda não marcar como testado até a conclusão. O deploy Streamlit e a confirmação visual no dispositivo continuam pendentes.
