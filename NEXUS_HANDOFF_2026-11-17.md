@@ -414,3 +414,9 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - Contrato e prompt Brain 4 ajustados: confidence opcional, um token por word timestamp, instrução explícita para não inventar precisão/confiança.
 - CI #1002 / `44116215338`: 198 testes Python passaram, typecheck e Commons smoke passaram; render sintético skipped (sem alteração de renderer).
 - Próximo: executor Brain 4 testável com mocks, conectado ao worker após áudio Fish. A chamada real Gemini deve ficar desabilitada até autorização de custo; produção ainda não gera `edit_timeline`.
+
+
+## Checkpoint — runner entrega alinhamento ao Brain 4 — 17/11/2026
+- `run_four_brain_pipeline()` recebe timestamps de palavra opcionais, aplica a normalização estrita e os passa ao executor do Brain 4. Teste confirma a propagação sem rede.
+- CI #1007: unit-tests e typecheck passaram; Commons smoke ainda estava em execução na última consulta; synthetic render skipped.
+- Próximo: preparar executor Brain 4 com mocks e integração desativada por padrão. A chamada Gemini adicional por render só deve ser habilitada com autorização de custo.
