@@ -54,7 +54,10 @@ def patch_api_workflow(
             raise ComfyUIError(
                 f"Input {node_id}.{input_name} está conectado; não pode ser sobrescrito como widget."
             )
-        inputs[input_name] = binding["value"]
+        value = binding["value"]
+        # Match ComfyUI frontend graphToPrompt: array-valued widgets are wrapped
+        # so the backend does not confuse them with [node_id, output_slot] links.
+        inputs[input_name] = {"__value__": value} if isinstance(value, list) else value
     return patched
 
 
