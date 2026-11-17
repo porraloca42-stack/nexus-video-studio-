@@ -199,7 +199,38 @@ def discover_model(api_key, requested="auto"):
     return discover_models(api_key, requested)[0]
 
 
-def _request(prompt, secret_reader):
+EDITORIAL_MODEL_SYSTEM = """Você é o editor audiovisual Brain 4 do NEXUS.
+Siga exclusivamente o contrato e as instruções contidas na mensagem do usuário.
+Retorne somente um objeto JSON válido, sem Markdown, comentários ou campos extras.
+Não reescreva a narração nem invente alinhamento temporal, confiança ou precisão fonética.
+"""
+
+
+def generate_editorial_json(prompt, api_key, requested_model="auto"):
+    """Make one bounded Gemini generation request for an editorial stage."""
+    if not api_key:
+        raise RuntimeError("Configure GEMINI_API_KEY para ativar o Brain 4.")
+    return _request(
+        prompt,
+        lambda name, default="": (
+            api_key if name == "GEMINI_API_KEY"
+            else requested_model if name == "GEMINI_MODEL"
+            else default
+        ),
+        system_instruction=EDITORIAL_MODEL_SYSTEM,
+        max_models=1,
+        attempts_per_model=1,
+    )
+
+
+def _request(
+    prompt,
+    secret_reader,
+    *,
+    system_instruction=None,
+    max_models=5,
+    attempts_per_model=2,
+):
     key = secret_reader("GEMINI_API_KEY")
     requested = secret_reader("GEMINI_MODEL", "auto")
     if not key:
@@ -212,15 +243,15 @@ def _request(prompt, secret_reader):
     last_status = None
     last_detail = ""
 
-    for model in models[:5]:
+    for model in models[:max(1, int(max_models))]:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
         request_prompt = prompt
-        for attempt in range(2):
+        for attempt in range(max(1, int(attempts_per_model))):
             payload = {
-                "systemInstruction": {"parts": [{"text": SYSTEM}]},
+                "systemInstruction": {"parts": [{"text": system_instruction or SYSTEM}]},
                 "contents": [{"role": "user", "parts": [{"text": request_prompt}]}],
                 "generationConfig": {
-                    "temperature": 0.2 if attempt else 0.25,
+                    "temperature": 0.25,
                     "responseMimeType": "application/json",
                     "maxOutputTokens": 8192,
                 },
@@ -230,7 +261,7 @@ def _request(prompt, secret_reader):
                     url, params={"key": key}, json=payload, timeout=240
                 )
             except requests.RequestException:
-                if attempt == 0:
+                if attempt < attempts_per_model - 1:
                     time.sleep(2)
                     continue
                 last_status = "conexão"
@@ -245,7 +276,7 @@ def _request(prompt, secret_reader):
                     detail = ""
                 last_detail = str(detail)[:500] or "Sem detalhe adicional informado pela API."
                 attempted.append(f"{model} (HTTP {response.status_code})")
-                if attempt == 0:
+                if attempt < attempts_per_model - 1:
                     time.sleep(2)
                     continue
                 # Try the next model instead of showing a fatal error immediately.
@@ -335,7 +366,7 @@ def _request(prompt, secret_reader):
                 # Gemini may stop with malformed JSON even when finishReason is
                 # STOP. Retry once with a compact JSON-only instruction, then
                 # fail over to another compatible model if needed.
-                if attempt == 0:
+                if attempt < attempts_per_model - 1:
                     request_prompt = (
                         prompt
                         + "\n\nRETRY OBRIGATÓRIO: a resposta anterior não formou JSON válido. "
