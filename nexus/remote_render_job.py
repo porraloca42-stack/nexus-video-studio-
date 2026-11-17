@@ -6,6 +6,7 @@ from pathlib import Path
 
 from nexus.audio import make_voice
 from nexus.editorial_pipeline import provider_segments_to_word_timestamps
+from nexus.editorial_executors import run_brain4_for_storyboard
 from nexus.director import revise_narration_for_duration, _fit_scene_durations
 from nexus.cloudflare_images import generate_scene_images
 from nexus.video_engine import get_video_engine
@@ -89,7 +90,27 @@ def _fit_narration_to_timeline(audio_path: Path, target: float, actual_duration=
     return float(final_probe.stdout.strip())
 
 
-def main(project_root=None):
+def apply_optional_brain4(plan, audio_path, duration_seconds, word_timestamps, model_call=None):
+    """Apply Brain 4 only when a caller explicitly injects a model executor."""
+    if model_call is None:
+        unchanged = dict(plan)
+        unchanged["editorial_pipeline"] = {
+            "status": "disabled",
+            "reason": "no editorial model executor was injected",
+        }
+        return unchanged
+    return run_brain4_for_storyboard(
+        plan,
+        narration_audio={
+            "audio_asset_id": str(audio_path),
+            "duration_seconds": float(duration_seconds),
+        },
+        word_timestamps=word_timestamps,
+        model_call=model_call,
+    )
+
+
+def main(project_root=None, editorial_model_call=None):
     raw = os.environ.get("NEXUS_MANIFEST_ENCRYPTED", "")
     encrypted_fish = os.environ.get("NEXUS_FISH_CREDENTIALS_ENCRYPTED", "")
     encryption_secret = os.environ.get("CLOUDFLARE_API_TOKEN", "")
@@ -209,6 +230,10 @@ def main(project_root=None):
         "word_timestamps": word_timestamps,
         "warning": alignment_warning,
     }
+    plan = apply_optional_brain4(
+        plan, audio_path, actual_audio_duration, word_timestamps,
+        model_call=editorial_model_call,
+    )
 
     generated = generate_scene_images(
         scenes,
@@ -335,6 +360,7 @@ def main(project_root=None):
         "maximum_duration": maximum_duration,
         "narration_duration": narration_duration,
         "narration_provider": narration_provider,
+        "editorial_pipeline": plan.get("editorial_pipeline", {"status": "unknown"}),
         "narration_alignment": {
             "provider": "Fish Audio",
             "method": "fish_audio_tts_stream_with_timestamp",
