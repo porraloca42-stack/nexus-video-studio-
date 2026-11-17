@@ -1,6 +1,6 @@
 # NEXUS VIDEO STUDIO — BOOTSTRAP PARA NOVOS CHATS
 
-Última revisão: 2026-11-17T17:56:28-03:00 (America/Sao_Paulo)
+Última revisão: 2026-11-17T18:11:28-03:00 (America/Sao_Paulo)
 Repositório: https://github.com/porraloca42-stack/nexus-video-studio-
 Branch oficial: main
 
@@ -55,6 +55,15 @@ Consultar o bloco operacional completo no início de NEXUS_MASTER_STATE.md. Em r
 2. Manter PRs abertas até solicitação explícita de merge.
 3. Atualizar Master State e handoff com timestamp preciso após cada marco.
 4. Não executar deploy, Modal/GPU ou APIs pagas sem autorização específica e limite de custo.
+
+
+## Atualização operacional — 2026-11-17T18:11:28-03:00 (America/Sao_Paulo)
+- HEAD da main na retomada: `198cc21e7a2a39aff49db20fdfd9938ab7731521`.
+- PR #11 revisada: separação entre deploy Modal e smoke LTX confirmada nos workflows. CI #1178 / `44175647626`: unit-tests, Commons smoke e Remotion typecheck success; synthetic render skipped.
+- PR #11 continua aberta e não mergeada. Não executar deploy ou inferência GPU sem autorização específica; o smoke é manual e separado.
+- PR #10 permanece aberta e não mergeada, head `ef102d4116da01e67c829efc0af7832b8510fd5c`, CI #1174 aprovado nos jobs executados.
+- Última ação concluída: revisão estática da PR #11 e atualização de sua descrição. Próxima ação: aguardar autorização explícita para merge da PR #11; depois, tratar deploy e inferência como decisões separadas.
+- Nenhuma operação paga ou implantação foi iniciada nesta retomada.
 
 ## Fonte de verdade
 - NEXUS_MASTER_STATE.md na branch main é a fonte operacional atual.
