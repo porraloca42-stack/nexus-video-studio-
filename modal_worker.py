@@ -278,6 +278,9 @@ class Inference:
                 "image_cond_noise_scale": IMAGE_COND_NOISE_SCALE,
                 "pipeline_type": "multi-scale",
                 "estimated_gpu_cost_usd": round(estimated_gpu_cost(), 4),
+                "estimated_model_load_gpu_cost_usd": round(self.model_load_seconds * GPU_RATE_USD_PER_SECOND, 4),
+                "estimated_batch_gpu_cost_usd": round((time.monotonic() - batch_started) * GPU_RATE_USD_PER_SECOND, 4),
+                "estimated_scaledown_gpu_cost_usd": round(SCALEDOWN_WINDOW_SECONDS * GPU_RATE_USD_PER_SECOND, 4),
                 "gpu_cost_budget_usd": GPU_COST_BUDGET_USD,
                 "motion_metrics": motion_metrics,
             })
