@@ -9,6 +9,7 @@ _GPU_NAME_PATTERNS = {
     "H100": (r"(?<![A-Z0-9])H100(?![A-Z0-9])",),
     # A10G is a valid A10 variant; token boundaries prevent matching A100.
     "A10": (r"(?<![A-Z0-9])A10G?(?![A-Z0-9])",),
+    "A10G": (r"(?<![A-Z0-9])A10G(?![A-Z0-9])",),
 }
 
 
