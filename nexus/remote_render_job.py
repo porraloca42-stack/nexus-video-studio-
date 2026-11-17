@@ -6,6 +6,7 @@ from pathlib import Path
 
 from nexus.audio import make_voice
 from nexus.editorial_pipeline import provider_segments_to_word_timestamps
+from nexus.captions import build_alignment_caption_events, captions_cover_word_alignment
 from nexus.editorial_executors import run_brain4_for_storyboard
 from nexus.director import revise_narration_for_duration, _fit_scene_durations
 from nexus.cloudflare_images import generate_scene_images
@@ -90,16 +91,51 @@ def _fit_narration_to_timeline(audio_path: Path, target: float, actual_duration=
     return float(final_probe.stdout.strip())
 
 
-def apply_optional_brain4(plan, audio_path, duration_seconds, word_timestamps, model_call=None):
-    """Apply Brain 4 only when a caller explicitly injects a model executor."""
+def apply_optional_brain4(
+    plan, audio_path, duration_seconds, word_timestamps, model_call=None,
+    provider_segments=None,
+):
+    """Add verified captions by default; Brain 4 enriches them when explicitly enabled."""
+    source_segments = provider_segments if provider_segments else word_timestamps
+    fallback = build_alignment_caption_events(source_segments, duration_seconds)
+
+    def with_fallback_captions(result, reason):
+        updated = dict(result)
+        timeline = dict(updated.get("edit_timeline") or {})
+        timeline["caption_events"] = fallback["events"]
+        updated["edit_timeline"] = timeline
+        updated["captioning"] = {
+            "status": "provider_alignment" if fallback["events"] else "unavailable",
+            "source": "Fish Audio timestamps",
+            "alignment_level": fallback["alignment_level"],
+            "event_count": len(fallback["events"]),
+            "warning": fallback["warning"],
+        }
+        pipeline = dict(updated.get("editorial_pipeline") or {})
+        pipeline.setdefault("status", "disabled")
+        pipeline["captioning_status"] = updated["captioning"]["status"]
+        if reason:
+            pipeline["reason"] = reason
+        updated["editorial_pipeline"] = pipeline
+        return updated
+
     if model_call is None:
         unchanged = dict(plan)
         unchanged["editorial_pipeline"] = {
             "status": "disabled",
-            "reason": "no editorial model executor was injected",
+            "reason": "Brain 4 is opt-in; provider-aligned captions are used without another Gemini call.",
         }
-        return unchanged
-    return run_brain4_for_storyboard(
+        return with_fallback_captions(unchanged, None)
+
+    if not word_timestamps:
+        unchanged = dict(plan)
+        unchanged["editorial_pipeline"] = {
+            "status": "disabled",
+            "reason": "Brain 4 requires verified word-level alignment; no Gemini call was made.",
+        }
+        return with_fallback_captions(unchanged, "Word-level alignment unavailable; used provider-aligned captions when possible.")
+
+    result = run_brain4_for_storyboard(
         plan,
         narration_audio={
             "audio_asset_id": str(audio_path),
@@ -108,7 +144,25 @@ def apply_optional_brain4(plan, audio_path, duration_seconds, word_timestamps, m
         word_timestamps=word_timestamps,
         model_call=model_call,
     )
+    timeline = dict(result.get("edit_timeline") or {})
+    brain4_captions = timeline.get("caption_events") or []
+    if captions_cover_word_alignment(brain4_captions, word_timestamps):
+        result["captioning"] = {
+            "status": "brain4_word_aligned",
+            "source": "Fish Audio timestamps, grouped by Brain 4",
+            "alignment_level": "word",
+            "event_count": len(brain4_captions),
+            "warning": None,
+        }
+        result["editorial_pipeline"]["captioning_status"] = "brain4_word_aligned"
+        return result
 
+    # A structurally valid timeline can still omit or reorder spoken words.
+    # Keep its other edit decisions, but never ship incomplete captions.
+    return with_fallback_captions(
+        result,
+        "Brain 4 captions did not cover the verified narration exactly; replaced them with provider-aligned captions.",
+    )
 
 def build_brain4_model_call(credentials):
     """Build one bounded Gemini call only for an explicitly enabled render."""
@@ -250,6 +304,7 @@ def main(project_root=None, editorial_model_call=None):
     plan = apply_optional_brain4(
         plan, audio_path, actual_audio_duration, word_timestamps,
         model_call=editorial_model_call,
+        provider_segments=narration_alignment_segments,
     )
 
     generated = generate_scene_images(
@@ -378,6 +433,7 @@ def main(project_root=None, editorial_model_call=None):
         "narration_duration": narration_duration,
         "narration_provider": narration_provider,
         "editorial_pipeline": plan.get("editorial_pipeline", {"status": "unknown"}),
+        "captioning": plan.get("captioning", {"status": "unknown"}),
         "narration_alignment": {
             "provider": "Fish Audio",
             "method": "fish_audio_tts_stream_with_timestamp",
@@ -435,3 +491,4 @@ def main(project_root=None, editorial_model_call=None):
 
 if __name__ == "__main__":
     main()
+
