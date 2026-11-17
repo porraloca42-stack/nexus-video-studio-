@@ -135,6 +135,45 @@ def run_brain4_for_storyboard(
     errors = validate_edit_timeline(timeline)
     if errors:
         raise ValueError("Brain 4 rejected: " + "; ".join(errors))
+    if timeline.get("alignment_level") != "word":
+        raise ValueError("Brain 4 rejected: alignment precision must remain word-level")
+    normalized_source_words = [
+        {
+            "text": item["text"],
+            "start_seconds": float(item["start_seconds"]),
+            "end_seconds": float(item["end_seconds"]),
+        }
+        for item in word_timestamps
+    ]
+    normalized_output_words = [
+        {
+            "text": item.get("text"),
+            "start_seconds": item.get("start_seconds"),
+            "end_seconds": item.get("end_seconds"),
+        }
+        for item in timeline.get("word_timestamps", [])
+        if isinstance(item, dict)
+    ]
+    if normalized_output_words != normalized_source_words:
+        raise ValueError("Brain 4 rejected: provider word timestamps must be preserved exactly")
+    if timeline.get("character_timestamps") or timeline.get("phoneme_timestamps"):
+        raise ValueError("Brain 4 rejected: character/phoneme timing was not supplied by the aligner")
+    source_word_keys = {
+        (item["text"], item["start_seconds"], item["end_seconds"])
+        for item in normalized_source_words
+    }
+    for caption_index, caption in enumerate(timeline.get("caption_events", [])):
+        for word_index, word in enumerate(caption.get("words", [])):
+            key = (
+                word.get("text"),
+                float(word.get("start_seconds", -1)),
+                float(word.get("end_seconds", -1)),
+            )
+            if key not in source_word_keys:
+                raise ValueError(
+                    f"Brain 4 rejected: caption_events[{caption_index}].words[{word_index}] "
+                    "does not match a verified provider word timestamp"
+                )
     if timeline.get("audio_asset_id") != narration_audio["audio_asset_id"]:
         raise ValueError("Brain 4 rejected: audio asset does not match the final narration")
     if abs(timeline.get("audio_duration_seconds", 0) - narration_audio["duration_seconds"]) > 0.05:
