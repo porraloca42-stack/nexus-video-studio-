@@ -1563,3 +1563,12 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Teste de regressão adicionado em `tests/test_app_import_resilience.py` para presença do botão junto ao nome, player compacto, uso da amostra publicada e geração sob demanda.
 - Commits: `627d2cf` (player e prévia sob demanda), `aea5de0` (teste de regressão).
 - Estado: enviado à branch `main`; CI do commit final ainda pendente. O funcionamento de reprodução no navegador móvel depende de confirmação visual/funcional após o deploy; os testes estáticos não substituem essa verificação.
+
+## Refinamento do player de prévia das vozes — 17/11/2026
+- Evidência da nova captura mobile: o iframe de áudio era renderizado abaixo do nome, aumentando a altura da lista; players independentes também permitiam reprodução simultânea e não ofereciam um controle de pausa integrado ao botão compacto.
+- Em `app.py`: removido o iframe HTML por voz. Nome e botão de prévia agora são dois botões Streamlit nativos em colunas 86/14 na mesma linha. O botão alterna entre ▶ e ⏸ para a voz ativa.
+- Todos os previews usam um único `st.audio` compartilhado. Ao tocar outra voz, a fonte do player é substituída; ao tocar novamente na voz ativa, a fonte é removida e a prévia é interrompida. Isso elimina players simultâneos e disponibiliza os controles nativos de reprodução/pausa.
+- As amostras publicadas (URL ou data URI) continuam suportadas; vozes sem amostra geram MP3 sob demanda e armazenam o áudio em sessão.
+- Teste de regressão substitui o teste anterior do iframe e verifica botões alinhados em colunas, toggle ▶/⏸, player compartilhado único e remoção do iframe/player individual.
+- Commits: `d08a57e` (interface e player único), `968fd6f` (teste de regressão).
+- Estado: enviado à branch `main`; CI do commit final pendente. A captura do usuário confirma a falha anterior; a nova disposição e autoplay/pausa ainda dependem de confirmação no navegador móvel após deploy.
