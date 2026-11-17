@@ -7,10 +7,20 @@ from pathlib import Path
 from nexus.audio import make_voice
 from nexus.director import revise_narration_for_duration, _fit_scene_durations
 from nexus.cloudflare_images import generate_scene_images
-from nexus.modal_i2v import animate_scene_images
+from nexus.video_engine import get_video_engine
 from nexus.remotion_renderer import render_video_remotion
 from nexus.render_crypto import decrypt_compressed_text, decrypt_text, encrypt_bytes, encrypt_text
 from nexus.video_quality import analyze_video_motion
+
+
+def animate_scene_images(generated_images, scenes, output_dir, *, progress_callback=None):
+    """Stable orchestration entry point; engine-specific execution stays behind the adapter."""
+    return get_video_engine().animate_scene_images(
+        generated_images,
+        scenes,
+        output_dir,
+        progress_callback=progress_callback,
+    )
 
 
 def generate_worker_narration(text, voice, output_path, fish_api_key="", fish_voice_id=""):
