@@ -176,6 +176,7 @@ def main(project_root=None):
         scenes,
         work / "images",
         steps=int(os.environ.get("CLOUDFLARE_IMAGE_STEPS", "4")),
+        visual_continuity=plan.get("visual_continuity"),
     )
     media = []
     for item in generated:
