@@ -1,6 +1,6 @@
 import unittest
 
-from nexus.render_crypto import decrypt_bytes, decrypt_text, encrypt_bytes, encrypt_text
+from nexus.render_crypto import decrypt_bytes, decrypt_text, decrypt_compressed_text, encrypt_bytes, encrypt_text, encrypt_compressed_text
 
 
 class RenderCryptoTests(unittest.TestCase):
@@ -9,6 +9,16 @@ class RenderCryptoTests(unittest.TestCase):
         encrypted = encrypt_text('{"title":"roteiro privado"}', secret)
         self.assertNotIn("roteiro privado", encrypted)
         self.assertEqual(decrypt_text(encrypted, secret), '{"title":"roteiro privado"}')
+
+    def test_compressed_text_round_trip(self):
+        secret = "test-cloudflare-token"
+        payload = '{"scenes":[' + ','.join(
+            '{"image_prompt":"cinematic visual direction with repeated descriptive detail"}'
+            for _ in range(20)
+        ) + ']}'
+        encrypted = encrypt_compressed_text(payload, secret)
+        self.assertLess(len(encrypted), len(payload))
+        self.assertEqual(decrypt_compressed_text(encrypted, secret), payload)
 
     def test_binary_round_trip(self):
         secret = "test-cloudflare-token"
