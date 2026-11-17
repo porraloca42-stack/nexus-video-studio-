@@ -1489,5 +1489,5 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Estado: código atualizado no GitHub `main`. Run mais recente `43991099437` está em execução nos três jobs; ainda não marcar como testado até a conclusão. O deploy Streamlit e a confirmação visual no dispositivo continuam pendentes.
 
 - Validação do código de interface: GitHub Actions run `43991099437`, commit de aplicação `42a2eea`, concluiu com sucesso nos três jobs (`unit-tests`, `remotion-typecheck`, `commons-live-smoke`). A suíte unitária passou; typecheck e smoke também passaram.
-- O run `43991135448`, disparado pelo commit de documentação `53a4a5c`, também concluiu typecheck e Commons smoke; a suíte unitária ainda estava em execução no último polling. O código de aplicação validado é o mesmo commit `42a2eea`.
+- O run `43991135448`, disparado pelo commit de documentação `53a4a5c`, também concluiu com sucesso os três jobs: unit-tests, Remotion typecheck e Commons smoke. O código de aplicação validado é o mesmo commit `42a2eea`.
 - Limite de validação: CI confirma regressões automatizadas e sintaxe exercitada pela suíte, não confirma a aparência publicada nem o comportamento real dos widgets no navegador móvel. Aguardando confirmação visual no Streamlit após sincronização.
