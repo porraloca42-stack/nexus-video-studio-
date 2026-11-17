@@ -400,21 +400,21 @@ if active_view == "Criar":
         horizontal=True,
         key="nexus_render_mode",
         help=(
-            "O modo econômico usa bibliotecas de vídeo e evita Cloudflare/Modal. "
-            "Gemini e Fish Audio continuam sujeitos às cotas e planos das respectivas contas. "
-            "O modo de IA original envia cenas para geração e animação e consome créditos."
+            "O modo de IA original prioriza visuais exclusivos e envia cenas para geração e animação. "
+            "Para evitar esses créditos, escolha bibliotecas de vídeo; isso pode reduzir a exclusividade visual. "
+            "Gemini e Fish Audio seguem sujeitos às cotas e planos das respectivas contas."
         ),
     )
     if mode_uses_modal(render_mode):
         st.warning(
-            "IA original usa créditos da Cloudflare e da Modal. O custo total de um vídeo "
-            "de 40–50s ainda não foi validado; o limite interno do worker não representa "
-            "uma garantia de cobrança máxima do Workspace."
+            "Modo de qualidade selecionado: cenas originais usam créditos Cloudflare e Modal. "
+            "Meta de planejamento: 22 vídeos/mês. O custo total por vídeo ainda precisa ser "
+            "medido; o limite interno do worker não limita o gasto mensal do Workspace."
         )
     else:
         st.caption(
-            "Modo econômico selecionado: não aciona geração Cloudflare nem GPU Modal. "
-            "Chamadas Gemini/Fish Audio ainda dependem das cotas das suas contas."
+            "Modo Bibliotecas: evita geração Cloudflare e GPU Modal, mas pode reduzir a exclusividade "
+            "das imagens. Chamadas Gemini/Fish Audio seguem sujeitas às cotas das suas contas."
         )
     with st.container(border=True):
         topic = st.text_area(
@@ -1312,8 +1312,8 @@ elif active_view == "Perfil":
     with st.expander("Configurações avançadas de produção", expanded=False):
         st.markdown('<div class="nexus-kicker">PRODUÇÃO</div>', unsafe_allow_html=True)
         st.caption(
-            "O modo visual é escolhido na tela Criar. O modo econômico evita GPU Modal; "
-            "IA original usa créditos Cloudflare e Modal."
+            "O modo visual é escolhido na tela Criar. IA original prioriza cenas exclusivas e usa "
+            "créditos Cloudflare e Modal; bibliotecas evitam esses créditos com menor exclusividade visual."
         )
         with st.expander("Ferramentas avançadas · diagnóstico das bibliotecas de vídeo"):
             st.caption("Testa busca, licença, download e leitura do vídeo no Wikimedia Commons, Pixabay e Pexels. As chaves nunca são exibidas.")
