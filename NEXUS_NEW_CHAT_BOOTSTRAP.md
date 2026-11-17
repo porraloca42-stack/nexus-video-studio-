@@ -276,3 +276,9 @@ O protocolo detalhado e prevalente está no fim do `NEXUS_MASTER_STATE.md`. O ha
 Cada unidade de trabalho — consulta, leitura, pesquisa, análise, decisão, alteração, teste, workflow, revisão, correção, atualização documental ou bloqueio — exige checkpoint imediato, antes da próxima unidade. Registrar timestamp completo em `America/Sao_Paulo`, ação, resultado/evidência, arquivos/commits/IDs, estado real, limitações, pendências e próxima ação. Atualizar imediatamente master state e handoff; manter este bootstrap sincronizado quando mudar procedimento ou ponto de continuidade. Relêr na main. Se não for possível gravar, declarar o bloqueio e deixar o checkpoint explícito na resposta; nunca fingir que foi salvo. É proibido adiar os registros para o fim ou limitar a regra a etapas grandes. Ver regra prevalente no fim de `NEXUS_MASTER_STATE.md`.
 
 Timestamp da atualização: 2026-11-17T14:08:19-03:00 (UTC−03:00).
+
+
+## Checkpoint da regra absoluta — 17/11/2026, 14:08:47 (America/Sao_Paulo)
+- Regra permanente: checkpoint após toda unidade de trabalho, sem exceção, com data/hora/fuso, ação, evidência, estado e próxima ação. Inclui etapas pequenas e bloqueios.
+- Master state atualizado no commit `cab669983d7a6897d9e85e79095d96d18bc10349`; handoff atualizado no commit `6e56171a1305083df21a64188e7731f460347885`.
+- Esta atualização sincroniza o bootstrap após o master/handoff. Timestamp: 2026-11-17T14:08:47-03:00 (UTC−03:00).
