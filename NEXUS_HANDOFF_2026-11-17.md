@@ -881,3 +881,13 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - Main HEAD observado antes desta atualização documental: 3a749c48a2eed16d24a12625c62193f52634bb0f. Atualizações documentais estão sendo gravadas sequencialmente em Master State, Bootstrap e Handoff.
 - Nenhum merge, deploy, chamada Modal, GPU, Cloudflare, Fish Audio, Gemini ou render pago foi executado. Custo variável adicional: US$0.
 - Próxima ação: verificar por que o CI ainda não apareceu para o novo head; revisar configuração dos workflows e então acompanhar os checks. Depois, auditoria estática de telemetria/cache. Não fazer merge sem pedido explícito.
+
+
+## CHECKPOINT — CI #1163 VERDE NO HEAD A10G — 2026-11-17T17:53:45-03:00 (America/Sao_Paulo)
+- Consulta GitHub: 2026-11-17T17:53:45-03:00 (America/Sao_Paulo). HEAD de main antes desta atualização documental: 37e8ae7093734cd778f8f8950fbccdd23a41a815.
+- PR #10 head 402323ac23cd30286bb634c3c3966725f185c351 continua aberta, não mergeada e não implantada. GitHub reporta mergeable=true.
+- CI #1163 / run 44173764665 concluiu: unit-tests success; remotion-typecheck success; commons-live-smoke success; remotion-synthetic-render skipped por condição do workflow (não foi executado).
+- Os 8 testes do validador também passaram no teste local isolado anterior. O CI completo do workflow confirmou a suíte de regressão, compilação, typecheck e Commons smoke no head atualizado.
+- O CI não executou render sintético, deploy, Modal/GPU, Cloudflare, Fish Audio, Gemini ou produção audiovisual. Não comprova GPU real, billing ou movimento de LTX.
+- Próxima ação sem custo: auditoria estática final do diff #10 e desenho de telemetria/cache. Manter PR aberta; não fazer merge sem pedido explícito.
+- Custo variável adicional nesta etapa: US$0.
