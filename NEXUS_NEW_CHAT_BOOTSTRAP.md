@@ -1,6 +1,6 @@
 # NEXUS VIDEO STUDIO — BOOTSTRAP PARA NOVOS CHATS
 
-Última revisão: 2026-11-17T16:52:25-03:00 (America/Sao_Paulo)
+Última revisão: 2026-11-17T16:57:47-03:00 (America/Sao_Paulo)
 Repositório: https://github.com/porraloca42-stack/nexus-video-studio-
 Branch oficial: main
 
@@ -44,6 +44,7 @@ Consultar o bloco operacional completo no início de NEXUS_MASTER_STATE.md. Em r
 - Smoke live de uma cena Cloudflare → Modal/LTX → Remotion: passou tecnicamente em 17/11 às 15:58:59 BRT; movimento quase estático e GPU não identificada (gpu_name=null).
 - Produção completa de 40–50s com Fish Audio + Brain 4 + render: ainda não validada.
 - PR #9 permanece aberta/não mergeada/não implantada; CI #1135 passou nos jobs relevantes, render sintético skipped.
+- PR #10 está aberta para validar a GPU real antes de carregar os pesos e remover a estimativa de custo falsa do smoke Modal. CI #1143 / run 44164137648 está em andamento; não declarar aprovado nem fazer merge.
 - Modal: painel do usuário mostra gasto acumulado US$1.50 majoritariamente H100; código declara L40S; deployment ativo não identificado. Deploy e nova inferência pagos bloqueados sem autorização.
 - Build indicator Streamlit integrado pela PR #6; confirmar SHA no app publicado.
 
