@@ -1814,3 +1814,12 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - A normalização foi ajustada para preservar letras acentuadas do português. Teste adicionado para pares semelhantes com termos como “portão metálico” e para prompt sem verbo físico reconhecido.
 - Commits adicionais: `6769d06` (normalização Unicode), `f8af365` (teste de português acentuado), `8161dd2` (detecção lexical de ação física), `875ea44` (teste do prompt estático), `3bf05cd` (métrica na UI), `6b8accc` (contrato UI).
 - Código e testes foram gravados na branch main. Ainda não há execução de testes/CI confirmada, deploy ou validação visual. Nenhuma API paga, GPU ou renderização foi chamada; custo variável adicional: US$0.
+
+
+## Protótipo ComfyUI/LTX-2.5 — pesquisa e cliente HTTP mockável (17/11/2026)
+- Pesquisa do workflow oficial `LTX-2.5_T2V_I2V_Two_Stage_Distilled.json`: transformer distilled 22B BF16, I2V opcional com imagem inicial, upscale espacial latente 2× e refinamento de 3 passos; workflow gera áudio e vídeo conjuntamente e exige frame count 1+8n. O grafo consultado usa 24 fps e defaults paisagem 960×544/121 frames; NEXUS exigirá grafo vertical e duração 2–5s.
+- Requisitos oficiais publicados: GPU NVIDIA 32 GB VRAM mínimo; A100 80 GB ou H100 recomendados; 32 GB RAM e 100 GB livres mínimos. L40S 48 GB supera o mínimo, mas fica abaixo da configuração recomendada. Não há evidência de que o grafo 22B BF16 caiba com margem ou respeite o custo de US$0,50/vídeo.
+- Plano detalhado salvo em `NEXUS_LTX25_COMFYUI_PLAN.md`. A arquitetura proposta mantém worker independente, ComfyUI local dentro de Modal, API privada, pesos em volume persistente, grafo API versionado e fallback LTX 0.9.8.
+- Implementado sem GPU: `nexus/comfyui_client.py`, cliente HTTP mockável para upload, submissão, histórico, espera, detecção de erro e download. Testes mockados adicionados em `tests/test_comfyui_client.py`.
+- Ainda não implementado: workflow API exportado/patcher, worker Modal ComfyUI, custom nodes/versões pinadas, feature flag, integração ao render principal ou benchmark. Nenhuma inferência, download de pesos ou deploy.
+- CI/testes ainda não confirmados; custo variável adicional US$0. Próximo passo: confirmar CI e construir contrato do workflow API exportado com testes de nós/inputs, sem iniciar ComfyUI ou baixar modelos.
