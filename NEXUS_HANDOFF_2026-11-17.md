@@ -239,3 +239,12 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - A alegação de US$0.02 por vídeo completo não foi comprovada para concorrentes; custos internos não são públicos.
 - **Estado de decisão:** não remover LTX-0.9.8; pausar nova implementação/adoção de LTX-2.5 até validar rota híbrida por cena. Próxima etapa sem custo: mocks, roteador de mídia, camadas Remotion e contabilidade de custo. Nenhum gasto variável executado.
 - HEAD quando este handoff foi atualizado: consultar branch main; documentação de pesquisa adicionada sem alterações ao pipeline de produção.
+
+
+## Continuação — pipeline editorial em quatro cérebros aprovado (17/11/2026)
+- O usuário aprovou adicionar ao NEXUS a cadeia editorial de quatro cérebros: (1) estrategista de retenção com três hooks, seleção, arco e loop; (2) roteirista de micro-ritmo com unidades-alvo de 2,5–3,5s como heurística; (3) diretor de fotografia que traduz fala em metáforas visuais e trava uma bíblia visual por vídeo; (4) editor que alinha áudio final e sincroniza cortes, movimentos, SFX, legendas e música.
+- A proposta foi registrada no relatório NEXUS_FACELESS_VIDEO_ARCHITECTURE_RESEARCH_2026-11-17.md (commit 92204b323c7ab8764cbe448a1ade731c1960db82) e no NEXUS_MASTER_STATE.md (commit 53393f09d9ffba18b7e3dedd2fcdd819311b2bc1).
+- Ressalva factual: trata-se de arquitetura-alvo aprovada para o NEXUS, não de engenharia interna comprovada dos apps pagos. Whisper oferece timestamps por palavra em modo experimental; isso não basta para localizar sílaba tônica. Avaliar forced alignment/nível fonético e prosódia antes de prometer sincronismo silábico.
+- Implementação em código: não. Teste com áudio real, teste de retenção/A-B, deploy e MP4: não. Nenhuma API paga, GPU, download de pesos ou render de produção foi executado; custo variável adicional US$0.
+- Próxima etapa gratuita: especificar schemas JSON e testes determinísticos por estágio, depois integrar um cérebro de cada vez. Preservar motor atual e roteamento híbrido; não reativar gasto de GPU sem autorização explícita.
+
