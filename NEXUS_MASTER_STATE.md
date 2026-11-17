@@ -2632,3 +2632,14 @@ Este protocolo prevalece sobre instruções antigas ou checkpoints históricos q
 4. Só depois reconciliar Usage por intervalo temporal com os deployments. Não fazer novo deploy nem chamada GPU só para descobrir isso.
 - Estado: hipótese de deploy não atualizado **forte e verificável no Dashboard**; app órfão **não confirmado**; segundo decorator/sobrescrita no caminho principal **não encontrado**; secret de GPU **sem evidência**; scaledown de 5s confirmado, mas não explica tipo de GPU; defeito de estimativa L40S identificado.
 - Nenhuma chamada Modal, inferência GPU, Cloudflare, Fish Audio, Gemini ou render foi iniciada nesta auditoria. Nenhum custo adicional.
+
+
+## Segurança operacional — separação de deploy e smoke Modal — 2026-11-17
+- Branch: `safety/separate-modal-deploy-smoke`; PR #11: https://github.com/porraloca42-stack/nexus-video-studio-/pull/11.
+- Mudança: `.github/workflows/modal-deploy.yml` instala somente Modal CLI e executa `modal deploy modal_worker.py`; removeu a inferência smoke, dependências Pillow/FFmpeg e upload de artefatos do workflow de deploy.
+- Novo workflow: `.github/workflows/modal-inference-smoke.yml`, acionado somente por `workflow_dispatch`, valida os dois secrets Modal, executa `scripts/modal_smoke_test.py` e publica MP4/relatório como artifact por 3 dias.
+- Objetivo: impedir que o deploy dispare automaticamente inferência LTX faturável. Deploy e teste de inferência são decisões operacionais independentes.
+- Revisão estática concluída: ambos os workflows foram lidos diretamente na branch; nenhum smoke é chamado pelo deploy; nenhuma alteração no worker ou no pipeline editorial.
+- CI #1178 / run `44175647626`, head `75cdb246c80d7ad5d9e4059e215fbad1e07741a5`: unit-tests, commons-live-smoke e remotion-typecheck success; remotion-synthetic-render skipped. O CI não valida deploy Modal nem inferência GPU.
+- Estado: implementado e CI dos jobs executados aprovado; PR aberta, não mergeada e não implantada. Nenhum deploy, GPU, API paga ou render foi acionado; custo variável adicional US$0.
+- Próxima ação: aguardar autorização explícita para merge; deploy Modal e inferência smoke continuam exigindo decisões/autorização separadas.
