@@ -265,3 +265,20 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - Nenhuma API Gemini/Fish/Cloudflare, inferência Modal/GPU, download de modelo ou render de produção foi executado por esta etapa. Custo variável adicional US$0.
 - Próxima etapa: pesquisar e especificar os artefatos reais de cada cérebro e integrar primeiro Brain 1 em modo shadow/dry-run, mantendo o storyboard atual como fonte de produção até comparar e aprovar resultados. Não introduzir chamadas adicionais de API nem custo variável sem autorização específica.
 
+
+
+## Pesquisa técnica complementar — Revid, Crayo e alinhamento de fala (17/11/2026)
+- Revid publica API v3 workflow-driven: o cliente seleciona um fluxo (script-to-video, prompt-to-video, static-background, article/audio/music-to-video, entre outros), fornece source e configura media/voice/captions/music/options/render. A documentação afirma que uma requisição de render coordena visuais, voz, legendas e música; há endpoint de estimativa de créditos e cada render soma 10 créditos de base às gerações. Isso demonstra uma interface de orquestração unificada, não prova que o backend execute um único modelo ou quatro LLMs especializados.
+- A página pública de faceless do Revid enumera seis classes visuais: imagens IA animadas (padrão), AI video, stock video, motion graphics, mídia do usuário e gameplay. Também descreve estilo global aplicado às cenas e voz/legendas/música/SFX. Tratar como funcionalidades e comportamento declarados pelo fornecedor, não engenharia interna verificada.
+- Crayo documenta timeline multipista com vídeo, captions, texto, áudio e efeitos; cutaways com ducking automático; zooms com easing, transições, LUTs, speed ramps e keyframes de câmera. Também descreve legendas editáveis com timing word-level e destaque de palavras-chave. Isso reforça o contrato de timeline do NEXUS; não comprova o algoritmo interno de sincronização.
+- OpenAI Whisper expõe word_timestamps por cross-attention + dynamic time warping e a CLI marca a opção como experimental. O resultado é alinhamento estimado por palavra, não alinhamento fonético nem identificação da sílaba tônica.
+- WhisperX aplica forced alignment com modelos wav2vec2 para refinar os tempos de palavra e pode retornar alinhamentos em nível de caractere. A documentação lista limitações: palavras fora do vocabulário do alinhador podem ficar sem tempo, fala sobreposta é problemática e é necessário modelo de alinhamento apropriado ao idioma. Alinhamento de caracteres não equivale a sílaba tônica; prosódia/ênfase é uma etapa distinta.
+- Consequência para o NEXUS: manter o contrato atual capaz de representar alinhamento word ou phoneme, mas não instalar nem baixar modelos agora. Antes de escolher implementação, comparar suporte real a pt-BR, cobertura de números/nomes, licença, dependências, RAM/CPU/GPU, velocidade e custo. Validar timestamps contra áudio final Fish Audio e amostras anotadas manualmente. Cortes devem usar âncoras editoriais com confiança, não disparar mecanicamente em cada palavra.
+- Fontes públicas:
+  - Revid API docs: https://www.revid.ai/docs
+  - Revid faceless workflow: https://www.revid.ai/tools/faceless-video
+  - Crayo editor: https://crayo.ai/features/video-editor
+  - OpenAI Whisper word timestamps: https://github.com/openai/whisper/blob/main/whisper/transcribe.py
+  - WhisperX forced alignment and limitations: https://github.com/m-bain/whisperX
+- Nenhum endpoint Revid/Crayo foi chamado; nenhuma conta criada; nenhum modelo baixado; nenhuma chamada paga, GPU ou render foi executado.
+
