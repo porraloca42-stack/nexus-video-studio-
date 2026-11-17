@@ -498,3 +498,10 @@ Antes de qualquer teste pago de LTX, leia o bloco mais recente de `NEXUS_MASTER_
 - GPU efetiva do worker atualmente implantado e causa da divergência ainda não identificadas. Não fazer deploy nem nova inferência paga sem autorização explícita.
 - PR #9 permanece aberta e não integrada. CI #1135 / run `44159676828`: unit-tests, commons-live-smoke e remotion-typecheck passaram; remotion-synthetic-render foi skipped. CI não comprova movimento, GPU ativa ou custo.
 - Fonte de verdade operacional: `NEXUS_MASTER_STATE.md` na branch `main`; não usar anexo antigo cuja última atualização seja 16/11/2026.
+
+
+## Complemento — investigação H100 — 17/11/2026
+- Auditoria de código encontrou um único worker LTX principal `modal.App("nexus-video-i2v")` e `@app.cls(gpu=GPU_TYPE)`; deploy é manual (`workflow_dispatch`). Não há `.with_options(gpu=...)`, Sandbox, keep_warm ou variável de GPU no caminho auditado.
+- Worker configura scaledown de 5s. Isso não explica diferença H100/L40S.
+- Defeito de medição: `scripts/modal_smoke_test.py` sempre usa taxa nomeada L40S para estimar custo, mesmo que registre `gpu_name` real. Não usar essa estimativa como cobrança nem para concluir que o runtime usou L40S.
+- Consultar Dashboard > Apps e deployment ativo/logs para verificar versão e GPU. Não executar deploy ou inferência para essa verificação; nenhum acesso à conta Modal foi feito nesta sessão.
