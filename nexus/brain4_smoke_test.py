@@ -6,6 +6,7 @@ caller invokes run_brain4_live_smoke_test().
 """
 from __future__ import annotations
 
+import importlib
 from typing import Any, Callable
 
 from nexus.editorial_executors import run_brain4_for_storyboard
@@ -70,7 +71,20 @@ def run_brain4_live_smoke_test(
         raise RuntimeError("GEMINI_API_KEY não está configurada.")
 
     if model_call is None:
-        from nexus.director import generate_editorial_json
+        # Streamlit Cloud can keep an older module object in sys.modules after
+        # syncing source files. Reload the director before resolving the helper
+        # so a newly deployed generate_editorial_json is not hidden by that cache.
+        director_module = importlib.import_module("nexus.director")
+        director_module = importlib.reload(director_module)
+        generate_editorial_json = getattr(
+            director_module, "generate_editorial_json", None
+        )
+        if not callable(generate_editorial_json):
+            module_path = getattr(director_module, "__file__", "desconhecido")
+            raise RuntimeError(
+                "O módulo do diretor está desatualizado ou incompatível após recarga. "
+                f"Arquivo carregado: {module_path}"
+            )
 
         model_call = lambda prompt: generate_editorial_json(
             prompt, api_key, requested_model=requested_model

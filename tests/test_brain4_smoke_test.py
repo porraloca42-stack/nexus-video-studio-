@@ -1,5 +1,7 @@
+import importlib
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
+from types import SimpleNamespace
 
 from nexus.brain4_smoke_test import run_brain4_live_smoke_test
 
@@ -63,6 +65,33 @@ class Brain4SmokeTest(unittest.TestCase):
         self.assertEqual(result["audio_mix_event_count"], 1)
         self.assertEqual(result["sfx_event_count"], 0)
         self.assertEqual(result["timeline"]["word_timestamps"], valid_timeline()["word_timestamps"])
+
+
+    def test_live_smoke_reloads_cached_director_before_resolving_generator(self):
+        stale_director = SimpleNamespace(
+            __file__="/mount/src/nexus-video-studio-/nexus/director.py"
+        )
+        generator = Mock(return_value=valid_timeline())
+        refreshed_director = SimpleNamespace(
+            __file__="/mount/src/nexus-video-studio-/nexus/director.py",
+            generate_editorial_json=generator,
+        )
+
+        with (
+            patch.object(
+                importlib, "import_module", return_value=stale_director
+            ) as import_module,
+            patch.object(
+                importlib, "reload", return_value=refreshed_director
+            ) as reload_module,
+        ):
+            result = run_brain4_live_smoke_test("test-key")
+
+        import_module.assert_called_once_with("nexus.director")
+        reload_module.assert_called_once_with(stale_director)
+        generator.assert_called_once()
+        self.assertEqual(result["status"], "brain4_validated")
+        self.assertEqual(result["alignment_level"], "word")
 
     def test_smoke_test_rejects_timestamps_not_matching_fixture(self):
         timeline = valid_timeline()
