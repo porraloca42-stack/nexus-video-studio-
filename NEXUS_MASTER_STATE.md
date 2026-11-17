@@ -2,13 +2,13 @@
 
 # STATUS OPERACIONAL VIGENTE — SOBRESCREVE CHECKPOINTS HISTÓRICOS
 
-Atualizado em: 2026-11-17T17:04:33-03:00 (America/Sao_Paulo)
-HEAD da branch main no início desta atualização: 0342f3b042b81dcdf0e18c0b5010ce58e3033bc7
-Último commit de main antes desta atualização documental: 0342f3b042b81dcdf0e18c0b5010ce58e3033bc7.
+Atualizado em: 2026-11-17T17:50:00-03:00 (America/Sao_Paulo)
+HEAD da branch main no início desta atualização: 3a749c48a2eed16d24a12625c62193f52634bb0f
+Último commit de main antes desta atualização documental: 3a749c48a2eed16d24a12625c62193f52634bb0f.
 
 **REGRA DE LEITURA:** este bloco é a fonte prioritária para o estado atual. Os registros cronológicos abaixo são histórico. Nunca retomar uma “próxima ação” antiga sem confrontá-la com este bloco e com o HEAD atual. Em especial, NÃO tratar tarefas do dia 16/11 nem checkpoints antigos sobre integração Brain 4/Remotion como pendências atuais.
 
-## Estado vigente em 17/11/2026 às 17:01 (BRT)
+## Estado vigente em 17/11/2026 às 17:50 (BRT)
 - Quatro cérebros: contratos, validadores, prompts e runner implementados. Brain 4 isolado foi aprovado pelo usuário em execução real Gemini, validando timeline em fixture sintética de 4s; isso não valida vídeo completo.
 - Integração editorial no worker de produção existe como opt-in: usa narração Fish Audio e segmentos/timestamps do provedor, aplica Brain 4 quando habilitado, valida timeline e encaminha eventos para Remotion. Não confundir integração de código/testes com pipeline completo live.
 - Remotion multifaixa (captions, SFX, ducking/fades) implementado e validado em MP4 sintético de 4s; qualidade com voz/música reais e vídeo de 40–50s não validada.
@@ -17,12 +17,12 @@ HEAD da branch main no início desta atualização: 0342f3b042b81dcdf0e18c0b5010
 - PR #9 (feat/ltx-low-cost-simple-motion) permanece aberta, não mergeada e não implantada. CI #1135/run 44159676828 passou nos testes Python, Commons smoke e Remotion typecheck; render sintético foi skipped. Não inferir GPU, custo ou qualidade por CI.
 - Modal: painel informado pelo usuário mostrou US$1.50 acumulados, majoritariamente H100. Código versionado declara L40S, mas deployment ativo/GPU real permanecem não identificados. Deploy é manual; não fazer deploy/inferência paga sem autorização. A PR #10 remove a estimativa de custo do smoke baseada em taxa L40S hardcoded e tempo de parede; até integração, a correção existe somente na branch da PR.
 - Build indicator Streamlit: PR #6 integrada; Perfil deve mostrar SHA/origem ou “não identificado”. A leitura na instância publicada ainda não foi confirmada.
-- PR #10 aberta: Verify Modal GPU identity and remove misleading smoke cost estimate. Branch fix/modal-gpu-identity-and-cost-report, head eb7269bfa339dc13ff0704e6b5fa91c2fb8fbba7. CI #1143 e #1144 passaram nos jobs executados antes da revisão final. A revisão encontrou risco de confundir A10 com A100; o validador foi ajustado para tokens exatos e teste A10G/A100 adicionado. CI #1154 falhou por NameError em commit intermediário (variável markers após renomeação); corrigido em eb7269b. CI #1155 / run 44165173593, head eb7269bfa339dc13ff0704e6b5fa91c2fb8fbba7, concluído: unit-tests success, remotion-typecheck success, commons-live-smoke success; remotion-synthetic-render skipped. Os jobs executados passaram; render sintético não foi executado. PR segue aberta, não mergeada e não implantada.
+- PR #10 aberta: Verify Modal GPU identity and remove misleading smoke cost estimate. Branch fix/modal-gpu-identity-and-cost-report. Em 17:50 BRT foi corrigida a ausência de alias para A10G como tipo solicitado; novos testes cobrem A10G solicitado/real e rejeitam A10 quando A10G foi solicitado. Commits: 16fe13649aceda91d4dcd827a486501d52546c00 (validador) e 402323ac23cd30286bb634c3c3966725f185c351 (testes). O head anterior eb7269b tinha CI #1155 verde; a nova cabeça ainda aguarda CI. CI #1143 e #1144 passaram nos jobs executados antes da revisão final. A revisão encontrou risco de confundir A10 com A100; o validador foi ajustado para tokens exatos e teste A10G/A100 adicionado. CI #1154 falhou por NameError em commit intermediário (variável markers após renomeação); corrigido em eb7269b. CI #1155 / run 44165173593, head eb7269bfa339dc13ff0704e6b5fa91c2fb8fbba7, concluído: unit-tests success, remotion-typecheck success, commons-live-smoke success; remotion-synthetic-render skipped. Os jobs executados passaram; render sintético não foi executado. PR segue aberta, não mergeada e não implantada.
 
 ## Próxima ação sem custo
-1. Aguardar CI #1155; inspecionar logs se algum job falhar e corrigir a PR incrementalmente.
-2. Após CI verde, revisar o diff final e manter PR #10 aberta até solicitação explícita de merge.
-3. Planejar auditoria do deployment Modal sem iniciar deploy/inferência; confirmar runtime pode exigir acesso ao painel ou uma execução autorizada.
+1. Aguardar CI do novo head 402323ac23cd30286bb634c3c3966725f185c351; oito testes unitários isolados do validador passaram localmente, mas isso não substitui CI.
+2. Revisar logs e diff final da PR #10; manter aberta até solicitação explícita de merge.
+3. Prosseguir com auditoria estática de observabilidade/cache e documentação de deployment, sem chamar Modal ou serviços pagos.
 4. Manter produção completa bloqueada até confirmação do deployment e autorização explícita de custos.
 
 ## Separação de estados
