@@ -158,7 +158,7 @@ st.markdown("""
 html,body,.stApp,[data-testid="stAppViewContainer"]{background:#09090B!important;color:#F4F4F5!important;font-family:'Plus Jakarta Sans',sans-serif!important}
 [data-testid="stAppViewContainer"]{background:radial-gradient(circle at 50% 0%,#18122B 0%,#09090B 46%)!important}
 [data-testid="stSidebar"],[data-testid="collapsedControl"],[data-testid="stHeader"],[data-testid="stToolbar"],[data-testid="manage-app-button"],[data-testid="stFooter"],[data-testid="stBottom"],#MainMenu,header,footer,.stApp>footer,div[class*="viewerBadge"],div[class*="ViewerBadge"],div[class*="viewer-badge"]{display:none!important;visibility:hidden!important;height:0!important;min-height:0!important;padding:0!important;margin:0!important;border:0!important}
-.block-container{padding-top:2rem!important;padding-bottom:3rem!important;max-width:1280px!important}
+.block-container{padding-top:2rem!important;padding-bottom:10rem!important;max-width:1280px!important}
 .nexus-hero{position:relative;overflow:hidden;padding:1.45rem 1.65rem;border:1px solid #30234d;border-radius:22px;background:linear-gradient(115deg,rgba(24,18,43,.98),rgba(18,18,22,.96) 65%,rgba(30,24,52,.95));box-shadow:0 18px 48px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.06);margin-bottom:1rem}
 .nexus-brand-lockup{display:flex;align-items:center;justify-content:center;gap:clamp(.65rem,2.8vw,1.15rem);width:100%;min-width:0;margin:0 auto}
 .nexus-logo-mark{display:grid;place-items:center;width:clamp(58px,16vw,76px);height:clamp(58px,16vw,76px);flex:0 0 auto;border-radius:18px;background:linear-gradient(145deg,#21163e,#101019);border:1px solid #6245a2;box-shadow:0 0 28px rgba(139,92,246,.22),inset 0 1px 0 rgba(255,255,255,.12)}.nexus-logo-mark svg{width:66%;height:66%;filter:drop-shadow(0 0 9px rgba(167,139,250,.45))}
@@ -174,18 +174,15 @@ html,body,.stApp,[data-testid="stAppViewContainer"]{background:#09090B!important
 [data-testid="stTextInput"] input,[data-testid="stTextArea"] textarea,[data-testid="stSelectbox"] div[data-baseweb="select"],[data-testid="stMultiSelect"] div[data-baseweb="select"]{background:#18181B!important;border:1px solid #27272A!important;border-radius:10px!important;color:#FAFAFA!important;transition:border-color .2s ease,box-shadow .2s ease!important}
 [data-testid="stTextInput"] input:focus,[data-testid="stTextArea"] textarea:focus,[data-testid="stSelectbox"] div[data-baseweb="select"]:focus-within{border-color:#8B5CF6!important;box-shadow:0 0 0 1px #8B5CF6!important}
 [data-testid="stTextArea"] textarea{line-height:1.55!important;min-height:112px!important}
-.st-key-nexus-bottom-nav{position:fixed!important;z-index:9999!important;left:0!important;right:0!important;bottom:0!important;width:100%!important;padding:.55rem 1rem calc(.55rem + env(safe-area-inset-bottom))!important;background:rgba(12,12,18,.96)!important;border-top:1px solid #30234d!important;backdrop-filter:blur(18px)!important}
-.st-key-nexus-bottom-nav [data-testid="stRadio"]{margin:0!important}
-.st-key-nexus-bottom-nav [role="radiogroup"]{display:flex!important;justify-content:space-around!important;gap:.25rem!important}
-.st-key-nexus-bottom-nav [role="radiogroup"] label{flex:1 1 25%!important;justify-content:center!important;padding:.35rem .15rem!important;border-radius:10px!important;color:#a1a1aa!important;font-size:.78rem!important}
-.st-key-nexus-bottom-nav [role="radiogroup"] label:has(input:checked){color:#c4b5fd!important;background:rgba(124,58,237,.14)!important}
-.st-key-nexus-bottom-nav [role="radiogroup"] label p{font-size:.78rem!important}
-.st-key-nexus-bottom-nav [role="radiogroup"] input{display:none!important}
-.st-key-nexus-style-chips [role="radiogroup"]{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;gap:.45rem!important;padding:.25rem .05rem .65rem!important;scrollbar-width:thin!important}
-.st-key-nexus-style-chips [role="radiogroup"] label{flex:0 0 auto!important;padding:.45rem .85rem!important;border:1px solid #34303f!important;border-radius:999px!important;background:#18181d!important;color:#d4d4d8!important}
-.st-key-nexus-style-chips [role="radiogroup"] label:has(input:checked){border-color:#8b5cf6!important;background:rgba(124,58,237,.2)!important;color:#fff!important}
-.st-key-nexus-style-chips [role="radiogroup"] input{display:none!important}
-.nexus-output-placeholder{width:min(100%,290px);aspect-ratio:9/16;margin:1rem auto;border:1px solid #4b3b70;border-radius:22px;background:linear-gradient(145deg,#181522,#101014);display:flex;align-items:center;justify-content:center;text-align:center;color:#85808f;padding:1.2rem;box-shadow:inset 0 0 45px rgba(124,58,237,.08)}
+.st-key-nexus-bottom-nav{position:fixed!important;z-index:9999!important;left:0!important;right:0!important;bottom:5.25rem!important;width:100%!important;padding:.45rem .7rem!important;background:rgba(12,12,18,.97)!important;border-top:1px solid #30234d!important;border-bottom:1px solid #30234d!important;backdrop-filter:blur(18px)!important}
+.st-key-nexus-bottom-nav [data-testid="stPills"]{margin:0!important}
+.st-key-nexus-bottom-nav [data-testid="stPills"] [role="group"]{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;justify-content:space-between!important;gap:.35rem!important;scrollbar-width:none!important}
+.st-key-nexus-bottom-nav [data-testid="stPills"] button{flex:1 0 auto!important;min-width:max-content!important;justify-content:center!important;padding:.45rem .75rem!important;border-radius:12px!important;font-size:.8rem!important}
+[data-testid="stPills"]{width:100%!important;min-width:0!important}
+[data-testid="stPills"] [role="group"]{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;gap:.5rem!important;padding:.3rem .1rem .65rem!important;scrollbar-width:thin!important;overscroll-behavior-x:contain!important}
+[data-testid="stPills"] [role="group"] button{flex:0 0 auto!important;width:auto!important;min-width:max-content!important;max-width:none!important;white-space:nowrap!important;word-break:keep-all!important;overflow-wrap:normal!important;writing-mode:horizontal-tb!important;padding:.5rem .9rem!important;border:1px solid #34303f!important;border-radius:999px!important;background:#18181d!important;color:#d4d4d8!important}
+[data-testid="stPills"] [role="group"] button[aria-pressed="true"]{border-color:#8b5cf6!important;background:rgba(124,58,237,.24)!important;color:#fff!important;box-shadow:0 0 0 1px rgba(139,92,246,.25)!important}
+.nexus-output-placeholder{width:min(100%,220px);aspect-ratio:9/16;margin:1rem auto;border:1px solid #4b3b70;border-radius:22px;background:linear-gradient(145deg,#181522,#101014);display:flex;align-items:center;justify-content:center;text-align:center;color:#85808f;padding:1.2rem;box-shadow:inset 0 0 45px rgba(124,58,237,.08)}
 .nexus-output-placeholder strong{display:block;color:#d4c5ff;margin-bottom:.5rem;font-size:1rem}
 [data-testid="stWidgetLabel"] p,label,[data-testid="stMarkdownContainer"] strong{color:#F4F4F5!important}
 [data-testid="stCaptionContainer"],.stCaption{color:#A1A1AA!important}
@@ -200,7 +197,7 @@ div[data-testid="stButton"] button[kind="primary"]:hover{box-shadow:0 8px 25px r
 [data-testid="stAlert"]{border-radius:13px!important}
 [data-testid="stProgress"]>div>div{background:linear-gradient(90deg,#6366F1,#8B5CF6)!important}
 hr{border-color:#27272A!important}
-@media(max-width:850px){.block-container{padding:1rem .8rem 7rem!important}.nexus-hero{padding:1rem .7rem;border-radius:17px}.nexus-brand-lockup{gap:.65rem}.nexus-brand-name{font-size:clamp(1.45rem,6.4vw,1.9rem);letter-spacing:.08em}.nexus-brand-subtitle{font-size:clamp(.72rem,3.1vw,.92rem);letter-spacing:.15em}.nexus-preview img{width:112px}}
+@media(max-width:850px){.block-container{padding:1rem .8rem 10rem!important}.nexus-hero{padding:1rem .7rem;border-radius:17px}.nexus-brand-lockup{gap:.65rem}.nexus-brand-name{font-size:clamp(1.45rem,6.4vw,1.9rem);letter-spacing:.08em}.nexus-brand-subtitle{font-size:clamp(.72rem,3.1vw,.92rem);letter-spacing:.15em}.nexus-preview img{width:112px}}
 </style>
 """, unsafe_allow_html=True)
 
@@ -215,8 +212,11 @@ st.markdown("""
 
 # Mobile-first navigation; the production pipeline is preserved.
 with st.container(key="nexus-bottom-nav"):
-    active_view = st.radio("Navegação", ["Criar", "Biblioteca", "Modelos", "Perfil"],
-        horizontal=True, label_visibility="collapsed", key="nexus_navigation")
+    active_view = st.pills(
+        "Navegação", ["Criar", "Biblioteca", "Modelos", "Perfil"],
+        selection_mode="single", default="Criar", key="nexus_navigation",
+        label_visibility="collapsed",
+    ) or "Criar"
 
 if active_view == "Criar":
     if "nexus_style" not in st.session_state or st.session_state["nexus_style"] not in STYLE_OPTIONS:
@@ -308,18 +308,12 @@ if active_view == "Criar":
         with st.container(border=True):
             st.markdown('<div class="nexus-kicker">02 · Direção visual</div>', unsafe_allow_html=True)
             st.markdown('<div class="nexus-kicker">ESTILO VISUAL</div>', unsafe_allow_html=True)
-            with st.container(key="nexus-style-chips"):
-                st.radio("Estilo visual", STYLE_OPTIONS,
-                    index=STYLE_OPTIONS.index(st.session_state["nexus_style"]),
-                    horizontal=True, key="nexus_style", label_visibility="collapsed")
-            style = st.session_state["nexus_style"]
-            preview_svg = style_preview_svg(style)
-            preview_b64 = base64.b64encode(preview_svg.encode("utf-8")).decode("ascii")
-            preview_copy = STYLE_META[style][3]
-            st.markdown(
-                f'<div class="nexus-preview"><img src="data:image/svg+xml;base64,{preview_b64}" alt="Tratamento visual {style}"><div><div class="nexus-preview-title">{style}</div><div class="nexus-preview-copy">{preview_copy}</div></div></div>',
-                unsafe_allow_html=True
-            )
+            style = st.pills(
+                "Estilo visual", STYLE_OPTIONS,
+                selection_mode="single", default=st.session_state["nexus_style"],
+                key="nexus_style", label_visibility="collapsed",
+            ) or st.session_state["nexus_style"]
+            st.session_state["nexus_style"] = style
         with st.container(border=True):
             st.markdown('<div class="nexus-kicker">Narração</div>', unsafe_allow_html=True)
             fish_api_key = secret("FISH_API_KEY")
