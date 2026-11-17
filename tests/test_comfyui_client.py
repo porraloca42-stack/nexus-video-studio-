@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from nexus.comfyui_client import ComfyUIClient, ComfyUIError
+from nexus.comfyui_client import ComfyUIClient, ComfyUIError, patch_api_workflow
 
 
 class FakeResponse:
@@ -55,6 +55,48 @@ class ComfyUIClientTests(unittest.TestCase):
             client.upload_image(b"")
 
         self.assertEqual(session.calls, [])
+
+    def test_patch_api_workflow_changes_only_explicit_widget_inputs(self):
+        workflow = {
+            "10": {
+                "class_type": "LoadImage",
+                "inputs": {"image": "old.png", "upload": "image"},
+            },
+            "20": {
+                "class_type": "PrimitiveInt",
+                "inputs": {"value": 121},
+            },
+        }
+
+        patched = patch_api_workflow(workflow, {
+            "keyframe": {"node_id": "10", "input_name": "image", "value": "new.png"},
+            "frame_count": {"node_id": "20", "input_name": "value", "value": 73},
+        })
+
+        self.assertEqual(patched["10"]["inputs"]["image"], "new.png")
+        self.assertEqual(patched["20"]["inputs"]["value"], 73)
+        self.assertEqual(workflow["10"]["inputs"]["image"], "old.png")
+        self.assertEqual(workflow["20"]["inputs"]["value"], 121)
+
+    def test_patch_api_workflow_rejects_linked_inputs(self):
+        workflow = {
+            "10": {
+                "class_type": "LTXVPreprocess",
+                "inputs": {"image": ["4", 0]},
+            }
+        }
+
+        with self.assertRaisesRegex(ComfyUIError, "está conectado"):
+            patch_api_workflow(workflow, {
+                "keyframe": {"node_id": "10", "input_name": "image", "value": "new.png"},
+            })
+
+    def test_patch_api_workflow_rejects_unknown_node_or_input(self):
+        with self.assertRaisesRegex(ComfyUIError, "ausente"):
+            patch_api_workflow(
+                {"10": {"class_type": "LoadImage", "inputs": {"image": "old.png"}}},
+                {"keyframe": {"node_id": "99", "input_name": "image", "value": "new.png"}},
+            )
 
     def test_queue_prompt_returns_prompt_id_and_sends_api_workflow(self):
         session = FakeSession([FakeResponse({"prompt_id": "job-123", "number": 1})])
