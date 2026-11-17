@@ -240,6 +240,11 @@ def validate_edit_timeline(data: Any) -> list[str]:
             errors.append(f"{item_path}.confidence: expected value between 0 and 1")
 
     anchors = _require_list(data, "edit_anchors", path, errors)
+    aligned_words = [
+        word for word in words
+        if _is_object(word) and _is_nonempty_string(word.get("text"))
+        and _is_number(word.get("start_seconds")) and _is_number(word.get("end_seconds"))
+    ]
     last_anchor = -1.0
     for index, anchor in enumerate(anchors):
         item_path = f"{path}.edit_anchors[{index}]"
@@ -262,6 +267,18 @@ def validate_edit_timeline(data: Any) -> list[str]:
             errors.append(f"{item_path}: phoneme anchor requires phoneme-level alignment")
         if anchor_level == "phoneme":
             _require_string(anchor, "phoneme", item_path, errors)
+        if anchor_level == "word" and _is_nonempty_string(anchor.get("trigger_text")):
+            matching = [
+                word for word in aligned_words
+                if word["text"].strip().casefold() == anchor["trigger_text"].strip().casefold()
+            ]
+            if not matching:
+                errors.append(f"{item_path}.trigger_text: no matching aligned word")
+            elif _is_number(anchor.get("at_seconds")) and not any(
+                word["start_seconds"] - 0.05 <= anchor["at_seconds"] <= word["end_seconds"] + 0.05
+                for word in matching
+            ):
+                errors.append(f"{item_path}.at_seconds: anchor falls outside the aligned trigger word")
         _require_string(anchor, "visual_event", item_path, errors)
         sfx = anchor.get("sfx")
         if sfx is not None and not _is_nonempty_string(sfx):
@@ -328,6 +345,98 @@ def validate_editorial_pipeline(data: Any) -> dict[str, list[str]]:
         "micro_script": script_errors,
         "visual_direction": visual_errors,
         "edit_timeline": edit_errors,
+    }
+
+
+def micro_script_advisories(data: Any) -> list[str]:
+    """Non-blocking guidance for the preferred 2.5–3.5s micro-rhythm."""
+    if not _is_object(data) or not isinstance(data.get("blocks"), list):
+        return []
+    advisories = []
+    for index, block in enumerate(data["blocks"], 1):
+        if not _is_object(block) or not _is_number(block.get("target_duration_seconds")):
+            continue
+        duration = block["target_duration_seconds"]
+        if not 2.5 <= duration <= 3.5:
+            advisories.append(
+                f"micro_script.blocks[{index - 1}]: {duration:.2f}s is outside the preferred 2.5–3.5s range; "
+                "review editorially, but do not shorten a complete idea just to satisfy the heuristic."
+            )
+    return advisories
+
+
+def run_four_brain_pipeline(
+    brief: dict,
+    *,
+    strategist,
+    scriptwriter,
+    photographer,
+    editor,
+    narration_audio: dict,
+) -> dict:
+    """Run injected stage functions in order; safe for mocks and offline tests.
+
+    Production integrations must explicitly provide the four stage executors and
+    a final narration asset. This runner never discovers credentials or calls APIs.
+    """
+    if not _is_object(brief):
+        raise ValueError("brief: expected object")
+    if not _is_object(narration_audio):
+        raise ValueError("narration_audio: expected object")
+    if not _is_nonempty_string(narration_audio.get("audio_asset_id")):
+        raise ValueError("narration_audio.audio_asset_id: expected non-empty string")
+    if not _is_number(narration_audio.get("duration_seconds")) or narration_audio["duration_seconds"] <= 0:
+        raise ValueError("narration_audio.duration_seconds: expected positive number")
+
+    hook = strategist(brief)
+    errors = validate_hook_strategy(hook)
+    if errors:
+        raise ValueError("Brain 1 rejected: " + "; ".join(errors))
+
+    script = scriptwriter({"brief": brief, "hook_strategy": hook})
+    errors = validate_micro_script(script)
+    if errors:
+        raise ValueError("Brain 2 rejected: " + "; ".join(errors))
+    selected_hook = hook.get("selected_hook", "").casefold()
+    if selected_hook not in script["blocks"][0]["text"].casefold():
+        raise ValueError("Brain 2 rejected: selected hook is missing from opening block")
+
+    visual = photographer({
+        "brief": brief,
+        "hook_strategy": hook,
+        "micro_script": script,
+    })
+    errors = validate_visual_direction(visual)
+    if errors:
+        raise ValueError("Brain 3 rejected: " + "; ".join(errors))
+    visual_ids = {beat["block_id"] for beat in visual["beats"]}
+    script_ids = {block["id"] for block in script["blocks"]}
+    if visual_ids != script_ids:
+        raise ValueError("Brain 3 rejected: visual beats must map one-to-one to micro-script blocks")
+
+    edit = editor({
+        "brief": brief,
+        "hook_strategy": hook,
+        "micro_script": script,
+        "visual_direction": visual,
+        "narration_audio": narration_audio,
+    })
+    errors = validate_edit_timeline(edit)
+    if errors:
+        raise ValueError("Brain 4 rejected: " + "; ".join(errors))
+    if edit.get("audio_asset_id") != narration_audio["audio_asset_id"]:
+        raise ValueError("Brain 4 rejected: timeline audio_asset_id does not match final narration asset")
+    if abs(edit.get("audio_duration_seconds", 0) - narration_audio["duration_seconds"]) > 0.05:
+        raise ValueError("Brain 4 rejected: timeline duration does not match measured narration duration")
+
+    return {
+        "contract_version": CONTRACT_VERSION,
+        "hook_strategy": hook,
+        "micro_script": script,
+        "visual_direction": visual,
+        "narration_audio": narration_audio,
+        "edit_timeline": edit,
+        "micro_script_advisories": micro_script_advisories(script),
     }
 
 
