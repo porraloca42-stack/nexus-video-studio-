@@ -2092,3 +2092,10 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Run #119, `44118084308`, workflow Remotion demo: typecheck e testes de adapters passaram; demo manual de 50s foi skipped; render de integração sintética de 4s via adapter real estava em andamento na última consulta. Aguardar validação do MP4.
 - Estado: ponte Brain 4 implementada e validada com mock; NÃO implantada como executor Gemini real e NÃO conectada ao app por padrão. Ainda não comprova captions/SFX/ducking em produção.
 - Sem chamada Gemini/Fish adicional, GPU, modelo, deploy ou render de produção. O workflow demo executa somente teste sintético CPU/Remotion; o render manual de 50s permanece condicionado a workflow_dispatch.
+
+
+## Render de integração do adapter Python → Remotion validado — 17/11/2026
+- Workflow #119, run `44118084308`, commit `1e8443f1a23c4988619cf49e4849e361782ee9f3`: execução completa com sucesso. Typecheck Remotion, testes dos adapters Python, geração de manifest via `build_remotion_manifest()`, render Remotion e validação FFprobe passaram.
+- MP4 sintético produzido a partir do adapter Python real: H.264 720×1280, AAC, duração 4.011s (limite do teste 3.8–4.2s). Artifact `nexus-remotion-demos` ID `14344496316`, retenção até 24/11/2026.
+- Demo manual de 50s foi skipped por não ser workflow_dispatch; nenhum vídeo de produção foi gerado. O teste usa still sintético + áudio sintético, sem Cloudflare, Fish, Modal, GPU ou modelo.
+- Isso valida o caminho Python manifest adapter → Remotion para o manifesto sintético; não valida a nova timeline Brain 4 no worker nem conteúdo audiovisual real.
