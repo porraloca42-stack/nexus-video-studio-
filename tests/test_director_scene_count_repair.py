@@ -152,6 +152,17 @@ class SceneCountRepairTests(unittest.TestCase):
         self.assertEqual(report["near_duplicate_action_pairs"][0]["scenes"], [1, 2])
         self.assertTrue(any("alta sobreposição de termos" in warning for warning in report["warnings"]))
 
+    def test_preflight_detects_near_duplicate_actions_in_portuguese(self):
+        plan = make_plan(12)
+        plan["scenes"][0]["visual_action"] = "A mulher empurra o portão metálico com a mão direita."
+        plan["scenes"][1]["visual_action"] = "A mulher empurra o portão metálico com a mão esquerda."
+
+        report = director.build_storyboard_preflight(plan)
+
+        self.assertTrue(report["near_duplicate_action_pairs"])
+        self.assertEqual(report["near_duplicate_action_pairs"][0]["scenes"], [1, 2])
+
+
     def test_preflight_reports_action_and_motion_prompt_coverage(self):
         plan = make_plan(10)
         plan["scenes"][0]["visual_action"] = ""
