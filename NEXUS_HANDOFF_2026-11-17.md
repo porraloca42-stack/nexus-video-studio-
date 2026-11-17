@@ -420,3 +420,11 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - `run_four_brain_pipeline()` recebe timestamps de palavra opcionais, aplica a normalização estrita e os passa ao executor do Brain 4. Teste confirma a propagação sem rede.
 - CI #1007: unit-tests e typecheck passaram; Commons smoke ainda estava em execução na última consulta; synthetic render skipped.
 - Próximo: preparar executor Brain 4 com mocks e integração desativada por padrão. A chamada Gemini adicional por render só deve ser habilitada com autorização de custo.
+
+
+## Checkpoint — ponte opt-in Brain 4 no worker — 17/11/2026
+- `nexus/editorial_executors.py`: novo `run_brain4_for_storyboard()` adapta cenas existentes, usa callable explicitamente injetado, valida `edit_timeline` e confere asset/duração do áudio.
+- `nexus/remote_render_job.py`: `main(editorial_model_call=None)` e `apply_optional_brain4()`; sem injeção, status disabled e plano original preservado. Com injeção, exige timestamps word-level reais; sem eles falha antes de chamar o modelo. App padrão não injeta callable; Gemini não é chamado.
+- CI #1017 / `44118108425`: 202 testes Python, typecheck e Commons smoke passaram; synthetic multitrack skipped.
+- Workflow Remotion demo #119 / `44118084308`: typecheck e adapter tests passaram; render demo manual de 50s skipped; teste sintético de integração de 4s estava em andamento.
+- Ponte mockada e validada; não implantada como executor Gemini nem habilitada no fluxo de produção. Próximo: concluir validação do MP4 sintético; depois desenhar o fornecimento seguro do callable Gemini com feature flag e orçamento explícito, mantendo desabilitado por padrão.
