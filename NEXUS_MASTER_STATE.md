@@ -1407,3 +1407,13 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - `app.py` agora separa a experiência em abas “Criar” e “Estilos”. A aba Criar preserva o fluxo atual de produção; a aba Estilos oferece galeria compacta com referências simplificadas, descrição curta e ação “Usar este estilo”. Nenhuma instrução técnica detalhada da IA é exibida.
 - Testes adicionados para garantir ausência de motivos fixos nos perfis, preservação de termos específicos da cena e presença da regra anti-template.
 - Estado: alterações gravadas em `main`. Revisão estática confirmou abas, 18 estilos, perfis anti-template e integração do diretor. CI acionado pelo GitHub Actions; aguardar conclusão. Deploy Streamlit e teste real de storyboard/render ainda pendentes.
+
+
+## Integração final da gramática visual ao worker — 17/11/2026
+- Verificado o caminho real de produção: `nexus/cloudflare_images.py` consome diretamente `scene.image_prompt` para gerar os keyframes; `nexus/modal_i2v.py` usa `video_motion_prompt` ou deriva movimento da imagem-base. Por isso, apenas guardar o perfil em `plan.style_directive` não era suficiente para garantir que o gerador de imagem recebesse a direção.
+- `apply_visual_style_lock()` agora anexa a direção de arte interna completa ao `image_prompt` de cada cena, com marcador idempotente para evitar duplicação em reprocessamentos. O worker Cloudflare recebe, portanto, as regras anti-template, a gramática formal e as restrições do estilo no prompt efetivamente usado.
+- A animação LTX preserva a imagem-base e seu estilo; a instrução de movimento permanece subordinada à ação da cena e à identidade visual do keyframe.
+- Teste específico adicionado para verificar a presença do perfil completo no prompt real do worker e impedir duplicação.
+- Commits desta revisão: `d12ac01` (perfis sem motivos fixos), `2e184d3` (diretor anti-template), `56b7d1e` (abas Criar/Estilos), `5429e4a` (testes anti-template), `06356a7` (contrato 2.0), `0ebd0de` (perfil no image_prompt), `4649652` (teste de integração), `cbf7f56` (quebras de parágrafo no prompt).
+- Revisão estática confirmou que a aba Estilos existe, as 18 opções são carregadas do catálogo centralizado, os prompts completos permanecem internos e o worker de imagens recebe o perfil. GitHub Actions run `43988617253` está em execução no momento do registro; não marcar testes como aprovados até conclusão.
+- Deploy Streamlit e validação visual da nova navegação, além de storyboard e MP4 reais com estilos diferentes, permanecem pendentes.
