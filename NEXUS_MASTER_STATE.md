@@ -1795,3 +1795,14 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Custos: nenhuma chamada Gemini, Cloudflare, Fish Audio, Modal/GPU ou renderização paga foi iniciada nesta etapa. Custo variável adicional: US$0.
 - Próximo passo: obter o resultado do CI de push do commit `9b4326c` por uma consulta de Actions que inclua eventos push; se verde, continuar com a próxima melhoria de direção semântica em código/testes locais, sem inferência paga. A validação visual publicada permanece separada.
 
+
+
+## Pré-validação textual ampliada do storyboard — 17/11/2026
+- Evolução de `build_storyboard_preflight(plan)` em `nexus/director.py`: além de repetição literal, compara sobreposição de termos informativos entre pares de ações e buscas. O critério é conservador (mínimo de quatro termos compartilhados e 80% de sobreposição sobre o menor conjunto); pares literalmente idênticos continuam reportados apenas pela regra de repetição exata.
+- O relatório agora inclui `action_coverage_ratio`, `motion_prompt_coverage_ratio`, `near_duplicate_action_pairs` e `near_duplicate_search_pairs`, além dos indicadores existentes. A análise é lexical/determinística: NÃO compreende sinônimos, intenção ou semântica real e pode produzir falsos positivos/negativos.
+- A interface Streamlit exibe cobertura de descrição da ação/movimento e quantidade de pares com possível semelhança, mantendo o aviso de que não analisa quadros e não substitui revisão visual.
+- Testes adicionados/ajustados em `tests/test_director_scene_count_repair.py` e `tests/test_app_import_resilience.py`: repetição aproximada com palavras reordenadas, cobertura dos campos, ações concretas distintas e contrato da UI.
+- Commits na branch main: `87380c4` (heurística), `f096421` (testes), `6c2f931` (métricas na UI), `7b50d6d` (teste de contrato UI), `464ca0f` (evitar alerta duplicado quando os conjuntos de termos são idênticos).
+- Validação desta etapa: alterações gravadas no GitHub e precisam de releitura pós-commit. Os testes automatizados ainda NÃO foram executados/confirmados por CI. A integração GitHub disponível não expõe listagem de Actions para eventos push; o status combinado consultado anteriormente veio vazio. Tentativa de clone para execução local falhou por indisponibilidade de DNS no ambiente. Não declarar CI aprovado.
+- Deploy Streamlit, validação mobile, produção MP4, inferência Gemini/Cloudflare/Fish/Modal e qualidade audiovisual real não foram executados nesta etapa. Custo variável adicional: US$0.
+- Próximo passo: verificar HEAD e releitura dos arquivos; tentar confirmar CI com os recursos GitHub disponíveis. Se não houver evidência, manter CI como desconhecido. Depois, evoluir validação semântica do diretor sem chamadas externas pagas, com testes determinísticos e contratos claros.
