@@ -1633,3 +1633,14 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Commit: `8a59784e163b6e02774d5da97c49ca7cbd6cb6e6`.
 - Impacto de custo: a etapa de render foi ignorada antes do passo que chama `nexus.remote_render_job`; portanto esta execução não iniciou Modal LTX nem geração de mídia.
 - Estado: aguardando CI da correção e depois nova tentativa real. MP4 não validado.
+
+
+## Melhoria de UX — acompanhamento da produção e organização do Criar (17/11/2026)
+- Solicitação: remover parte do espaço vertical abaixo da marca NEXUS, manter o logotipo no mesmo tamanho e aproximar o formulário/controles; mostrar o estado do planejamento e da renderização logo abaixo dos controles de voz e duração, em vez de deixar erros e resultados distantes no fim da tela.
+- CSS do cabeçalho ajustado para reduzir altura/margens sem alterar dimensões da marca SVG e do nome NEXUS.
+- Criado slot de status no fluxo principal, logo após os controles de voz/duração. Quando o storyboard existe, mostra quantidade de cenas e duração e orienta o próximo passo. Durante render, o mesmo slot recebe barra, etapa atual, tempo decorrido e restante estimado; erros também são apresentados nesse espaço.
+- `nexus/github_renderer.py` agora envia ao callback uma fração de progresso, tempo decorrido e restante estimado. Como o workflow agrupa a geração de mídia numa etapa longa e não expõe progresso por frame, a barra entre o início e conclusão é explicitamente uma estimativa temporal (base inicial de 10 min), não telemetria exata da Modal. O estado final só chega a 100% depois que o MP4 é recuperado e as verificações/auditoria do app terminam.
+- Teste de regressão do callback de progresso adicionado em `tests/test_github_renderer.py`.
+- Commits: `bd9bdd5` (telemetria estimada), `91f9227` (layout/status no app), `6cd8712` (correção de sintaxe no cálculo percentual), `1b81542` (teste do callback).
+- CI do commit `1b815421bca7c1b5f75ebdf49f54af98fa71d755`: `unit-tests`, `remotion-typecheck` e `commons-live-smoke` aprovados na execução `44062631463`. A execução de render de integração `44062631615` está em andamento; não declarar a melhoria completamente validada até ela terminar.
+- Deploy Streamlit e validação visual em dispositivo móvel ainda pendentes.
