@@ -71,6 +71,21 @@ class FakeGitHubSession:
         raise AssertionError(f"Unexpected GitHub API URL: {url}")
 
 
+class DelayedGitHubSession(FakeGitHubSession):
+    """Simulate the dispatch-to-run visibility delay returned by GitHub Actions."""
+    def __init__(self, encryption_secret):
+        super().__init__(encryption_secret)
+        self.run_list_requests = 0
+
+    def get(self, url, **kwargs):
+        if url.endswith("/actions/runs"):
+            self.run_list_requests += 1
+            if self.run_list_requests == 1:
+                self.calls.append(("GET", url, kwargs))
+                return Response(payload={"workflow_runs": []})
+        return super().get(url, **kwargs)
+
+
 class GitHubRendererTests(unittest.TestCase):
     def test_dispatches_encrypted_manifest_and_recovers_encrypted_mp4(self):
         secret = "cloudflare-api-token"
@@ -106,6 +121,25 @@ class GitHubRendererTests(unittest.TestCase):
             "topic": "Tema de teste",
             "style": "Cinematográfico",
         })
+
+
+    def test_waiting_for_run_does_not_read_uninitialized_status(self):
+        secret = "cloudflare-api-token"
+        session = DelayedGitHubSession(secret)
+        progress_events = []
+        result = render_on_github(
+            {"scenes": [{"voiceover": "sensitive narration", "duration_seconds": 40}]},
+            "voice-test",
+            "github-token",
+            encryption_secret=secret,
+            session=session,
+            poll_interval=0,
+            progress_callback=lambda *event: progress_events.append(event),
+        )
+        self.assertEqual(session.run_list_requests, 2)
+        self.assertTrue(progress_events)
+        self.assertIn("Aguardando o GitHub iniciar", progress_events[0][0])
+        self.assertEqual(result["video"], b"private-mp4")
 
     def test_large_storyboard_is_compressed_before_dispatch(self):
         secret = "cloudflare-api-token"
