@@ -135,15 +135,28 @@ def apply_optional_brain4(
         }
         return with_fallback_captions(unchanged, "Word-level alignment unavailable; used provider-aligned captions when possible.")
 
-    result = run_brain4_for_storyboard(
-        plan,
-        narration_audio={
-            "audio_asset_id": str(audio_path),
-            "duration_seconds": float(duration_seconds),
-        },
-        word_timestamps=word_timestamps,
-        model_call=model_call,
-    )
+    try:
+        result = run_brain4_for_storyboard(
+            plan,
+            narration_audio={
+                "audio_asset_id": str(audio_path),
+                "duration_seconds": float(duration_seconds),
+            },
+            word_timestamps=word_timestamps,
+            model_call=model_call,
+        )
+    except Exception:
+        # Optional editorial assistance must not block an otherwise valid render.
+        # Preserve word-synced captions and report that Brain 4 fell back.
+        unchanged = dict(plan)
+        unchanged["editorial_pipeline"] = {
+            "status": "disabled",
+            "reason": "Brain 4 could not validate its timeline; provider-aligned captions were retained.",
+        }
+        return with_fallback_captions(
+            unchanged,
+            "Brain 4 não conseguiu validar a edição; as legendas sincronizadas foram mantidas pelo alinhamento da Fish Audio.",
+        )
     timeline = dict(result.get("edit_timeline") or {})
     brain4_captions = timeline.get("caption_events") or []
     if captions_cover_word_alignment(brain4_captions, word_timestamps):
