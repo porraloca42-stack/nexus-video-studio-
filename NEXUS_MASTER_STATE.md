@@ -2524,3 +2524,11 @@ Este protocolo prevalece sobre instruções antigas ou checkpoints históricos q
 - A consulta é local, com timeout de 2s, sem rede e sem secrets. Não aciona Gemini, Fish Audio, Cloudflare, Modal/GPU ou render.
 - Testes adicionados para SHA do checkout, fallback de variável, rejeição de valores inválidos e ausência do executável Git. CI ainda pendente nesta branch.
 - Estado: código implementado na branch; ainda não integrado à main, não implantado no Streamlit e não validado visualmente no app publicado.
+
+
+### Resultado da integração — identificador de build — 17/11/2026
+- PR #6 integrada por squash em `aeda3d42e42c5285a1e625aef16dcbe7d1241639`: https://github.com/porraloca42-stack/nexus-video-studio-/pull/6 .
+- CI da PR #6, run `44150058257`: `unit-tests` success, `remotion-typecheck` success, `commons-live-smoke` success; `remotion-synthetic-render` skipped conforme configuração. Os quatro testes novos passaram e o job de compilação da aplicação passou.
+- Main conferida após merge: `app.py` importa o helper e Perfil exibe o SHA/origem/link ou aviso explícito de não identificado; `nexus/build_info.py` e `tests/test_build_info.py` presentes.
+- Estado: implementado, integrado e CI da PR aprovado. Deploy/sync do Streamlit e leitura do SHA no app publicado ainda não foram confirmados. Não houve chamada paga, GPU, render ou produção.
+- Próxima ação: após sincronização do Streamlit, abrir Perfil e conferir o commit. Se aparecer “não identificado”, usar os logs/ambiente do runtime para descobrir se o checkout não contém `.git` nem variável de SHA; não usar HEAD remoto como aproximação.
