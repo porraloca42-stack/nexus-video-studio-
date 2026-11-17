@@ -2074,3 +2074,10 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Contrato Brain 4 aceita `confidence` ausente, valida o campo apenas quando o provedor o fornece e rejeita itens multi-palavra em `word_timestamps`. Prompt do editor proíbe inventar confidence e não permite transformar frases em palavras.
 - CI #1002, run `44116215338`, commit `e755143c177def67ce98922fd1036ec736b53066`: 198 testes Python passaram; Remotion typecheck e Commons live smoke passaram; render sintético foi ignorado por não ser alteração de render.
 - Próximo passo: construir e testar com mocks o executor do Brain 4 no worker, consumindo a evidência Fish e produzindo `edit_timeline`. A execução real do Brain 4 adicionará uma chamada Gemini por render; manter desligada até autorização explícita de custo. Ainda não ligar captions/SFX/ducking ao vídeo real sem essa etapa e validação.
+
+
+## Runner editorial entrega timestamps verificados ao Brain 4 — 17/11/2026
+- `run_four_brain_pipeline()` aceita agora `word_timestamps` opcionais, normaliza/valida a granularidade e entrega os tempos ao executor injetado do Brain 4 junto de `narration_audio`, `micro_script` e `visual_direction`.
+- Teste de regressão confirma que o Brain 4 recebe os timestamps Fish promovidos com evidência. A ponte permanece pura e sem chamadas de rede.
+- CI #1007, run `44116479483`, commit `696528f48e939ce1ae077c3cd5358da96e617c43`: unit-tests e Remotion typecheck passaram; Commons live smoke estava em execução na última consulta; render sintético foi ignorado por não ser alteração do renderer.
+- O fluxo de produção ainda não chama `run_four_brain_pipeline()` nem possui executor real do Brain 4. Próximo passo é preparar o executor e integração opcional com mocks; ativar uma chamada Gemini adicional por vídeo requer autorização explícita de custo. Manter a integração desativada até lá.
