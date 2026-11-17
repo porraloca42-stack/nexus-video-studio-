@@ -10,7 +10,8 @@ def make_scene(index):
         "purpose": f"Beat {index}",
         "voiceover": f"Trecho narrado da cena {index}.",
         "visual_action": f"Uma pessoa realiza uma ação concreta diferente na cena {index}.",
-        "image_prompt": f"Cinematic vertical shot of a person performing action {index}, no text.",
+        "image_prompt": f"Opening frame of a person beginning action {index}, hands and relevant props visible, cinematic vertical shot, no text.",
+        "video_motion_prompt": f"A person begins action {index}, then performs a clear physical movement with their hands and body. The action progresses naturally and reaches a visible end state in one continuous shot. The camera remains steady.",
         "visual_style": "Cinematográfico realista",
         "style_search_terms": "cinematic realistic natural light",
         "semantic_reason": ("A imagem mostra diretamente a ação descrita na narração, "
