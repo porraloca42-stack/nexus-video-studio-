@@ -33,12 +33,23 @@ def normalize_review(payload, scenes):
             score = max(0, min(10, int(round(float(score)))))
         except (TypeError, ValueError):
             score = 0
+        def bounded_score(value):
+            try:
+                return max(0, min(10, int(round(float(value)))))
+            except (TypeError, ValueError):
+                return 0
+
         by_number[number] = {
             "scene_number": number,
             "semantic_score": score,
             "matches_narration": bool(item.get("matches_narration", False)),
+            "motion_progression_score": bounded_score(item.get("motion_progression_score")),
+            "action_observed": bool(item.get("action_observed", False)),
+            "continuity_score": bounded_score(item.get("continuity_score")),
+            "temporal_progression": str(item.get("temporal_progression") or "")[:500],
             "visual_quality": str(item.get("visual_quality") or "")[:500],
             "issues": [str(x)[:180] for x in (item.get("issues") or [])[:5]],
+            "critical_issues": [str(x)[:180] for x in (item.get("critical_issues") or [])[:5]],
             "recommendation": str(item.get("recommendation") or "")[:500],
         }
     result = []
@@ -70,8 +81,15 @@ def review_scene_frames(frame_paths, scenes, api_key, model=None, timeout=180, s
         + ("Use a sequência para observar movimento real, progressão da ação e repetição; não confunda zoom digital "
            "ou mudanças pequenas de enquadramento com ação significativa. " if temporal else
            "Não infira movimento a partir de um quadro estático. ")
-        + "Se as imagens não permitirem concluir algo, registre a limitação. Retorne somente JSON com a chave reviews; "
-        "cada item deve conter scene_number, semantic_score de 0 a 10, matches_narration booleano, visual_quality, "
+        + "Se as imagens não permitirem concluir algo, registre a limitação; nunca invente movimento que os quadros não mostram. "
+        "Avalie separadamente semantic_score (0–10, aderência à fala), matches_narration (booleano), motion_progression_score "
+        "(0–10, mudança física real entre início/meio/fim), action_observed (booleano, ação principal realmente executada), "
+        "continuity_score (0–10, identidade, cenário, luz e estilo), temporal_progression (descreva o que efetivamente muda). "
+        "Separe issues comuns de critical_issues: falhas graves como identidade trocada, ação ausente, congelamento evidente, "
+        "deformação ou contradição com a fala. Não dê nota alta só por beleza estética. Se o gesto não for observável, reduza "
+        "motion_progression_score. Retorne somente JSON com a chave reviews; "
+        "cada item deve conter scene_number, semantic_score, matches_narration, motion_progression_score, action_observed, "
+        "continuity_score, temporal_progression, visual_quality, issues, critical_issues e recommendation. "
         "issues como lista e recommendation. Inclua uma avaliação por cena na ordem recebida.\nCENAS:\n"
         + json.dumps([
             {"scene_number": i + 1, "voiceover": scene.get("voiceover", ""),
