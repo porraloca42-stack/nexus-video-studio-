@@ -1,6 +1,6 @@
 # NEXUS VIDEO STUDIO — BOOTSTRAP PARA NOVOS CHATS
 
-Última revisão: 2026-11-17T17:01:49-03:00 (America/Sao_Paulo)
+Última revisão: 2026-11-17T17:03:58-03:00 (America/Sao_Paulo)
 Repositório: https://github.com/porraloca42-stack/nexus-video-studio-
 Branch oficial: main
 
@@ -44,14 +44,15 @@ Consultar o bloco operacional completo no início de NEXUS_MASTER_STATE.md. Em r
 - Smoke live de uma cena Cloudflare → Modal/LTX → Remotion: passou tecnicamente em 17/11 às 15:58:59 BRT; movimento quase estático e GPU não identificada (gpu_name=null).
 - Produção completa de 40–50s com Fish Audio + Brain 4 + render: ainda não validada.
 - PR #9 continua aberta, não mergeada e não implantada; CI #1135 passou nos jobs aplicáveis, render sintético skipped.
-- PR #10 continua aberta, não mergeada e não implantada. CI #1143 / run 44164137648 concluiu com unit-tests, remotion-typecheck e commons-live-smoke em success; remotion-synthetic-render skipped. Não confundir CI verde com validação de deploy, GPU, billing ou MP4.
+- PR #10 continua aberta, não mergeada e não implantada. A revisão detectou que a comparação antiga poderia confundir A10 e A100; foi substituída por padrões com limites de token e testes para A10G/A100.
+- CI #1154 falhou em commit intermediário por NameError (`markers`); correção gravada no head `eb7269bfa339dc13ff0704e6b5fa91c2fb8fbba7`. CI #1155 / run 44165173593 está em andamento: Remotion typecheck success; unit-tests e Commons live smoke pendentes; render sintético skipped. Não declarar CI verde até concluir.
 - PR #10 propõe validar identidade CUDA antes de carregar pesos e remover a estimativa de custo falsa do smoke. As alterações permanecem apenas na branch da PR até eventual merge.
 - Modal: painel do usuário mostrou gasto acumulado de US$1.50, majoritariamente H100; código versionado declara L40S; deployment ativo permanece não identificado. Deploy e nova inferência pagos bloqueados sem autorização.
 - Build indicator Streamlit integrado pela PR #6; confirmar SHA no app publicado.
 
 ## Próxima sequência autorizada sem custo
-1. Revisar o diff completo da PR #10 contra o código atual e corrigir apenas defeitos demonstráveis.
-2. Manter PRs abertas até solicitação explícita de merge.
+1. Aguardar CI #1155 e inspecionar logs de eventual falha.
+2. Revisar o diff final da PR #10 após CI verde; manter PRs abertas até solicitação explícita de merge.
 3. Atualizar Master State e handoff com timestamp preciso após cada marco.
 4. Não executar deploy, Modal/GPU ou APIs pagas sem autorização específica e limite de custo.
 
