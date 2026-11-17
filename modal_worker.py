@@ -185,7 +185,7 @@ class Inference:
         for index, item in enumerate(scenes, start=1):
             if estimated_gpu_cost() >= GPU_COST_BUDGET_USD:
                 raise RuntimeError(
-                    f"LTX interrompido para proteger o orçamento de 0.50 USD. "
+                    f"LTX interrompido para proteger o orçamento de {GPU_COST_BUDGET_USD:.2f} USD. "
                     + f"{index - 1} cenas concluídas; GPU estimada em "
                     + f"{estimated_gpu_cost():.3f} USD."
                 )
