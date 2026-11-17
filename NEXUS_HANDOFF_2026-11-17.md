@@ -540,3 +540,13 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - CI #1085 (`44129937870`), #1086 (`44129946819`) e #1087 (`44129956495`) dos commits de atualização documental concluíram com sucesso.
 - Tentativa de abrir a raiz e `/_stcore/health` via navegador falhou; DNS também não resolveu no ambiente de execução. Isso não permite concluir que o Streamlit esteja indisponível; somente que a verificação externa não foi possível.
 - Botão está no código da main, mas deploy e visibilidade na instância publicada ainda não foram comprovados. Não executar Gemini sem clique explícito; não iniciar produção ou custos externos.
+
+
+## CHECKPOINT DE CONTINUIDADE — PROTOCOLO OBRIGATÓRIO — 17/11/2026, 14:06:50 (America/Sao_Paulo)
+
+- O usuário determinou que todo chat novo deve informar quando os dados foram atualizados e consultados, declarar o ponto exato de continuação e pedir confirmação antes de prosseguir.
+- Protocolo completo registrado no fim de `NEXUS_MASTER_STATE.md`. Aplicar também as regras resumidas em `NEXUS_NEW_CHAT_BOOTSTRAP.md`.
+- Regra de abertura: ler os três documentos diretamente da `main`, verificar HEAD/commits/Actions, montar relatório de retomada com timestamps distintos (consulta atual vs último checkpoint) e parar aguardando confirmação explícita.
+- Regra durante o trabalho: checkpoint timestampado após cada etapa significativa; manter master, handoff e bootstrap sincronizados; registrar evidências e estados separados; não declarar concluído sem validação.
+- Estado desta atualização: protocolo em documentação; ainda depende da confirmação de CI dos commits documentais. Não altera código de produção, não dispara APIs pagas, deploy ou render.
+- Próxima ação: verificar os três commits e respectivos checks no GitHub Actions; então informar ao usuário os SHAs e o resultado real. O chat seguinte deve executar o relatório de retomada e aguardar confirmação antes de qualquer alteração.
