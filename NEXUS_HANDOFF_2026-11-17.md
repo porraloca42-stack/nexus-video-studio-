@@ -330,3 +330,12 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - Não foram gerados áudio/visuais, nem chamados Gemini/Fish/Cloudflare, nem iniciada GPU, download de modelo, deploy ou render de produção. Custo variável adicional US$0.
 - Próximo passo: preparar um manifesto sintético com áudio e SFX de teste localizados, executar render local de validação e inspecionar sincronismo quadro a quadro. Isso não exige serviços pagos, mas só deve ser executado em ambiente local/CI com dependências Remotion disponíveis; não declarar a camada audiovisual validada até inspecionar o MP4.
 
+
+
+## Suavização do ducking de música — 17/11/2026
+- Eventos de mixagem agora aceitam fade_in_seconds e fade_out_seconds (padrão 0.12s), limitados a 2s e sem exceder a duração do evento.
+- Remotion interpola o volume da música entre o nível base e o volume reduzido, aplicando envelopes de entrada/saída para evitar mudanças bruscas nos limites dos eventos. Eventos simultâneos continuam usando o menor volume calculado.
+- Manifesto Python transmite os fades em camelCase; prompt do Brain 4 inclui os campos; testes verificam valores e rejeição de fades maiores que o evento.
+- CI #953, run 44100380076, commit 2a27062459e877d849197f1e5944e5f28fb7bea1: 191 testes Python passaram e Remotion typecheck passou; Commons live smoke estava em andamento na última consulta.
+- Ainda sem render real do Remotion; sincronismo audiovisual em MP4 permanece não validado. Sem APIs pagas, downloads de modelos, GPU, deploy ou render de produção; custo variável adicional US$0.
+
