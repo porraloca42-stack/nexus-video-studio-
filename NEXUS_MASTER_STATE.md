@@ -1823,3 +1823,10 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Implementado sem GPU: `nexus/comfyui_client.py`, cliente HTTP mockável para upload, submissão, histórico, espera, detecção de erro e download. Testes mockados adicionados em `tests/test_comfyui_client.py`.
 - Ainda não implementado: workflow API exportado/patcher, worker Modal ComfyUI, custom nodes/versões pinadas, feature flag, integração ao render principal ou benchmark. Nenhuma inferência, download de pesos ou deploy.
 - CI/testes ainda não confirmados; custo variável adicional US$0. Próximo passo: confirmar CI e construir contrato do workflow API exportado com testes de nós/inputs, sem iniciar ComfyUI ou baixar modelos.
+
+
+### Complemento — patch seguro de workflow API (17/11/2026)
+- `nexus/comfyui_client.py` agora inclui `patch_api_workflow(workflow, bindings)`: cria cópia profunda do grafo e altera somente inputs explicitamente mapeados. Rejeita nós/inputs inexistentes, bindings incompletos e inputs que já estejam conectados por links, evitando quebrar silenciosamente a topologia.
+- Testes adicionais verificam isolamento do grafo original, alteração de widgets, rejeição de links e referências desconhecidas.
+- Commits: `273c047` (patcher), `9cb0830` (testes).
+- O arquivo `.github/workflows/tests.yml` foi inspecionado: a job de regressão compila `nexus` e executa `python -m unittest discover -s tests -v`, portanto o novo arquivo de teste entra na descoberta padrão. Isso confirma a configuração do workflow, não o resultado de uma execução.
