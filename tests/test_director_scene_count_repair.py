@@ -42,7 +42,7 @@ def make_plan(count):
 class SceneCountRepairTests(unittest.TestCase):
     def test_automatically_repairs_undersegmented_50_second_storyboard(self):
         short_plan = make_plan(8)
-        repaired_plan = make_plan(10)
+        repaired_plan = make_plan(12)
 
         def secret_reader(name, default=None):
             return "test-key" if name == "GEMINI_API_KEY" else "auto"
@@ -54,10 +54,12 @@ class SceneCountRepairTests(unittest.TestCase):
                 "Uma manhã tranquila na cidade", "Cinematográfico realista", 50, secret_reader
             )
 
-        self.assertEqual(len(result["scenes"]), 10)
-        self.assertEqual(sum(scene["duration_seconds"] for scene in result["scenes"]), 50)
+        self.assertEqual(len(result["scenes"]), 12)
+        self.assertEqual(result["requested_duration_seconds"], 50)
+        self.assertEqual(result["maximum_duration_seconds"], 60)
+        self.assertAlmostEqual(sum(scene["duration_seconds"] for scene in result["scenes"]), result["estimated_duration_seconds"], places=2)
         self.assertEqual(request.call_count, 2)
-        self.assertIn("NO MÍNIMO ABSOLUTO 10 CENAS", request.call_args.args[0])
+        self.assertIn("NO MÍNIMO ABSOLUTO 12 CENAS", request.call_args.args[0])
 
     def test_40_seconds_rejects_seven_and_repairs_to_ten(self):
         short_plan = make_plan(7)
@@ -74,7 +76,8 @@ class SceneCountRepairTests(unittest.TestCase):
                     )
 
         self.assertEqual(len(result["scenes"]), 10)
-        self.assertEqual(sum(scene["duration_seconds"] for scene in result["scenes"]), 40)
+        self.assertEqual(result["maximum_duration_seconds"], 50)
+        self.assertAlmostEqual(sum(scene["duration_seconds"] for scene in result["scenes"]), result["estimated_duration_seconds"], places=2)
         self.assertEqual(request.call_count, 2)
         self.assertIn("NO MÍNIMO ABSOLUTO 10 CENAS", request.call_args.args[0])
 
@@ -95,7 +98,7 @@ class SceneCountRepairTests(unittest.TestCase):
                 "Uma manhã tranquila na cidade", "Cinematográfico realista", 50, secret_reader
             )
 
-        self.assertEqual(len(result["scenes"]), 10)
+        self.assertEqual(len(result["scenes"]), 12)
         self.assertEqual(request.call_count, 1)
 
 
