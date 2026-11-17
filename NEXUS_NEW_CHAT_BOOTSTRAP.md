@@ -222,3 +222,12 @@ Este bootstrap reduz perda de continuidade, mas não garante que a plataforma ca
 - CI #1075–#1077 estava pendente na última consulta. Confirme cada execução no GitHub Actions e leia logs se falhar.
 - Nenhuma chamada Gemini real foi feita e deploy Streamlit não foi verificado. Não afirmar que a função está disponível na instância publicada até confirmar deploy.
 - Após CI verde, aguardar o usuário executar o botão no Streamlit; não acionar API Gemini por conta própria. Um render completo exigirá autorização de custos/execução separada.
+
+
+
+## Direção de produto e checkpoint mais recente — 17/11/2026
+- A ambição do projeto é competir com Revid AI e outros faceless apps de ponta em qualidade ponta a ponta; consulte a seção “Benchmark de produto faceless e direção de qualidade” no master state.
+- Revid oficial anuncia roteiros/links para vídeos, escolha de mídia por cena, voz, captions, música, timeline editor, export até 4K, social publishing, automação e API/MCP/CLI; claims do fornecedor devem ser verificados e não equivalem a benchmark independente.
+- CI #1081 / run `44122780273`, commit `223f97a071befdfb18a0be5cf3393f9c59749753`: sucesso, 212 testes Python, typecheck e Commons smoke; synthetic render skipped.
+- O botão “Testar Brain 4 — sem produzir vídeo” está implementado e passou CI. Não foi executado contra Gemini real; deploy Streamlit não confirmado. O próximo chat deve verificar deploy e aguardar clique explícito do usuário antes de qualquer chamada Gemini.
+- Nenhum vídeo de produção, inferência GPU ou custo de serviços externos foi iniciado nesta etapa.
