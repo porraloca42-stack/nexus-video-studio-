@@ -5,6 +5,7 @@ The caller must supply an API-format workflow and an already running server.
 """
 from __future__ import annotations
 
+import copy
 import time
 from typing import Any
 
@@ -13,6 +14,48 @@ import requests
 
 class ComfyUIError(RuntimeError):
     """Raised when ComfyUI rejects, fails, or cannot finish a workflow."""
+
+
+def patch_api_workflow(
+    workflow: dict[str, Any],
+    bindings: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    """Return a patched copy of an API-format graph using explicit node/input bindings.
+
+    Each binding maps a semantic field to {"node_id": "...", "input_name": "...", "value": ...}.
+    Linked inputs are rejected so a patch cannot silently break graph topology.
+    """
+    if not isinstance(workflow, dict) or not workflow:
+        raise ComfyUIError("O workflow API base está vazio ou inválido.")
+    if not isinstance(bindings, dict):
+        raise ComfyUIError("O mapa de inputs do workflow é inválido.")
+
+    patched = copy.deepcopy(workflow)
+    for semantic_name, binding in bindings.items():
+        if not isinstance(binding, dict):
+            raise ComfyUIError(f"Binding inválido para {semantic_name}.")
+        node_id = str(binding.get("node_id") or "")
+        input_name = str(binding.get("input_name") or "")
+        if not node_id or not input_name or "value" not in binding:
+            raise ComfyUIError(f"Binding incompleto para {semantic_name}.")
+        node = patched.get(node_id)
+        if not isinstance(node, dict) or not isinstance(node.get("inputs"), dict):
+            raise ComfyUIError(f"Nó {node_id} ausente ou sem inputs no workflow API.")
+        inputs = node["inputs"]
+        if input_name not in inputs:
+            raise ComfyUIError(f"Input {input_name} ausente no nó {node_id}.")
+        current_value = inputs[input_name]
+        if (
+            isinstance(current_value, list)
+            and len(current_value) == 2
+            and isinstance(current_value[1], int)
+            and str(current_value[0]).isdigit()
+        ):
+            raise ComfyUIError(
+                f"Input {node_id}.{input_name} está conectado; não pode ser sobrescrito como widget."
+            )
+        inputs[input_name] = binding["value"]
+    return patched
 
 
 class ComfyUIClient:
