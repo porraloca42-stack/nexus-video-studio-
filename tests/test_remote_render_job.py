@@ -79,7 +79,7 @@ class RemoteNarrationTests(unittest.TestCase):
                 "streams": [{"codec_type": "video", "width": 512, "height": 896}],
             }), stderr="")
             audio_short = Mock(returncode=0, stdout="37.6\n", stderr="")
-            audio_result = Mock(returncode=0, stdout="45.0\n", stderr="")
+            audio_result = Mock(returncode=0, stdout="50.0\n", stderr="")
             final_result = Mock(returncode=0, stdout=json.dumps({
                 "format": {"duration": 50.0, "size": 123456},
                 "streams": [
