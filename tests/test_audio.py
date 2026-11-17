@@ -314,6 +314,36 @@ class AudioOutputTests(unittest.TestCase):
         }
         self.assertTrue(_is_human_narrator_voice(voice, "male"))
 
+    def test_professional_narrator_filter_excludes_public_figures_and_entertainment_personas(self):
+        base = {
+            "description": "Brazilian Portuguese male narration",
+            "tags": ["male", "narration"],
+            "languages": ["pt-BR"],
+        }
+        for title in ("Adolf Hitler", "Papai Noel", "São Cipriano", "Mickey Mouse"):
+            with self.subTest(title=title):
+                self.assertFalse(
+                    _is_human_narrator_voice({**base, "title": title}, "male")
+                )
+
+    def test_professional_voice_catalog_excludes_voices_without_public_samples(self):
+        session = FakeFishSession(payload={
+            "total": 1,
+            "items": [{
+                "_id": "no-sample-pvc", "type": "tts", "state": "trained",
+                "visibility": "public", "title": "Brazilian Male Narrator",
+                "description": "Natural Brazilian Portuguese narration",
+                "languages": ["pt-BR"], "tags": ["male", "narration"],
+                "source": "pvc", "task_count": 100,
+                "samples": [],
+            }],
+        })
+
+        voices = list_fish_professional_narrators("test-key", session=session)
+
+        self.assertEqual(voices["male"], [])
+        self.assertEqual(voices["female"], [])
+
     def test_lists_private_personal_voice_models(self):
         session = FakeFishSession(payload={
             "total": 1,
