@@ -428,3 +428,8 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - CI #1017 / `44118108425`: 202 testes Python, typecheck e Commons smoke passaram; synthetic multitrack skipped.
 - Workflow Remotion demo #119 / `44118084308`: typecheck e adapter tests passaram; render demo manual de 50s skipped; teste sintético de integração de 4s estava em andamento.
 - Ponte mockada e validada; não implantada como executor Gemini nem habilitada no fluxo de produção. Próximo: concluir validação do MP4 sintético; depois desenhar o fornecimento seguro do callable Gemini com feature flag e orçamento explícito, mantendo desabilitado por padrão.
+
+
+## Validação adicional — adapter Python → Remotion — 17/11/2026
+- Workflow #119 / `44118084308` passou. O adapter Python construiu o manifesto e Remotion gerou MP4 sintético 4.011s; FFprobe confirmou H.264 720×1280 + AAC. Artifact #14344496316.
+- Demo manual 50s foi skipped; teste de integração usa still/áudio sintéticos, sem serviços externos. Não equivale a render real nem prova timeline Brain 4.
