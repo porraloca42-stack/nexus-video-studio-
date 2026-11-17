@@ -282,3 +282,9 @@ Timestamp da atualização: 2026-11-17T14:08:19-03:00 (UTC−03:00).
 - Regra permanente: checkpoint após toda unidade de trabalho, sem exceção, com data/hora/fuso, ação, evidência, estado e próxima ação. Inclui etapas pequenas e bloqueios.
 - Master state atualizado no commit `cab669983d7a6897d9e85e79095d96d18bc10349`; handoff atualizado no commit `6e56171a1305083df21a64188e7731f460347885`.
 - Esta atualização sincroniza o bootstrap após o master/handoff. Timestamp: 2026-11-17T14:08:47-03:00 (UTC−03:00).
+
+
+## Ponto operacional vigente — 2026-11-17T14:13:50-03:00 (America/Sao_Paulo)
+- HEAD consultado: `8a4ab1c198caf7cc60c6c1f3648cf4fa3f32a403`; CI #1097–#1100 aprovado (unit-tests, Remotion typecheck, Commons smoke; render sintético skipped).
+- Brain 4 smoke está no código main, mas deploy Streamlit não confirmado; Gemini real não executado e produção não iniciada.
+- Próxima ação: usuário verificar o botão na URL Streamlit registrada; clique realiza uma geração Gemini e pode consumir cota/crédito. Ver checkpoint completo no fim de `NEXUS_MASTER_STATE.md` e do handoff.
