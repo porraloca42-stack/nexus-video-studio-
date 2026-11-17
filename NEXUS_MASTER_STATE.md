@@ -2041,3 +2041,12 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Corrigido somente o isolamento do fixture em `549bb44e51e2375cf0f08b826749565bfc104c96`: narração passou a 1100Hz, música permanece em 220Hz, SFX passou a 3000Hz e sua banda de medição foi ajustada para 2800–3200Hz. A implementação do ducking em `NexusVideo.tsx` não foi alterada.
 - O commit contém `[run-remotion-validation]` para executar novamente o teste sintético. Aguardar métricas de áudio e artifact; não declarar mixagem validada antes de a redução, recuperação da música e presença do SFX passarem.
 - Sem APIs pagas, GPU, deploy ou render de produção. Runner hospedado pode consumir minutos da franquia GitHub.
+
+
+## Validação sintética multifaixa aprovada — 17/11/2026
+- Run #977 do GitHub Actions, ID `44114553978`, commit `549bb44e51e2375cf0f08b826749565bfc104c96`: `unit-tests`, `remotion-typecheck`, `commons-live-smoke` e `remotion-synthetic-render` concluíram com sucesso.
+- O script `scripts/validate_remotion_render.py` passou integralmente após separar as frequências de fixture. Métricas registradas: música antes `-36.1dB`, durante ducking `-50.6dB` (redução de 14.5dB), depois `-36.1dB` (recuperação); SFX antes `-45.7dB`, durante `-30.0dB` (presença de 15.7dB); pixels de destaque das palavras: `word_one=2249`, `word_two=1773`, legenda desligada `0`.
+- Artifact `nexus-remotion-synthetic-validation`, ID `14342476549`, baixado e inspecionado. MP4 contém H.264 720x1280 (9:16), 30fps, AAC estéreo 48kHz; duração reportada pelo ffprobe `4.011s` para composição nominal de 4s. Frame de legenda/destaque inspecionado visualmente.
+- Resultado: suporte sintético multifaixa (legendas com destaque por palavra, SFX agendado e ducking com fade/recuperação) está implementado, testado no CI e validado no MP4 sintético. A correção foi no isolamento das frequências do fixture; a lógica de ducking em `remotion/src/NexusVideo.tsx` não foi alterada nesta rodada.
+- Limite da validação: não comprova qualidade perceptual com voz/música reais, alinhamento fonético, cenas de produção, render de 40–50s, integração com o app Streamlit, implantação ou estabilidade de worker de produção. `nexus/remotion_renderer.py` continua documentado como adapter isolado, não usado por padrão pelo app.
+- Sem API paga, GPU, download de modelo, deploy ou render de produção. O CI usou runner hospedado e artifact com retenção de 7 dias.
