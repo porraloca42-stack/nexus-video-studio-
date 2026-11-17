@@ -188,3 +188,9 @@ Este bootstrap reduz perda de continuidade, mas não garante que a plataforma ca
 - Artifact #14343349831 inspecionado: H.264/AAC, 720×1280, 4.011s. Frames confirmam destaque palavra por palavra (NEXUS → valida) e remoção da legenda fora do intervalo.
 - Métricas: ducking música 14.5 dB e recuperação; SFX +15.7 dB. Limite: fixture gráfico sintético, não conteúdo real.
 - Próxima etapa pendente: integração Gemini real em Brain 4 com feature flag default-off e orçamento autorizado; nenhuma chamada paga foi feita.
+
+
+## Implementação em validação — Gemini real opt-in Brain 4 — 17/11/2026
+- Helper Gemini Brain 4 dedicado, uma geração por vídeo (um modelo, sem retry/failover); retorno JSON timeline, não storyboard.
+- Checkbox no app desmarcado por padrão; flag e modelo seguem criptografados ao worker. Worker recusa flag ativa sem GEMINI_API_KEY antes da geração de imagens.
+- Testes adicionados; CI #1061 / `44120993502` em execução. Não houve chamada Gemini real nem render de produção. Conferir CI antes de prosseguir.
