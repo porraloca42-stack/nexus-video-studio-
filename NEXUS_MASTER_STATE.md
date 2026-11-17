@@ -1386,3 +1386,13 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Versão visual identificadora: `NEXUS-2026.11.16-brand-header-1`.
 - Escopo: somente cabeçalho/CSS e identificação visual; não altera o pipeline de roteiro, narração, geração, animação ou montagem.
 - Estado: commit gravado em `main`; confirmação por leitura posterior do arquivo é necessária. Deploy e validação visual em celular ainda pendentes.
+
+
+## Biblioteca de estilos visuais e direção de arte — 16/11/2026
+- Curadoria aprovada para o catálogo: 18 estilos (7 novos propostos pelo usuário, 8 preservados e 3 complementares): Quântico & Cósmico; Sonho Lúcido; Dark Psychology; Épico Espiritual; Aura Neon; Hermetismo Clássico; Visual ASMR / Hipnótico; Cinematográfico; Dark Cinematográfico; Ilustração Editorial; Filme Noir; Aquarela Artística; Fantasia Cinematográfica; Graphic Novel; Minimalista Clean; Realismo Humano Emocional; Reconstituição Histórica; Natureza Contemplativa.
+- Nova biblioteca interna `nexus/visual_styles.py`: cada estilo recebe identidade/intenção, paleta, iluminação, fotografia/composição, texturas/atmosfera, termos para busca, restrições e metadados mínimos de interface. As descrições técnicas são exclusivamente para o diretor; a UI mostra apenas nome, pequena referência visual e descrição curta.
+- `nexus/director.py` incorpora a direção detalhada ao prompt do Gemini e fixa o perfil no storyboard; a busca recebe termos específicos por estilo. O estilo é critério de identidade artística, nunca substitui a correspondência semântica da cena com a narração.
+- `app.py` consome o catálogo centralizado, remove as seis opções antigas não aprovadas, atualiza o contador para 18 e usa Cinematográfico como padrão. A galeria permanece compacta e não expõe os prompts internos.
+- Decisão de produto: na interface redesenhada, haverá uma aba independente “Estilos” para explorar referências e exemplos. A tela “Criar” continuará enxuta, com seleção em carrossel. A aba de consulta ainda não foi implementada neste conjunto de commits.
+- Commits: `ec80c66` (catálogo na UI), `3e5217c` (perfis internos), `74e5be9` (integração com Gemini), `031ab44` (testes), `54f1f77` (correção de separadores de linha).
+- Validação pendente: executar CI/testes Python, confirmar deploy Streamlit e gerar cenas reais com estilos distintos. A existência dos perfis e a revisão estática do código não comprovam ainda a qualidade visual da geração.
