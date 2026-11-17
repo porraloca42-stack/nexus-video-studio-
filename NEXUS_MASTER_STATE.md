@@ -1417,3 +1417,10 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Commits desta revisão: `d12ac01` (perfis sem motivos fixos), `2e184d3` (diretor anti-template), `56b7d1e` (abas Criar/Estilos), `5429e4a` (testes anti-template), `06356a7` (contrato 2.0), `0ebd0de` (perfil no image_prompt), `4649652` (teste de integração), `cbf7f56` (quebras de parágrafo no prompt), `372eb3f` (remoção de motivos concretos também das restrições negativas), `2131a3f` (teste contra vazamento de motivos específicos).
 - Revisão estática confirmou que a aba Estilos existe, as 18 opções são carregadas do catálogo centralizado, os prompts completos permanecem internos e o worker de imagens recebe o perfil. GitHub Actions run `43988702350` (commit `2131a3f`) está em execução no momento do registro; não marcar testes como aprovados até conclusão.
 - Deploy Streamlit e validação visual da nova navegação, além de storyboard e MP4 reais com estilos diferentes, permanecem pendentes.
+
+
+## Idempotência e último ciclo de regressão — 17/11/2026
+- `apply_visual_style_lock()` também evita duplicar os modificadores formais em `style_search_terms` quando o storyboard é reprocessado; o teste agora verifica idempotência tanto da direção anexada ao `image_prompt` quanto dos termos de busca.
+- Limpeza das instruções negativas: removidas referências a objetos/cenas concretos dos campos `avoid` para reduzir ativação involuntária de clichês mesmo quando mencionados como algo a evitar.
+- Commits adicionais: `372eb3f` (restrições sem exemplos de cena), `2131a3f` (teste de não vazamento), `e6be587` (idempotência do lock), `789d294` (teste de idempotência).
+- Workflow atual: GitHub Actions run `43988771498` associado ao commit `789d294`; estado inicial queued. O run anterior `43988702350` havia avançado com typecheck Remotion concluído com sucesso; unit-tests e Commons smoke ainda estavam em andamento no último polling. Aguardar o run mais recente para conclusão dos testes.
