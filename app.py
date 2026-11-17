@@ -988,82 +988,82 @@ elif active_view == "Perfil":
     st.markdown('<div class="nexus-kicker">CONFIGURAÇÃO</div>', unsafe_allow_html=True)
     st.subheader("Perfil e serviços")
     st.caption("Estado dos serviços. Os valores das chaves nunca são exibidos.")
-        with st.expander("Configurações avançadas de produção", expanded=False):
-            st.markdown('<div class="nexus-kicker">PRODUÇÃO</div>', unsafe_allow_html=True)
-            render_mode = st.selectbox(
-                "Motor de produção visual",
-                ["Imagens originais · Cloudflare + Modal I2V + Remotion", "Bibliotecas de vídeo (alternativo)"],
-                index=0,
-                key="nexus_render_mode",
-                help="Fluxo principal: Cloudflare gera o keyframe de cada cena, Modal/LTX-Video anima cada keyframe em um clipe MP4 e Remotion monta o vídeo final. Requer MODAL_TOKEN_ID e MODAL_TOKEN_SECRET nos GitHub Actions Secrets e o worker Modal implantado. Bibliotecas de vídeo permanecem como alternativa.",
-            )
-            with st.expander("Ferramentas avançadas · diagnóstico das bibliotecas de vídeo"):
-                st.caption("Testa busca, licença, download e leitura do vídeo no Wikimedia Commons, Pixabay e Pexels. As chaves nunca são exibidas.")
-                if st.button("Testar todas as bibliotecas configuradas", type="secondary"):
-                    providers = [
-                        ("Wikimedia Commons", "", {"wikimedia_enabled": True}),
-                        ("Pixabay", secret("PIXABAY_API_KEY"), {"pixabay_key": secret("PIXABAY_API_KEY")}),
-                        ("Pexels", secret("PEXELS_API_KEY"), {"pexels_key": secret("PEXELS_API_KEY")}),
-                    ]
-                    tested = 0
-                    with tempfile.TemporaryDirectory(prefix="nexus_library_diagnostics_") as temp_dir:
-                        for provider_name, api_key, source_args in providers:
-                            if not api_key and provider_name != "Wikimedia Commons":
-                                st.warning(f"{provider_name}: chave não configurada nos Secrets.")
-                                continue
-                            tested += 1
-                            try:
-                                with st.spinner(f"Testando {provider_name}: autenticação, busca e download..."):
-                                    results, source_errors = _search_stock_compatible(
-                                        "nature landscape",
-                                        per_page=5,
-                                        relevance_query="nature landscape",
-                                        min_relevance=0,
-                                        **source_args,
-                                    )
-                                    if not results:
-                                        detail = "; ".join(source_errors) if source_errors else "A API não retornou clipes relevantes e utilizáveis."
-                                        st.error(f"{provider_name}: busca sem resultados — {detail}")
-                                        continue
-                                    chosen = next((item for item in results if item.get("vertical")), results[0])
-                                    clip_path = download_file(
-                                        chosen["url"],
-                                        Path(temp_dir) / (provider_name.lower() + "_test.mp4"),
-                                    )
-                                    probe = subprocess.run(
-                                        [
-                                            "ffprobe", "-v", "error",
-                                            "-show_entries", "format=duration,size:stream=codec_name,codec_type,width,height",
-                                            "-of", "json", str(clip_path),
-                                        ],
-                                        capture_output=True, text=True, timeout=60,
-                                    )
-                                    if probe.returncode != 0:
-                                        raise RuntimeError(probe.stderr[-1200:] or "FFprobe não conseguiu ler o arquivo.")
-                                    metadata = json.loads(probe.stdout)
-                                    streams = metadata.get("streams", [])
-                                    video = next((stream for stream in streams if stream.get("codec_type") == "video"), None)
-                                    if not video:
-                                        raise RuntimeError("O arquivo baixado não contém uma faixa de vídeo.")
-                                    duration_seconds = float(metadata.get("format", {}).get("duration") or 0)
-                                    size_bytes = int(metadata.get("format", {}).get("size") or clip_path.stat().st_size)
-                                    if duration_seconds <= 0 or size_bytes <= 0:
-                                        raise RuntimeError("O MP4 não apresentou duração ou tamanho válidos.")
-                                    st.success(
-                                        f"{provider_name}: busca, {len(results)} candidatos, download e leitura MP4 aprovados."
-                                    )
-                                    st.caption(
-                                        f"{chosen.get('title') or provider_name} · "
-                                        f"{video.get('width')}×{video.get('height')} · "
-                                        f"{duration_seconds:.1f}s · {video.get('codec_name', 'codec desconhecido')}"
-                                    )
-                                    if source_errors:
-                                        st.caption("Avisos de busca: " + " | ".join(source_errors))
-                            except Exception as exc:
-                                st.error(f"{provider_name}: falha no teste — {exc}")
-                    if not tested:
-                        st.info("Nenhuma biblioteca tem chave configurada. Adicione as chaves nos Secrets e tente novamente.")
-    
+    with st.expander("Configurações avançadas de produção", expanded=False):
+        st.markdown('<div class="nexus-kicker">PRODUÇÃO</div>', unsafe_allow_html=True)
+        render_mode = st.selectbox(
+            "Motor de produção visual",
+            ["Imagens originais · Cloudflare + Modal I2V + Remotion", "Bibliotecas de vídeo (alternativo)"],
+            index=0,
+            key="nexus_render_mode",
+            help="Fluxo principal: Cloudflare gera o keyframe de cada cena, Modal/LTX-Video anima cada keyframe em um clipe MP4 e Remotion monta o vídeo final. Requer MODAL_TOKEN_ID e MODAL_TOKEN_SECRET nos GitHub Actions Secrets e o worker Modal implantado. Bibliotecas de vídeo permanecem como alternativa.",
+        )
+        with st.expander("Ferramentas avançadas · diagnóstico das bibliotecas de vídeo"):
+            st.caption("Testa busca, licença, download e leitura do vídeo no Wikimedia Commons, Pixabay e Pexels. As chaves nunca são exibidas.")
+            if st.button("Testar todas as bibliotecas configuradas", type="secondary"):
+                providers = [
+                    ("Wikimedia Commons", "", {"wikimedia_enabled": True}),
+                    ("Pixabay", secret("PIXABAY_API_KEY"), {"pixabay_key": secret("PIXABAY_API_KEY")}),
+                    ("Pexels", secret("PEXELS_API_KEY"), {"pexels_key": secret("PEXELS_API_KEY")}),
+                ]
+                tested = 0
+                with tempfile.TemporaryDirectory(prefix="nexus_library_diagnostics_") as temp_dir:
+                    for provider_name, api_key, source_args in providers:
+                        if not api_key and provider_name != "Wikimedia Commons":
+                            st.warning(f"{provider_name}: chave não configurada nos Secrets.")
+                            continue
+                        tested += 1
+                        try:
+                            with st.spinner(f"Testando {provider_name}: autenticação, busca e download..."):
+                                results, source_errors = _search_stock_compatible(
+                                    "nature landscape",
+                                    per_page=5,
+                                    relevance_query="nature landscape",
+                                    min_relevance=0,
+                                    **source_args,
+                                )
+                                if not results:
+                                    detail = "; ".join(source_errors) if source_errors else "A API não retornou clipes relevantes e utilizáveis."
+                                    st.error(f"{provider_name}: busca sem resultados — {detail}")
+                                    continue
+                                chosen = next((item for item in results if item.get("vertical")), results[0])
+                                clip_path = download_file(
+                                    chosen["url"],
+                                    Path(temp_dir) / (provider_name.lower() + "_test.mp4"),
+                                )
+                                probe = subprocess.run(
+                                    [
+                                        "ffprobe", "-v", "error",
+                                        "-show_entries", "format=duration,size:stream=codec_name,codec_type,width,height",
+                                        "-of", "json", str(clip_path),
+                                    ],
+                                    capture_output=True, text=True, timeout=60,
+                                )
+                                if probe.returncode != 0:
+                                    raise RuntimeError(probe.stderr[-1200:] or "FFprobe não conseguiu ler o arquivo.")
+                                metadata = json.loads(probe.stdout)
+                                streams = metadata.get("streams", [])
+                                video = next((stream for stream in streams if stream.get("codec_type") == "video"), None)
+                                if not video:
+                                    raise RuntimeError("O arquivo baixado não contém uma faixa de vídeo.")
+                                duration_seconds = float(metadata.get("format", {}).get("duration") or 0)
+                                size_bytes = int(metadata.get("format", {}).get("size") or clip_path.stat().st_size)
+                                if duration_seconds <= 0 or size_bytes <= 0:
+                                    raise RuntimeError("O MP4 não apresentou duração ou tamanho válidos.")
+                                st.success(
+                                    f"{provider_name}: busca, {len(results)} candidatos, download e leitura MP4 aprovados."
+                                )
+                                st.caption(
+                                    f"{chosen.get('title') or provider_name} · "
+                                    f"{video.get('width')}×{video.get('height')} · "
+                                    f"{duration_seconds:.1f}s · {video.get('codec_name', 'codec desconhecido')}"
+                                )
+                                if source_errors:
+                                    st.caption("Avisos de busca: " + " | ".join(source_errors))
+                        except Exception as exc:
+                            st.error(f"{provider_name}: falha no teste — {exc}")
+                if not tested:
+                    st.info("Nenhuma biblioteca tem chave configurada. Adicione as chaves nos Secrets e tente novamente.")
+
 
     for label, key in [("Direção Gemini", "GEMINI_API_KEY"), ("Narração Fish Audio", "FISH_API_KEY"), ("Render remoto GitHub", "GITHUB_ACTIONS_TOKEN"), ("Geração visual Cloudflare", "CLOUDFLARE_API_TOKEN")]:
         if secret(key):
