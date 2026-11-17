@@ -40,17 +40,20 @@ class ModalI2VTests(unittest.TestCase):
         })
         self.assertEqual(prompt, "A woman slowly opens a book as sunlight moves across the pages.")
 
-    def test_motion_prompt_fallback_uses_scene_action_and_camera(self):
+    def test_missing_motion_prompt_is_rejected_instead_of_reusing_static_image_prompt(self):
+        with self.assertRaisesRegex(ModalVideoError, "prompt da imagem estática"):
+            build_motion_prompt({
+                "image_prompt": "Cinematic portrait of a person at a desk.",
+                "visual_action": "A pessoa abre o caderno.",
+            })
+
+    def test_motion_prompt_uses_only_the_dedicated_video_direction(self):
         prompt = build_motion_prompt({
-            "image_prompt": "Cinematic portrait of a person at a desk.",
-            "visual_action": "A pessoa abre o caderno.",
-            "camera_motion": "push_in",
-            "motion_events": ["the hand turns a page"],
+            "image_prompt": "Static image description that must not be reused.",
+            "video_motion_prompt": "A woman reaches for the book, opens it with both hands, and turns one page in a continuous shot.",
         })
-        self.assertIn("Cinematic portrait", prompt)
-        self.assertIn("A pessoa abre o caderno", prompt)
-        self.assertIn("push in", prompt)
-        self.assertIn("the hand turns a page", prompt)
+        self.assertIn("reaches for the book", prompt)
+        self.assertNotIn("Static image description", prompt)
 
     def test_batch_calls_modal_once_and_saves_every_clip(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -64,6 +67,7 @@ class ModalI2VTests(unittest.TestCase):
                 scenes.append({
                     "duration_seconds": 3,
                     "image_prompt": "A cinematic scene.",
+                    "video_motion_prompt": "A person walks naturally from left to right, taking two visible steps while their jacket moves slightly in the breeze; one continuous shot.",
                     "visual_action": "A person walks naturally.",
                 })
             results = [
