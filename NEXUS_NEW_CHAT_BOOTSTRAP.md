@@ -1,6 +1,6 @@
 # NEXUS VIDEO STUDIO — BOOTSTRAP PARA NOVOS CHATS
 
-Última revisão: 2026-11-17T18:14:17-03:00 (America/Sao_Paulo)
+Última revisão: 2026-11-17T18:16:51-03:00 (America/Sao_Paulo)
 Repositório: https://github.com/porraloca42-stack/nexus-video-studio-
 Branch oficial: main
 
@@ -60,9 +60,9 @@ Consultar o bloco operacional completo no início de NEXUS_MASTER_STATE.md. Em r
 ## Atualização operacional — 2026-11-17T18:11:28-03:00 (America/Sao_Paulo)
 - HEAD da main na retomada: `198cc21e7a2a39aff49db20fdfd9938ab7731521`.
 - PR #11 revisada e branch sincronizada com a main pelo merge commit `8ad700537fae41199f1b506a5fc68b74173ed5d9`. CI #1182 / `44177472367`: unit-tests, Commons smoke e Remotion typecheck success; synthetic render skipped.
-- PR #11 continua aberta e não mergeada. Após novos commits documentais na main, comparação: 4 commits à frente, 3 atrás; GitHub reporta mergeable=false. Antes de futura integração, sincronizar branch e repetir CI. Não executar deploy ou inferência GPU sem autorização específica; o smoke é manual e separado.
+- PR #11 continua aberta e não mergeada. Branch sincronizada no head `a2b5d2c3a668cf36db0ee891854d3bb457ad8534`; CI #1190 / `44177875187` passou nos três jobs executados, synthetic render skipped. Compare após sync: 5 commits à frente, 0 atrás; GitHub reportou mergeable=true. Não executar deploy ou inferência GPU sem autorização específica; o smoke é manual e separado.
 - PR #10 permanece aberta e não mergeada, head `ef102d4116da01e67c829efc0af7832b8510fd5c`, CI #1174 aprovado nos jobs executados.
-- Última ação concluída: revisão estática e CI #1182 aprovado no head sincronizado da PR #11; depois disso a main avançou com três commits documentais, exigindo nova sincronização antes de merge. Próxima ação: aguardar autorização explícita para merge da PR #11; depois, tratar deploy e inferência como decisões separadas.
+- Última ação concluída: revisão estática, sincronização final e CI #1190 aprovado na PR #11. A PR permanece aberta; aguardar autorização explícita para merge. Próxima ação: aguardar autorização explícita para merge da PR #11; depois, tratar deploy e inferência como decisões separadas.
 - Nenhuma operação paga ou implantação foi iniciada nesta retomada.
 
 ## Fonte de verdade
