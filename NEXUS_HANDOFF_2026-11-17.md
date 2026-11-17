@@ -533,3 +533,10 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - `app.py` foi relido nas linhas 580–630: botão isolado está no modo Cloudflare + Modal I2V + Remotion, exige clique e `GEMINI_API_KEY`, faz uma geração no fixture sintético e não dispara serviços de mídia ou render.
 - Deploy Streamlit segue sem confirmação; não foi possível identificar URL pública inequívoca a partir do repositório. Não presumir sincronização com a main.
 - Próxima ação: usuário fornecer/confirmar a URL da aplicação Streamlit; verificar a instância e localizar o botão. Aguardar clique explícito do usuário para a chamada Gemini real. Sem produção, GPU ou custos de serviços externos nesta etapa.
+
+
+## Continuidade — CIs documentais verdes; acesso ao Streamlit inconclusivo — 17/11/2026
+- URL já registrada no master state: https://htykbebk3hceoen5bvopax.streamlit.app/ . Não pedir ao usuário para repeti-la.
+- CI #1085 (`44129937870`), #1086 (`44129946819`) e #1087 (`44129956495`) dos commits de atualização documental concluíram com sucesso.
+- Tentativa de abrir a raiz e `/_stcore/health` via navegador falhou; DNS também não resolveu no ambiente de execução. Isso não permite concluir que o Streamlit esteja indisponível; somente que a verificação externa não foi possível.
+- Botão está no código da main, mas deploy e visibilidade na instância publicada ainda não foram comprovados. Não executar Gemini sem clique explícito; não iniciar produção ou custos externos.
