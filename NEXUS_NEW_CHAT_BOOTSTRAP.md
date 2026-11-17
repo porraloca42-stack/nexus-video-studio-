@@ -113,3 +113,10 @@ Este bootstrap reduz perda de continuidade, mas não garante que a plataforma ca
 - Remotion está no fluxo padrão indireto via app.py → GitHub worker → `nexus.remote_render_job` → `render_video_remotion`; não está isolado do worker.
 - Os quatro cérebros ainda não estão conectados ao app: app.py não importa o runner/prompts editoriais e director.py não cria `edit_timeline`. Sem timeline, captions word-highlight, SFX e ducking/fades não chegam comprovadamente ao MP4 de produção.
 - Próxima etapa: preparar integração offline/testável dos contratos editoriais com o plano atual, sem executar chamadas externas ou custos. Preservar o caminho de produção e fallback até haver validação controlada.
+
+
+## Último marco — alinhamento Fish Audio — 17/11/2026
+- Fish Audio SSE agora preserva snapshots por chunk e offsets absolutos, com retorno opcional e compatibilidade retroativa. Worker inclui segmentos no relatório criptografado.
+- CI #991: 193 testes Python passaram; typecheck e Commons smoke passaram. Render sintético não foi acionado nesta alteração.
+- Segmentos são mantidos como `provider_segments`; não inventar confidence nem declarar palavra/fonema sem validação. Brain 4 ainda não está conectado a esses segmentos.
+- Próximo: ajustar contrato Brain 4 para a evidência real do provedor e testar com executores simulados. Não executar chamada Gemini adicional sem autorização de custo.
