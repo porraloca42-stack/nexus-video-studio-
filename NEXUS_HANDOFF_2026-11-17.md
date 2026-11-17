@@ -303,3 +303,16 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
   - Modelo pt-BR candidato: https://huggingface.co/ProgramadorArtificial/wav2vec2-large-xlsr-53-portuguese
 - Sem downloads de modelos, instalação de WhisperX, chamadas externas de API, GPU, deploy ou render real nesta pesquisa.
 
+
+
+## Expansão dos contratos, prompts e runner dos quatro cérebros — 17/11/2026
+- nexus/editorial_pipeline.py agora diferencia alinhamento word, character e phoneme. Para níveis finos, exige arrays de timestamps correspondentes; âncoras não podem declarar precisão superior à evidência disponível. Âncoras word precisam corresponder a palavra e intervalo do alinhador. A descoberta do WhisperX motivou essa distinção: saída de palavra/caractere não deve ser chamada de saída fonêmica.
+- O módulo também oferece micro_script_advisories (2,5–3,5s como orientação não bloqueante) e run_four_brain_pipeline com quatro executores injetados. O runner aplica validação após cada cérebro, encerra a cadeia no primeiro artefato inválido e exige o asset/duração reais da narração antes do cérebro 4. Não descobre credenciais nem chama serviços.
+- Criado nexus/editorial_prompts.py com builders independentes para os quatro prompts: estratégia de retenção; micro-roteiro; direção visual/metáforas e roteamento; timeline/alinhamento e edição. Os builders são puros e não fazem chamadas Gemini.
+- Testes atualizados para alinhamento word/character/phoneme, âncoras e runner. CI #928, run 44099325976, commit c204031df1e55fe12c0e4a2c9d85d230eaebcef4: **184 testes Python passaram**; Remotion typecheck passou; Commons live smoke passou. Execução concluída com sucesso.
+- Commits adicionais: 9abaec0 (granularidade de alinhamento), da301c3/d8caace (prompts com granularidade), 9801d4c/c204031 (testes de caracteres e prompts).
+- Estado: contratos, prompts, runner e testes estão no GitHub e validados em CI. Ainda não conectados ao create_storyboard, aos executores Gemini/Fish nem ao Remotion; não há vídeo real nem comparação de retenção.
+- Auditoria Remotion: ainda só há narração e música fixa em volume 0.12; sem captions, SFX ou ducking dinâmico. Próxima etapa de composição: adicionar eventos tipados para captions/SFX/mix e fazer Remotion consumi-los com fixtures sintéticas e testes de render local.
+- Nenhuma chamada Gemini/Fish/Cloudflare, download de modelo, inferência Modal/GPU, deploy ou render de produção executado. Custo variável adicional US$0.
+- Limite de autorização: a permissão de pesquisa cobre investigação pública aprofundada; não autoriza compras, assinaturas, API paga, inferência, download de pesos ou deploy com custo sem aprovação de orçamento específica.
+
