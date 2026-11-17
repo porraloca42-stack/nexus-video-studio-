@@ -857,3 +857,14 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - CI anterior #1143 / #1144 passou para a versão anterior da PR, mas não substitui o reteste do head atual.
 - PR #10 segue aberta, não mergeada e não implantada. Nenhum deploy, inferência Modal/GPU, API paga ou render de produção foi executado.
 - Próxima ação: acompanhar #1155, inspecionar logs se necessário, então revisar o diff final. Não fazer merge sem pedido explícito.
+
+
+## CHECKPOINT — CI FINAL VERDE APÓS CORREÇÃO A10/A100 — 2026-11-17T17:04:33-03:00 (America/Sao_Paulo)
+- Consulta GitHub: 2026-11-17T17:04:33-03:00. HEAD de main antes deste checkpoint: 0342f3b042b81dcdf0e18c0b5010ce58e3033bc7.
+- PR #10 head: `eb7269bfa339dc13ff0704e6b5fa91c2fb8fbba7`. Continua aberta, não mergeada e não implantada.
+- CI #1155 / run `44165173593` concluído com `unit-tests: success`, `remotion-typecheck: success`, `commons-live-smoke: success`; `remotion-synthetic-render: skipped`. Todos os três jobs executados passaram no head atual da PR.
+- A falha anterior do run #1154 foi de commit intermediário, com NameError já corrigido antes do head testado em #1155. O histórico da falha foi preservado neste handoff.
+- A proteção agora diferencia L40S, H100 e A10/A10G com limites de token; o teste garante que A100 não seja aceito como A10.
+- CI não valida implantação Modal, GPU ativa, faturamento, movimento perceptível nem MP4 final. Nenhum deploy, inferência GPU, API paga ou render de produção foi executado.
+- Documentação sincronizada em main: Master State commit `7513676c4a24edae81d84f5045969cdbf0601289`; Bootstrap commit `7878ad39b99a8db282c56147241feafd5909a674`; este checkpoint será o commit seguinte.
+- Próxima ação: revisão final do diff da PR #10 e recomendação técnica. Não fazer merge sem solicitação explícita do usuário.
