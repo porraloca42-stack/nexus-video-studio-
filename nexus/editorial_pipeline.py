@@ -201,6 +201,41 @@ def validate_visual_direction(data: Any) -> list[str]:
     return errors
 
 
+def provider_segments_to_word_timestamps(segments: Any) -> list[dict]:
+    """Promote provider segments to word timestamps only when each is one token.
+
+    Fish alignment snapshots may describe either words or phrases. Phrase-level
+    segments must never be relabeled as word-level timing.
+    """
+    if not isinstance(segments, list):
+        raise ValueError("provider alignment: expected a list of segments")
+    normalized = []
+    previous_end = 0.0
+    for index, segment in enumerate(segments):
+        if not _is_object(segment):
+            raise ValueError(f"provider alignment[{index}]: expected an object")
+        text = segment.get("text")
+        start = segment.get("start_seconds")
+        end = segment.get("end_seconds")
+        if not _is_nonempty_string(text):
+            raise ValueError(f"provider alignment[{index}].text: expected non-empty text")
+        if len(text.split()) != 1 or not any(char.isalnum() for char in text):
+            raise ValueError(
+                f"provider alignment[{index}]: phrase or punctuation segment cannot be promoted to word timing"
+            )
+        if not _is_number(start) or not _is_number(end):
+            raise ValueError(f"provider alignment[{index}]: timestamps must be numeric")
+        if start < 0 or end <= start or start < previous_end - 0.02:
+            raise ValueError(f"provider alignment[{index}]: invalid or unordered interval")
+        normalized.append({
+            "text": text,
+            "start_seconds": float(start),
+            "end_seconds": float(end),
+        })
+        previous_end = end
+    return normalized
+
+
 def validate_edit_timeline(data: Any) -> list[str]:
     """Validate Brain 4: measured audio alignment and time-ordered edit events."""
     errors: list[str] = []
