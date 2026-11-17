@@ -37,15 +37,20 @@ class VisualReviewTests(unittest.TestCase):
             def json(self):
                 return {"candidates": [{"content": {"parts": [{"text":
                     '{"reviews":[{"scene_number":1,"semantic_score":9,"matches_narration":true,'
-                    '"visual_quality":"Boa","issues":[],"recommendation":"Manter"}]}'
+                    '"motion_progression_score":8,"action_observed":true,"continuity_score":9,'
+                    '"temporal_progression":"A mão alcança a maçaneta, gira e abre a janela.",'
+                    '"visual_quality":"Boa","issues":[],"critical_issues":[],"recommendation":"Manter"}]}'
                 }]}}]}
         session = Mock()
         session.post.return_value = Response()
         with tempfile.TemporaryDirectory() as folder:
-            frame = Path(folder) / "frame.jpg"
-            frame.write_bytes(b"jpeg bytes")
+            frames = []
+            for index in range(3):
+                frame = Path(folder) / f"frame_{index}.jpg"
+                frame.write_bytes(f"jpeg bytes {index}".encode("ascii"))
+                frames.append(frame)
             result = review_scene_frames(
-                [frame], [{"voiceover": "A pessoa abre a janela.", "visual_action": "Abrir janela"}],
+                frames, [{"voiceover": "A pessoa abre a janela.", "visual_action": "Abrir janela"}],
                 "api-key", model="gemini-test", session=session
             )
         self.assertEqual(result[0]["semantic_score"], 9)
