@@ -75,7 +75,7 @@ class RemoteNarrationTests(unittest.TestCase):
                 "format": {"duration": 5.04},
                 "streams": [{"codec_type": "video", "width": 512, "height": 896}],
             }), stderr="")
-            audio_result = Mock(returncode=0, stdout="50.0\n", stderr="")
+            audio_result = Mock(returncode=0, stdout="45.0\n", stderr="")
             final_result = Mock(returncode=0, stdout=json.dumps({
                 "format": {"duration": 50.0, "size": 123456},
                 "streams": [
@@ -93,7 +93,7 @@ class RemoteNarrationTests(unittest.TestCase):
                  patch("nexus.remote_render_job.generate_worker_narration", return_value=(audio, "Fish Audio")) as gen_voice, \
                  patch("nexus.remote_render_job.render_video_remotion", side_effect=fake_render) as render, \
                  patch("nexus.remote_render_job.subprocess.run", side_effect=(
-                     [image_result] * 10 + [clip_result] * 10 + [audio_result, final_result]
+                     [audio_result] + [image_result] * 10 + [clip_result] * 10 + [final_result]
                  )):
                 from nexus.remote_render_job import main
                 main(project_root=root)
