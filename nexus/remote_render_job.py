@@ -5,6 +5,7 @@ import subprocess
 from pathlib import Path
 
 from nexus.audio import make_voice
+from nexus.director import revise_narration_for_duration, _fit_scene_durations
 from nexus.cloudflare_images import generate_scene_images
 from nexus.modal_i2v import animate_scene_images
 from nexus.remotion_renderer import render_video_remotion
@@ -23,8 +24,7 @@ def generate_worker_narration(text, voice, output_path, fish_api_key="", fish_vo
     )
 
 
-def _fit_narration_to_timeline(audio_path: Path, target: float) -> float:
-    """Gently time-stretch narration audio to the Remotion timeline; no captions are produced."""
+def _measure_audio_duration(audio_path: Path) -> float:
     probe = subprocess.run(
         ["ffprobe", "-v", "error", "-show_entries", "format=duration",
          "-of", "default=noprint_wrappers=1:nokey=1", str(audio_path)],
@@ -32,7 +32,18 @@ def _fit_narration_to_timeline(audio_path: Path, target: float) -> float:
     )
     if probe.returncode:
         raise RuntimeError("Não foi possível medir a duração da narração no worker.")
-    actual = float(probe.stdout.strip())
+    try:
+        actual = float(probe.stdout.strip())
+    except (TypeError, ValueError):
+        raise RuntimeError("A Fish Audio retornou uma duração de narração inválida.") from None
+    if actual <= 0:
+        raise RuntimeError("A narração gerada está vazia ou tem duração inválida.")
+    return actual
+
+
+def _fit_narration_to_timeline(audio_path: Path, target: float, actual_duration=None) -> float:
+    """Gently time-stretch narration audio to the Remotion timeline; no captions are produced."""
+    actual = float(actual_duration) if actual_duration is not None else _measure_audio_duration(audio_path)
     if target <= 0 or actual <= 0:
         raise RuntimeError("Duração inválida para sincronização da narração.")
     ratio = actual / target
@@ -81,6 +92,75 @@ def main(project_root=None):
     root = Path(project_root or Path(__file__).resolve().parents[1])
     work = root / "worker_output" / job_id
     work.mkdir(parents=True, exist_ok=True)
+
+    # Calibrate the selected Fish voice before expensive image generation and I2V.
+    # A short narration must never waste a full visual-generation run before failing.
+    narration = " ".join(str(scene.get("voiceover", "")).strip() for scene in scenes).strip()
+    if not narration:
+        raise RuntimeError("Narração vazia.")
+    expected_duration = sum(
+        float(scene.get("duration_seconds") or scene.get("duration") or 0)
+        for scene in scenes
+    )
+    if expected_duration <= 0:
+        raise RuntimeError("O storyboard não possui duração total válida.")
+    audio_path, narration_provider = generate_worker_narration(
+        narration,
+        voice,
+        work / "narration.mp3",
+        fish_api_key=fish_credentials.get("api_key", ""),
+        fish_voice_id=fish_credentials.get("voice_id", ""),
+    )
+    audio_path = Path(audio_path)
+    actual_audio_duration = _measure_audio_duration(audio_path)
+    ratio = actual_audio_duration / expected_duration
+
+    # If the real voice rate differs materially from the estimate, ask Gemini
+    # to revise only the spoken lines while preserving scene order and visuals.
+    for calibration_attempt in range(2):
+        if 0.90 <= ratio <= 1.10:
+            break
+        gemini_api_key = fish_credentials.get("gemini_api_key", "")
+        if not gemini_api_key:
+            raise RuntimeError(
+                f"A narração ficou com {actual_audio_duration:.1f}s para {expected_duration:.1f}s. "
+                "A calibração automática exige GEMINI_API_KEY; nenhuma imagem foi gerada."
+            )
+        print(
+            f"Calibrando narração com a duração real da voz "
+            f"({actual_audio_duration:.1f}s / {expected_duration:.1f}s), "
+            f"tentativa {calibration_attempt + 1}/2."
+        )
+        style = str(fish_credentials.get("style") or plan.get("style_lock") or "")
+        topic = str(fish_credentials.get("topic") or plan.get("topic") or "")
+        plan = revise_narration_for_duration(
+            plan, expected_duration, actual_audio_duration, topic, style,
+            lambda name: gemini_api_key if name == "GEMINI_API_KEY" else "",
+        )
+        scenes = plan.get("scenes") or []
+        _fit_scene_durations(scenes, expected_duration)
+        narration = " ".join(str(scene.get("voiceover", "")).strip() for scene in scenes).strip()
+        audio_path.unlink(missing_ok=True)
+        audio_path, narration_provider = generate_worker_narration(
+            narration,
+            voice,
+            work / "narration.mp3",
+            fish_api_key=fish_credentials.get("api_key", ""),
+            fish_voice_id=fish_credentials.get("voice_id", ""),
+        )
+        audio_path = Path(audio_path)
+        actual_audio_duration = _measure_audio_duration(audio_path)
+        ratio = actual_audio_duration / expected_duration
+
+    if not 0.85 <= ratio <= 1.15:
+        raise RuntimeError(
+            f"Após a calibração, a narração ficou com {actual_audio_duration:.1f}s "
+            f"para uma meta de {expected_duration:.1f}s. "
+            "O trabalho foi interrompido antes da geração das imagens para evitar custo desnecessário."
+        )
+    narration_duration = _fit_narration_to_timeline(
+        audio_path, expected_duration, actual_duration=actual_audio_duration
+    )
 
     generated = generate_scene_images(
         scenes,
@@ -149,22 +229,6 @@ def main(project_root=None):
         animated_media.append({"path": str(clip_path)})
 
     media = animated_media
-    narration = " ".join(str(scene.get("voiceover", "")).strip() for scene in scenes).strip()
-    if not narration:
-        raise RuntimeError("Narração vazia.")
-    audio_path, narration_provider = generate_worker_narration(
-        narration,
-        voice,
-        work / "narration.mp3",
-        fish_api_key=fish_credentials.get("api_key", ""),
-        fish_voice_id=fish_credentials.get("voice_id", ""),
-    )
-    expected_duration = sum(
-        float(scene.get("duration_seconds") or scene.get("duration") or 0)
-        for scene in scenes
-    )
-    narration_duration = _fit_narration_to_timeline(Path(audio_path), expected_duration)
-
     output = work / "nexus_video.mp4"
     render_video_remotion(
         media,
