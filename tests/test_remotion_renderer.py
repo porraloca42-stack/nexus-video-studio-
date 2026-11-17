@@ -76,8 +76,8 @@ class RemotionManifestTests(unittest.TestCase):
             direction = manifest["scenes"][0]["sceneDirection"]
             self.assertEqual(direction["camera"]["move"], "tilt_up")
             self.assertEqual(direction["camera"]["intensity"], 1.0)
-            self.assertEqual(direction["camera"]["startScale"], 1.02)
-            self.assertEqual(direction["camera"]["endScale"], 1.28)
+            self.assertEqual(direction["camera"]["startScale"], 1.0)
+            self.assertEqual(direction["camera"]["endScale"], 1.18)
             self.assertEqual(direction["camera"]["focus"], "subject")
             self.assertEqual(direction["depthLayers"]["parallaxStrength"], 0.0)
             self.assertEqual(direction["lighting"]["change"], "none")
@@ -88,6 +88,21 @@ class RemotionManifestTests(unittest.TestCase):
             self.assertEqual(direction["transition"]["durationFrames"], 12)
             self.assertEqual(len(direction["beats"]), 3)
             self.assertEqual(direction["beats"][0]["at"], 1.0)
+
+    def test_still_scene_without_camera_direction_defaults_to_static_not_fake_zoom(self):
+        from nexus.remotion_renderer import sanitize_scene_direction
+        direction = sanitize_scene_direction({})
+        self.assertEqual(direction["camera"]["move"], "static")
+        self.assertEqual(direction["camera"]["startScale"], 1.0)
+        self.assertEqual(direction["camera"]["endScale"], 1.0)
+        self.assertEqual(direction["camera"]["intensity"], 0.45)
+
+    def test_explicit_push_in_uses_subtle_bounded_motion(self):
+        from nexus.remotion_renderer import sanitize_scene_direction
+        direction = sanitize_scene_direction({"camera": {"move": "push_in"}})
+        self.assertEqual(direction["camera"]["move"], "push_in")
+        self.assertEqual(direction["camera"]["startScale"], 1.0)
+        self.assertEqual(direction["camera"]["endScale"], 1.08)
 
     def test_preserves_wav_extension_for_generated_narration(self):
         with tempfile.TemporaryDirectory() as temp:

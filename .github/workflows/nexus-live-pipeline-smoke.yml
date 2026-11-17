@@ -51,7 +51,7 @@ jobs:
           name: nexus-live-pipeline-validation
           path: |
             nexus-live-pipeline-output/nexus-live-pipeline.mp4
-            nexus-live-pipeline-output/cloudflare-scene.png
+            nexus-live-pipeline-output/cloudflare-scene.*
             nexus-live-pipeline-output/pipeline-report.json
           if-no-files-found: error
           retention-days: 3
