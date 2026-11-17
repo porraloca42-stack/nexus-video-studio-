@@ -2246,3 +2246,36 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - A tentativa anterior de acessar a raiz Streamlit e `/_stcore/health` não foi conclusiva; não prova indisponibilidade do app. Não há evidência suficiente neste ambiente para afirmar qual commit está ativo na instância publicada.
 - Próximo passo permanece: confirmar deployment/commit ativo do Streamlit. Só depois, com UI observável, executar o smoke Gemini mediante clique explícito do usuário. Não iniciar Gemini, worker, Fish Audio, Cloudflare, Modal, GPU ou render de produção automaticamente.
 - Estado separado: código do smoke Brain 4 implementado e aprovado em CI; CIs documentais #1088–#1090 aprovados; deploy não verificado; Gemini real não executado; vídeo de produção não iniciado.
+
+
+## PROTOCOLO OBRIGATÓRIO DE CONTINUIDADE E CHECKPOINT — 17/11/2026, 14:06:50 (America/Sao_Paulo)
+
+Este protocolo prevalece sobre instruções antigas ou checkpoints históricos que entrem em conflito com ele. Registros antigos permanecem como histórico; não devem ser tratados como estado atual.
+
+### A. Abertura de todo chat novo — bloqueio antes de executar
+1. Ler integralmente, diretamente da branch `main`, este arquivo, `NEXUS_HANDOFF_2026-11-17.md` (ou o handoff com data mais recente) e `NEXUS_NEW_CHAT_BOOTSTRAP.md`.
+2. Consultar o HEAD atual, os commits recentes, os arquivos alterados e os workflows/checks do GitHub Actions relacionados aos commits relevantes. Abrir logs quando houver falha ou estado inconclusivo.
+3. Tratar anexos do Project, memórias, resumos de conversa e cópias locais como referências potencialmente desatualizadas. Em conflito, prevalecem a branch `main` e evidências atuais do GitHub. Nunca misturar estados de datas diferentes sem identificar explicitamente a origem de cada um.
+4. Antes de qualquer alteração, apresentar ao usuário um **RELATÓRIO DE RETOMADA** com: (a) data/hora de São Paulo em que o GitHub foi consultado; (b) data/hora do último checkpoint documental disponível; (c) HEAD e commit mais recente relevante; (d) último trabalho concluído; (e) testes/CI e seus resultados; (f) o que está implementado, commitado, testado, implantado e validado separadamente; (g) pendências e bloqueios; (h) ponto exato de continuação, incluindo próxima ação concreta e arquivos/área envolvidos.
+5. Encerrar o relatório perguntando: **“Esse estado e esse ponto de continuação estão corretos? Posso prosseguir?”** Aguardar resposta afirmativa. Até a confirmação, não editar arquivos, criar commits, disparar workflows, executar chamadas externas, fazer deploy ou iniciar render. A leitura e a auditoria necessárias para montar o relatório são permitidas.
+6. Se os documentos divergirem, houver commit posterior não registrado, CI pendente ou falha sem diagnóstico, declarar a divergência e não inventar um ponto de retomada. Resolver a leitura/auditoria antes de pedir confirmação.
+
+### B. Registro obrigatório durante o trabalho
+1. Após cada etapa significativa (alteração de código, correção, teste, CI, integração, deploy, render ou bloqueio), registrar um checkpoint antes de iniciar a próxima etapa independente.
+2. Cada checkpoint deve conter timestamp completo com fuso `America/Sao_Paulo`, objetivo, ação executada, arquivos afetados, commit/URL quando houver, comando ou workflow de teste, resultado observável, evidência, limitações e próxima ação exata.
+3. Não registrar como concluído o que apenas foi tentado. Usar estados explícitos: **proposto**, **implementado localmente**, **commitado**, **CI aprovado/reprovado/pendente**, **implantado/não confirmado**, **renderizado/não renderizado**, **validado/não validado**.
+4. Atualizar os três documentos canônicos de forma coerente: acrescentar ao master state o registro histórico e o estado vigente; atualizar o handoff com o checkpoint mais recente e a próxima ação; atualizar o bootstrap com o procedimento e a referência ao checkpoint vigente. Não apagar evidência histórica nem deixar instruções contraditórias ativas.
+5. Depois de cada conjunto coerente de atualizações, conferir os arquivos novamente na `main`, registrar os SHAs/commit e verificar o CI correspondente. Se uma atualização falhar parcialmente, registrar exatamente quais documentos foram atualizados e quais faltam; não declarar sincronização completa.
+
+### C. Encerramento de sessão
+- Antes de parar, mesmo que o trabalho esteja bloqueado, publicar um checkpoint com data/hora, estado real, evidências, pendências, riscos e a próxima ação em ordem executável.
+- O handoff deve permitir que outro chat continue sem perguntar ao usuário o que já está documentado.
+- O próximo chat deve repetir o relatório de retomada e solicitar confirmação antes de continuar.
+
+### D. Regra de integridade temporal
+- Todos os horários de checkpoint devem usar `America/Sao_Paulo` e incluir o offset/fuso.
+- Distinguir sempre: **“consultado em”** (momento da verificação atual no GitHub) e **“última atualização registrada”** (timestamp do documento/checkpoint). Nunca chamar a data do arquivo de horário da consulta.
+- Se não for possível obter horário confiável, informar isso; não inventar hora.
+
+### Estado de implantação deste protocolo
+- Protocolo documentado nesta atualização. Sua eficácia depende de manter estes três arquivos sincronizados e de o chat novo cumprir a etapa de confirmação. Não existe garantia técnica de memória automática entre conversas; a continuidade confiável é fornecida pelos documentos versionados e pela verificação do GitHub.
