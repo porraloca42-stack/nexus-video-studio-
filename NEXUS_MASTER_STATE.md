@@ -1774,3 +1774,10 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Modal tarifa GPU por segundo (consulta 17/11/2026): L40S US$0.000542/s, A100 80GB US$0.000694/s, H100 US$0.001097/s, além de CPU/memória e tempo de carregamento. Não há base para afirmar que LTX-2.5 custará igual/menos: 22B vs 2B e necessidade de VRAM maior podem aumentar tempo/custo; deve ser benchmarkado com um único clipe e custo efetivo.
 - Plano de migração: preservar LTX 0.9.8 como fallback; prototipar ComfyUI + LTX-2.5 distilled I2V two-stage num worker isolado; testar primeiro numa GPU de 48GB com pesos quantizados oficiais compatíveis, sem presumir que caiba; se necessário testar A100 80GB/H100 apenas após estimativa; medir cold start, carregamento, inferência, qualidade temporal e custo total; comparar em cenas idênticas antes de trocar produção.
 - Orçamento de US$0.50 por vídeo permanece requisito, mas não está demonstrado para LTX-2.5. Não realizar render de benchmark pago sem aprovação do usuário.
+
+## Pré-validação gratuita de variedade do storyboard — 17/11/2026
+- Adicionado `build_storyboard_preflight(plan)` em `nexus/director.py`. O relatório mede proporção de ações e buscas principais únicas, variedade de tipos de plano e ambientes; sinaliza repetições literais e baixa diversidade.
+- O relatório é anexado ao plano como `preflight_report` após a criação do storyboard. É uma verificação determinística de texto/metadados, não uma avaliação semântica visual nem substitui a auditoria multimodal.
+- Não faz chamadas adicionais ao Gemini, não usa GPU e não altera cenas automaticamente. Os avisos são diagnósticos para orientar revisão posterior, sem reprovar storyboards por heurísticas frágeis.
+- Testes adicionados para repetição literal e diversidade de ações/buscas. Commits: `4d81513` (implementação) e `94b7980` (testes).
+- Estado no momento do registro: alterações gravadas na branch main; status de CI ainda não retornado pela integração GitHub. Não houve deploy, inferência GPU, chamada paga ou geração de MP4.
