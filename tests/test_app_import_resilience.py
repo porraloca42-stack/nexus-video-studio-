@@ -4,6 +4,15 @@ from pathlib import Path
 
 
 class AppImportResilienceTests(unittest.TestCase):
+    def test_credit_sensitive_visual_mode_is_visible_and_quality_first_by_default(self):
+        source = Path("app.py").read_text(encoding="utf-8")
+        self.assertIn("render_mode = st.radio(", source)
+        self.assertIn('key="nexus_render_mode"', source)
+        self.assertIn("if mode_uses_modal(render_mode):", source)
+        self.assertIn("Modo de qualidade selecionado", source)
+        self.assertIn("Modo Bibliotecas:", source)
+        self.assertNotIn('st.selectbox(\n            "Motor de produção visual"', source)
+
     def test_optional_narration_calibrator_is_not_imported_at_startup(self):
         tree = ast.parse(Path("app.py").read_text(encoding="utf-8"))
         top_level_imports = [
