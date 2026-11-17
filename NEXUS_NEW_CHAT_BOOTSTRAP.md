@@ -351,3 +351,11 @@ Timestamp da atualização: 2026-11-17T14:08:19-03:00 (UTC−03:00).
 - GitHub retornou PR aberto, ainda não merged e mergeable `false` no instante de criação (estado inicial/checagens pendentes; investigar checks e atualizar metadata antes de qualquer merge).
 - CI/testes ainda pendentes. Nenhuma chamada Gemini real, produção, GPU ou render. Próxima ação: consultar workflow disparado pelo PR #3, jobs e logs; corrigir se necessário e não fazer merge antes de CI verde.
 - Timestamp: `2026-11-17T14:25:45-03:00` (UTC−03:00).
+
+
+## Checkpoint — CI do PR #3 em execução — 2026-11-17T14:26:25-03:00 (America/Sao_Paulo)
+- PR #3 / run `44136877385` (workflow #1108, evento `pull_request`, commit da branch `29d2fb01101570c3bd6caf6121d1700da8a77659`) está `in_progress`.
+- Jobs observados: `unit-tests` em execução após compile application modules concluído; `remotion-typecheck` em execução durante instalação de dependências; `commons-live-smoke` em execução durante instalação de FFmpeg/requests; `remotion-synthetic-render` `skipped` corretamente.
+- Nenhum job foi declarado aprovado/reprovado ainda. Próxima ação: consultar conclusão do run e inspecionar logs de `unit-tests` primeiro; corrigir qualquer falha antes de merge.
+- Nenhuma chamada Gemini real, render de produção, GPU ou serviços de mídia foi acionada.
+- Timestamp: `2026-11-17T14:26:25-03:00` (UTC−03:00). Atualização documental usa `[skip ci]` para não criar workflow concorrente.
