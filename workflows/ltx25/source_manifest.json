@@ -15,12 +15,36 @@
     "top_level_nodes": 20,
     "top_level_links": 34,
     "subgraphs": [
-      {"id": "c28230e9-b195-4ec2-9679-39e1e920f733", "name": "Input Parameters", "nodes": 19},
-      {"id": "792f0fd8-129e-48eb-9904-8d1aa82154d1", "name": "Preprocess", "nodes": 6},
-      {"id": "f9337bd7-ca7a-4a59-99f1-65b664bed7e7", "name": "Sampler - Distilled (8 steps)", "nodes": 7},
-      {"id": "bee43e38-9234-4e41-86ff-63874164f482", "name": "Decode", "nodes": 3},
-      {"id": "cf7c664d-af7e-4a9e-9f19-9f93cfd2476e", "name": "Upscale and re-sampler (3 steps)", "nodes": 9},
-      {"id": "f007aab9-e7ad-4b10-974c-4d7cc55001a9", "name": "Load Models", "nodes": 7}
+      {
+        "id": "c28230e9-b195-4ec2-9679-39e1e920f733",
+        "name": "Input Parameters",
+        "nodes": 19
+      },
+      {
+        "id": "792f0fd8-129e-48eb-9904-8d1aa82154d1",
+        "name": "Preprocess",
+        "nodes": 6
+      },
+      {
+        "id": "f9337bd7-ca7a-4a59-99f1-65b664bed7e7",
+        "name": "Sampler - Distilled (8 steps)",
+        "nodes": 7
+      },
+      {
+        "id": "bee43e38-9234-4e41-86ff-63874164f482",
+        "name": "Decode",
+        "nodes": 3
+      },
+      {
+        "id": "cf7c664d-af7e-4a9e-9f19-9f93cfd2476e",
+        "name": "Upscale and re-sampler (3 steps)",
+        "nodes": 9
+      },
+      {
+        "id": "f007aab9-e7ad-4b10-974c-4d7cc55001a9",
+        "name": "Load Models",
+        "nodes": 7
+      }
     ],
     "defaults": {
       "fps": 24,
@@ -32,7 +56,10 @@
   },
   "nexus_adaptation": {
     "target_aspect_ratio": "9:16",
-    "target_scene_duration_seconds": [2, 5],
+    "target_scene_duration_seconds": [
+      2,
+      5
+    ],
     "narration_provider": "Fish Audio",
     "discard_generated_ltx_audio": true,
     "final_composition": "Remotion",
@@ -44,5 +71,21 @@
     "node_bindings_validated": false,
     "worker_integrated": false,
     "gpu_tested": false
+  },
+  "api_exporter": {
+    "repository": "https://github.com/Comfy-Org/ComfyUI_frontend",
+    "commit": "196dd85cde3314dffdc33b41caa3e5d9be432ffb",
+    "source_path": "src/utils/executionUtil.ts",
+    "dto_source_path": "src/lib/litegraph/src/subgraph/ExecutableNodeDTO.ts",
+    "function": "graphToPrompt",
+    "requirements": [
+      "expand nested subgraphs with ExecutableNodeDTO.getInnerNodes",
+      "resolve links across subgraph boundaries and widget passthrough values",
+      "preserve execution IDs using colon-separated subgraph paths",
+      "skip virtual, NEVER and BYPASS nodes according to frontend semantics",
+      "serialize widget arrays as objects containing __value__"
+    ],
+    "api_prompt_exported": false,
+    "export_runtime_verified": false
   }
 }
