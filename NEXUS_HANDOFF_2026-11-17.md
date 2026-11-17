@@ -802,3 +802,14 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - Main conferida após merge: `app.py` importa o helper e Perfil exibe o SHA/origem/link ou aviso explícito de não identificado; `nexus/build_info.py` e `tests/test_build_info.py` presentes.
 - Estado: implementado, integrado e CI da PR aprovado. Deploy/sync do Streamlit e leitura do SHA no app publicado ainda não foram confirmados. Não houve chamada paga, GPU, render ou produção.
 - Próxima ação: após sincronização do Streamlit, abrir Perfil e conferir o commit. Se aparecer “não identificado”, usar os logs/ambiente do runtime para descobrir se o checkout não contém `.git` nem variável de SHA; não usar HEAD remoto como aproximação.
+
+
+## CHECKPOINT DE CONTINUIDADE — FONTE CORRIGIDA PARA NOVOS CHATS — 2026-11-17T16:52:25-03:00 (America/Sao_Paulo)
+- Consulta GitHub: 2026-11-17T16:52:25-03:00 (America/Sao_Paulo). Branch main antes desta atualização: 53f4769a8fd9827694e144be20ca4d42df695dc2.
+- Problema identificado: o bootstrap anterior continha centenas de linhas de checkpoints antigos e instruía o novo chat a retomar uma validação sintética de 4s do Remotion, apesar de o projeto ter avançado para integração Brain 4, smoke live Cloudflare/Modal/Remotion, PR #6 e investigação H100. Isso explica a recorrência de respostas sobre o dia 16/11.
+- Correção feita: NEXUS_NEW_CHAT_BOOTSTRAP.md foi substituído por instruções curtas e hierarquia explícita de fontes. Ele manda ler primeiro o estado operacional vigente no topo do Master State, depois o último checkpoint deste handoff e só então verificar HEAD/CI. Proíbe expressamente ressuscitar checkpoints históricos superados.
+- Correção feita: NEXUS_MASTER_STATE.md recebeu no topo o bloco “STATUS OPERACIONAL VIGENTE — SOBRESCREVE CHECKPOINTS HISTÓRICOS”, com timestamp, HEAD-base, estados separados, bloqueios e próxima sequência. A data/hora do cabeçalho também foi atualizada.
+- O bloco atual deixa explícito: Brain 4 isolado aprovado em smoke real pelo usuário; Remotion multifaixa validado em MP4 sintético; smoke live de uma cena passou tecnicamente às 15:58:59 BRT, mas o movimento LTX foi mínimo e gpu_name veio null; vídeo completo 40–50s continua não validado; PR #9 permanece aberta; Modal tem discrepância H100/L40S e deployment atual não identificado.
+- Nenhuma API paga, GPU, deploy, render de produção ou merge de PR foi acionado nesta correção documental.
+- Commits desta atualização documental: consultar HEAD de main para a cadeia final dos três commits sequenciais.
+- Próxima ação técnica sem custo: confirmar os novos commits/CI, depois auditar e corrigir scripts/modal_smoke_test.py e a observabilidade/guard de GPU, com testes offline. Não executar deploy ou inferência.
