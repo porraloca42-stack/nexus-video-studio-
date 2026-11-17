@@ -52,7 +52,7 @@ CENAS:
 - Crie `visual_continuity` no nível do vídeo com `visual_arc`, `lead_character` e `character_reference_prompt`. Se o vídeo tiver protagonista recorrente, `character_reference_prompt` deve ser um prompt em inglês para um retrato de referência 1:1, corpo/rosto claramente visíveis, pose neutra, fundo simples, aparência e figurino descritos com precisão, no mesmo estilo visual do vídeo, sem texto. Se não houver protagonista recorrente, use `lead_character: "none"` e `character_reference_prompt: ""`.
 - O `image_prompt` de cada cena deve usar o protagonista descrito em `visual_continuity` quando aplicável, preservando a identidade; altere pose, ação, enquadramento e ambiente conforme a progressão. A diversidade deve vir da fotografia e da evolução da ação, não de pessoas aleatórias sem continuidade.
 - style_search_terms deve conter somente características formais do estilo (meio, fotografia, cor, luz, textura e linguagem visual), nunca impor objetos, pessoas ou cenários. A busca principal e a alternativa continuam sendo específicas ao conteúdo da cena.
-- Toda cena deve ter pelo menos dois microeventos visuais.
+- Toda cena deve ter UMA ação principal com progressão visual clara em pelo menos duas fases observáveis (início → execução → resultado). Pode haver um microevento secundário do ambiente, desde que não concorra com a ação principal. Não empilhe gestos diferentes em uma tomada de 2–5 segundos.
 
 DIREÇÃO CINEMATOGRÁFICA EXECUTÁVEL (scene_direction):
 Para cada cena, entregue também um objeto scene_direction estruturado. Não use instruções vagas como "cinematic movement". Ele deve conter:
