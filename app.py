@@ -739,6 +739,7 @@ if active_view == "Criar":
                             "audio_codec": report.get("audio_codec", ""),
                             "narration_provider": report.get("narration_provider", "não informado pelo worker"),
                             "editorial_pipeline": report.get("editorial_pipeline", {"status": "unknown"}),
+                            "captioning": report.get("captioning", {"status": "unknown"}),
                             "size_mb": len(video_bytes) / (1024 * 1024),
                             "scene_count": len(plan.get("scenes", [])),
                             "motion_clip_count": len(report.get("motion_clips") or []),
@@ -1169,10 +1170,25 @@ if active_view == "Criar":
         if info.get("narration_provider"):
             st.caption("Narração: " + info["narration_provider"])
         editorial_status = (info.get("editorial_pipeline") or {}).get("status")
+        captioning = info.get("captioning") or {}
         if editorial_status == "brain4_validated":
-            st.success("Brain 4 executado: edição sincronizada validada.")
+            if captioning.get("status") == "brain4_word_aligned":
+                st.success("Brain 4 executado: edição e cobertura das legendas sincronizadas validadas.")
+            else:
+                st.info("Brain 4 planejou a edição; as legendas foram completadas pelos timestamps da Fish Audio.")
         elif editorial_status == "disabled":
             st.caption("Brain 4 não foi executado neste vídeo.")
+        if captioning.get("status") == "provider_alignment":
+            st.caption(
+                f"Legendas sincronizadas pela Fish Audio · "
+                f"{captioning.get('event_count', 0)} blocos · "
+                f"alinhamento {captioning.get('alignment_level', 'não informado')}."
+            )
+        elif captioning.get("status") == "unavailable":
+            st.warning(
+                "O MP4 foi renderizado sem legendas sincronizadas: "
+                + str(captioning.get("warning") or "timestamps da narração indisponíveis.")
+            )
         if info.get("motion_clip_count"):
             st.caption(
                 f"Animação LTX: {info['motion_clip_count']} cenas · "

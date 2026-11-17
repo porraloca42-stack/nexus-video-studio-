@@ -1,5 +1,23 @@
 # NEXUS VIDEO STUDIO — CONTEXTO OPERACIONAL
 
+## Atualização operacional — auditoria TikTok e conta Modal — 2026-11-17 20:32 BRT
+
+### Conta Modal conferida somente para leitura
+- Workspace do projeto: plano Starter, com US$30 de créditos de computação por ciclo.
+- Ciclo de cobrança consultado: 1–30/11/2026. Uso observado: US$1,50, integralmente coberto por créditos; cobranças líquidas: US$0.
+- Quebra do uso: H100 US$1,46, CPU US$0,02, memória US$0,01. O app `nexus-video-i2v` aparece como workload principal. As quatro chamadas listadas não comprovam quatro vídeos completos.
+- Painel exibe limite de uso total de US$42,50 e spend limit de US$0. Nenhuma configuração financeira foi alterada; o usuário pediu para manter como está.
+- Ainda não há medida de um vídeo TikTok completo de 40–50s; os valores atuais não permitem extrapolar 22 vídeos/mês.
+
+### Auditoria e melhoria de legendas padrão
+- A auditoria do fluxo Gemini → Fish Audio → Remotion encontrou que legendas sincronizadas dependiam do Brain 4, desligado por padrão. O modo padrão podia concluir MP4 sem legendas, inadequado para TikTok.
+- PR #14 adiciona legendas determinísticas no caminho padrão com intervalos vindos da Fish Audio, sem nova chamada Gemini. Alinhamento por palavra é agrupado em trechos curtos e mantém timestamps fornecidos; alinhamento por frase permanece por frase. O código não inventa sincronização palavra a palavra.
+- Se o Brain 4 retornar legendas ausentes/incompletas ou falhar na validação, o worker mantém as legendas baseadas no alinhamento do provedor e continua o render. O app passa a reportar se as legendas foram sincronizadas e alerta quando não há alinhamento utilizável.
+- CI #1214 no head `0d47a694fe7e7a6149991c2c5da2322c43b9a165`: unit-tests, Remotion typecheck e Commons live smoke passaram; Remotion synthetic render foi skipped. Esta verificação antecede a atualização documental nesta branch.
+- Nenhuma geração Gemini, chamada Fish Audio/Cloudflare/Modal, render de produção, deploy ou mudança de gasto foi executada. PR aberta e validação visual do vídeo completo continua pendente. Não declarar a qualidade TikTok final validada.
+
+
+
 ## Atualização operacional — revisão do plano TikTok e orçamento — 2026-11-17 (atualizada após merge PR #12)
 
 - Meta declarada pelo usuário: 22 vídeos TikTok por mês, com 40–50 segundos, mantendo qualidade de visuais originais, hooks, narração, cenas e edição; economia não deve ser feita sacrificando a qualidade percebida.
