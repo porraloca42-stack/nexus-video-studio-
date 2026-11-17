@@ -415,3 +415,12 @@ Timestamp da atualização: 2026-11-17T14:08:19-03:00 (UTC−03:00).
 - Decisão técnica: não ampliar tentativas/modelos automaticamente (preserva limite aprovado de uma geração e evita consumo/custo extra). Fazer correção pequena apenas no texto do erro para distinguir o smoke limitado de caminhos que realmente tentam vários modelos; adicionar teste unitário que verifica HTTP 503, uma única requisição e mensagem sem alegação falsa de retry/failover.
 - Estado: correção de import na main e CI #1111 aprovados; screenshot confirma erro externo de disponibilidade Gemini nesta tentativa; nenhum vídeo foi produzido. Próximo passo é correção textual/teste, PR e CI; depois, quando o serviço estiver disponível, o usuário poderá repetir o smoke manualmente. Não disparar nova chamada Gemini automaticamente.
 - Timestamp: `2026-11-17T14:53:06-03:00` (UTC−03:00). Atualização documental `[skip ci]`.
+
+
+## Checkpoint — correção de diagnóstico HTTP 503 Brain 4 em branch — 2026-11-17T14:54:18-03:00 (America/Sao_Paulo)
+- Branch `fix/brain4-smoke-503-message` criada a partir da main `e2040c3c22373a5b3adfbd8a1b6e35b05c57d5fa`.
+- Commit de branch `f698a0121599cbcbbdeca7c2422c653c2c096f82`: ajuste de mensagem no ramo 503 de `_request` quando `max_models=1` e `attempts_per_model=1`; agora explica que Brain 4 fez uma única chamada ao modelo indicado e não tentou failover. Caminhos de múltiplas tentativas/modelos mantêm a mensagem existente.
+- Teste novo em `tests/test_director_json_recovery.py`: injeta HTTP 503, verifica uma única requisição e garante que a mensagem não alegue retry/failover.
+- Nenhuma chamada real ao Gemini, nenhuma alteração na política de tentativas/custo, nenhum render ou deploy. Testes ainda pendentes; PR ainda não aberta.
+- Próxima ação: reler diff na branch, abrir PR, executar CI e corrigir qualquer falha antes de merge.
+- Timestamp: `2026-11-17T14:54:18-03:00` (UTC−03:00). Atualização documental `[skip ci]`.
