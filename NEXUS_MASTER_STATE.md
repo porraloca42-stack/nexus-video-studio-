@@ -1605,3 +1605,5 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Testes adicionados/ajustados: round-trip da compressão; storyboard maior que 42 KB aceito e recuperado sem perda; worker usa manifesto comprimido.
 - Commits: `7fb8eff` (crypto comprimida), `bbf1bd1` (dispatch comprimido), `f716616` (worker descomprime), `e9b6c37` (teste crypto), `8968995` (teste de manifesto grande), `6cd43ce` (teste do worker).
 - Estado: implementação enviada à branch `main`; CI do commit mais recente ainda precisa concluir. Não declarar render validado até nova tentativa no app gerar e recuperar MP4 real.
+
+- Validação CI concluída: execução GitHub Actions `43999265137`, commit `82a05b2f4f1b613da989f82d8b2923faff91b0f5`, resultado `success`; jobs `unit-tests`, `remotion-typecheck` e `commons-live-smoke` concluídos com sucesso. Isso valida os testes automatizados e o contrato de transporte comprimido; não equivale a render MP4 real.
