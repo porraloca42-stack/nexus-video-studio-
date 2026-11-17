@@ -2477,3 +2477,14 @@ Este protocolo prevalece sobre instruções antigas ou checkpoints históricos q
 - Estados: correção de import integrada e CI aprovada; correção textual 503 integrada e CI aprovada; deploy Streamlit não confirmado; teste real do Brain 4 ainda não passou devido indisponibilidade 503 do Gemini; vídeo de produção não renderizado/validado. Nenhuma chamada Gemini real iniciada pelo assistente.
 - Próxima ação: esperar o Gemini voltar e o usuário executar manualmente o botão de teste mais uma vez; conferir se recebe validação positiva. Não iniciar produção nem repetir chamadas automaticamente.
 - Timestamp: `2026-11-17T14:57:02-03:00` (UTC−03:00). Atualização documental `[skip ci]`.
+
+
+## Resultado real — Brain 4 smoke test aprovado pelo usuário — 2026-11-17T15:01:40-03:00 (America/Sao_Paulo)
+- Usuário enviou screenshot do Streamlit após repetir `Testar Brain 4 — sem produzir vídeo`.
+- UI confirmou literalmente: `Brain 4 respondeu e a timeline passou pela validação contratual.`
+- Métricas exibidas: `alignment_level=word`; `caption_event_count=2`; `edit_anchor_count=2`; `audio_mix_event_count=1`; fixture sintética de 4.0s; `sfx_event_count=0`; nenhum vídeo produzido.
+- Marco validado: o caminho isolado Brain 4 completou chamada real Gemini e validação do contrato/timeline. Isso confirma a funcionalidade isolada no ambiente Streamlit em execução.
+- Limites da evidência: não valida ainda sincronização com timestamps reais Fish Audio, integração no render final, efeitos sonoros reais, Cloudflare/Modal, Remotion final, MP4 ou qualidade audiovisual end-to-end. A fixture foi sintética e de 4s.
+- Estado atualizado: Brain 4 isolado **implementado, integrado, CI aprovado e smoke live validado**. Produção de vídeo completa ainda não executada nem validada. Deploy Streamlit ainda sem confirmação independente por status do provedor, embora a tela observada pelo usuário demonstre que a interface em execução contém o botão e o resultado de sucesso.
+- Próximo marco: planejar/autorizar uma produção end-to-end controlada, com roteiro e narração reais, antes de acionar serviços externos potencialmente pagos (Fish Audio, Cloudflare, Modal/GPU e render). Não iniciar produção nem custos automaticamente.
+- Timestamp: `2026-11-17T15:01:40-03:00` (UTC−03:00). Atualização documental `[skip ci]`.
