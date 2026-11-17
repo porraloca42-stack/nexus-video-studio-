@@ -1511,3 +1511,13 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Estado: código e dependência gravados em `main`. GitHub Actions run `43992412802` do commit `75870c1` e run `43992420470` do commit de dependência `dbd2738` foram acionados; confirmar os resultados. A validação visual no Streamlit mobile permanece pendente até nova captura do usuário.
 
 - Resultado parcial confirmado: run `43992412802` do commit de aplicação `75870c1` concluiu os três jobs com sucesso; `unit-tests` passou em 99 testes, além de `remotion-typecheck` e `commons-live-smoke`. O run `43992420470` referente ao commit de dependência `dbd2738` ainda tinha o job `commons-live-smoke` em execução no último polling; não registrar o ciclo da dependência como totalmente concluído até encerrar.
+
+## Refinamento final da tela Criar: marca, seletores modais e palco 9:16 — 17/11/2026
+- Novas capturas do usuário mostraram três pontos restantes: marca do cabeçalho desalinhada e sem o símbolo N enviado; controles de voz/duração exibidos como painéis inline grandes e com fluxo de seleção redundante; prévia ainda quadrada em vez de vertical 9:16.
+- Cabeçalho: substituído o ícone geométrico anterior por um traçado vetorial do símbolo N fornecido pelo usuário. A marca N + wordmark NEXUS fica centralizada com colunas laterais equilibradas; o botão de configurações permanece à direita.
+- Narração: removidos os popovers e a lista longa de expansores por categoria. Um botão abre diálogo modal central; dentro dele há um seletor pesquisável único que reúne as 40 vozes com o provedor no rótulo, amostra de áudio quando disponível e uma única ação “Usar esta voz”. IDs e catálogo existente são preservados.
+- Duração: um botão irmão abre diálogo modal compacto com quatro escolhas (40s, 45s, 50s, 60s) em pills e uma única confirmação. O valor escolhido permanece em session_state e continua sendo passado ao diretor/storyboard.
+- Os dois botões ficam em colunas iguais, lado a lado, com altura e estilo uniformes. A tela principal não exibe selects duplicados nem listas abertas.
+- Prévia vazia: CSS atualizado para largura limitada e proporção exata 9:16; o MP4 real continua sendo exibido no mesmo palco quando disponível.
+- Commits de aplicação: `063d837` (primeira versão de modais/layout e testes), `2c61ce0` (ordem segura de declaração dos diálogos após set_page_config), `5fe0df7` (path vetorial do símbolo N conectado ao cabeçalho); teste `1d5cc14` cobre marca centralizada, diálogos e proporção do palco.
+- CI run `43993586380` foi acionado para o commit final `5fe0df7`; resultado ainda pendente no último polling. A validação visual publicada no Streamlit mobile ainda depende de nova captura após deploy. Não declarar aparência validada antes disso.
