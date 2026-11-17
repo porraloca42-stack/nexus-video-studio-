@@ -1994,3 +1994,12 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - CI #953, run 44100380076, commit 2a27062459e877d849197f1e5944e5f28fb7bea1: 191 testes Python passaram e Remotion typecheck passou; Commons live smoke estava em andamento na última consulta.
 - Ainda sem render real do Remotion; sincronismo audiovisual em MP4 permanece não validado. Sem APIs pagas, downloads de modelos, GPU, deploy ou render de produção; custo variável adicional US$0.
 
+## Validação sintética multifaixa — 17/11/2026
+- Criado `scripts/validate_remotion_render.py`: gera WAVs determinísticos de narração, música e SFX; constrói um manifesto com duas palavras temporizadas, um evento SFX e ducking com fades; renderiza MP4 vertical de 4s no Remotion.
+- A inspeção automatizada extrai frames em dois momentos de destaque de palavra e um momento sem legenda; verifica presença visual do destaque. Também usa FFmpeg para medir bandas de frequência e confirmar redução/restauração da música e presença do SFX no intervalo programado.
+- O workflow `.github/workflows/tests.yml` ganhou o job `remotion-synthetic-render`, com Node 22, dependências Remotion, Chrome Headless Shell e FFmpeg; preserva o MP4 como artifact por 7 dias. O job é CPU-only e não usa APIs externas, GPU ou mídia paga.
+- Commits: `43c289de3e5e266138635cc123fae23eaa4c0110` (script) e `52b055939d737c5904ce46649afdd06c06af0ebe` (workflow).
+- Estado após o push: implementação gravada na branch main; execução do novo job e MP4 ainda aguardam resultado verificável. O status combinado consultado não retornou checks; portanto não afirmar que o render foi executado ou passou.
+- A máquina desta sessão não tem checkout local do repositório nem dependências Remotion instaladas; a tentativa de acesso direto ao GitHub pela rede local falhou por indisponibilidade de DNS. A validação foi encaminhada ao GitHub Actions, sem contornar isso com downloads ou serviços pagos.
+- Nenhuma API Gemini/Fish/Cloudflare, inferência Modal/GPU, modelo, deploy ou render de produção foi acionado. Custo variável externo adicional: US$0. O artifact sintético, quando o job concluir, valida apenas o comportamento técnico básico dos eventos, não qualidade de conteúdo nem sincronismo em produção.
+- Próxima etapa: consultar o resultado real do job e inspecionar o MP4/artifact. Se passar, registrar a validação sintética; depois preparar um teste controlado com narração Fish Audio real apenas com autorização explícita para eventual custo.
