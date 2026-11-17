@@ -489,3 +489,9 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - Testes cobrem o helper Gemini (um único POST, JSON timeline), transporte criptografado da flag, default-off e proteção quando a chave falta.
 - UI checkbox desmarcado por padrão; worker só ativa Brain 4 quando a opção criptografada está true. Ainda não houve chamada Gemini real nem render de produção.
 - Próximo: rodar regressão sintética Remotion após mudanças e fazer uma validação controlada com usuário selecionando Brain 4, sem iniciar job real até confirmar orçamento/uso da chave.
+
+
+## Regressão sintética pós Brain 4 — 17/11/2026
+- CI #1067 passou: 209 testes, compileall, typecheck, Commons smoke e Remotion synthetic MP4. Artifact #14345002405; 4.011s H.264/AAC, word highlight, captions, ducking e SFX aprovados.
+- UI mostra status Brain 4 no detalhe do vídeo. Commit `72f4721f77d02ad22f5203c8f54c5a243e062797`; conferir CI subsequente.
+- Ainda sem chamada Gemini real ou render de produção.
