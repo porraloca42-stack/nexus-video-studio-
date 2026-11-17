@@ -2106,3 +2106,10 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Testes cobrem deriva temporal, tentativa de declarar fonemas não fornecidos e palavra de legenda com intervalo inventado.
 - CI #1022, run `44118368309`, commit `c7d25424a2ab10f6bb50ea711f1ba068be6ba0ca`: 203 testes Python passaram; Remotion typecheck e Commons smoke passaram; render sintético multifaixa foi skipped (sem alteração no renderer).
 - Integração Brain 4 continua opt-in e mockada; nenhum executor Gemini real foi conectado.
+
+
+## Teste de integração Brain 4 → Remotion manifest — 17/11/2026
+- Adicionado em `tests/test_remotion_renderer.py` um teste que executa `run_brain4_for_storyboard()` com executor simulado, entrega a timeline validada diretamente a `build_remotion_manifest()` e confirma o transporte de caption word timing, SFX, volume de música e fades para o manifest Remotion.
+- O teste é offline: não chama Gemini, Fish Audio, Cloudflare ou Modal. Ele verifica a ligação entre o contrato de Brain 4 e a estrutura consumida pelo renderer, não a qualidade perceptual do MP4.
+- CI #1030, run `44118607705`, commit `7e64dd543674f8b0e0001ba0002de32f22aa59bd`: em execução na última consulta; aguardar unit-tests/typecheck/Commons smoke antes de declarar aprovado.
+- Workflow Remotion demo #120, run `44118607421`: em execução; deverá repetir o render sintético de integração Python→Remotion. O render manual de 50s permanece skipped em eventos push.
