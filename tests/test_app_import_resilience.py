@@ -28,6 +28,9 @@ class AppImportResilienceTests(unittest.TestCase):
         self.assertIn('key="nexus-open-duration-picker"', source)
         self.assertNotIn('with st.popover(f"◷', source)
         self.assertIn("aspect-ratio:9/16", source)
+        self.assertIn("grid-template-columns:minmax(0,1fr) minmax(0,1fr)", source)
+        self.assertIn('max-width:100%!important;min-width:0!important', source)
+        self.assertIn('flex:none!important;width:auto!important', source)
 
     def test_header_uses_centered_user_supplied_nexus_mark(self):
         source = Path("app.py").read_text(encoding="utf-8")
