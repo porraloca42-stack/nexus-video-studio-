@@ -185,7 +185,7 @@ Retorne SOMENTE JSON válido no contrato:
       "block_id":"m1",
       "trigger_text":"...",
       "at_seconds":0.0,
-      "alignment_level":"word|phoneme",
+      "alignment_level":"word|character|phoneme",
       "character":"optional only with character-level evidence",
       "phoneme":"optional only with phoneme-level evidence",
       "visual_event":"...",
@@ -193,22 +193,22 @@ Retorne SOMENTE JSON válido no contrato:
     }}
   ],
   "caption_events":[
-    {
+    {{
       "id":"caption-1",
       "start_seconds":0.0,
       "end_seconds":2.5,
       "text":"...",
       "position":"bottom",
       "words":[
-        {"text":"...","start_seconds":0.0,"end_seconds":0.4,"emphasis":false}
+        {{"text":"...","start_seconds":0.0,"end_seconds":0.4,"emphasis":false}}
       ]
-    }
+    }}
   ],
   "sfx_events":[
-    {"id":"sfx-1","asset_path":"...","start_seconds":1.2,"duration_seconds":0.8,"volume":0.25}
+    {{"id":"sfx-1","asset_path":"...","start_seconds":1.2,"duration_seconds":0.8,"volume":0.25}}
   ],
   "audio_mix_events":[
-    {"start_seconds":0.0,"end_seconds":2.5,"music_volume":0.06}
+    {{"start_seconds":0.0,"end_seconds":2.5,"music_volume":0.06}}
   ]
 }}
 
