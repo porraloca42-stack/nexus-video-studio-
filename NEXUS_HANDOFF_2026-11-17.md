@@ -482,3 +482,10 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - Novo helper Gemini usa system prompt dedicado e limite de uma geração/um modelo por vídeo. Sem retry ou failover de geração para controlar custo.
 - UI Streamlit tem checkbox explícito, desmarcado por padrão, somente no modo de render compatível. Flag é enviada dentro das credenciais criptografadas; worker só cria executor se true. Sem chave, interrompe antes de gerar imagens.
 - Testes adicionados em director JSON recovery, worker e GitHub renderer. CI #1061 / run `44120993502` em andamento. Sem chamada real Gemini/produção até aprovação.
+
+
+## Resultado CI — integração Gemini opt-in Brain 4 — 17/11/2026
+- CI #1061 / run `44120993502` passou: 209 testes Python, compileall, Remotion typecheck e Commons live smoke; synthetic render skipped por ausência de marcador.
+- Testes cobrem o helper Gemini (um único POST, JSON timeline), transporte criptografado da flag, default-off e proteção quando a chave falta.
+- UI checkbox desmarcado por padrão; worker só ativa Brain 4 quando a opção criptografada está true. Ainda não houve chamada Gemini real nem render de produção.
+- Próximo: rodar regressão sintética Remotion após mudanças e fazer uma validação controlada com usuário selecionando Brain 4, sem iniciar job real até confirmar orçamento/uso da chave.
