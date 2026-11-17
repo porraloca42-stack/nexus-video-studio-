@@ -41,6 +41,12 @@ class EditorialPromptBuilderTests(unittest.TestCase):
         self.assertIn("ai_image_motion", prompt)
         self.assertIn("ai_video", prompt)
 
+    def test_editor_prompt_does_not_invent_alignment_confidence_or_word_boundaries(self):
+        prompt = build_edit_timeline_prompt(self.script, self.visual, self.audio, self.words)
+        self.assertIn("Não invente nem estime confidence", prompt)
+        self.assertIn("um item por palavra individual", prompt)
+        self.assertNotIn('"confidence":0.0', prompt)
+
     def test_editor_prompt_forbids_invented_phoneme_timing(self):
         prompt = build_edit_timeline_prompt(self.script, self.visual, self.audio, self.words)
         self.assertIn("sincronismo por fonema/sílaba", prompt)
