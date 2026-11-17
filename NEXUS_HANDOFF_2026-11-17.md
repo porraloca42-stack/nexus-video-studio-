@@ -369,3 +369,11 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - O job `remotion-synthetic-render` deve ser disparado por esse push, pois o workflow filtra a mensagem do commit.
 - A integração GitHub consultada retornou status combinado vazio e não expõe runs de push (a ação `fetch_commit_workflow_runs` retorna apenas execuções de pull request). Resultado do job, logs e artifact continuam sem confirmação.
 - Próxima ação: abrir GitHub Actions no repositório e localizar a execução do commit acima; conferir o job `remotion-synthetic-render` e artifact `nexus-remotion-synthetic-validation`. Não declarar sucesso até obter evidência.
+
+
+## Checkpoint adicional — correção de import e disparo da validação — 17/11/2026
+- O log do run #969 (44106516739), job `remotion-synthetic-render`, mostrou `ModuleNotFoundError: No module named 'nexus'` ao importar `nexus.remotion_renderer` no script sintético.
+- A raiz do repositório foi adicionada a `sys.path` antes do import em `scripts/validate_remotion_render.py`, commit `178ffe1bcb26a5a9ebbbbf69c08979ebfb555df7`.
+- Run #973 (44113431413): unit-tests, Remotion typecheck e Commons live smoke passaram; render sintético foi skipped porque o commit de correção não continha o marcador requerido.
+- Commit de documentação/disparo: `cc86d8b9ad78c2c0d3c9b2d081e481d741fd87c8`, com `[run-remotion-validation]`. Aguardar e inspecionar o job e artifact antes de afirmar sucesso.
+- Nenhum serviço pago, GPU, deploy ou render de produção foi acionado. Runner hospedado pode consumir minutos da franquia.
