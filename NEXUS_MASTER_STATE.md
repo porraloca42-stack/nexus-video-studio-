@@ -2147,3 +2147,10 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Workflow demo #121 / run `44119421068` também passou: repetiu adapter Python → Remotion e validação FFprobe. Demo manual de 50s permaneceu skipped.
 - Estado: caminho sintético completo Brain4 adapter (mock) → manifest → Remotion MP4 está validado para captions, word highlight, SFX e ducking/fades. Ainda não é saída de Gemini real, nem vídeo com assets reais, nem implantação do Brain 4 em produção.
 - Próximo: revisar visualmente o artifact MP4 e então planejar a integração Gemini real com autorização de orçamento explícita; manter default-off.
+
+
+## Revisão visual do MP4 sintético — 17/11/2026
+- Artifact #14343349831 baixado e inspecionado localmente. FFprobe confirmou H.264 720×1280 + AAC, duração 4.011s.
+- Frames inspecionados em 0.8s, 1.5s e 2.7s: a primeira palavra (NEXUS) recebe destaque dourado, a segunda (valida) assume o destaque no intervalo seguinte e a legenda desaparece fora da janela. Fundo gráfico de validação permanece estável e sem texto indevido.
+- Métricas automatizadas confirmam os mesmos resultados: 2249/1773 pixels dourados nos dois intervalos e zero com legenda desligada; ducking de música 14.5 dB com recuperação; SFX 15.7 dB acima do nível de fundo.
+- Revisão visual limitada ao fixture gráfico sintético. Não avalia qualidade semântica de cenas reais, estética final, sincronismo com fala natural ou identidade visual de personagem.
