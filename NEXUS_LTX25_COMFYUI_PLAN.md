@@ -125,3 +125,12 @@ A proposta anterior de “protótipo isolado” não significa projeto paralelo 
 - Commit final: `6731ed3`. CI #878 / run `44091549701` no commit `6731ed34867b08b1c63f62354167c200f854811b`: 148 testes Python aprovados, Remotion typecheck aprovado e Commons live smoke aprovado.
 - A implementação oficial do ComfyUI frontend `graphToPrompt` (revisão `196dd85cde3314dffdc33b41caa3e5d9be432ffb`) gera o API prompt expandindo subgrafos por `ExecutableNodeDTO.getInnerNodes()`, resolvendo conexões e widgets e emitindo `class_type` + `inputs`. Isso reforça que o workflow visual pinado não pode ser enviado diretamente a `POST /prompt` nem convertido com uma substituição superficial.
 - Próxima etapa técnica: definir como gerar/exportar o API prompt com expansão correta dos seis subgrafos (preferencialmente pelo conversor oficial ou export real do ComfyUI), versionar o resultado e testar estrutura, links e bindings antes de criar o adaptador LTX-2.5.
+
+
+## 12. Investigação do exportador API e contrato de arrays — 17/11/2026
+- Fonte consultada: ComfyUI frontend em 196dd85cde3314dffdc33b41caa3e5d9be432ffb, arquivo src/utils/executionUtil.ts. A função oficial graphToPrompt expande os subgrafos por meio de ExecutableNodeDTO, constrói um mapa de nós executáveis, percorre a ordem de execução, resolve inputs conectados e valores de widgets e produz o objeto API com class_type, inputs e _meta.
+- O exportador oficial encapsula widgets de array em objeto com __value__; arrays sem esse encapsulamento representam links [origin_node_id, origin_slot]. Isso é parte do contrato e não pode ser ignorado por patchers.
+- O cliente NEXUS agora encapsula bindings de array em __value__, preservando o comportamento do exportador. Teste de regressão adicionado.
+- O workflow visual fixado possui seis subgrafos, incluindo o subgrafo Input Parameters com dois nós GemmaAPITextEncode. O caminho de API externa depende de uma chave LTX; a configuração padrão observada não fornece chave. Não usar serviço externo nem adicionar segredo sem avaliar custo e necessidade. A codificação local usa Gemma e deve ser revisada para remover o enhancer somente se isso não quebrar a topologia.
+- CI #887 / run 44092812673 / commit 2d0a8068c72430cc4dd6cded0f5d49a981968ccd: 154 testes Python, Remotion typecheck e Commons live smoke aprovados.
+- Estado: compatibilidade do patcher e regressões testadas; API prompt real ainda não exportado; bindings dos nós ainda não validados; worker e integração não implementados; GPU, downloads, deploy e render não executados.
