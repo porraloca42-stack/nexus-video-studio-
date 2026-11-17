@@ -1624,3 +1624,12 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Testes atualizados para cobrir envio criptografado dos dados de calibração e o cenário de narração inicialmente curta (37,6s) revisada para a meta antes de iniciar imagens.
 - Commits: `871c542` (worker/preflight e calibração), `24f7f47` (dispatcher criptografado), `2d8dab8` (app), `48488bc` (teste do dispatcher), `8e25496` (teste de calibração), `81cec91` (fixture alinhada).
 - Estado: código e testes enviados à branch `main`. CI `44057057040` concluído com sucesso: `unit-tests`, `remotion-typecheck` e `commons-live-smoke` aprovados. Isso valida regressões e integração automatizada, mas não substitui render real. A nova execução real no Streamlit ainda NÃO foi validada; não declarar MP4 concluído até o vídeo ser produzido, recuperado e inspecionado.
+
+
+## Incidente de instalação Remotion — 17/11/2026
+- Execução real `44058484835` falhou no passo `Install Remotion dependencies`, antes de typecheck, geração de imagens, Fish Audio, Modal LTX ou render MP4. Os passos seguintes foram explicitamente ignorados.
+- Erro: npm HTTP 404 ao baixar `csstype-3.2.4.tgz`. Pesquisa do registro npm mostra `csstype` publicado atualmente em `3.2.3`; `3.2.4` não está publicado.
+- Correção aplicada em `remotion/package.json`: override exato `"csstype": "3.2.3"` para forçar a resolução da versão publicada e evitar a dependência transitiva inexistente.
+- Commit: `8a59784e163b6e02774d5da97c49ca7cbd6cb6e6`.
+- Impacto de custo: a etapa de render foi ignorada antes do passo que chama `nexus.remote_render_job`; portanto esta execução não iniciou Modal LTX nem geração de mídia.
+- Estado: aguardando CI da correção e depois nova tentativa real. MP4 não validado.
