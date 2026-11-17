@@ -225,7 +225,7 @@ with header_brand:
     """, unsafe_allow_html=True)
 with header_settings:
     if st.button("⚙", key="nexus-open-settings", help="Abrir perfil e configurações"):
-        st.session_state["nexus_navigation"] = "⚙ Perfil"
+        st.session_state["nexus_navigation"] = "♙ Perfil"
 
 # Mobile-first navigation; icon labels follow the supplied reference.
 nav_map = {"＋ Criar": "Criar", "▱ Biblioteca": "Biblioteca", "▣ Modelos": "Modelos", "♙ Perfil": "Perfil", "⚙ Perfil": "Perfil"}
