@@ -386,3 +386,12 @@ Timestamp da atualização: 2026-11-17T14:08:19-03:00 (UTC−03:00).
 - PR #3 continua aberto; nenhum merge/deploy. Nenhuma chamada Gemini real, produção, GPU ou render foi iniciada.
 - Próxima ação: aguardar conclusão de `commons-live-smoke`, depois revisar estado de merge da PR e decidir merge seguro.
 - Timestamp: `2026-11-17T14:28:32-03:00` (UTC−03:00). Atualização documental `[skip ci]`.
+
+
+## Checkpoint — correção Brain 4 integrada à main — 2026-11-17T14:29:16-03:00 (America/Sao_Paulo)
+- PR #3 foi aprovado pelos checks e integrado por squash. Merge commit: `9125e73cc177c952b4b5b13f44c0726db79d98e5`; PR: https://github.com/porraloca42-stack/nexus-video-studio-/pull/3 .
+- Run #1110 / `44137245208` concluído `success`: `unit-tests` success (213 testes, incluindo regressão do cache), `remotion-typecheck` success, `commons-live-smoke` success (2 candidatos aceitos; um vídeo CC BY 3.0 baixado e decodificado); `remotion-synthetic-render` skipped corretamente.
+- Código de correção agora integrado na `main`: helper recarrega `nexus.director` antes de buscar `generate_editorial_json`; valida callable e fornece diagnóstico do caminho se o símbolo ainda estiver ausente; teste de regressão com mock garante reload e uma invocação mockada.
+- Estados: **implementado** e **commitado na main**; CI da PR **aprovado**; **deploy Streamlit ainda não confirmado**; **Gemini real não executado**; **vídeo de produção não renderizado nem validado**. Nenhuma chamada paga, GPU, Modal, Cloudflare ou Fish Audio foi iniciada por esta correção.
+- Próxima ação: confirmar HEAD e os arquivos na main, verificar novo CI do commit de merge e deployment Streamlit; depois orientar o usuário a recarregar o app e repetir o teste Brain 4 (isso fará uma chamada Gemini real e exige decisão explícita do usuário).
+- Timestamp: `2026-11-17T14:29:16-03:00` (UTC−03:00). Atualização documental `[skip ci]`.
