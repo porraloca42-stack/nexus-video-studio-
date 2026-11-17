@@ -61,6 +61,7 @@ app = modal.App(APP_NAME)
 class Inference:
     @modal.enter()
     def load_pipeline(self):
+        load_started = time.monotonic()
         import torch
         import diffusers
 
@@ -73,6 +74,11 @@ class Inference:
         ).to("cuda")
         # Modal Volumes require an explicit commit to persist newly downloaded weights.
         model_cache.commit()
+        self.model_load_seconds = round(time.monotonic() - load_started, 3)
+        self.gpu_name = torch.cuda.get_device_name(0) if torch.cuda.is_available() else "unknown"
+        print({"event": "ltx_model_ready", "model": MODEL_ID, "revision": MODEL_REVISION,
+               "model_load_seconds": self.model_load_seconds, "gpu_name": self.gpu_name,
+               "width": WIDTH, "height": HEIGHT, "fps": FPS})
 
     @modal.method()
     def run_batch(self, scenes):
@@ -80,6 +86,7 @@ class Inference:
         from PIL import Image, ImageOps
 
         results = []
+        batch_started = time.monotonic()
         for index, item in enumerate(scenes, start=1):
             image_bytes = item.get("image_bytes")
             prompt = str(item.get("prompt") or "").strip()
@@ -125,6 +132,11 @@ class Inference:
                 "model_revision": MODEL_REVISION,
                 "width": WIDTH,
                 "height": HEIGHT,
+                "model_load_seconds": self.model_load_seconds,
+                "batch_wall_seconds": round(time.monotonic() - batch_started, 3),
+                "gpu_name": self.gpu_name,
+                "num_inference_steps": 50,
+                "guidance_scale": 3.0,
             })
             self.torch.cuda.empty_cache()
         return results
