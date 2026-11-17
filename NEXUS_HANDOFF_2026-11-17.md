@@ -445,3 +445,8 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 ## Etapa seguinte — teste Brain 4 → Remotion — 17/11/2026
 - Novo teste offline conecta timeline Brain 4 simulada ao `build_remotion_manifest()` e verifica captions/word timing, SFX, ducking e fades no manifest.
 - CI #1030 e workflow Remotion demo #120 estavam em execução na última consulta. Não marcar a integração como validada até ambos terminarem.
+
+
+## Resultado CI — Brain 4 → manifest — 17/11/2026
+- CI #1030: 205 testes Python passaram, typecheck e Commons smoke passaram. Teste de transporte de captions/word timing, SFX, ducking e fades do Brain 4 para o manifest Remotion aprovado.
+- Workflow demo #120 ainda executava MP4 sintético via Remotion; verificar o resultado antes de considerar o trajeto render validado.
