@@ -1,5 +1,15 @@
 # NEXUS VIDEO STUDIO — CONTEXTO OPERACIONAL
 
+## Auditoria da narração — 2026-11-17
+
+- A versão Streamlit em execução foi confirmada no commit `3d1498935906e4cda5b891e16c0db3455fa23136`; Gemini, Fish Audio, GitHub renderer e Cloudflare apareciam como configurados.
+- A inspeção visual do catálogo mostrou nomes de figuras públicas/personagens (incluindo “Adolf Hitler” e “Papai Noel”) em grupos CapCut/ElevenLabs/Fish. O botão de prévia também podia chamar síntese Fish para vozes sem amostra publicada. Isso contradiz a curadoria aprovada de narradores profissionais pt-BR e o requisito de não gerar prévias pagas.
+- PR de correção em andamento: o seletor passa a descobrir até 25 narradores masculinos e femininos que atendem aos metadados pt-BR, narração e origem PVC/licenciada, e exige amostra pública. O filtro exclui identidade de figuras públicas/personagens conhecidas; a UI não chama síntese para prévia.
+- Voz previamente selecionada que não consta na nova curadoria é removida da sessão e precisa ser escolhida novamente. Se a API não retornar uma voz elegível, não há fallback para vozes de entretenimento.
+- Testes para catálogo, exclusões, amostras públicas e UI foram atualizados; CI ainda pendente nesta versão. Nenhuma prévia de voz nem síntese de narração foi acionada nesta auditoria.
+
+
+
 ## Estado operacional — pós-merge da melhoria de legendas TikTok — 2026-11-17 20:38 BRT
 
 ### Conta Modal conferida somente para leitura
