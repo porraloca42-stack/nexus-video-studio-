@@ -63,6 +63,19 @@ class AppImportResilienceTests(unittest.TestCase):
         self.assertNotIn('nexus_active_voice_preview_id', dialog)
         self.assertIn('fish_audio.generate_fish_preview(api_key, voice_id)', dialog)
 
+    def test_voice_preview_uses_fragment_rerun_without_closing_dialog(self):
+        source = Path("app.py").read_text(encoding="utf-8")
+        start = source.index('@st.dialog("Escolher narração"')
+        end = source.index('@st.dialog("Duração do vídeo"', start)
+        dialog = source[start:end]
+        self.assertIn('st.rerun(scope="fragment")', dialog)
+        self.assertIn('st.session_state["nexus_pending_voice_id"] = voice_id', dialog)
+        self.assertNotIn('st.session_state["nexus_pending_voice_name"] = f"{category} · {voice_title}"\n                        st.rerun()', dialog)
+        # Confirming is intentionally a full-app rerun so the dialog closes.
+        self.assertIn('st.session_state["nexus_fish_voice_id"] = pending_id', dialog)
+        self.assertIn('st.session_state.pop(key, None)', dialog)
+        self.assertIn('st.rerun()\n\n    for category in categories:', dialog)
+
     def test_header_uses_centered_user_supplied_nexus_mark(self):
         source = Path("app.py").read_text(encoding="utf-8")
         self.assertIn('with st.container(key="nexus-header"):', source)
