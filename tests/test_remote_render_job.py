@@ -30,7 +30,7 @@ class RemoteNarrationTests(unittest.TestCase):
         import json
         import os
         from unittest.mock import Mock, patch
-        from nexus.render_crypto import encrypt_text, decrypt_text, decrypt_bytes
+        from nexus.render_crypto import encrypt_compressed_text, encrypt_text, decrypt_text, decrypt_bytes
 
         with tempfile.TemporaryDirectory(prefix="nexus_remote_worker_") as temp:
             root = Path(temp)
@@ -62,7 +62,7 @@ class RemoteNarrationTests(unittest.TestCase):
             ]}
             secret = "cloudflare-encryption-secret"
             env = {
-                "NEXUS_MANIFEST_ENCRYPTED": encrypt_text(json.dumps(plan), secret),
+                "NEXUS_MANIFEST_ENCRYPTED": encrypt_compressed_text(json.dumps(plan), secret),
                 "NEXUS_FISH_CREDENTIALS_ENCRYPTED": encrypt_text(
                     json.dumps({"api_key": "fish-secret", "voice_id": "voice-369"}), secret
                 ),
