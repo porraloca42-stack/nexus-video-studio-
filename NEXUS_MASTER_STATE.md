@@ -1,9 +1,9 @@
 # NEXUS VIDEO STUDIO — CONTEXTO OPERACIONAL
 
-## Atualização operacional — revisão do plano TikTok e orçamento — 2026-11-17
+## Atualização operacional — revisão do plano TikTok e orçamento — 2026-11-17 (atualizada após merge PR #12)
 
 - Meta declarada pelo usuário: 22 vídeos TikTok por mês, com 40–50 segundos, mantendo qualidade de visuais originais, hooks, narração, cenas e edição; economia não deve ser feita sacrificando a qualidade percebida.
-- PR #12 foi reenquadrada como qualidade-primeiro com alternativa de menor custo: o modo IA original (Cloudflare + Modal) é o padrão; bibliotecas seguem acessíveis e a interface explica a troca de exclusividade visual. A PR está aberta; o CI do head atualizado está em andamento. Não mergeada nem implantada.
+- PR #12 (`Prioritize original AI visuals with a cost-aware alternative`) foi mergeada por squash em `cc5d3946f4378cfa23b7619ed653cf7c69193b2c`. O modo IA original (Cloudflare + Modal) é o padrão qualidade-primeiro; bibliotecas seguem acessíveis como alternativa de menor custo com menor exclusividade visual. Unit tests, Remotion typecheck e Commons smoke passaram no head pré-merge `e0ae37250cbf6c18cab46ebfd77c3ebe59efdcb3`; synthetic render foi skipped. Não houve validação pós-merge nem deploy.
 - O worker Modal contém `GPU_COST_BUDGET_USD = 0.42` como limite estimado de GPU por lote, não por mês. Multiplicar por 22 lotes resulta em US$ 9,24 de GPU estimada antes de custos de CPU/memória e outras variáveis; isso não é uma previsão garantida nem um teto de cobrança. O valor de US$ 30 de crédito Starter e rates GPU do fornecedor não substituem fatura medida.
 - Proteção mensal efetiva requer limite de Workspace e spend limit na Modal. Workspace budget é compartilhado por outros apps/projetos do workspace; spend limit deve impedir cobrança líquida além dos créditos. A configuração real da conta não foi conferida nem alterada.
 - Próxima etapa de orçamento: auditoria estática completa dos caminhos de criação e chamadas externas, seguida de plano de medição real autorizado para vídeos completos; antes de piloto, conferir/configurar os limites no workspace e obter custo por lote/uso agregado. Não executar inferência, render pago ou deploy automaticamente.
