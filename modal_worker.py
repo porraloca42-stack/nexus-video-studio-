@@ -15,6 +15,8 @@ from nexus.ltx_config import (
     DECODE_NOISE_SCALE,
     DECODE_TIMESTEP,
     FPS,
+    GPU_COST_BUDGET_USD,
+    GPU_RATE_USD_PER_SECOND,
     GPU_TYPE,
     HEIGHT,
     IMAGE_COND_NOISE_SCALE,
@@ -24,6 +26,7 @@ from nexus.ltx_config import (
     MODEL_ID,
     MODEL_NAME,
     MODEL_REVISION,
+    SCALEDOWN_WINDOW_SECONDS,
     SPATIAL_UPSCALER,
     WIDTH,
     build_pipeline_config,
@@ -77,7 +80,7 @@ app = modal.App(APP_NAME)
     image=image,
     gpu=GPU_TYPE,
     timeout=45 * MINUTES,
-    scaledown_window=5,
+    scaledown_window=SCALEDOWN_WINDOW_SECONDS,
     volumes={MODEL_CACHE: model_cache},
 )
 class Inference:
@@ -129,6 +132,12 @@ class Inference:
         # Modal Volumes require an explicit commit to persist newly downloaded weights.
         model_cache.commit()
         self.model_load_seconds = round(time.monotonic() - load_started, 3)
+        load_gpu_cost = (self.model_load_seconds + SCALEDOWN_WINDOW_SECONDS) * GPU_RATE_USD_PER_SECOND
+        if load_gpu_cost >= GPU_COST_BUDGET_USD:
+            raise RuntimeError(
+                f"LTX abortado para proteger o orçamento: carregamento estimado em "
+                + f"{load_gpu_cost:.3f} USD de GPU antes de gerar cenas."
+            )
         self.gpu_name = torch.cuda.get_device_name(0) if torch.cuda.is_available() else "unknown"
         print({
             "event": "ltx_model_ready",
@@ -155,11 +164,26 @@ class Inference:
 
         results = []
         batch_started = time.monotonic()
+
+        def estimated_gpu_cost():
+            active_seconds = (
+                self.model_load_seconds
+                + (time.monotonic() - batch_started)
+                + SCALEDOWN_WINDOW_SECONDS
+            )
+            return active_seconds * GPU_RATE_USD_PER_SECOND
+
         height_padded = ((HEIGHT - 1) // 32 + 1) * 32
         width_padded = ((WIDTH - 1) // 32 + 1) * 32
         padding = calculate_padding(HEIGHT, WIDTH, height_padded, width_padded)
 
         for index, item in enumerate(scenes, start=1):
+            if estimated_gpu_cost() >= GPU_COST_BUDGET_USD:
+                raise RuntimeError(
+                    f"LTX interrompido para proteger o orçamento de 0.50 USD. "
+                    + f"{index - 1} cenas concluídas; GPU estimada em "
+                    + f"{estimated_gpu_cost():.3f} USD."
+                )
             image_bytes = item.get("image_bytes")
             prompt = str(item.get("prompt") or "").strip()
             if not image_bytes or not prompt:
@@ -250,6 +274,13 @@ class Inference:
                 "decode_noise_scale": DECODE_NOISE_SCALE,
                 "image_cond_noise_scale": IMAGE_COND_NOISE_SCALE,
                 "pipeline_type": "multi-scale",
+                "estimated_gpu_cost_usd": round(estimated_gpu_cost(), 4),
+                "gpu_cost_budget_usd": GPU_COST_BUDGET_USD,
             })
+            if estimated_gpu_cost() >= GPU_COST_BUDGET_USD:
+                raise RuntimeError(
+                    f"LTX interrompido após a cena {index} para proteger o orçamento. "
+                    + f"GPU estimada em {estimated_gpu_cost():.3f} USD."
+                )
             self.torch.cuda.empty_cache()
         return results
