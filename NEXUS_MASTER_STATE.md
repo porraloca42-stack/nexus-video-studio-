@@ -2032,3 +2032,12 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - No run #973 (44113431413), após esse commit, `unit-tests`, `remotion-typecheck` e `commons-live-smoke` concluíram com sucesso; `remotion-synthetic-render` foi ignorado porque a mensagem do commit não continha o marcador `[run-remotion-validation]`. Portanto, a correção de importação ainda não foi exercitada pelo job de render.
 - Este checkpoint será enviado com o marcador de execução para disparar somente a validação sintética prevista no workflow. Aguardar conclusão, logs e artifact antes de declarar MP4 validado.
 - Sem APIs pagas, GPU, download adicional de modelos, deploy ou render de produção. O runner hospedado do GitHub pode consumir minutos da franquia.
+
+
+## Diagnóstico do primeiro MP4 sintético e isolamento das bandas — 17/11/2026
+- Run #974 (44113881942), commit `cc86d8b9ad78c2c0d3c9b2d081e481d741fd87c8`: unit-tests, Remotion typecheck e Commons live smoke passaram; `remotion-synthetic-render` gerou MP4 e artifact, mas falhou na asserção de ducking.
+- Log: `Music ducking too weak: before=-34.6dB, ducked=-38.7dB`. O MP4 foi baixado do artifact #14342431166 e inspecionado: H.264, 720x1280, 30fps, 4.000s, áudio AAC 48kHz. A inspeção visual confirmou o destaque da palavra no frame de 0.8s; as duas verificações automatizadas de legenda também passaram, pois o script alcançou a etapa de áudio.
+- Diagnóstico provável: o fixture usava narração em 440Hz, música em 220Hz e SFX em 880Hz; a medição do ducking filtrava 190–250Hz com filtros passa-altas/baixas suaves, podendo incluir vazamento da narração e criar um piso que mascara a atenuação real. A asserção de SFX não foi alcançada nesta execução, portanto ainda não está validada.
+- Corrigido somente o isolamento do fixture em `549bb44e51e2375cf0f08b826749565bfc104c96`: narração passou a 1100Hz, música permanece em 220Hz, SFX passou a 3000Hz e sua banda de medição foi ajustada para 2800–3200Hz. A implementação do ducking em `NexusVideo.tsx` não foi alterada.
+- O commit contém `[run-remotion-validation]` para executar novamente o teste sintético. Aguardar métricas de áudio e artifact; não declarar mixagem validada antes de a redução, recuperação da música e presença do SFX passarem.
+- Sem APIs pagas, GPU, deploy ou render de produção. Runner hospedado pode consumir minutos da franquia GitHub.
