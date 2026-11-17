@@ -2125,3 +2125,10 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Teste da execução normal do worker agora confirma que o relatório registra `editorial_pipeline.status=disabled` quando nenhum executor é injetado.
 - Commit `3f721da8890c5b12fe7b01690e6156378350159b`; CI #1037 / run `44119171372` em execução na última consulta. Não declarar aprovado até conclusão.
 - Workflow #120 concluído com sucesso: segundo MP4 sintético validado H.264 720×1280, AAC, 4.011s; artifact #14344765828 (retenção até 24/11/2026).
+
+
+## Hook do worker e integração sintética Brain 4 — 17/11/2026
+- CI #1037 / `44119171372`, commit `3f721da8890c5b12fe7b01690e6156378350159b`: 206 testes Python passaram; Remotion typecheck e Commons smoke passaram; synthetic multitrack foi skipped por ausência do marcador.
+- Testes confirmam o hook `apply_optional_brain4()` com executor injetado e status `disabled` no relatório padrão do worker.
+- Script `scripts/validate_remotion_render.py` atualizado para gerar timeline Brain 4 determinística via `run_brain4_for_storyboard()` com callable simulado e então renderizar MP4 via Remotion. Exercita contrato, preservação de word timestamps, captions, SFX, ducking e fades sem Gemini/Fish/Cloudflare/Modal.
+- Commit `e1f8737447fe14fb7114617dc9681200bf5742f0`; próximo passo é rodar workflow sintético com marcador `[run-remotion-validation]` e inspecionar resultado/artifact.
