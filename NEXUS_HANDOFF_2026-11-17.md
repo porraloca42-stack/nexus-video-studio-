@@ -690,3 +690,14 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - Estados: **implementado** e **commitado na main**; CI da PR **aprovado**; **deploy Streamlit ainda não confirmado**; **Gemini real não executado**; **vídeo de produção não renderizado nem validado**. Nenhuma chamada paga, GPU, Modal, Cloudflare ou Fish Audio foi iniciada por esta correção.
 - Próxima ação: confirmar HEAD e os arquivos na main, verificar novo CI do commit de merge e deployment Streamlit; depois orientar o usuário a recarregar o app e repetir o teste Brain 4 (isso fará uma chamada Gemini real e exige decisão explícita do usuário).
 - Timestamp: `2026-11-17T14:29:16-03:00` (UTC−03:00). Atualização documental `[skip ci]`.
+
+
+## Resultado do CI no commit de merge e estado de implantação — 2026-11-17T14:30:06-03:00 (America/Sao_Paulo)
+- GitHub Actions #1111 / run `44137507191`, head/merge commit `9125e73cc177c952b4b5b13f44c0726db79d98e5`: `completed/success`.
+- Jobs: `unit-tests` success; `remotion-typecheck` success; `commons-live-smoke` success; `remotion-synthetic-render` skipped corretamente por ausência do marcador. O CI da PR #3 (#1110) também passou integralmente.
+- Main atual inclui a correção. Arquivos relidos e verificados: `nexus/brain4_smoke_test.py` (blob `2e5c698`) contém reload do diretor e validação callable; `tests/test_brain4_smoke_test.py` (blob `dd82926`) contém teste de regressão.
+- Tentativa de abrir `https://htykbebk3hceoen5bvopax.streamlit.app/` via navegador não foi acessível; isso não confirma falha nem sucesso de deploy. **Deploy Streamlit ainda não confirmado.**
+- Estados: correção implementada/commitada na main; CI da PR e CI do merge aprovados; deploy não confirmado; Gemini real não executado; vídeo de produção não renderizado nem validado.
+- Próxima ação: usuário recarregar a aplicação publicada (reabrir/refresh após a sincronização automática do Streamlit Cloud) e, quando estiver disposto a consumir uma chamada Gemini, executar novamente `Testar Brain 4 — sem produzir vídeo`. A resposta deve ser compartilhada para validação. Não marcar checkbox nem iniciar produção.
+- Nenhuma chamada Gemini real, inferência GPU, render de produção ou custo de serviço de mídia foi acionado pelo assistente.
+- Timestamp: `2026-11-17T14:30:06-03:00` (UTC−03:00). Atualização documental `[skip ci]`.
