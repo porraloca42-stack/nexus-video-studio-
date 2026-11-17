@@ -4,6 +4,7 @@ No credentials, network clients or model SDKs are imported here. A caller must
 explicitly inject a callable; tests can use deterministic local executors.
 """
 from collections.abc import Callable
+from typing import Any
 
 from nexus.editorial_prompts import (
     build_edit_timeline_prompt,
