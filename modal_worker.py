@@ -11,6 +11,8 @@ from pathlib import Path
 
 import modal
 
+from nexus.ltx_motion_metrics import measure_temporal_motion
+
 from nexus.ltx_config import (
     DECODE_NOISE_SCALE,
     DECODE_TIMESTEP,
@@ -180,7 +182,7 @@ class Inference:
         for index, item in enumerate(scenes, start=1):
             if estimated_gpu_cost() >= GPU_COST_BUDGET_USD:
                 raise RuntimeError(
-                    f"LTX interrompido para proteger o orçamento de 0.50 USD. "
+                    f"LTX interrompido para proteger o orçamento de {GPU_COST_BUDGET_USD:.2f} USD. "
                     + f"{index - 1} cenas concluídas; GPU estimada em "
                     + f"{estimated_gpu_cost():.3f} USD."
                 )
@@ -243,6 +245,7 @@ class Inference:
 
             video_frames = output[0].permute(1, 2, 3, 0).cpu().float().numpy()
             video_frames = np.clip(video_frames * 255.0, 0, 255).astype(np.uint8)
+            motion_metrics = measure_temporal_motion(video_frames)
             output_path = Path(f"/tmp/nexus-scene-{index:02d}-{seed}.mp4")
             with imageio.get_writer(str(output_path), fps=FPS, codec="libx264") as writer:
                 for frame in video_frames:
@@ -275,7 +278,11 @@ class Inference:
                 "image_cond_noise_scale": IMAGE_COND_NOISE_SCALE,
                 "pipeline_type": "multi-scale",
                 "estimated_gpu_cost_usd": round(estimated_gpu_cost(), 4),
+                "estimated_model_load_gpu_cost_usd": round(self.model_load_seconds * GPU_RATE_USD_PER_SECOND, 4),
+                "estimated_batch_gpu_cost_usd": round((time.monotonic() - batch_started) * GPU_RATE_USD_PER_SECOND, 4),
+                "estimated_scaledown_gpu_cost_usd": round(SCALEDOWN_WINDOW_SECONDS * GPU_RATE_USD_PER_SECOND, 4),
                 "gpu_cost_budget_usd": GPU_COST_BUDGET_USD,
+                "motion_metrics": motion_metrics,
             })
             if estimated_gpu_cost() >= GPU_COST_BUDGET_USD:
                 raise RuntimeError(

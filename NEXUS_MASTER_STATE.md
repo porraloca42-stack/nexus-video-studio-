@@ -2545,3 +2545,34 @@ Este protocolo prevalece sobre instruções antigas ou checkpoints históricos q
 - Estado: Cloudflare live image generation **executada com sucesso**; Modal/LTX live inference **executada com sucesso**; Remotion MP4 mux/render **executado e tecnicamente validado**; qualidade temporal/movimento **pendente**; identificação de GPU **pendente**; imagem-base como artefato **pendente**; produção audiovisual real de 40–50s **não executada/não validada**.
 - Próxima ação técnica: corrigir workflow para anexar `image.path` real, enriquecer relatório com custo estimado/GPU sem inventar valor, e investigar por que `gpu_name` chegou nulo; em seguida melhorar critério de avaliação temporal (frames start/mid/end) e repetir smoke só após aprovação explícita de novo consumo Cloudflare/Modal. Não disparar produção completa automaticamente.
 - Nenhuma chamada Fish Audio ou Gemini ocorreu nesta execução. Custos efetivos Cloudflare/Modal não foram quantificados no artefato; não afirmar valor.
+
+
+## Perfil econômico LTX — 17/11/2026
+- Solicitação do usuário: LTX deve produzir movimentos simples e legíveis (ex.: nuvens deslizando, uma pessoa executando um gesto curto), sem movimentos extraordinários, e gastar muito menos que o perfil anterior.
+- Branch de trabalho: `feat/ltx-low-cost-simple-motion`; não integrada.
+- Alterações propostas nesta branch: resolução de inferência reduzida de 512×896 para 384×672 (43,75% menos pixels por quadro); teto de GPU por batch reduzido de US$0,42 para US$0,15 (64,3% menor); 24 fps e agenda destilada oficial 7+3 preservados para não degradar também a qualidade temporal; smoke fixture simplificada para um único movimento de nuvens em 2 segundos, com personagem, montanha, estrelas e câmera parados.
+- `image_cond_noise_scale=0.025` foi mantido: a documentação do Diffusers recomenda esse valor para variantes LTX 0.9.1+ com VAE timestep-aware; não há evidência suficiente para alterá-lo como suposta causa da imagem estática. Fonte: https://huggingface.co/docs/diffusers/en/api/pipelines/ltx_video.
+- Economia de pixels e teto de orçamento são reduções de configuração, não economia real medida. Nenhuma inferência Modal/GPU foi iniciada; a validação de movimento e custo real depende de um único smoke live de 2s aprovado pelo usuário.
+- Testes CI devem validar configuração e fixture. Mesmo com CI verde, não declarar que LTX voltou a produzir movimento até assistir ao MP4 e medir o movimento de forma apropriada.
+
+## Checkpoint — custo observado e diagnóstico LTX — 2026-11-17
+- Custo real informado pelo usuário no smoke anterior de 2s: US$0,16, apesar de não haver movimento perceptível. Esse valor foi reportado pelo usuário; não foi obtido de uma consulta direta à fatura Modal nesta sessão.
+- Projeção linear simples: US$3,20 para 40s. Não é previsão confiável porque cold start, carregamento e batching alteram o custo; ainda assim, o custo observado reprova economicamente o perfil anterior.
+- PR #9 / branch `feat/ltx-low-cost-simple-motion`: CI #1126 passou em unit-tests, Remotion typecheck e Commons smoke; synthetic Remotion render foi skipped. PR continua aberta, não integrada nem implantada.
+- Perfil econômico: 384×672, 24fps, schedule multi-scale 7+3; teto da estimativa de GPU reduzido para US$0,08 por batch. Esse valor não é teto garantido de cobrança Modal; CPU/memória, inicialização e diferenças de billing podem acrescentar custo.
+- Adicionado `nexus/ltx_motion_metrics.py` e testes: medição entre quadros adjacentes, fração de pixels alterados e flag de saída quase estática. É diagnóstico, não comprovação visual de movimento.
+- Worker passou a registrar essas métricas e a mensagem de proteção de orçamento deixou de exibir o valor hardcoded antigo de US$0,50.
+- Nenhuma nova inferência Modal/GPU, chamada Cloudflare, Fish Audio, Gemini ou render live foi iniciada. Nenhum custo novo nesta etapa.
+- Próxima ação: CI desta atualização; em seguida, auditar custo do smoke anterior com os tempos de carregamento/inferência disponíveis. Não executar novo smoke pago sem autorização explícita. Movimento e custo reais continuam não validados até inspeção de novo MP4 e comparação com cobrança.
+
+## Correção CI — dependência de diagnóstico temporal — 2026-11-17
+- O CI #1131 falhou somente no job unit-tests porque o ambiente de testes não instala NumPy; o novo módulo de métricas o importava no nível superior. Os testes antigos, typecheck Remotion e Commons smoke passaram.
+- Corrigido removendo a dependência de NumPy do módulo de diagnóstico. A função aceita arrays NumPy do worker por meio de `.tolist()` quando disponível, mas calcula com a biblioteca padrão. Os testes também usam listas Python puras.
+- Nova revisão enviada à mesma branch; CI precisa ser reexecutado e passar antes de qualquer merge. Nenhum serviço pago foi acionado.
+
+## Validação da correção e auditoria do artefato anterior — 2026-11-17
+- CI #1132 / run `44159472207`, commit `a2e73f1d2dc4e1bad630e13985701399e3077789`: unit-tests success, Remotion typecheck success e Commons smoke success; Remotion synthetic render skipped pela condição do workflow. A falha por NumPy foi eliminada com implementação baseada na biblioteca padrão.
+- Artefato live anterior `14360216809` foi baixado e inspecionado: contém apenas `nexus-live-pipeline.mp4` e `pipeline-report.json`. O relatório confirma 49 frames, 2.0417s, inferência LTX reportada em 7.455s e saída Remotion 720×1280 por 2.005s; `gpu_name` é null e o relatório não contém `model_load_seconds`, custo estimado Modal nem detalhamento de billing.
+- Portanto, o custo de US$0,16 informado pelo usuário não pode ser atribuído com precisão a carregamento, inferência ou scaledown usando o artefato preservado. O tempo da chamada remota visto no log foi ~37.5s, mas não é equivalente a tempo faturável de GPU e não explica por si só o valor reportado.
+- Worker atualizado para registrar estimativas separadas de GPU para carregamento do modelo, processamento do batch e scaledown, além do total estimado e do diagnóstico temporal. São estimativas internas; ainda precisam ser comparadas com a cobrança real do Modal.
+- A atualização mais recente do worker e do registro master gerou novo CI; não declarar PR inteira aprovada até o run do commit final terminar. Nenhuma execução live paga foi iniciada.
