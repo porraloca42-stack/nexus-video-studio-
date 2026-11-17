@@ -1,6 +1,6 @@
 # NEXUS VIDEO STUDIO — BOOTSTRAP PARA NOVOS CHATS
 
-Última revisão: 2026-11-17T18:16:51-03:00 (America/Sao_Paulo)
+Última revisão: 2026-11-17T18:20:48-03:00 (America/Sao_Paulo)
 Repositório: https://github.com/porraloca42-stack/nexus-video-studio-
 Branch oficial: main
 
@@ -64,6 +64,15 @@ Consultar o bloco operacional completo no início de NEXUS_MASTER_STATE.md. Em r
 - PR #10 permanece aberta e não mergeada, head `ef102d4116da01e67c829efc0af7832b8510fd5c`, CI #1174 aprovado nos jobs executados.
 - Última ação concluída: revisão estática, sincronização final e CI #1190 aprovado na PR #11. A PR permanece aberta; aguardar autorização explícita para merge. Próxima ação: aguardar autorização explícita para merge da PR #11; depois, tratar deploy e inferência como decisões separadas.
 - Nenhuma operação paga ou implantação foi iniciada nesta retomada.
+
+
+## CHECKPOINT MAIS RECENTE — 2026-11-17T18:20:48-03:00 (America/Sao_Paulo)
+- PR #11 foi mergeada por squash após autorização do usuário. Merge commit na main: `10ea042ac9fb3d68636edbe28ccb331f0cd47ca5`. GitHub confirma `closed` e `merged=true`.
+- Workflows confirmados em main: deploy Modal manual e independente; smoke LTX em workflow separado, manual e com validação dos secrets.
+- CI #1190 / run `44177875187` passou em unit-tests, commons-live-smoke e remotion-typecheck no head pré-merge `a2b5d2c3a668cf36db0ee891854d3bb457ad8534`; synthetic render skipped. Nenhum CI associado diretamente ao merge commit foi localizado.
+- Nenhum deploy Modal, inferência GPU ou serviço pago foi executado. Não inferir implantação a partir do merge.
+- Próxima sequência: auditoria estática da PR #10/telemetria; manter deploy e smoke pagos condicionados a autorização específica.
+- Master State e handoff receberam este checkpoint; confira seus timestamps e HEAD atuais antes de continuar.
 
 ## Fonte de verdade
 - NEXUS_MASTER_STATE.md na branch main é a fonte operacional atual.
