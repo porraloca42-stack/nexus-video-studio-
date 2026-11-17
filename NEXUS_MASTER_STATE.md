@@ -2,13 +2,25 @@
 
 # STATUS OPERACIONAL VIGENTE — SOBRESCREVE CHECKPOINTS HISTÓRICOS
 
-Atualizado em: 2026-11-17T18:20:48-03:00 (America/Sao_Paulo)
-HEAD da branch main no início desta atualização documental: 10ea042ac9fb3d68636edbe28ccb331f0cd47ca5
-Último commit de main antes desta atualização documental: 10ea042ac9fb3d68636edbe28ccb331f0cd47ca5.
+Atualizado em: 2026-11-17T19:19:53-03:00 (America/Sao_Paulo)
+HEAD da branch main no início desta atualização documental: ec57db7517cc89a132343ac02354657ee02e82c3
+Último commit de main antes desta atualização documental: ec57db7517cc89a132343ac02354657ee02e82c3.
 
 **REGRA DE LEITURA:** este bloco é a fonte prioritária para o estado atual. Os registros cronológicos abaixo são histórico. Nunca retomar uma “próxima ação” antiga sem confrontá-la com este bloco e com o HEAD atual. Em especial, NÃO tratar tarefas do dia 16/11 nem checkpoints antigos sobre integração Brain 4/Remotion como pendências atuais.
 
-## Estado vigente em 17/11/2026 às 17:56 (BRT)
+## Estado vigente após autorização de produto — 17/11/2026 às 19:19 BRT
+- Direção de produto confirmada pelo usuário: foco 100% em TikTok; vídeo precisa parar o scroll com hook imediato, narrativa falada forte, progressão de retenção, cenas específicas e ritmo de mudança visual; preservar voz, estilo visual, Gemini e Remotion já integrados.
+- Restrição financeira: não gerar gastos fora dos créditos incluídos/limites existentes. O usuário quer que os US$30 mensais da Modal durem o ciclo. Nenhuma inferência GPU, chamada paga, deploy ou render de produção foi iniciada após essa autorização.
+- PR #10 foi integrada por squash na main: commit `ec57db7517cc89a132343ac02354657ee02e82c3`. Inclui identificação da GPU antes de carregar pesos, falha segura quando a GPU real não corresponde, métricas de cache Hugging Face e remoção da falsa estimativa de custo no relatório do smoke. CI #1174 no head pré-merge passou em unit-tests, Remotion typecheck e Commons smoke; synthetic render foi skipped. Não foi localizado CI no commit de merge.
+- Testes locais dos novos módulos não foram executados: o comando Python do ambiente resolveu para o alias Windows Store e não iniciou. O CI pré-merge permanece a validação disponível; não declarar validação pós-merge.
+- A proteção de GPU agora está na main, mas isso não comprova qual versão/GPU está implantada no Modal nem limita por si só a cobrança total do Workspace. A configuração atual ainda tem `render_mode` padrão Cloudflare + Modal. O caminho econômico não pode invocar Modal por padrão.
+- PR #9 (`feat/ltx-low-cost-simple-motion`) permanece aberta e não integrada; estado consultado: mergeable=false. Propõe 384×672 e teto estimado de GPU US$0,08/batch, mas custo total e movimento não foram validados. Não tratar o teto estimado como fatura garantida nem executar smoke/deploy pago.
+- Evidência histórica fornecida pelo usuário: US$1,50 de consumo acumulado no Modal, predominantemente H100; uma execução curta anterior custou cerca de US$0,16 segundo o usuário. Isso não permite extrapolar com confiança o custo por vídeo de 40–50s.
+- Plano de produto sem gasto variável: consolidar o fluxo TikTok editorial; fazer bibliotecas gratuitas/edição CPU serem o modo econômico padrão; manter cenas Modal/LTX como recurso limitado e explicitamente opt-in (por exemplo, cenas hero) apenas depois de haver limite rígido e projeção validável. Gemini, Fish Audio, Cloudflare e publicação também podem ter cotas/planos próprios; não afirmar custo zero sem conferir cada conta.
+- Controles Modal documentados: no Starter há US$30/mês de crédito computacional; Workspace budget limita o uso bruto antes de créditos, e spend limit limita cobrança líquida após créditos. Para tentar ficar dentro do crédito, configuração-alvo é budget do Workspace US$30 e spend limit US$0; isso cobre o Workspace inteiro, não apenas o NEXUS. Environment budgets exigem Team/Enterprise. O acesso ao painel Modal não foi verificado.
+- Próxima prioridade de engenharia: auditar e implementar o roteamento econômico para o padrão TikTok e uma camada de apresentação de custo antes de produção; preservar o modo Modal separado. Em paralelo, avaliar o fluxo de retenção existente e integrar candidatos de hook/estrutura editorial sem multiplicar chamadas Gemini sem necessidade. Validar offline/CI; qualquer geração de mídia ou inferência ao vivo que possa usar créditos continua proibida até existir controle verificável e autorização para o piloto.
+
+## Snapshot histórico anterior — 17/11/2026 às 17:56 BRT (sobrescrito acima)
 - Quatro cérebros: contratos, validadores, prompts e runner implementados. Brain 4 isolado foi aprovado pelo usuário em execução real Gemini, validando timeline em fixture sintética de 4s; isso não valida vídeo completo.
 - Integração editorial no worker de produção existe como opt-in: usa narração Fish Audio e segmentos/timestamps do provedor, aplica Brain 4 quando habilitado, valida timeline e encaminha eventos para Remotion. Não confundir integração de código/testes com pipeline completo live.
 - Remotion multifaixa (captions, SFX, ducking/fades) implementado e validado em MP4 sintético de 4s; qualidade com voz/música reais e vídeo de 40–50s não validada.
@@ -2642,3 +2654,4 @@ Este protocolo prevalece sobre instruções antigas ou checkpoints históricos q
 4. Só depois reconciliar Usage por intervalo temporal com os deployments. Não fazer novo deploy nem chamada GPU só para descobrir isso.
 - Estado: hipótese de deploy não atualizado **forte e verificável no Dashboard**; app órfão **não confirmado**; segundo decorator/sobrescrita no caminho principal **não encontrado**; secret de GPU **sem evidência**; scaledown de 5s confirmado, mas não explica tipo de GPU; defeito de estimativa L40S identificado.
 - Nenhuma chamada Modal, inferência GPU, Cloudflare, Fish Audio, Gemini ou render foi iniciada nesta auditoria. Nenhum custo adicional.
+
