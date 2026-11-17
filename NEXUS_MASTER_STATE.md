@@ -2018,3 +2018,9 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - Próximo passo: disparar novamente o job sintético com commit marker após a correção, e obter resultado/artifact. A integração GitHub disponível não oferece listagem de runs disparados por push nem dispatch explícito; status combinado até aqui retornou vazio. Não inferir sucesso.
 - O job permanece restrito a `workflow_dispatch` ou push com `[run-remotion-validation]`; runner hospedado pode consumir minutos da franquia GitHub. Sem APIs pagas, GPU, modelos ou deploy.
 - Continuidade: manter este arquivo, `NEXUS_HANDOFF_2026-11-17.md` e `NEXUS_NEW_CHAT_BOOTSTRAP.md` sincronizados a cada marco relevante. Esses registros reduzem perda de contexto, mas o próximo chat ainda deve verificar o estado vivo do GitHub.
+
+### Reexecução após correção do fixture — 17/11/2026
+- Push marker criado após a correção do diretório de frames: `b5d374eaadc148260a78b8fc2d849d8af9b7c7e6` (`[run-remotion-validation]`).
+- O job `remotion-synthetic-render` deve ser disparado por esse push, pois o workflow filtra a mensagem do commit.
+- A integração GitHub consultada retornou status combinado vazio e não expõe runs de push (a ação `fetch_commit_workflow_runs` retorna apenas execuções de pull request). Resultado do job, logs e artifact continuam sem confirmação.
+- Próxima ação: abrir GitHub Actions no repositório e localizar a execução do commit acima; conferir o job `remotion-synthetic-render` e artifact `nexus-remotion-synthetic-validation`. Não declarar sucesso até obter evidência.
