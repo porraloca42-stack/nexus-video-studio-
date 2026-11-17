@@ -182,3 +182,9 @@ Este bootstrap reduz perda de continuidade, mas não garante que a plataforma ca
 - Asserções de mídia: destaque captions 2249/1773 pixels, caption off 0; ducking música 14.5 dB com recuperação ao nível original; SFX 15.7 dB acima do nível de fundo. Artifact #14343349831.
 - Workflow demo #121 também passou; render manual 50s skipped.
 - Limite: não é Gemini real nem vídeo de produção. Próxima etapa: revisão visual do MP4 e plano de integração real condicionado a autorização de custo.
+
+
+## Revisão visual concluída — MP4 sintético — 17/11/2026
+- Artifact #14343349831 inspecionado: H.264/AAC, 720×1280, 4.011s. Frames confirmam destaque palavra por palavra (NEXUS → valida) e remoção da legenda fora do intervalo.
+- Métricas: ducking música 14.5 dB e recuperação; SFX +15.7 dB. Limite: fixture gráfico sintético, não conteúdo real.
+- Próxima etapa pendente: integração Gemini real em Brain 4 com feature flag default-off e orçamento autorizado; nenhuma chamada paga foi feita.
