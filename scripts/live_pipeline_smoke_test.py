@@ -101,6 +101,10 @@ def main():
         ],
         "image": {"model": image["model"], "bytes": image["bytes"], "width": 512, "height": 910},
         "ltx": {
+            "profile": "low-cost-simple-motion",
+            "target_width": 384,
+            "target_height": 672,
+            "gpu_budget_usd": 0.15,
             "model": clips[0]["model"],
             "gpu_name": clips[0].get("gpu_name"),
             "duration_seconds": clips[0]["duration_seconds"],
