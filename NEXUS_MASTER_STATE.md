@@ -2569,3 +2569,10 @@ Este protocolo prevalece sobre instruções antigas ou checkpoints históricos q
 - O CI #1131 falhou somente no job unit-tests porque o ambiente de testes não instala NumPy; o novo módulo de métricas o importava no nível superior. Os testes antigos, typecheck Remotion e Commons smoke passaram.
 - Corrigido removendo a dependência de NumPy do módulo de diagnóstico. A função aceita arrays NumPy do worker por meio de `.tolist()` quando disponível, mas calcula com a biblioteca padrão. Os testes também usam listas Python puras.
 - Nova revisão enviada à mesma branch; CI precisa ser reexecutado e passar antes de qualquer merge. Nenhum serviço pago foi acionado.
+
+## Validação da correção e auditoria do artefato anterior — 2026-11-17
+- CI #1132 / run `44159472207`, commit `a2e73f1d2dc4e1bad630e13985701399e3077789`: unit-tests success, Remotion typecheck success e Commons smoke success; Remotion synthetic render skipped pela condição do workflow. A falha por NumPy foi eliminada com implementação baseada na biblioteca padrão.
+- Artefato live anterior `14360216809` foi baixado e inspecionado: contém apenas `nexus-live-pipeline.mp4` e `pipeline-report.json`. O relatório confirma 49 frames, 2.0417s, inferência LTX reportada em 7.455s e saída Remotion 720×1280 por 2.005s; `gpu_name` é null e o relatório não contém `model_load_seconds`, custo estimado Modal nem detalhamento de billing.
+- Portanto, o custo de US$0,16 informado pelo usuário não pode ser atribuído com precisão a carregamento, inferência ou scaledown usando o artefato preservado. O tempo da chamada remota visto no log foi ~37.5s, mas não é equivalente a tempo faturável de GPU e não explica por si só o valor reportado.
+- Worker atualizado para registrar estimativas separadas de GPU para carregamento do modelo, processamento do batch e scaledown, além do total estimado e do diagnóstico temporal. São estimativas internas; ainda precisam ser comparadas com a cobrança real do Modal.
+- A atualização mais recente do worker e do registro master gerou novo CI; não declarar PR inteira aprovada até o run do commit final terminar. Nenhuma execução live paga foi iniciada.
