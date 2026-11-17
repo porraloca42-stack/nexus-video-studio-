@@ -62,10 +62,14 @@ const SceneLayer: React.FC<{ scene: NexusScene; duration: number; overlapFrames:
   const fadeOutOpacity = fadeOut ? interpolate(frame, [duration - fadeOut, duration], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) : 1;
   const opacity = Math.min(fadeInOpacity, fadeOutOpacity);
 
-  const lighting = direction?.lighting?.change || "none";
+  // LTX-generated footage must remain untouched by generic 2D overlays.
+  // Atmosphere/light overlays belong to still-image treatments only; otherwise
+  // they read as arbitrary effects laid over real generated motion.
+  const allowStillImageOverlays = !isGeneratedVideo;
+  const lighting = allowStillImageOverlays ? (direction?.lighting?.change || "none") : "none";
   const flicker = lighting === "subtle_flicker" ? 0.025 * Math.sin(frame * 0.72) : 0;
   const exposure = lighting === "exposure_ramp" ? interpolate(progress, [0, 1], [0.035, -0.02]) : 0;
-  const atmosphere = direction?.atmosphere?.effect || "none";
+  const atmosphere = allowStillImageOverlays ? (direction?.atmosphere?.effect || "none") : "none";
   const strength = clamp(direction?.atmosphere?.intensity ?? 0, 0, 1);
   const particleCount = atmosphere === "rain" ? 24 : ["dust", "embers", "particles"].includes(atmosphere) ? 16 : 0;
 
