@@ -44,13 +44,15 @@ Esses sites complementam a descoberta e a curadoria humana. O NEXUS não faz scr
 ## Diagnóstico
 O painel avançado testa busca, download e leitura do vídeo. O resultado precisa ser validado no Streamlit publicado e com uma geração real; testes unitários simulados não comprovam a disponibilidade externa das bibliotecas.
 
-## Estado de validação — 16/11/2026
-- **Código no GitHub:** alterações de seleção 9:16, revisão visual, bibliotecas gratuitas e Wikimedia Commons registradas na branch `main`.
-- **CI principal:** run #291 aprovado; compilação e 54 testes automatizados passaram. O teste de render FFmpeg confirma MP4 vertical com áudio/legendas.
-- **Remotion:** runs #26 e #31 aprovados. O adaptador Python gerou manifesto a partir de clipe + WAV + SRT; Remotion renderizou H.264/AAC 720×1280, duração 4,011s; FFprobe e upload do artefato passaram. Demo gráfica 50s também foi validada no run #26. Fonte sans-serif corrigida e inspecionada no artefato do run #29.
-- **Wikimedia Commons ao vivo:** busca e download de um vídeo licenciado foram concluídos; FFprobe confirmou arquivo VP9 válido (1920×1080, 261,16 s, CC BY 3.0). Isso valida o fluxo técnico com o candidato testado, não a relevância editorial de todo resultado.
-- **Ainda pendente:** configuração dos Secrets Cloudflare/GitHub, geração real de imagens Workers AI, execução do worker de produção com credenciais, confirmação do deploy Streamlit e inspeção de um MP4 final com imagens geradas.
-- **Não declarar produção ponta a ponta validada** até concluir essas verificações no ambiente publicado.
+## Estado de validação — atualizado em 17/11/2026
+
+- **Brain 4 isolado:** integrado à main, CI aprovado e smoke live aprovado no Streamlit pelo usuário. A geração Gemini real respondeu e a timeline sintética de 4s passou pela validação contratual (alinhamento por palavra, eventos de legenda/âncoras/mixagem).
+- **Regressões:** correção do reload do módulo `nexus.director` e diagnóstico HTTP 503 específico para chamada única integradas. PRs #3 e #4 aprovadas; CI do merge #1113 passou.
+- **Testes automatizados:** 214 testes Python aprovados na PR #4; Remotion typecheck e Commons live smoke aprovados.
+- **Remotion:** run #1110 / `44119421068` construiu manifesto pelo adaptador Python, renderizou MP4 sintético e validou streams/duração. A demo manual de 50s foi ignorada; esse teste não chamou Cloudflare, Modal ou Fish Audio.
+- **Integração simulada do worker:** testes cobrem Fish Audio, timestamps, Brain 4 opt-in, imagens, clips, Remotion, FFprobe e transporte criptografado com mocks.
+- **Ainda não validado ao vivo:** geração Cloudflare + animação Modal/LTX + narração Fish Audio com timestamps reais + Brain 4 no mesmo job + MP4 final de 40–50s + auditoria visual final. Deploy do worker Modal e presença/validade de Secrets externos ainda precisam de confirmação.
+- **Próxima validação:** smoke live de uma cena Cloudflare→Modal→Remotion; depois, piloto real de 40–50s com Brain 4 ativado. O worker LTX tem guard interno de US$0,42 para GPU e reserva de US$0,08 para outros custos, mas isso não garante o custo total nem a conclusão do vídeo.
 
 ## Modo experimental: imagens originais + Remotion
 O NEXUS possui um modo opcional de produção com imagens originais por cena:
