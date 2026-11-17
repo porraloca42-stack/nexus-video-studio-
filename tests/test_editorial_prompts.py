@@ -44,7 +44,7 @@ class EditorialPromptBuilderTests(unittest.TestCase):
     def test_editor_prompt_forbids_invented_phoneme_timing(self):
         prompt = build_edit_timeline_prompt(self.script, self.visual, self.audio, self.words)
         self.assertIn("não afirme sincronismo por fonema/sílaba", prompt)
-        self.assertIn("Não crie timestamps", prompt)
+        self.assertIn("NÃO crie timestamps", prompt)
         self.assertIn("word_timestamps", prompt)
 
     def test_prompt_builder_rejects_non_object_inputs(self):
