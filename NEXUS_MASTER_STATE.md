@@ -2227,3 +2227,11 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - **Deploy Streamlit:** continua não confirmado. O repositório consultado não fornece URL pública inequívoca da instância; não inferir domínio nem afirmar que a publicação já sincronizou a branch.
 - **Próximo passo:** obter/confirmar a URL da aplicação Streamlit e verificar a instância publicada. Se o botão estiver presente, aguardar o clique explícito do usuário para o smoke real Gemini. Não executar a API por conta própria e não iniciar produção ou serviços pagos.
 - Estado separado: código implementado na main; CI dos commits documentais e smoke corretivo testados/aprovados; deploy não confirmado; Gemini real ainda não validado; vídeo de produção não iniciado.
+
+
+## Retomada após CI documental — verificação da aplicação — 17/11/2026
+- O endereço correto da aplicação já consta no cabeçalho deste arquivo: https://htykbebk3hceoen5bvopax.streamlit.app/ . Não solicitar novamente ao usuário um endereço que já esteja registrado.
+- CI dos três commits documentais de checkpoint também foi confirmado: #1085 / run `44129937870` (commit `8796a6d`), #1086 / run `44129946819` (commit `8be817f`) e #1087 / run `44129956495` (commit `219fcfb`), todos concluídos com sucesso.
+- Verificação externa da URL Streamlit: tanto a página raiz quanto o endpoint `/_stcore/health` não puderam ser acessados pelas ferramentas de navegação disponíveis; a tentativa de resolução DNS no ambiente de execução também falhou. Isso é uma limitação do ambiente de verificação e **não prova que o app esteja fora do ar**.
+- O botão `Testar Brain 4 — sem produzir vídeo` está presente no código da branch `main` em `app.py`; sua presença na instância publicada permanece não verificada. Não afirmar deploy concluído.
+- Próximo passo operacional: obter uma resposta observável da instância publicada (abrir a URL em navegador acessível ou confirmar no painel Streamlit Cloud o último deploy/commit). Quando a UI estiver acessível, localizar o botão e aguardar o clique explícito do usuário. Nenhuma chamada Gemini real ou produção iniciada.
