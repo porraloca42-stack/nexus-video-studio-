@@ -27,6 +27,9 @@ def render_on_github(
     encryption_secret=None,
     fish_api_key=None,
     fish_voice_id=None,
+    gemini_api_key=None,
+    topic=None,
+    style=None,
     repository=DEFAULT_REPOSITORY,
     timeout=2400,
     poll_interval=8,
@@ -45,6 +48,9 @@ def render_on_github(
         json.dumps({
             "api_key": fish_api_key or "",
             "voice_id": fish_voice_id or "",
+            "gemini_api_key": gemini_api_key or "",
+            "topic": topic or "",
+            "style": style or "",
         }, separators=(",", ":")),
         encryption_secret,
     )
