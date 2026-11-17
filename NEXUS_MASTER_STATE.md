@@ -1469,3 +1469,6 @@ Começar lendo a versão atual de `NEXUS_MASTER_STATE.md` no GitHub e conferindo
 - O pipeline de storyboard e renderização existente foi preservado. O botão principal agora é rotulado "Gerar vídeo".
 - Estado: alteração gravada no GitHub main. GitHub Actions do commit `8d66cbc493536970661b3a29691351d25c4f7d20` iniciou os três checks (unit-tests, Remotion typecheck e Commons smoke), mas ainda não havia resultado final no momento desta atualização. Implantação automática e aparência real no Streamlit mobile ainda precisam ser confirmadas.
 - Limitação conhecida: a prévia vazia é apenas um placeholder visual; não representa uma prévia renderizada. A biblioteca ainda é limitada à sessão ativa e não é uma biblioteca persistente.
+
+- Validação posterior do commit `8d66cbc`: GitHub Actions run `43989995593` concluiu com sucesso nos três jobs. `unit-tests` compilou os módulos da aplicação e passou em 99 testes; `remotion-typecheck` e `commons-live-smoke` também passaram.
+- A compilação do CI confirma sintaxe Python dos módulos, mas não comprova a renderização visual do Streamlit. O novo layout ainda aguarda inspeção no app publicado em celular; não afirmar implantação visual validada.
