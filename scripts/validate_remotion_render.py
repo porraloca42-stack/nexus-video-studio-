@@ -145,6 +145,11 @@ def main():
         "--concurrency=2", "--log=error",
     ], cwd=REMOTION)
 
+    # The generated media fixture directory above has been cleaned up after
+    # manifest creation; keep extracted inspection frames in a separate path.
+    frame_dir = Path(tempfile.gettempdir()) / "nexus-remotion-validation-frames"
+    frame_dir.mkdir(parents=True, exist_ok=True)
+
     probe = run([
         "ffprobe", "-v", "error", "-show_entries", "format=duration",
         "-of", "json", str(OUTPUT)
@@ -155,7 +160,7 @@ def main():
 
     frames = {}
     for label, seconds in (("word_one", 0.8), ("word_two", 1.5), ("caption_off", 2.7)):
-        frame_path = fixture / f"{label}.png"
+        frame_path = frame_dir / f"{label}.png"
         extract_frame(OUTPUT, seconds, frame_path)
         frames[label] = gold_caption_pixels(frame_path)
     if frames["word_one"] < frames["caption_off"] + 20:
