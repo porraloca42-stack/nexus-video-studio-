@@ -37,7 +37,7 @@ PROFISSIONALISMO EDITORIAL, RETENÇÃO E DESCOBERTA:
 
 CENAS:
 - Decida a quantidade a partir da duração e da progressão narrativa. Use pelo menos ceil(duração/5) cenas e prefira ceil(duração/4) ou mais: 50s normalmente 12–15 cenas; 40s 10–12; 60s 15–18.
-- Cada cena representa uma unidade narrativa e uma ação concreta. As durações são apenas estimativas: o sistema atribuirá a duração final exata depois. Não sacrifique a narrativa para tentar fazer a soma matemática.
+- Cada cena representa uma unidade narrativa e uma ação concreta. As durações são estimativas: o sistema medirá a voz selecionada e distribuirá a duração real entre as cenas. Não sacrifique a narrativa para tentar fazer a soma matemática.
 - Cada cena deve representar exatamente o trecho narrado com ação, objeto, pessoa, ambiente ou processo diretamente relacionado. Não use cenas genéricas só porque combinam com a emoção.
 - Para image-to-video, gere também `video_motion_prompt` em inglês: uma única tomada contínua de 2–5 segundos, com 1–3 movimentos físicos concretos e observáveis, indicando quem/o que se move, direção e ritmo. Preserve a identidade, o rosto, a roupa, o cenário e a composição da imagem-base; não introduza novos sujeitos, objetos, cortes ou mudanças de cena. Evite instruções abstratas como "make it cinematic".
 - Leia e compreenda o roteiro inteiro antes de planejar cenas. Identifique ideia central, progressão, afirmações, exemplos e emoção de cada trecho.
