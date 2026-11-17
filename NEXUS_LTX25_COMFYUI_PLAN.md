@@ -167,3 +167,19 @@ O manifesto inicial havia apontado para uma revisão posterior do frontend (1.61
 A função `graphToPrompt` e a classe `ExecutableNodeDTO` foram relidas nessa versão exata. O contrato de expansão de subgrafos, resolução de links/widgets e encapsulamento de arrays já existe nela. O manifesto e o teste agora verificam explicitamente a versão 1.48.7. A revisão 1.61.2 fica apenas como leitura comparativa e não é a base de compatibilidade.
 
 Essa correção não cria um API prompt e não altera o status de integração: a exportação oficial ainda precisa ser executada em runtime compatível, com os nós registrados.
+
+
+## 14. Pausa para revisão da arquitetura híbrida faceless — 17/11/2026
+
+A decisão anterior de tratar LTX-2.5/ComfyUI como motor-alvo definitivo fica **em revisão** após a pesquisa comparativa de apps faceless comerciais. O objetivo do NEXUS é o resultado audiovisual, não adotar um modelo específico por ser mais novo.
+
+O relatório `NEXUS_FACELESS_VIDEO_ARCHITECTURE_RESEARCH_2026-11-17.md` identifica que Revid, Crayo, Pictory, InVideo, Fliki e VEED expõem combinações de stock, imagens IA animadas, motion graphics, mídia própria/gameplay e vídeo IA. Revid recomenda vídeo premium em uma ou duas cenas hero, não em todas as cenas.
+
+Até concluir uma comparação controlada:
+- não implementar mais integração LTX-2.5;
+- não baixar pesos, iniciar GPU, fazer deploy ou executar render pago;
+- preservar o LTX-0.9.8 atual, sem o tornar obrigatório para todas as cenas;
+- priorizar desenho/testes sem custo para roteamento de mídia por cena e recursos Remotion;
+- decidir o papel futuro do LTX-2.5 apenas com dados de qualidade, tempo e custo medidos.
+
+Esta pausa não remove os commits, o manifesto ou a investigação do exportador API. Apenas impede que o plano técnico seja interpretado como autorização para continuar investindo na adoção do LTX-2.5 antes da revisão de arquitetura.
