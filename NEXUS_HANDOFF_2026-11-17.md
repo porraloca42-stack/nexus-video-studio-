@@ -868,3 +868,16 @@ A decisão anterior de “worker/protótipo isolado” foi refinada após alinha
 - CI não valida implantação Modal, GPU ativa, faturamento, movimento perceptível nem MP4 final. Nenhum deploy, inferência GPU, API paga ou render de produção foi executado.
 - Documentação sincronizada em main: Master State commit `7513676c4a24edae81d84f5045969cdbf0601289`; Bootstrap commit `7878ad39b99a8db282c56147241feafd5909a674`; este checkpoint será o commit seguinte.
 - Próxima ação: revisão final do diff da PR #10 e recomendação técnica. Não fazer merge sem solicitação explícita do usuário.
+
+
+## CHECKPOINT — CORREÇÃO DO ALIAS A10G E RETESTE — 2026-11-17T17:50:00-03:00 (America/Sao_Paulo)
+- Consulta ao GitHub: 2026-11-17T17:50:00-03:00 (America/Sao_Paulo). HEAD de main antes da atualização documental: 3a749c48a2eed16d24a12625c62193f52634bb0f.
+- Releitura realizada: Master State, bootstrap, este handoff, PR #10, worker Modal e configuração LTX. O estado operacional no topo do Master State prevaleceu sobre os registros históricos.
+- PR #10 estava aberta, não mergeada e não implantada; head anterior eb7269bfa339dc13ff0704e6b5fa91c2fb8fbba7, com CI #1155 verde nos jobs executados.
+- Revisão encontrou uma lacuna no validador: reconhecia runtime A10G quando o tipo solicitado era A10, mas não aceitava a string solicitada A10G que Modal também pode receber.
+- Correção gravada na branch fix/modal-gpu-identity-and-cost-report: commit 16fe13649aceda91d4dcd827a486501d52546c00 adiciona alias solicitado A10G com matcher exato; commit 402323ac23cd30286bb634c3c3966725f185c351 acrescenta testes para aceitar A10G→NVIDIA A10G e rejeitar A10G→NVIDIA A10.
+- Teste local isolado do validador: 8 testes passaram (python -m unittest discover -s tests -v). Isso valida apenas a função e os testes copiados para o ambiente local; não substitui o CI do GitHub.
+- Consulta imediata ao status de workflows para o novo head não retornou execução nem checks. CI do novo head permanece pendente/não confirmado; não declarar PR validada novamente até verificar os jobs.
+- Main HEAD observado antes desta atualização documental: 3a749c48a2eed16d24a12625c62193f52634bb0f. Atualizações documentais estão sendo gravadas sequencialmente em Master State, Bootstrap e Handoff.
+- Nenhum merge, deploy, chamada Modal, GPU, Cloudflare, Fish Audio, Gemini ou render pago foi executado. Custo variável adicional: US$0.
+- Próxima ação: verificar por que o CI ainda não apareceu para o novo head; revisar configuração dos workflows e então acompanhar os checks. Depois, auditoria estática de telemetria/cache. Não fazer merge sem pedido explícito.
