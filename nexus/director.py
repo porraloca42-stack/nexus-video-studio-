@@ -833,23 +833,58 @@ Os números dos candidatos aparecem imediatamente antes de seus quadros."""
     raise RuntimeError("A avaliação visual do Gemini falhou: " + (last_error or "nenhum modelo respondeu."))
 
 def build_storyboard_preflight(plan):
-    """Cheap deterministic diagnostics for coverage and visual variety; never calls an API."""
+    """Cheap deterministic text diagnostics; never calls an API or claims semantic understanding."""
     scenes = plan.get("scenes", []) if isinstance(plan, dict) else []
+    stopwords = {
+        "a", "as", "o", "os", "um", "uma", "uns", "umas", "de", "da", "do", "das", "dos",
+        "em", "no", "na", "nos", "nas", "por", "para", "com", "sem", "ao", "aos", "e",
+        "ou", "que", "se", "sobre", "entre", "the", "a", "an", "and", "or", "of", "to",
+        "in", "on", "at", "by", "for", "with", "without", "from", "into", "onto", "as",
+        "is", "are", "was", "were", "be", "being", "been", "this", "that", "these", "those",
+    }
 
     def normalized(value):
         words = re.findall(r"[a-z0-9]+", str(value or "").lower())
         return " ".join(words)
+
+    def informative_tokens(value):
+        return {
+            token for token in normalized(value).split()
+            if len(token) > 2 and token not in stopwords
+        }
 
     def uniqueness(field):
         values = [normalized(scene.get(field, "")) for scene in scenes]
         values = [value for value in values if value]
         return round(len(set(values)) / len(values), 3) if values else 0.0
 
+    def near_duplicate_pairs(field, minimum_shared=4, minimum_overlap=0.8, max_pairs=5):
+        records = [
+            (index, informative_tokens(scene.get(field, "")))
+            for index, scene in enumerate(scenes, 1)
+        ]
+        records = [(index, tokens) for index, tokens in records if len(tokens) >= 5]
+        pairs = []
+        for left_index, (left_scene, left_tokens) in enumerate(records):
+            for right_scene, right_tokens in records[left_index + 1:]:
+                shared = len(left_tokens & right_tokens)
+                overlap = shared / min(len(left_tokens), len(right_tokens))
+                if shared >= minimum_shared and overlap >= minimum_overlap:
+                    pairs.append({
+                        "scenes": [left_scene, right_scene],
+                        "shared_terms": shared,
+                        "overlap": round(overlap, 3),
+                    })
+        return pairs
+
     actions = [normalized(scene.get("visual_action", "")) for scene in scenes]
     queries = [normalized(scene.get("asset_search_query", "")) for scene in scenes]
     shot_types = [normalized(scene.get("shot_type", "")) for scene in scenes]
     settings = [normalized(scene.get("setting", "")) for scene in scenes]
+    action_near_duplicates = near_duplicate_pairs("visual_action")
+    search_near_duplicates = near_duplicate_pairs("asset_search_query")
     warnings = []
+
     for label, values in (("ação visual", actions), ("busca principal", queries)):
         seen = {}
         for index, value in enumerate(values, 1):
@@ -860,6 +895,22 @@ def build_storyboard_preflight(plan):
             else:
                 seen[value] = index
 
+    for label, pairs in (
+        ("ações visualmente descritas", action_near_duplicates),
+        ("buscas principais", search_near_duplicates),
+    ):
+        for pair in pairs[:5]:
+            left, right = pair["scenes"]
+            warnings.append(
+                f"Cenas {left} e {right}: {label} têm alta sobreposição de termos "
+                f"({pair['overlap']:.0%}); revisar possível repetição com palavras diferentes."
+            )
+        if len(pairs) > 5:
+            warnings.append(
+                f"Há mais {len(pairs) - 5} pares com possível repetição em {label}; "
+                "a lista foi limitada para manter o relatório legível."
+            )
+
     nonempty_shots = [value for value in shot_types if value]
     if len(scenes) >= 6 and len(set(nonempty_shots)) <= 2:
         warnings.append("Pouca variedade de enquadramentos: revisar a gramática de planos.")
@@ -867,16 +918,22 @@ def build_storyboard_preflight(plan):
     if len(scenes) >= 6 and nonempty_settings and len(set(nonempty_settings)) / len(nonempty_settings) < 0.5:
         warnings.append("Mais da metade das cenas compartilha ambientes idênticos; verificar repetição visual.")
 
+    action_coverage = sum(bool(value) for value in actions) / len(scenes) if scenes else 0.0
+    motion_coverage = sum(bool(str(scene.get("video_motion_prompt", "")).strip()) for scene in scenes) / len(scenes) if scenes else 0.0
+
     return {
         "scene_count": len(scenes),
         "unique_action_ratio": uniqueness("visual_action"),
         "unique_search_ratio": uniqueness("asset_search_query"),
+        "action_coverage_ratio": round(action_coverage, 3),
+        "motion_prompt_coverage_ratio": round(motion_coverage, 3),
         "unique_shot_types": len(set(nonempty_shots)),
         "unique_settings": len(set(nonempty_settings)),
+        "near_duplicate_action_pairs": action_near_duplicates,
+        "near_duplicate_search_pairs": search_near_duplicates,
         "warnings": warnings,
-        "method": "deterministic_text_checks_no_external_calls",
+        "method": "deterministic_token_overlap_heuristic_no_external_calls",
     }
-
 
 def validate_storyboard(plan, requested_duration=None):
     errors = []
