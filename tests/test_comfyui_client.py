@@ -109,6 +109,22 @@ class ComfyUIClientTests(unittest.TestCase):
         self.assertEqual(workflow["10"]["inputs"]["image"], "old.png")
         self.assertEqual(workflow["20"]["inputs"]["value"], 121)
 
+    def test_patch_api_workflow_wraps_array_widget_values(self):
+        workflow = {
+            "10": {
+                "class_type": "PrimitiveArray",
+                "inputs": {"value": [1, 2, 3]},
+            }
+        }
+
+        patched = patch_api_workflow(workflow, {
+            "curve": {"node_id": "10", "input_name": "value", "value": [4, 5, 6]},
+        })
+
+        self.assertEqual(patched["10"]["inputs"]["value"], {"__value__": [4, 5, 6]})
+        self.assertEqual(workflow["10"]["inputs"]["value"], [1, 2, 3])
+        self.assertTrue(validate_api_workflow(patched))
+
     def test_patch_api_workflow_rejects_linked_inputs(self):
         workflow = {
             "10": {
