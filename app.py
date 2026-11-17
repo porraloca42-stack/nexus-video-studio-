@@ -138,11 +138,13 @@ def open_voice_picker():
         st.warning("A narração ainda não está conectada. Configure FISH_API_KEY nos Secrets do Streamlit.")
         return
 
-    catalog_key = "nexus_curated_voice_catalog_v1"
+    catalog_key = "nexus_professional_voice_catalog_v2"
     if catalog_key not in st.session_state:
         try:
-            with st.spinner("Carregando as 40 vozes cadastradas..."):
-                st.session_state[catalog_key] = fish_audio.list_curated_voice_catalog(api_key, max_workers=8)
+            with st.spinner("Carregando narradores profissionais pt-BR com amostra pública..."):
+                st.session_state[catalog_key] = fish_audio.list_fish_professional_narrators(
+                    api_key, per_gender=25, require_sample=True
+                )
         except Exception as exc:
             st.session_state[catalog_key] = {"error": str(exc)}
 
@@ -154,18 +156,37 @@ def open_voice_picker():
             st.rerun(scope="fragment")
         return
 
-    categories = ("CapCut", "ElevenLabs", "Licenciadas Fish")
-    total_voices = sum(len(catalog.get(category, [])) for category in categories)
+    groups = (("Masculinas", "male"), ("Femininas", "female"))
+    total_voices = sum(len(catalog.get(gender, [])) for _, gender in groups)
     st.caption(
-        f"{total_voices} vozes cadastradas · toque em um nome para ouvir a amostra. "
-        "Depois, confirme para usar a voz no vídeo."
+        f"{total_voices} narradores pt-BR licenciados ou PVC com amostra publicada. "
+        "A lista exclui vozes de personagens, memes e figuras públicas."
     )
+
+    eligible_ids = {
+        str(item.get("id") or "")
+        for _, gender in groups
+        for item in catalog.get(gender, [])
+        if item.get("id")
+    }
     current_id = st.session_state.get("nexus_fish_voice_id", "")
+    if current_id and current_id not in eligible_ids:
+        st.session_state.pop("nexus_fish_voice_id", None)
+        st.session_state.pop("nexus_fish_voice_name", None)
+        current_id = ""
+        st.warning("A voz selecionada anteriormente não passou pela curadoria profissional. Escolha outra voz.")
     pending_id = st.session_state.get("nexus_pending_voice_id")
+    if pending_id and pending_id not in eligible_ids:
+        for key in (
+            "nexus_pending_voice_id",
+            "nexus_pending_voice_preview_source",
+            "nexus_pending_voice_name",
+        ):
+            st.session_state.pop(key, None)
+        pending_id = None
     pending_source = st.session_state.get("nexus_pending_voice_preview_source")
     pending_name = st.session_state.get("nexus_pending_voice_name")
 
-    # Preview is a staging choice. The production voice changes only after confirmation.
     if pending_id and pending_source:
         st.markdown(f"**Prévia selecionada: {pending_name}**")
         st.audio(pending_source, format="audio/mp3", autoplay=True)
@@ -185,13 +206,15 @@ def open_voice_picker():
                 st.session_state.pop(key, None)
             st.rerun()
 
-    for category in categories:
-        category_voices = catalog.get(category, [])
+    for category, gender in groups:
+        category_voices = catalog.get(gender, [])
         if not category_voices:
             continue
         with st.expander(f"{category} · {len(category_voices)} vozes", expanded=True):
             for item in category_voices:
-                voice_id = item["id"]
+                voice_id = str(item.get("id") or "")
+                if not voice_id:
+                    continue
                 voice_title = item.get("title") or f"Voz {voice_id[:8]}"
                 selected = voice_id == current_id
                 pending = voice_id == pending_id
@@ -201,11 +224,11 @@ def open_voice_picker():
                     type="primary" if pending else "secondary",
                     width="stretch",
                     key=f"nexus-preview-select-voice-{voice_id}",
-                    help=f"Ouvir prévia · {category} · {voice_title}",
+                    help=f"Ouvir amostra publicada · {category} · {voice_title}",
                 ):
                     preview_key = f"nexus_voice_preview_audio_{voice_id}"
                     preview_audio = st.session_state.get(preview_key)
-                    sample_audio = item.get("sample_audio") or ""
+                    sample_audio = str(item.get("sample_audio") or "")
                     try:
                         if preview_audio:
                             preview_source = base64.b64decode(preview_audio)
@@ -214,10 +237,8 @@ def open_voice_picker():
                         elif sample_audio.startswith(("https://", "http://")):
                             preview_source = sample_audio
                         else:
-                            with st.spinner(f"Preparando amostra de {voice_title}..."):
-                                audio_bytes = fish_audio.generate_fish_preview(api_key, voice_id)
-                            st.session_state[preview_key] = base64.b64encode(audio_bytes).decode("ascii")
-                            preview_source = audio_bytes
+                            st.error("Esta voz não tem uma amostra pública utilizável e não pode ser selecionada.")
+                            continue
 
                         st.session_state["nexus_pending_voice_id"] = voice_id
                         st.session_state["nexus_pending_voice_preview_source"] = preview_source
@@ -230,13 +251,15 @@ def open_voice_picker():
                             "nexus_pending_voice_name",
                         ):
                             st.session_state.pop(key, None)
-                        st.error(f"Não foi possível preparar a amostra de {voice_title}: {str(exc)[:180]}")
+                        st.error(f"Não foi possível carregar a amostra pública de {voice_title}: {str(exc)[:180]}")
 
-    if total_voices != 40:
-        st.warning(
-            f"O catálogo retornou {total_voices} de 40 vozes cadastradas. "
-            "As opções com metadados indisponíveis continuam selecionáveis."
+    if total_voices < 50:
+        st.caption(
+            f"A curadoria encontrou {total_voices} vozes elegíveis (até 25 por gênero). "
+            "Vozes sem amostra pública ou sem metadados pt-BR/narração ficam de fora."
         )
+    if total_voices == 0:
+        st.warning("Nenhuma voz passou pela curadoria atual. Nenhuma voz de entretenimento será usada como fallback.")
     st.caption("A voz usada na produção só muda ao tocar em “Confirmar voz”.")
 
 
