@@ -2,7 +2,7 @@
 
 # STATUS OPERACIONAL VIGENTE — SOBRESCREVE CHECKPOINTS HISTÓRICOS
 
-Atualizado em: 2026-11-17T16:52:25-03:00 (America/Sao_Paulo)
+Atualizado em: 2026-11-17T16:57:47-03:00 (America/Sao_Paulo)
 HEAD da branch main no início desta atualização: 53f4769a8fd9827694e144be20ca4d42df695dc2
 Commit mais recente antes desta atualização: 53f4769a8fd9827694e144be20ca4d42df695dc2 — docs: add code audit findings for H100 investigation.
 
@@ -17,6 +17,7 @@ Commit mais recente antes desta atualização: 53f4769a8fd9827694e144be20ca4d42d
 - PR #9 (feat/ltx-low-cost-simple-motion) permanece aberta, não mergeada e não implantada. CI #1135/run 44159676828 passou nos testes Python, Commons smoke e Remotion typecheck; render sintético foi skipped. Não inferir GPU, custo ou qualidade por CI.
 - Modal: painel informado pelo usuário mostrou US$1.50 acumulados, majoritariamente H100. Código versionado declara L40S, mas deployment ativo/GPU real permanecem não identificados. Deploy é manual; não fazer deploy/inferência paga sem autorização. O cálculo em scripts/modal_smoke_test.py usa taxa L40S hardcoded e tempo de parede, portanto não é billing confiável.
 - Build indicator Streamlit: PR #6 integrada; Perfil deve mostrar SHA/origem ou “não identificado”. A leitura na instância publicada ainda não foi confirmada.
+- PR #10 aberta: Verify Modal GPU identity and remove misleading smoke cost estimate. Branch fix/modal-gpu-identity-and-cost-report, head 92f2f3dae72604f9a20087af5780827680615afc. CI run #1143 / 44164137648 está em andamento; unit-tests, Remotion typecheck e Commons live smoke ainda não concluíram; render sintético skipped. Não mergear sem CI verde e autorização explícita.
 
 ## Próxima ação sem custo
 1. Verificar o HEAD atual e os checks/PRs diretamente no GitHub.
