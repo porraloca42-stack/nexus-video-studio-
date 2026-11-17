@@ -97,3 +97,10 @@ Após autorização específica:
 - O módulo não inicia ComfyUI, não baixa pesos, não usa Modal, não importa Torch e não faz chamadas de rede durante importação. Só opera se for instanciado e chamado por um futuro worker.
 - Ainda não existe workflow API exportado, mapeamento de nós, worker Modal ComfyUI ou integração ao fluxo de produção. O cliente genérico não significa que o LTX-2.5 já esteja integrado.
 - Estado: código e testes gravados na branch main; execução automatizada ainda não confirmada. Nenhuma inferência, GPU, download de pesos ou deploy foi realizado; custo variável adicional US$0.
+
+
+### Complemento — patch seguro de workflow API (17/11/2026)
+- `nexus/comfyui_client.py` agora inclui `patch_api_workflow(workflow, bindings)`: cria cópia profunda do grafo e altera somente inputs explicitamente mapeados. Rejeita nós/inputs inexistentes, bindings incompletos e inputs que já estejam conectados por links, evitando quebrar silenciosamente a topologia.
+- Testes adicionais verificam isolamento do grafo original, alteração de widgets, rejeição de links e referências desconhecidas.
+- Commits: `273c047` (patcher), `9cb0830` (testes).
+- O arquivo `.github/workflows/tests.yml` foi inspecionado: a job de regressão compila `nexus` e executa `python -m unittest discover -s tests -v`, portanto o novo arquivo de teste entra na descoberta padrão. Isso confirma a configuração do workflow, não o resultado de uma execução.
