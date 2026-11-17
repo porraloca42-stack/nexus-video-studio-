@@ -2,9 +2,9 @@
 
 # STATUS OPERACIONAL VIGENTE — SOBRESCREVE CHECKPOINTS HISTÓRICOS
 
-Atualizado em: 2026-11-17T18:14:17-03:00 (America/Sao_Paulo)
-HEAD da branch main no início desta atualização: 1922407e433825d99d2d716d01b100fd92cb447b
-Último commit de main antes desta atualização documental: 1922407e433825d99d2d716d01b100fd92cb447b.
+Atualizado em: 2026-11-17T18:16:51-03:00 (America/Sao_Paulo)
+HEAD da branch main no início desta atualização: e93fbe5a171f9d1cc3c19dc8796c4e3d343f1252
+Último commit de main antes desta atualização documental: e93fbe5a171f9d1cc3c19dc8796c4e3d343f1252.
 
 **REGRA DE LEITURA:** este bloco é a fonte prioritária para o estado atual. Os registros cronológicos abaixo são histórico. Nunca retomar uma “próxima ação” antiga sem confrontá-la com este bloco e com o HEAD atual. Em especial, NÃO tratar tarefas do dia 16/11 nem checkpoints antigos sobre integração Brain 4/Remotion como pendências atuais.
 
@@ -23,11 +23,11 @@ HEAD da branch main no início desta atualização: 1922407e433825d99d2d716d01b1
 - PR: https://github.com/porraloca42-stack/nexus-video-studio-/pull/11; branch `safety/separate-modal-deploy-smoke`; head `75cdb246c80d7ad5d9e4059e215fbad1e07741a5`; base main `198cc21e7a2a39aff49db20fdfd9938ab7731521`.
 - Revisão direta dos dois workflows na branch: `.github/workflows/modal-deploy.yml` permanece manual (`workflow_dispatch`), instala apenas Modal CLI e executa `modal deploy modal_worker.py`; não chama o smoke. `.github/workflows/modal-inference-smoke.yml` é separado, manual, valida `MODAL_TOKEN_ID` e `MODAL_TOKEN_SECRET`, executa `scripts/modal_smoke_test.py` e publica MP4/relatório como artifact por 3 dias.
 - Diff conferido: 3 arquivos no PR (dois workflows e este registro no Master State); nenhuma alteração em `modal_worker.py` ou no pipeline editorial. Revisão estática sem defeito impeditivo identificado.
-- CI #1178 / run `44175647626` no head original e CI #1182 / run `44177472367` após sincronização: `unit-tests`, `commons-live-smoke` e `remotion-typecheck` concluídos com success; `remotion-synthetic-render` skipped nos dois runs.
-- A branch foi sincronizada com a main pelo merge commit `8ad700537fae41199f1b506a5fc68b74173ed5d9`; o CI #1182 passou nos três jobs executados. Após novos commits documentais na main, a comparação atual passou a 4 commits à frente e 3 atrás, e GitHub reporta `mergeable=false`.
-- Estado: implementação na branch, revisão estática e CI #1178/#1182 aprovados nos jobs executados; PR aberta, não mergeada; não implantada. Main e deployments existentes permanecem inalterados.
+- CI #1178 e #1182 passaram nos três jobs executados nos respectivos heads; o reteste mais recente CI #1190 / run `44177875187`, head `a2b5d2c3a668cf36db0ee891854d3bb457ad8534`, também concluiu com unit-tests, commons-live-smoke e remotion-typecheck success; synthetic render skipped.
+- A branch foi sincronizada novamente com a main pelo merge commit `a2b5d2c3a668cf36db0ee891854d3bb457ad8534`. Imediatamente após a sincronização, compare mostrou 5 commits à frente e 0 atrás; diff restrito aos dois workflows Modal. GitHub API reportou mergeable=true.
+- Estado: implementação na branch, revisão estática e CI #1190 aprovado nos jobs executados; PR aberta, não mergeada; não implantada. Main e deployments existentes permanecem inalterados.
 - Nenhum deploy Modal, smoke de inferência, GPU, Cloudflare, Fish Audio, Gemini ou render foi acionado. Nenhum custo variável adicional gerado.
-- Próxima ação: sincronizar a branch com a main e repetir CI antes de qualquer integração; merge depende de autorização explícita. Deploy e inferência continuam exigindo autorizações próprias.
+- Próxima ação: aguardar autorização explícita para merge e conferir novamente a base/checks antes da integração. Deploy e inferência continuam exigindo autorizações próprias.
 
 ## Próxima ação sem custo
 1. Fazer revisão final do diff e dos logs do CI #1163; manter PR #10 aberta até solicitação explícita de merge.
