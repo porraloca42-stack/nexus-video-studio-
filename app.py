@@ -746,6 +746,9 @@ if active_view == "Criar":
                             "low_motion_scene_count": int(report.get("low_motion_scene_count") or 0),
                             "total_i2v_seconds": float(report.get("total_i2v_seconds") or 0),
                             "total_i2v_inference_seconds": float(report.get("total_i2v_inference_seconds") or 0),
+                            "estimated_ltx_gpu_cost_usd": report.get("estimated_ltx_gpu_cost_usd"),
+                            "ltx_gpu_cost_budget_usd": report.get("ltx_gpu_cost_budget_usd"),
+                            "gpu_name": report.get("gpu_name"),
                             "visual_source": report.get("visual_source", "Cloudflare + Modal I2V + Remotion"),
                             "worker_run_id": result.get("run_id"),
                             "visual_reviews": [],
@@ -1177,6 +1180,20 @@ if active_view == "Criar":
                 f"{info.get('total_i2v_inference_seconds', 0):.1f}s de inferência GPU "
                 "(tempo de inferência, não o total faturado)"
             )
+            gpu_estimate = info.get("estimated_ltx_gpu_cost_usd")
+            if gpu_estimate is not None:
+                monthly_gpu_projection = float(gpu_estimate) * 22
+                st.caption(
+                    f"GPU Modal estimada por vídeo: US$ {float(gpu_estimate):.3f} · "
+                    f"projeção para 22 vídeos: US$ {monthly_gpu_projection:.2f} somente GPU. "
+                    "Não inclui CPU, memória, Cloudflare, Gemini ou Fish Audio; "
+                    "é uma estimativa técnica, não uma fatura."
+                )
+            else:
+                st.caption(
+                    "Estimativa de GPU Modal indisponível neste relatório. "
+                    "O custo completo deve ser conferido no painel Modal."
+                )
         if info.get("worker_run_id"):
             st.caption(f"[Ver execução do render no GitHub Actions](https://github.com/porraloca42-stack/nexus-video-studio-/actions/runs/{info['worker_run_id']})")
         reviews = info.get("visual_reviews", [])
