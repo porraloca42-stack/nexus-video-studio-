@@ -369,8 +369,42 @@ def generate_fish_preview(api_key, voice_id, *, text=FISH_VOICE_TEXT, session=No
     return response.content
 
 
-def _make_fish_voice(text, output, api_key, voice_id, session=None):
-    """Generate Fish S2.1 Pro Free audio and concatenate native timestamped SSE chunks."""
+def _flatten_fish_alignment(alignment_by_chunk):
+    """Convert Fish's latest per-chunk snapshots into global-time segments.
+
+    Fish sends cumulative snapshots, so the last non-null snapshot for each
+    chunk_seq replaces earlier snapshots. Segment times are local to that text
+    chunk and must be shifted by chunk_audio_offset_sec.
+    """
+    segments = []
+    for chunk_seq, snapshot in sorted(alignment_by_chunk.items()):
+        offset = snapshot.get("offset")
+        alignment = snapshot.get("alignment")
+        if not isinstance(offset, (int, float)) or not isinstance(alignment, dict):
+            continue
+        for item in alignment.get("segments", []):
+            if not isinstance(item, dict):
+                continue
+            text = item.get("text")
+            start, end = item.get("start"), item.get("end")
+            if (
+                not isinstance(text, str) or not text.strip()
+                or not isinstance(start, (int, float))
+                or not isinstance(end, (int, float))
+                or end <= start
+            ):
+                continue
+            segments.append({
+                "text": text,
+                "start_seconds": round(float(offset) + float(start), 6),
+                "end_seconds": round(float(offset) + float(end), 6),
+                "chunk_seq": chunk_seq,
+            })
+    return sorted(segments, key=lambda item: (item["start_seconds"], item["end_seconds"]))
+
+
+def _make_fish_voice(text, output, api_key, voice_id, session=None, return_alignment=False):
+    """Generate Fish audio and optionally preserve its timestamp alignment snapshots."""
     client = session or requests
     payload = {
         "text": text,
@@ -397,6 +431,7 @@ def _make_fish_voice(text, output, api_key, voice_id, session=None):
     )
     response.raise_for_status()
     audio_parts = []
+    alignment_by_chunk = {}
     for raw_line in response.iter_lines(decode_unicode=True):
         if not raw_line:
             continue
@@ -413,13 +448,27 @@ def _make_fish_voice(text, output, api_key, voice_id, session=None):
         encoded = event.get("audio_base64")
         if encoded:
             audio_parts.append(base64.b64decode(encoded))
+        alignment = event.get("alignment")
+        chunk_seq = event.get("chunk_seq")
+        offset = event.get("chunk_audio_offset_sec")
+        if (
+            isinstance(alignment, dict)
+            and isinstance(chunk_seq, int) and not isinstance(chunk_seq, bool)
+            and isinstance(offset, (int, float))
+        ):
+            alignment_by_chunk[chunk_seq] = {
+                "offset": float(offset),
+                "alignment": alignment,
+            }
     if not audio_parts:
         raise FishAudioError("Fish Audio não retornou segmentos de áudio.")
     output.write_bytes(b"".join(audio_parts))
+    if return_alignment:
+        return output, _flatten_fish_alignment(alignment_by_chunk)
     return output
 
 
-def make_voice(text, voice, output, fish_api_key=None, fish_voice_id=None, session=None, return_provider=False):
+def make_voice(text, voice, output, fish_api_key=None, fish_voice_id=None, session=None, return_provider=False, return_alignment=False):
     """Generate narration only with the selected Fish voice; never fall back to Edge TTS."""
     output = Path(output)
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -429,7 +478,14 @@ def make_voice(text, voice, output, fish_api_key=None, fish_voice_id=None, sessi
     if not voice_id:
         raise FishAudioError("Selecione uma voz da biblioteca Fish Audio antes de produzir o vídeo.")
     try:
-        result = _make_fish_voice(text, output, fish_api_key, voice_id=voice_id, session=session)
+        generated = _make_fish_voice(
+            text, output, fish_api_key, voice_id=voice_id, session=session,
+            return_alignment=return_alignment,
+        )
+        if return_alignment:
+            result, alignment_segments = generated
+        else:
+            result, alignment_segments = generated, []
         if not output.exists() or output.stat().st_size == 0:
             raise FishAudioError("Fish Audio retornou um arquivo de áudio vazio.")
     except Exception as exc:
@@ -440,4 +496,10 @@ def make_voice(text, voice, output, fish_api_key=None, fish_voice_id=None, sessi
             f"Fish Audio falhou ao gerar a voz selecionada ({str(exc)[:220]}). "
             "A produção foi interrompida para não substituir a voz por uma narração robótica."
         ) from exc
-    return (result, "Fish Audio S2.1 Pro Free") if return_provider else result
+    if return_provider and return_alignment:
+        return result, "Fish Audio S2.1 Pro Free", alignment_segments
+    if return_provider:
+        return result, "Fish Audio S2.1 Pro Free"
+    if return_alignment:
+        return result, alignment_segments
+    return result
