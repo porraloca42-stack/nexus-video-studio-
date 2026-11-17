@@ -47,21 +47,21 @@ class AppImportResilienceTests(unittest.TestCase):
         self.assertNotIn('st.selectbox(', dialog)
         self.assertNotIn('Usar esta voz', dialog)
 
-    def test_voice_picker_has_inline_toggle_and_single_shared_audio_player(self):
+    def test_voice_picker_previews_then_requires_explicit_confirmation(self):
         source = Path("app.py").read_text(encoding="utf-8")
         start = source.index('@st.dialog("Escolher narração"')
         end = source.index('@st.dialog("Duração do vídeo"', start)
         dialog = source[start:end]
-        self.assertIn('name_col, play_col = st.columns([0.86, 0.14]', dialog)
-        self.assertIn('"⏸" if is_previewing else "▶"', dialog)
-        self.assertIn('if is_previewing:', dialog)
-        self.assertIn('st.session_state.pop("nexus_active_voice_preview_source", None)', dialog)
-        self.assertIn('st.audio(active_preview_source, format="audio/mp3", autoplay=True)', dialog)
+        self.assertIn('key=f"nexus-preview-select-voice-{voice_id}"', dialog)
+        self.assertIn('st.session_state["nexus_pending_voice_id"] = voice_id', dialog)
+        self.assertIn('st.session_state["nexus_pending_voice_preview_source"] = preview_source', dialog)
+        self.assertIn('st.audio(pending_source, format="audio/mp3", autoplay=True)', dialog)
+        self.assertIn('key="nexus-confirm-pending-voice"', dialog)
+        self.assertIn('st.session_state["nexus_fish_voice_id"] = pending_id', dialog)
+        self.assertIn('st.session_state["nexus_fish_voice_name"] = pending_name', dialog)
+        self.assertNotIn('name_col, play_col = st.columns', dialog)
+        self.assertNotIn('nexus_active_voice_preview_id', dialog)
         self.assertIn('fish_audio.generate_fish_preview(api_key, voice_id)', dialog)
-        self.assertIn('st.session_state["nexus_active_voice_preview_source"] = preview_source', dialog)
-        self.assertNotIn('components.html(', dialog)
-        self.assertNotIn('<audio id=', dialog)
-        self.assertEqual(dialog.count('st.audio('), 1)
 
     def test_header_uses_centered_user_supplied_nexus_mark(self):
         source = Path("app.py").read_text(encoding="utf-8")
