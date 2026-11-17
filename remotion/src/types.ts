@@ -7,6 +7,32 @@ export type SceneDirection = {
   transition: { in: "cut" | "crossfade" | "match_cut" | "fade"; out: "cut" | "crossfade" | "match_cut" | "fade"; durationFrames: number };
   beats: Array<{ at: number; event: string; visualTarget: string }>;
 };
+export type CaptionWord = {
+  text: string;
+  startSeconds: number;
+  endSeconds: number;
+  emphasis?: boolean;
+};
+export type CaptionEvent = {
+  id: string;
+  startSeconds: number;
+  endSeconds: number;
+  text: string;
+  position?: "top" | "center" | "bottom";
+  words?: CaptionWord[];
+};
+export type SoundEffectEvent = {
+  id: string;
+  asset: string;
+  startSeconds: number;
+  durationSeconds: number;
+  volume: number;
+};
+export type AudioMixEvent = {
+  startSeconds: number;
+  endSeconds: number;
+  musicVolume: number;
+};
 export type NexusScene = {
   id: string; durationSeconds: number; narration: string; visualMode: "graphic" | "image" | "video";
   asset?: string; imagePrompt?: string; cameraMotion?: CameraMove; motionEvents?: string[];
@@ -14,5 +40,6 @@ export type NexusScene = {
 };
 export type NexusVideoProps = {
   width: number; height: number; fps: number; durationInFrames: number; title: string;
-  narrationAudio?: string; musicAudio?: string; scenes: NexusScene[];
+  narrationAudio?: string; musicAudio?: string; musicVolume?: number; scenes: NexusScene[];
+  captionEvents?: CaptionEvent[]; soundEffects?: SoundEffectEvent[]; audioMixEvents?: AudioMixEvent[];
 };
