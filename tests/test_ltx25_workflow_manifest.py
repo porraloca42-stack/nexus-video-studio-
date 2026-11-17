@@ -19,8 +19,10 @@ class LTX25WorkflowManifestTests(unittest.TestCase):
         self.assertFalse(manifest["api_exporter"]["api_prompt_exported"])
         self.assertEqual(
             manifest["api_exporter"]["commit"],
-            "196dd85cde3314dffdc33b41caa3e5d9be432ffb",
+            "6d6af63c00f132cd25dc29307fc56bd2c094fa22",
         )
+        self.assertEqual(manifest["api_exporter"]["frontend_version"], "1.48.7")
+        self.assertEqual(manifest["api_exporter"]["tag"], "v1.48.7")
         self.assertIn(
             "resolve links across subgraph boundaries and widget passthrough values",
             manifest["api_exporter"]["requirements"],
