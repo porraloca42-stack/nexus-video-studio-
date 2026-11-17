@@ -1,6 +1,6 @@
 import React from "react";
 import { AbsoluteFill, Audio, Img, OffthreadVideo, Sequence, interpolate, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
-import type { NexusScene, NexusVideoProps } from "./types";
+import type { CaptionEvent, NexusScene, NexusVideoProps } from "./types";
 
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
 
@@ -99,6 +99,49 @@ const SceneLayer: React.FC<{ scene: NexusScene; duration: number; overlapFrames:
   </AbsoluteFill>;
 };
 
+const CaptionOverlay: React.FC<{ event: CaptionEvent }> = ({ event }) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const currentSeconds = event.startSeconds + frame / fps;
+  const position = event.position || "bottom";
+  const justifyContent = position === "top" ? "flex-start" : position === "center" ? "center" : "flex-end";
+  const words = event.words || [];
+  return <AbsoluteFill style={{
+    justifyContent,
+    alignItems: "center",
+    paddingTop: position === "top" ? 150 : 40,
+    paddingBottom: position === "bottom" ? 190 : 40,
+    paddingLeft: 54,
+    paddingRight: 54,
+    pointerEvents: "none",
+  }}>
+    <div style={{
+      maxWidth: "100%",
+      padding: "12px 20px",
+      borderRadius: 16,
+      background: "rgba(0, 0, 0, 0.58)",
+      color: "#ffffff",
+      fontSize: 46,
+      fontWeight: 800,
+      lineHeight: 1.18,
+      textAlign: "center",
+      textShadow: "0 3px 12px rgba(0,0,0,0.85)",
+      overflowWrap: "anywhere",
+    }}>
+      {words.length ? words.map((word, index) => {
+        const active = currentSeconds >= word.startSeconds && currentSeconds < word.endSeconds;
+        const highlighted = Boolean(word.emphasis) || active;
+        return <span key={index} style={{
+          display: "inline-block",
+          marginRight: 11,
+          color: highlighted ? "#ffd477" : "#ffffff",
+          transform: active ? "scale(1.035)" : "scale(1)",
+        }}>{word.text}</span>;
+      }) : event.text}
+    </div>
+  </AbsoluteFill>;
+};
+
 export const NexusVideo: React.FC<NexusVideoProps> = (props) => {
   const { fps } = useVideoConfig();
   let cursor = 0;
@@ -121,6 +164,38 @@ export const NexusVideo: React.FC<NexusVideoProps> = (props) => {
       <SceneLayer scene={layer.scene} duration={layer.duration} overlapFrames={layer.overlapFrames} />
     </Sequence>)}
     {props.narrationAudio ? <Audio src={staticFile(props.narrationAudio)} /> : null}
-    {props.musicAudio ? <Audio src={staticFile(props.musicAudio)} volume={0.12} /> : null}
+    {props.musicAudio ? <Audio
+      src={staticFile(props.musicAudio)}
+      volume={(frame) => {
+        const seconds = frame / fps;
+        const activeMix = (props.audioMixEvents || []).filter(
+          (event) => seconds >= event.startSeconds && seconds < event.endSeconds
+        );
+        const requested = activeMix.length
+          ? Math.min(...activeMix.map((event) => event.musicVolume))
+          : (props.musicVolume ?? 0.12);
+        return clamp(requested, 0, 1);
+      }}
+    /> : null}
+    {(props.soundEffects || []).map((event) => (
+      <Sequence
+        key={event.id}
+        from={Math.max(0, Math.round(event.startSeconds * fps))}
+        durationInFrames={Math.max(1, Math.round(event.durationSeconds * fps))}
+        layout="none"
+      >
+        <Audio src={staticFile(event.asset)} volume={clamp(event.volume, 0, 1)} />
+      </Sequence>
+    ))}
+    {(props.captionEvents || []).map((event) => (
+      <Sequence
+        key={event.id}
+        from={Math.max(0, Math.round(event.startSeconds * fps))}
+        durationInFrames={Math.max(1, Math.round((event.endSeconds - event.startSeconds) * fps))}
+        layout="none"
+      >
+        <CaptionOverlay event={event} />
+      </Sequence>
+    ))}
   </AbsoluteFill>;
 };
