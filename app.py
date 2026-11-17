@@ -124,39 +124,31 @@ def secret(name, default=""):
 
 st.set_page_config(page_title="NEXUS VIDEO STUDIO", page_icon="🎬", layout="wide", initial_sidebar_state="collapsed")
 
-from nexus.visual_styles import STYLE_OPTIONS, STYLE_META, STYLE_PREVIEW_SCENES, STYLE_PROFILES
-STYLE_SCENES = [STYLE_PREVIEW_SCENES[name] for name in STYLE_OPTIONS]
+from nexus.visual_styles import STYLE_OPTIONS, STYLE_META, STYLE_PROFILES
+
 def style_preview_svg(style):
     sky, accent, ground, _ = STYLE_META[style]
-    scene = STYLE_SCENES[STYLE_OPTIONS.index(style)]
-    base = f'<defs><linearGradient id="bg" x2="0" y2="1"><stop stop-color="{sky}"/><stop offset="1" stop-color="{ground}"/></linearGradient><radialGradient id="light"><stop stop-color="{accent}" stop-opacity=".9"/><stop offset="1" stop-color="{accent}" stop-opacity="0"/></radialGradient></defs><rect width="480" height="270" fill="url(#bg)"/>'
-    art = {
-      "mountain": f'<circle cx="365" cy="75" r="65" fill="url(#light)"/><circle cx="365" cy="75" r="24" fill="{accent}"/><path d="M0 205L95 95 165 180 260 82 380 200 440 125 480 180V270H0Z" fill="{ground}"/>',
-      "farmer": f'<circle cx="240" cy="76" r="42" fill="{accent}"/><path d="M130 120Q240 60 350 120L385 145H95Z" fill="#bd9560"/><path d="M180 150Q240 118 300 150L340 270H140Z" fill="#526e56"/><path d="M0 220Q150 180 480 220V270H0Z" fill="{ground}"/>',
-      "silhouette": f'<circle cx="350" cy="75" r="70" fill="url(#light)"/><path d="M0 200L120 140 220 205 330 130 480 205V270H0Z" fill="{ground}"/><path d="M205 110Q240 90 265 115L275 175 300 240H180L205 175Z" fill="#080b12"/>',
-      "detective": f'<circle cx="240" cy="105" r="46" fill="#b8b8b8"/><path d="M160 85L240 38 320 85Z" fill="#090b10"/><path d="M180 145Q240 115 300 145L360 270H120Z" fill="#10131b"/><path d="M0 230H480" stroke="{accent}" stroke-width="3"/>',
-      "watch": f'<path d="M200 15H280L292 75H188Z M188 195H292L280 255H200Z" fill="#a68b5c"/><circle cx="240" cy="135" r="76" fill="#111820" stroke="{accent}" stroke-width="12"/><circle cx="240" cy="135" r="6" fill="{accent}"/><path d="M240 135L240 82M240 135L284 154" stroke="{accent}" stroke-width="5"/>',
-      "coffee": f'<circle cx="350" cy="70" r="70" fill="url(#light)"/><path d="M150 130H315L300 215Q230 250 165 215Z" fill="#eee0c9"/><path d="M315 150Q385 135 365 195Q350 220 300 205" fill="none" stroke="#eee0c9" stroke-width="16"/><path d="M210 118Q190 90 215 70M250 118Q230 82 255 58" stroke="#fff" stroke-width="5" fill="none" opacity=".7"/>',
-      "waterfall": f'<path d="M0 0H480V100L390 145 310 90 230 150 120 85 0 140Z" fill="{ground}"/><path d="M200 95Q230 140 210 210L190 270H300L270 190Q250 125 280 95Z" fill="#b8e4e8"/><path d="M0 230Q120 190 240 230T480 220V270H0Z" fill="#1c6870"/>',
-      "vase": f'<rect x="75" y="0" width="330" height="270" fill="#f0e8d8" opacity=".13"/><path d="M225 65H255L260 110Q315 145 285 225Q240 260 195 225Q165 145 220 110Z" fill="#e0d6c5"/><path d="M240 65Q220 35 190 20M240 65Q270 28 300 15" stroke="#8fa77c" stroke-width="8" fill="none"/>',
-      "van": f'<circle cx="370" cy="70" r="60" fill="{accent}"/><path d="M70 150H290L355 190V235H60V185Z" fill="#c18a52"/><circle cx="130" cy="235" r="25" fill="#10151b"/><circle cx="295" cy="235" r="25" fill="#10151b"/><path d="M0 250H480" stroke="#f2d3a0" stroke-width="3"/>',
-      "sunset": f'<circle cx="240" cy="120" r="90" fill="{accent}"/><path d="M0 165Q100 120 220 170T480 150V270H0Z" fill="{ground}"/><path d="M0 210H480M0 230H480M0 250H480" stroke="{sky}" stroke-width="6"/>',
-      "neon_city": f'<path d="M20 100H105V270H20ZM125 35H220V270H125ZM240 85H330V270H240ZM350 55H460V270H350Z" fill="#11152c" stroke="{accent}" stroke-width="4"/><path d="M40 130H90M145 75H200M260 120H310M375 90H435" stroke="#21d7e8" stroke-width="8"/>',
-      "spaceship": f'<circle cx="370" cy="55" r="65" fill="url(#light)"/><path d="M80 150Q240 30 400 150L320 205H160Z" fill="#a9c7d5" stroke="{accent}" stroke-width="6"/><path d="M180 205L140 250M300 205L340 250" stroke="#8cecff" stroke-width="8"/>',
-      "castle": f'<path d="M80 220V120H120V80H160V120H200V55H250V120H300V80H340V120H390V220Z" fill="{ground}" stroke="{accent}" stroke-width="5"/><path d="M220 220V160Q240 125 260 160V220" fill="{sky}"/>',
-      "surreal": f'<circle cx="240" cy="115" r="85" fill="{accent}" opacity=".75"/><path d="M155 170Q240 65 325 170L300 240H180Z" fill="#d7c6bc"/><circle cx="210" cy="130" r="9" fill="#151823"/><circle cx="270" cy="130" r="9" fill="#151823"/><path d="M210 180Q240 200 270 180" stroke="#151823" stroke-width="6" fill="none"/>',
-      "anime_landscape": f'<circle cx="365" cy="70" r="46" fill="{accent}"/><path d="M0 200L100 105 175 180 265 85 380 190 440 120 480 180V270H0Z" fill="{ground}"/><path d="M0 230Q120 200 240 230T480 225" stroke="#e6f4fa" stroke-width="5" fill="none"/>',
-      "anime_portrait": f'<circle cx="240" cy="110" r="75" fill="#f1c5a7"/><path d="M155 115Q140 10 245 28Q350 30 320 145L290 95 260 65 200 95Z" fill="#29344e"/><circle cx="210" cy="120" r="9" fill="#202a43"/><circle cx="270" cy="120" r="9" fill="#202a43"/><path d="M170 185Q240 155 310 185L365 270H115Z" fill="#d58f91"/>',
-      "editorial": f'<circle cx="335" cy="75" r="65" fill="{accent}"/><path d="M120 245L180 60 260 80 320 245Z" fill="#f0d8b0"/><path d="M165 115Q240 30 300 115" stroke="#273344" stroke-width="16" fill="none"/><path d="M0 250H480" stroke="{ground}" stroke-width="20"/>',
-      "lighthouse": f'<path d="M0 210L120 145 230 205 350 135 480 205V270H0Z" fill="{ground}"/><path d="M220 95H270L285 220H205Z" fill="#eee5d0"/><path d="M210 95H280L265 70H225Z" fill="{accent}"/><path d="M0 230Q120 205 240 235T480 225" stroke="#e8f6f5" stroke-width="8" fill="none"/>',
-      "comic": f'<path d="M0 0L480 270M480 0L0 270" stroke="{accent}" stroke-width="7"/><path d="M120 270V100L240 30 360 100V270Z" fill="#151a26" stroke="#f0d15c" stroke-width="6"/><circle cx="240" cy="120" r="40" fill="#f0d15c"/>',
-      "car": f'<path d="M80 165L130 105H330L390 165L430 205H50Z" fill="#b8d1dd" stroke="{accent}" stroke-width="6"/><circle cx="135" cy="210" r="30" fill="#111820"/><circle cx="350" cy="210" r="30" fill="#111820"/><path d="M150 115H310L350 165H110Z" fill="#18283a"/>',
-      "character3d": f'<circle cx="240" cy="95" r="60" fill="#efbf91"/><path d="M180 75Q190 15 250 30Q315 35 300 100L275 70 220 75Z" fill="#493b32"/><circle cx="220" cy="105" r="8" fill="#182333"/><circle cx="265" cy="105" r="8" fill="#182333"/><path d="M150 270Q165 165 240 165Q315 165 330 270Z" fill="{accent}"/>',
-      "clay": f'<circle cx="240" cy="120" r="76" fill="#d7a16e" stroke="#805c47" stroke-width="8"/><circle cx="215" cy="110" r="9" fill="#25252b"/><circle cx="265" cy="110" r="9" fill="#25252b"/><path d="M210 150Q240 175 270 150" stroke="#805c47" stroke-width="7" fill="none"/><path d="M160 210Q240 175 320 210L360 270H120Z" fill="{ground}"/>',
-      "droplet": f'<path d="M240 35Q110 175 240 230Q370 175 240 35Z" fill="#bceaf0" stroke="{accent}" stroke-width="8"/><circle cx="210" cy="150" r="14" fill="#fff" opacity=".85"/><circle cx="270" cy="180" r="7" fill="#fff" opacity=".7"/>',
-      "island": f'<path d="M0 170Q130 130 240 180T480 160V270H0Z" fill="#176e85"/><path d="M80 165Q190 45 340 120Q420 155 395 185Q260 215 80 165Z" fill="#7ea97d"/><path d="M190 125Q240 60 290 125" stroke="#e6d6ae" stroke-width="10" fill="none"/>'
-    }
-    svg = f'<svg xmlns="http://www.w3.org/2000/svg" width="480" height="270" viewBox="0 0 480 270">{base}{art[scene]}<rect x="5" y="5" width="470" height="260" rx="13" fill="none" stroke="{accent}" stroke-opacity=".45" stroke-width="3"/></svg>'
+    # Abstract material/lighting study only: no people, props, locations or scene examples.
+    svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="480" height="270" viewBox="0 0 480 270">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="{sky}"/><stop offset="1" stop-color="{ground}"/></linearGradient>
+        <radialGradient id="glow"><stop stop-color="{accent}" stop-opacity=".8"/><stop offset="1" stop-color="{accent}" stop-opacity="0"/></radialGradient>
+        <pattern id="grain" width="18" height="18" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="{accent}" opacity=".22"/></pattern>
+      </defs>
+      <rect width="480" height="270" fill="url(#bg)"/>
+      <ellipse cx="245" cy="128" rx="190" ry="110" fill="url(#glow)" opacity=".8"/>
+      <g fill="none" stroke="{accent}" stroke-opacity=".72">
+        <ellipse cx="240" cy="135" rx="175" ry="62" stroke-width="2"/>
+        <ellipse cx="240" cy="135" rx="125" ry="95" stroke-width="1.5" transform="rotate(-28 240 135)"/>
+        <ellipse cx="240" cy="135" rx="125" ry="95" stroke-width="1.5" transform="rotate(28 240 135)"/>
+        <path d="M35 205 Q145 150 240 205 T445 205" stroke-width="3"/>
+        <path d="M35 220 Q145 165 240 220 T445 220" stroke-width="1.5"/>
+      </g>
+      <circle cx="240" cy="135" r="34" fill="{accent}" opacity=".18"/>
+      <circle cx="240" cy="135" r="8" fill="{accent}"/>
+      <rect width="480" height="270" fill="url(#grain)"/>
+      <rect x="5" y="5" width="470" height="260" rx="13" fill="none" stroke="{accent}" stroke-opacity=".45" stroke-width="3"/>
+    </svg>'''
     return svg
 
 st.markdown("""
