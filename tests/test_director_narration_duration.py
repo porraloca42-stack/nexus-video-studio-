@@ -34,7 +34,7 @@ class NarrationDurationRevisionTests(unittest.TestCase):
         self.assertIn("velocidade NATURAL", prompt)
         self.assertIn("É PROIBIDO expandir o texto", prompt)
         self.assertIn("encurte SOMENTE", prompt)
-        self.assertIn("aproximadamente 12 palavras", prompt)
+        self.assertIn("aproximadamente 8 palavras", prompt)
 
     def test_rejects_missing_scene_voiceover(self):
         plan = {"scenes": [{"voiceover": "Fala um."}, {"voiceover": "Fala dois."}]}
