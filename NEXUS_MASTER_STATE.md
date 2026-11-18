@@ -1,3 +1,11 @@
+## Modal L40S — confirmação de cache em execução repetida — 2026-11-18
+- Segunda execução do smoke de uma cena: GitHub Actions run 44224013928, job 134532615456, status success. GPU real identificada como NVIDIA L40S; modelo LTX-Video 2B v0.9.8 distilled multi-scale.
+- Cena de 2,0417s: inferência 2,151s; carga do modelo 34,476s; chamada Modal 55,849s; duração do job 1m46s. Os arquivos do checkpoint e upscaler tiveram cache hit (2 hits, 0 misses, 0s de download). Comparado ao primeiro smoke frio, a carga caiu de 240,808s; a redução observada confirma persistência do cache.
+- O relatório não expõe preço faturado por execução (estimated_gpu_only_cost_usd: null). Painel agregado da Modal foi consultado: ainda mostra créditos cobrindo uso e US$0 em cobranças líquidas; o spend limit continua em US$0. Não atribuir variação do acumulado a esta execução como custo exato individual.
+- Esta execução confirma cache de pesos e inferência curta em L40S; não valida geração concorrente, vida útil do container durante várias cenas, custo isolado de um vídeo, render final ou qualidade editorial de 40–50s.
+- Próxima etapa de validação: um MP4 integrado de 40–50s pelo fluxo real (roteiro, narração, cenas, legendas e Remotion), capturando o uso agregado antes/depois e inspecionando sincronização, ritmo e coerência visual. Ainda pendente; não declarar custo mensal de 22 vídeos nem qualidade de produção validados.
+- Evidência: https://github.com/porraloca42-stack/nexus-video-studio-/actions/runs/44224013928.
+
 ## Modal GPU: custo, deployment e smoke test — 2026-11-18
 - Por autorização explícita do proprietário, o registro público contém o baseline de conta autorizado: crédito computacional mensal US$30,00; uso do ciclo antes do teste US$1,50, coberto por créditos; cobranças líquidas US$0; spend limit US$0. Nenhum limite financeiro foi alterado.
 - Tarifa pública Modal consultada: L40S US$0,000542/GPU-s; H100 US$0,001097/GPU-s. L40S custa cerca de 50,6% menos por segundo; H100 só empata se reduzir pela metade ou mais o tempo de GPU. Para o LTX-Video 2B distilled e formato de cena NEXUS (512×896), a opção recomendada é L40S, com H100 como fallback só se tempo/estabilidade real justificarem o prêmio.
