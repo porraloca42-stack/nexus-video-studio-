@@ -202,10 +202,27 @@ def open_voice_picker():
     pending_name = st.session_state.get("nexus_pending_voice_name")
 
     if pending_id and pending_source:
-        st.markdown(f"**Prévia selecionada: {pending_name}**")
-        st.audio(pending_source, format="audio/mp3", autoplay=True)
+        voice_name = pending_name.split(" · ", 1)[-1].removesuffix(" · Fish Official")
+        st.markdown(f"**{voice_name} · amostra publicada**")
+        st.audio(pending_source, format="audio/mp3")
+
+        auditions = st.session_state.setdefault("nexus_narration_auditions", {})
+        if pending_id not in auditions:
+            st.caption("Compare as vozes com o mesmo texto lido pelo sintetizador do vídeo. Cada teste usa a cota da Fish Audio.")
+            if st.button(
+                "Testar esta voz com o mesmo texto", key=f"nexus-audition-{pending_id}",
+            ):
+                try:
+                    with st.spinner("Sintetizando o trecho com a voz escolhida..."):
+                        auditions[pending_id] = fish_audio.make_voice_audition(api_key, pending_id)
+                except fish_audio.FishAudioError as exc:
+                    st.error(str(exc))
+        if pending_id in auditions:
+            st.caption("Teste de narração · " + fish_audio.NARRATION_AUDITION_TEXT)
+            st.audio(auditions[pending_id], format="audio/mp3")
+
         if st.button(
-            f"✓ Confirmar voz {pending_name.split(' · ')[-1]}",
+            f"✓ Confirmar voz {voice_name}",
             type="primary",
             width="stretch",
             key="nexus-confirm-pending-voice",
@@ -493,7 +510,10 @@ if active_view == "Criar":
         st.session_state["nexus_fish_voice_name"] = ""
     st.session_state.setdefault("nexus_duration", 45)
     selected_voice_name = st.session_state.get("nexus_fish_voice_name") or ""
-    voice_button_label = selected_voice_name.split(" · ")[-1] if selected_voice_name else "Escolher voz"
+    voice_button_label = (
+        selected_voice_name.split(" · ", 1)[-1].removesuffix(" · Fish Official")
+        if selected_voice_name else "Escolher voz"
+    )
     if len(voice_button_label) > 19:
         voice_button_label = voice_button_label[:18].rstrip() + "…"
     duration = int(st.session_state.get("nexus_duration", 45))

@@ -6,6 +6,7 @@ reported clearly instead of silently changing the selected voice.
 import base64
 import json
 import re
+import tempfile
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from urllib.parse import urljoin
@@ -16,6 +17,11 @@ import requests
 FISH_API = "https://api.fish.audio"
 FISH_TTS_MODEL = "s2.1-pro-free"
 FISH_VOICE_TEXT = "Olá! Esta é uma amostra da minha voz para a narração do seu vídeo. Vamos transformar essa ideia em uma história que prende a atenção."
+
+NARRATION_AUDITION_TEXT = (
+    "Você promete que começa amanhã. E se hoje bastassem dois minutos? "
+    "Escolha uma tarefa. Agora, faça só o primeiro movimento."
+)
 
 # Fish Audio first-party Brazilian Portuguese profiles verified on the official
 # voice pages. IDs are checked again at runtime against author, title, locale,
@@ -576,3 +582,13 @@ def make_voice(text, voice, output, fish_api_key=None, fish_voice_id=None, sessi
     if return_alignment:
         return result, alignment_segments
     return result
+
+
+def make_voice_audition(api_key, voice_id, *, session=None):
+    """Read the same short script through the production narrator for every voice."""
+    with tempfile.TemporaryDirectory(prefix="nexus_voice_audition_") as temp_dir:
+        audio_path = make_voice(
+            NARRATION_AUDITION_TEXT, voice_id, Path(temp_dir) / "audition.mp3",
+            fish_api_key=api_key, session=session,
+        )
+        return audio_path.read_bytes()
