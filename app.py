@@ -912,17 +912,18 @@ if active_view == "Criar":
                                     }
                                     for item in motion_diagnostics
                                 ], use_container_width=True, hide_index=True)
-                        # Final editorial QA: inspect one representative frame from every scene.
+                        # Audit the scene timings and narration used in the rendered MP4.
                         # This review is advisory and never discards a technically valid render.
                         try:
                             from nexus.visual_review import extract_scene_frames, review_scene_frames
                             visual_key = secret("GEMINI_API_KEY")
                             if visual_key:
+                                reviewed_scenes = report.get("rendered_scenes", plan.get("scenes", []))
                                 with tempfile.TemporaryDirectory(prefix="nexus_visual_review_") as qa_dir:
                                     qa_video = Path(qa_dir) / "rendered.mp4"
                                     qa_video.write_bytes(video_bytes)
-                                    frames = extract_scene_frames(qa_video, plan.get("scenes", []), Path(qa_dir) / "frames")
-                                    reviews = review_scene_frames(frames, plan.get("scenes", []), visual_key)
+                                    frames = extract_scene_frames(qa_video, reviewed_scenes, Path(qa_dir) / "frames")
+                                    reviews = review_scene_frames(frames, reviewed_scenes, visual_key)
                                 st.session_state["nexus_rendered_info"]["final_visual_audit"] = reviews
                                 semantic_avg = round(sum(item["semantic_score"] for item in reviews) / max(1, len(reviews)), 1)
                                 motion_avg = round(sum(item["motion_progression_score"] for item in reviews) / max(1, len(reviews)), 1)

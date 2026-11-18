@@ -492,8 +492,10 @@ class AudioOutputTests(unittest.TestCase):
                     },
                 ]
                 for event in events:
-                    yield "data: " + json.dumps(event)
-                yield "data: [DONE]"
+                    line = ("data: " + json.dumps(event, ensure_ascii=False)).encode("utf-8")
+                    # Requests may infer Latin-1 on text responses with no charset.
+                    yield line.decode("latin-1") if decode_unicode else line
+                yield b"data: [DONE]"
 
         class TimestampSession(FakeFishSession):
             def post(self, *args, **kwargs):
