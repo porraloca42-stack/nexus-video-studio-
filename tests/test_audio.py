@@ -371,7 +371,7 @@ class AudioOutputTests(unittest.TestCase):
         session = PagedSession()
         voices = list_fish_professional_narrators("test-key", session=session)
         self.assertEqual([voice["id"] for voice in voices["male"]], ["late-male-pvc"])
-        self.assertIn(2, [call["page_number"] for call in session.calls])
+        self.assertIn(2, [call["page_number"] for call in session.calls if "page_number" in call])
 
     def test_professional_narrator_accepts_explicit_pt_br_language_metadata(self):
         voice = {
