@@ -1,6 +1,9 @@
 # NEXUS VIDEO STUDIO — CONTEXTO OPERACIONAL
 
 ## Atualização — guardrails editoriais do nicho TikTok — 2026-11-18
+- PR #19 integrada por squash em `86e038b212df0c788e20adf7f06984b93e32abc5`; run `44213745233`: 246 unit tests, Remotion typecheck e Commons smoke passaram; synthetic render skipped. O teste do seletor agora mantém CapCut/ElevenLabs como referências e explica Fish Audio como sintetizador.
+- PR #21 aberta: revisão pré-render editável por cena (narração, ação, busca e movimento), recompõe a narração e recalcula pré-validação sem chamar provedores. CI run `44214296530` em fila; não integrar antes dos testes. Nenhuma mídia gerada.
+- Pesquisa pública Revid/CapCut aponta para fluxo controlável: roteiro segmentado, escolha do tipo de mídia, voz, captions, estimativa antes de gerar e timeline para ajuste posterior. NEXUS já tem planejamento e auditoria pós-render; controle pré-render está em PR #21. Isso descreve superfícies públicas, não o algoritmo interno dos concorrentes.
 - PR #19 integrada por squash em `86e038b212df0c788e20adf7f06984b93e32abc5`. CI run `44213745233`: 246 unit tests, Remotion typecheck e Commons live smoke passaram; render sintético foi skipped. O teste que antes proibia “CapCut” foi atualizado para confirmar os nomes CapCut/ElevenLabs e a indicação de síntese Fish Audio.
 
 - PR #20 integrada por squash no commit `19870aee1ab6c5c10a729aae8b856c1458ed3a3c`. O prompt de direção do Gemini agora distingue lei da atração como filosofia/prática pessoal, aconselha ações concretas em desenvolvimento pessoal e exige separar física quântica estabelecida de metáforas/interpretações, evitando promessas garantidas e autoridade/estudos inventados.
