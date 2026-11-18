@@ -7,6 +7,7 @@ from nexus.director import build_storyboard_preflight, create_storyboard, valida
 from nexus.build_info import get_runtime_build_info
 from nexus.assets import search_video_sources, download_file, diverse_candidate_shortlist
 from nexus.render_modes import ECONOMY_MODE, RENDER_MODE_OPTIONS, default_render_mode, mode_uses_modal
+from nexus.modal_budget import estimate_monthly_modal_budget
 import nexus.audio as fish_audio
 
 # Streamlit Cloud can retain a stale imported module across source syncs.
@@ -448,8 +449,21 @@ if active_view == "Criar":
     if mode_uses_modal(render_mode):
         st.warning(
             "Modo de qualidade selecionado: cenas originais usam créditos Cloudflare e Modal. "
-            "Meta de planejamento: 22 vídeos/mês. O custo total por vídeo ainda precisa ser "
-            "medido; o limite interno do worker não limita o gasto mensal do Workspace."
+            "A projeção abaixo é planejamento; não é limite de cobrança."
+        )
+        modal_projection = estimate_monthly_modal_budget()
+        st.caption(
+            f"Meta: {modal_projection['video_count']} vídeos/mês · "
+            f"teto interno GPU atual: US$ {modal_projection['gpu_per_video_usd']:.2f}/lote · "
+            f"projeção máxima GPU: US$ {modal_projection['monthly_gpu_usd']:.2f}."
+        )
+        st.caption(
+            f"Com reserva indicativa CPU/memória de US$ {modal_projection['reserve_per_video_usd']:.2f}/lote, "
+            f"o envelope de planejamento é US$ {modal_projection['monthly_envelope_usd']:.2f} "
+            f"e sobrariam US$ {modal_projection['credit_remaining_usd']:.2f} dos créditos de US$ "
+            f"{modal_projection['monthly_credit_usd']:.2f}, antes do uso de outros apps do Workspace. "
+            "A reserva não é um teto efetivo; GPU ativa, CPU/memória, outros apps e custos Cloudflare "
+            "precisam ser conferidos na conta."
         )
     else:
         st.caption(
