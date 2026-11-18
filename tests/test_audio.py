@@ -175,12 +175,19 @@ class AudioOutputTests(unittest.TestCase):
         self.assertEqual([voice["id"] for voice in voices["male"]], ["male-pvc"])
         self.assertEqual([voice["id"] for voice in voices["female"]], ["female-licensed"])
         self.assertTrue(voices["female"][0]["licensed"])
-        self.assertEqual(len(session.calls), 4)
-        queried_tags = {tuple(kwargs["params"]["tag"]) for _, _, kwargs in session.calls}
+        self.assertEqual(len(session.calls), 8)  # 4 searches plus 4 pinned official profile checks
+        list_calls = [
+            call for call in session.calls
+            if call[1][0].rstrip("/").endswith("/model")
+        ]
+        queried_tags = {tuple(kwargs["params"]["tag"]) for _, _, kwargs in list_calls}
         self.assertEqual(queried_tags, {("male",), ("female",)})
         # Discovery is broadened by gender, but narration/locale are still
         # enforced from each voice's metadata by the curator.
-        licensed_queries = [kwargs for _, _, kwargs in session.calls if kwargs["params"].get("licensed") == "true"]
+        licensed_queries = [
+            kwargs for _, _, kwargs in list_calls
+            if kwargs["params"].get("licensed") == "true"
+        ]
         self.assertEqual(len(licensed_queries), 2)
 
     def test_verified_fish_official_brazilian_voices_join_the_catalog(self):
@@ -326,8 +333,14 @@ class AudioOutputTests(unittest.TestCase):
             def __init__(self):
                 self.calls = []
             def get(self, url, headers=None, params=None, timeout=None):
-                self.calls.append(dict(params))
-                is_male = "male" in params.get("tag", [])
+                self.calls.append(dict(params or {}))
+                if not url.rstrip("/").endswith("/model"):
+                    return PagedResponse({
+                        "_id": url.rsplit("/", 1)[-1], "type": "tts",
+                        "state": "trained", "visibility": "public",
+                        "title": "Unverified Voice", "author": {"nickname": "Community"},
+                    })
+                is_male = "male" in (params or {}).get("tag", [])
                 page_number = params["page_number"]
                 if is_male and params.get("licensed") is None and page_number == 2:
                     items = [{
