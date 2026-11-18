@@ -504,7 +504,8 @@ def _make_fish_voice(text, output, api_key, voice_id, session=None, return_align
     response.raise_for_status()
     audio_parts = []
     alignment_by_chunk = {}
-    for raw_line in response.iter_lines(decode_unicode=True):
+    # Fish sends UTF-8 SSE even when the response omits a charset.
+    for raw_line in response.iter_lines(decode_unicode=False):
         if not raw_line:
             continue
         line = raw_line.decode("utf-8") if isinstance(raw_line, bytes) else raw_line
