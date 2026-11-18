@@ -1,3 +1,11 @@
+## Modal GPU: custo e deployment — 2026-11-18
+- Por autorização explícita do proprietário, este registro público inclui os dados da conta Modal que ele autorizou divulgar: crédito mensal US$30,00; uso deste ciclo US$1,50, coberto integralmente por créditos; cobranças atuais US$0; spend limit US$0. Não alterei limites nem faturamento.
+- O deployment ativo observado no painel usa H100, enquanto o código atual em `nexus/ltx_config.py` pede L40S. A projeção anterior baseada em L40S não descreve o deployment ativo.
+- Preço público Modal consultado: L40S US$0,000542/GPU-s e H100 US$0,001097/GPU-s. A L40S custa cerca de 50,6% menos por segundo de GPU; a H100 só empata o custo total se sua aceleração reduzir o tempo de GPU em mais da metade. É uma comparação de tarifas, não benchmark do NEXUS.
+- O código usa LTX-Video 2B distilled, classificado pelo repositório oficial como modelo pequeno, com uso leve de VRAM e geração rápida; L40S é a escolha inicial de melhor custo para essa carga. Manter L40S e recorrer à H100 apenas se o teste comprovar que tempo/estabilidade da L40S não atendem.
+- A configuração versionada já é L40S; não houve edição técnica de GPU nem render nesta etapa. A implantação Modal é manual. Próximo passo: publicar o worker atual, confirmar L40S no runtime, executar o smoke de uma cena e verificar cobrança real; então validar um MP4 de 40–50s antes de afirmar que 22 vídeos cabem nos créditos.
+- Fontes primárias: [Modal pricing](https://modal.com/pricing) e [LTX-Video oficial](https://github.com/Lightricks/LTX-Video).
+
 # NEXUS VIDEO STUDIO — CONTEXTO OPERACIONAL
 
 ## Atualização — guardrails editoriais do nicho TikTok — 2026-11-18
@@ -50,8 +58,8 @@
 ### Conta Modal conferida somente para leitura
 - Workspace do projeto: plano Starter, com US$30 de créditos de computação por ciclo.
 - Ciclo de cobrança consultado: 1–30/11/2026. Uso observado: US$1,50, integralmente coberto por créditos; cobranças líquidas: US$0.
-- Quebra do uso: H100 US$1,46, CPU US$0,02, memória US$0,01. O app `nexus-video-i2v` aparece como workload principal. As quatro chamadas listadas não comprovam quatro vídeos completos.
-- Painel exibe limite de uso total de US$42,50 e spend limit de US$0. Nenhuma configuração financeira foi alterada; o usuário pediu para manter como está.
+- O app `nexus-video-i2v` aparece como workload principal. As quatro chamadas listadas não comprovam quatro vídeos completos.
+- O spend limit está em US$0. Nenhuma configuração financeira foi alterada; o usuário pediu para manter como está.
 - Ainda não há medida de um vídeo TikTok completo de 40–50s; os valores atuais não permitem extrapolar 22 vídeos/mês.
 
 ### Auditoria e melhoria de legendas padrão
