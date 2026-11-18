@@ -84,6 +84,9 @@ class AppImportResilienceTests(unittest.TestCase):
         self.assertNotIn('name_col, play_col = st.columns', dialog)
         self.assertNotIn('nexus_active_voice_preview_id', dialog)
         self.assertNotIn('fish_audio.generate_fish_preview', dialog)
+        self.assertIn('uso pessoal não comercial', dialog)
+        self.assertIn('O NEXUS não verifica o plano da conta.', dialog)
+        self.assertIn('item.get("official_verified")', dialog)
 
     def test_visual_style_gallery_uses_distinct_visual_language_previews(self):
         source = Path("app.py").read_text(encoding="utf-8")

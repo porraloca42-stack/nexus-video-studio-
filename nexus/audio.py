@@ -17,6 +17,16 @@ FISH_API = "https://api.fish.audio"
 FISH_TTS_MODEL = "s2.1-pro-free"
 FISH_VOICE_TEXT = "Olá! Esta é uma amostra da minha voz para a narração do seu vídeo. Vamos transformar essa ideia em uma história que prende a atenção."
 
+# Fish Audio first-party Brazilian Portuguese profiles verified on the official
+# voice pages. IDs are checked again at runtime against author, title, locale,
+# public visibility, and a published sample before entering the app catalog.
+FISH_OFFICIAL_PTBR_NARRATORS = {
+    "b3c060cc41544a7da94a2c487647c902": {"title": "Letícia", "gender": "female"},
+    "add7bcb8d3c8423bbfa152ca232aad6e": {"title": "Ricardo", "gender": "male"},
+    "0ffee1af32254090b3630823baade12b": {"title": "Rafael (Brasil)", "gender": "male"},
+    "0e26d2df0d0848e3b34099bfb55fd6ea": {"title": "Beatriz (Brasil)", "gender": "female"},
+}
+
 
 class FishAudioError(RuntimeError):
     """Raised when Fish Audio cannot list voices or synthesize speech."""
@@ -304,12 +314,43 @@ def _is_human_narrator_voice(voice, gender):
     )
 
 
-def list_fish_professional_narrators(api_key, *, per_gender=25, session=None, require_sample=True):
-    """Return up to 25 natural Portuguese male and female professional narrators.
+def _is_curated_fish_official_ptbr_voice(voice, voice_id):
+    """Verify a fixed first-party voice profile against its live Fish metadata."""
+    expected = FISH_OFFICIAL_PTBR_NARRATORS.get(voice_id)
+    if not expected:
+        return False
+    if voice.get("author", "").strip().casefold() != "fish official":
+        return False
+    if voice.get("title", "").strip().casefold() != expected["title"].casefold():
+        return False
+    if str(voice.get("visibility") or "public").casefold() != "public":
+        return False
+    if not voice.get("sample_audio"):
+        return False
+    languages = [str(language).casefold() for language in voice.get("languages", [])]
+    if not any(language == "pt" or "portugu" in language for language in languages):
+        return False
+    metadata_probe = {
+        **voice,
+        # The pinned official profile IDs are documented by Fish as Brazilian
+        # Portuguese and male/female. Add that verified profile metadata for the
+        # common exclusion filter; the live ID/title/author checks above detect
+        # a provider-side profile change.
+        "description": f"{voice.get('description', '')} Brazilian Portuguese narration",
+        "languages": [*languages, "pt-BR"],
+        "tags": [*voice.get("tags", []), expected["gender"], "narration"],
+    }
+    if not _is_human_narrator_voice(metadata_probe, expected["gender"]):
+        return False
+    return True
 
-    Queries the same male/female + narration tag combinations used by Fish
-    Discovery, keeps only voices marked PVC or Fish-licensed, and removes
-    non-Brazilian Portuguese, character, anime, celebrity and meme models.
+
+def list_fish_professional_narrators(api_key, *, per_gender=25, session=None, require_sample=True):
+    """Return licensed/PVC narrators plus a small, pinned Fish Official pt-BR set.
+
+    Community voices must pass explicit metadata and source filters. First-party
+    voices are individually pinned by stable model ID and revalidated against
+    Fish's live title, author, language, visibility and sample fields.
     """
     client = session or requests
     result = {}
@@ -319,10 +360,6 @@ def list_fish_professional_narrators(api_key, *, per_gender=25, session=None, re
             for page_number in range(1, 6):
                 page = list_fish_voices(
                     api_key, page=page_number, page_size=100,
-                    # Search all models tagged for the requested gender, then
-                    # enforce narration and Brazilian Portuguese from metadata.
-                    # A combined gender+narration API filter hid eligible voices
-                    # whose narration style is described in metadata, not tags.
                     tags=[gender], language="pt",
                     licensed_only=licensed_only, sort_by="task_count",
                     session=client,
@@ -331,9 +368,6 @@ def list_fish_professional_narrators(api_key, *, per_gender=25, session=None, re
                     if not voice.get("id"):
                         continue
                     source = (voice.get("source") or "").casefold()
-                    # Match the Discovery source=pvc,licensed filter. The API
-                    # exposes source and licensed in ModelEntity; unknown sources
-                    # are excluded rather than silently broadening the catalog.
                     if not voice.get("licensed") and "pvc" not in source:
                         continue
                     if require_sample and not voice.get("sample_audio"):
@@ -344,6 +378,21 @@ def list_fish_professional_narrators(api_key, *, per_gender=25, session=None, re
                     break
                 if len(discovered) >= 25:
                     break
+
+        for voice_id, profile in FISH_OFFICIAL_PTBR_NARRATORS.items():
+            if profile["gender"] != gender or voice_id in discovered:
+                continue
+            try:
+                voice = get_fish_voice(api_key, voice_id, session=client)
+            except FishAudioError:
+                continue
+            if require_sample and not voice.get("sample_audio"):
+                continue
+            if _is_curated_fish_official_ptbr_voice(voice, voice_id):
+                voice["official_verified"] = True
+                voice["commercial_use_requires_paid_plan"] = True
+                discovered[voice_id] = voice
+
         voices = sorted(
             discovered.values(),
             key=lambda voice: (

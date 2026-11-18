@@ -160,9 +160,20 @@ def open_voice_picker():
     total_voices = sum(len(catalog.get(gender, [])) for _, gender in groups)
     narrator_label = "narrador" if total_voices == 1 else "narradores"
     st.caption(
-        f"{total_voices} {narrator_label} pt-BR licenciados ou PVC com amostra publicada. "
-        "A lista exclui vozes de personagens, memes e figuras públicas."
+        f"{total_voices} {narrator_label} pt-BR com amostra publicada. "
+        "A curadoria aceita origem licenciada/PVC e um conjunto pequeno de perfis Fish Official verificados."
     )
+    has_official_voices = any(
+        item.get("official_verified")
+        for _, gender in groups
+        for item in catalog.get(gender, [])
+    )
+    if has_official_voices:
+        st.warning(
+            "A Fish Audio informa que o plano gratuito permite uso pessoal não comercial; "
+            "conteúdo monetizado exige um plano com direitos comerciais. O NEXUS não verifica o plano da conta."
+        )
+    st.caption("A lista exclui vozes de personagens, memes e figuras públicas.")
 
     eligible_ids = {
         str(item.get("id") or "")
@@ -217,6 +228,8 @@ def open_voice_picker():
                 if not voice_id:
                     continue
                 voice_title = item.get("title") or f"Voz {voice_id[:8]}"
+                if item.get("official_verified"):
+                    voice_title = f"{voice_title} · Fish Official"
                 selected = voice_id == current_id
                 pending = voice_id == pending_id
                 label = f"{'✓ ' if selected else ''}{'▶ ' if pending else ''}{voice_title}"
