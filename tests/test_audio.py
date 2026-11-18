@@ -14,6 +14,8 @@ from nexus.audio import (
     _is_curated_fish_official_ptbr_voice,
     FISH_OFFICIAL_PTBR_NARRATORS,
     make_voice,
+    make_voice_audition,
+    NARRATION_AUDITION_TEXT,
 )
 
 
@@ -439,6 +441,17 @@ class AudioOutputTests(unittest.TestCase):
         self.assertEqual(kwargs["json"]["reference_id"], "voice-123")
         self.assertEqual(kwargs["json"]["language"], "pt-BR")
         self.assertEqual(kwargs["headers"]["model"], "s2.1-pro-free")
+
+    def test_audition_uses_the_same_script_and_production_endpoint_for_each_voice(self):
+        session = FakeFishSession()
+        for voice_id in ("voice-one", "voice-two"):
+            self.assertEqual(make_voice_audition("test-key", voice_id, session=session), b"fish-mp3")
+        for voice_id, (method, args, kwargs) in zip(("voice-one", "voice-two"), session.calls):
+            self.assertEqual(method, "POST")
+            self.assertTrue(args[0].endswith("/v1/tts/stream/with-timestamp"))
+            self.assertEqual(kwargs["json"]["text"], NARRATION_AUDITION_TEXT)
+            self.assertEqual(kwargs["json"]["reference_id"], voice_id)
+            self.assertEqual(kwargs["headers"]["model"], "s2.1-pro-free")
 
     def test_fish_audio_generates_selected_voice_and_reports_provider(self):
         session = FakeFishSession()

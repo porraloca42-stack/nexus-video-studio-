@@ -5,8 +5,9 @@ from nexus.director import apply_visual_style_lock
 
 
 class VisualStyleLibraryTests(unittest.TestCase):
-    def test_catalog_has_exactly_18_curated_styles(self):
-        self.assertEqual(len(STYLE_OPTIONS), 18)
+    def test_catalog_has_19_curated_styles_including_original_3d_animation(self):
+        self.assertEqual(len(STYLE_OPTIONS), 19)
+        self.assertIn("Animação 3D Autoral", STYLE_OPTIONS)
         self.assertEqual(set(STYLE_OPTIONS), set(STYLE_PROFILES))
 
     def test_every_style_has_complete_internal_art_direction(self):

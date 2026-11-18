@@ -121,6 +121,19 @@ _STYLE_ROWS = [
     ]
   ],
   [
+    "Animação 3D Autoral",
+    "Curta narrativo com personagens e cenários estilizados.",
+    "original stylized 3D short film, sculpted silhouettes, tactile matte materials, coherent production design",
+    "a restrained story-specific palette with one recurring accent color",
+    "motivated directional light, soft shadows, legible silhouette separation",
+    "deliberate shot scale and composition, readable action silhouettes, close detail followed by contextual framing",
+    "sculpted forms, matte handcrafted surfaces, subtle irregularities, clean silhouette edges",
+    "Design one coherent stylized 3D world per story. Keep recurring shapes, materials, set geography and character design consistent. Let poses, changes in props and physical consequences carry the story. Depict only subjects and settings supported by the brief.",
+    "photorealistic stock-footage aesthetics, generic motivational B-roll, posed portraits, plastic toy gloss, anonymous floating particles, imitation of recognizable characters or studios",
+    "abstract",
+    ["#232333", "#e7a35b", "#4b536e"]
+  ],
+  [
     "Cinematográfico",
     "Fotografia de cinema realista e versátil.",
     "naturalistic cinematic photography, 35mm film language, motivated light",
@@ -364,7 +377,7 @@ def build_visual_style_directive(style):
         f"TERMOS PARA BUSCA: {profile['search_terms']}\n"
         f"EVITAR: {profile['avoid']}\n"
         "CONTINUIDADE: mantenha a identidade artística em todas as cenas, variando "
-        "pessoas, ambientes, planos, ações e enquadramentos. O estilo nunca substitui "
+        "planos, ações e enquadramentos conforme a história. Preserve personagens e ambientes recorrentes. O estilo nunca substitui "
         "a correspondência semântica com a narração. Não inserir texto, legendas, "
         "logotipos ou tipografia nas imagens. Cada cena deve continuar específica "
         "ao trecho narrado.\n"
