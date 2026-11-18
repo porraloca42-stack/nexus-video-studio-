@@ -204,7 +204,7 @@ def open_voice_picker():
     if pending_id and pending_source:
         voice_name = pending_name.split(" · ", 1)[-1].removesuffix(" · Fish Official")
         st.markdown(f"**{voice_name} · amostra publicada**")
-        st.audio(pending_source, format="audio/mp3")
+        st.audio(pending_source, format="audio/mp3", autoplay=True)
 
         auditions = st.session_state.setdefault("nexus_narration_auditions", {})
         if pending_id not in auditions:
