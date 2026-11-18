@@ -1,5 +1,13 @@
 # NEXUS VIDEO STUDIO — CONTEXTO OPERACIONAL
 
+## Atualização — catálogo e rotulagem de vozes — 2026-11-18
+
+- PR #18 integrada por squash em `fa02b99727ac15d71aefab252dcff2901524b32e`. Aceita aliases exatos documentados “Rafael” / “Rafael Brasil” e “Beatriz” / “Beatriz Brasil” sem relaxar ID, autor Fish Official, idioma, amostra pública ou visibilidade; corrige singular/plural no seletor.
+- CI da PR #18: unit-tests e Remotion typecheck passaram; Commons live smoke passou na tentativa repetida após uma falha transitória (“no video with accepted license”); render sintético foi skipped pelo workflow. Isso valida CI, não a sonoridade por escuta nem o MP4 completo.
+- Esclarecimento do proprietário: rótulos/perfis “CapCut” e “ElevenLabs” são referências de sonoridade escolhidas para o catálogo. No caminho atual todos são sintetizados pela API Fish Audio; não chamar isso de integração oficial com APIs CapCut ou ElevenLabs. Preservar os rótulos reconhecíveis e explicar sua função na interface.
+- Quatro perfis Fish Official estão na lista curada, mas a quantidade efetivamente apresentada pelo app publicado ainda requer verificação pós-sync. Direitos comerciais dependem do plano/termos aplicáveis à conta e ao perfil; não foram verificados pelo app.
+- Próxima melhoria de produto: explicitar no seletor que CapCut/ElevenLabs descrevem perfis de referência e que Fish Audio é o mecanismo de síntese. A auditoria TikTok e a validação audiovisual real de 40–50s continuam pendentes.
+
 ## Auditoria e ampliação do catálogo de narração — 2026-11-18
 
 - A auditoria visual encontrou opções inadequadas de personagens/figuras públicas (incluindo Adolf Hitler e Papai Noel) e prévias que podiam sintetizar fala. PR #15 removeu a lista fixa e a síntese de prévias; integrada em `07579729650fa6db42d9f9f962d6c42e98c0bb56`, CI #1219 / run `44202766257` passou em 244 unit tests, Remotion typecheck e Commons smoke; render sintético skipped.
