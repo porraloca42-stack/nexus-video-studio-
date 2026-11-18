@@ -1,9 +1,9 @@
-import base64, json, os, shutil, subprocess, tempfile, inspect, importlib, time
+import base64, hashlib, json, os, shutil, subprocess, tempfile, inspect, importlib, time
 from pathlib import Path
 import requests
 import streamlit as st
 import streamlit.components.v1 as components
-from nexus.director import create_storyboard, validate_storyboard
+from nexus.director import build_storyboard_preflight, create_storyboard, validate_storyboard
 from nexus.build_info import get_runtime_build_info
 from nexus.assets import search_video_sources, download_file, diverse_candidate_shortlist
 from nexus.render_modes import ECONOMY_MODE, RENDER_MODE_OPTIONS, default_render_mode, mode_uses_modal
@@ -624,6 +624,80 @@ if active_view == "Criar":
                         "Nenhuma repetição literal ou alerta de variedade foi detectado "
                         "pelas regras automáticas."
                     )
+            st.markdown("### Revisar antes de produzir")
+            st.caption(
+                "Ajuste a narração e a direção de cada cena antes de iniciar qualquer geração. "
+                "Ao salvar, o NEXUS recalcula a pré-validação; a voz real ainda pode alterar a duração final."
+            )
+            storyboard_id = hashlib.sha1(
+                str(plan.get("full_narration", "")).encode("utf-8")
+            ).hexdigest()[:12]
+            edited_scenes = []
+            with st.form(f"nexus_storyboard_edit_{storyboard_id}"):
+                for i, scene in enumerate(scenes, 1):
+                    with st.expander(
+                        f"Cena {i} · {scene.get('purpose', 'Revisar cena')}",
+                        expanded=False,
+                    ):
+                        edited_scenes.append({
+                            **scene,
+                            "voiceover": st.text_area(
+                                "Narração",
+                                value=str(scene.get("voiceover", "")),
+                                key=f"nexus_edit_voice_{storyboard_id}_{i}",
+                                height=100,
+                            ),
+                            "visual_action": st.text_area(
+                                "Ação filmável",
+                                value=str(scene.get("visual_action", "")),
+                                key=f"nexus_edit_action_{storyboard_id}_{i}",
+                                height=90,
+                            ),
+                            "asset_search_query": st.text_input(
+                                "Busca visual",
+                                value=str(scene.get("asset_search_query", "")),
+                                key=f"nexus_edit_search_{storyboard_id}_{i}",
+                            ),
+                            "video_motion_prompt": st.text_area(
+                                "Movimento do clipe",
+                                value=str(scene.get("video_motion_prompt", "")),
+                                key=f"nexus_edit_motion_{storyboard_id}_{i}",
+                                height=100,
+                            ),
+                        })
+                save_storyboard_edits = st.form_submit_button(
+                    "Salvar ajustes e revalidar roteiro",
+                    type="primary",
+                    use_container_width=True,
+                )
+            if save_storyboard_edits:
+                edited_plan = {**plan, "scenes": edited_scenes}
+                edited_plan["full_narration"] = " ".join(
+                    str(scene.get("voiceover", "")).strip()
+                    for scene in edited_scenes
+                    if str(scene.get("voiceover", "")).strip()
+                )
+                edited_plan["preflight_report"] = build_storyboard_preflight(edited_plan)
+                edited_errors = validate_storyboard(
+                    edited_plan,
+                    edited_plan.get("requested_duration_seconds", duration),
+                )
+                st.session_state["nexus_plan"] = edited_plan
+                st.session_state["nexus_errors"] = edited_errors
+                if edited_errors:
+                    st.session_state["nexus_storyboard_edit_message"] = (
+                        "Ajustes salvos. Corrija os itens de validação antes de produzir."
+                    )
+                else:
+                    st.session_state.pop("nexus_storyboard_edit_message", None)
+                st.rerun()
+
+            edit_message = st.session_state.get("nexus_storyboard_edit_message")
+            if edit_message:
+                st.warning(edit_message)
+            elif st.session_state.get("nexus_plan") is plan and st.session_state.get("nexus_errors") == []:
+                st.caption("Planejamento aprovado pelas validações atuais. Você ainda pode revisar as cenas acima.")
+
             st.markdown("### Cenas")
             for i, scene in enumerate(scenes, 1):
                 st.markdown(f"**Cena {i} · {scene.get('duration_seconds', 0)}s · {scene.get('purpose', '')}**")
