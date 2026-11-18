@@ -319,7 +319,11 @@ def list_fish_professional_narrators(api_key, *, per_gender=25, session=None, re
             for page_number in range(1, 6):
                 page = list_fish_voices(
                     api_key, page=page_number, page_size=100,
-                    tags=[gender, "narration"], language="pt",
+                    # Search all models tagged for the requested gender, then
+                    # enforce narration and Brazilian Portuguese from metadata.
+                    # A combined gender+narration API filter hid eligible voices
+                    # whose narration style is described in metadata, not tags.
+                    tags=[gender], language="pt",
                     licensed_only=licensed_only, sort_by="task_count",
                     session=client,
                 )

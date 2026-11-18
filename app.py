@@ -158,8 +158,9 @@ def open_voice_picker():
 
     groups = (("Masculinas", "male"), ("Femininas", "female"))
     total_voices = sum(len(catalog.get(gender, [])) for _, gender in groups)
+    narrator_label = "narrador" if total_voices == 1 else "narradores"
     st.caption(
-        f"{total_voices} narradores pt-BR licenciados ou PVC com amostra publicada. "
+        f"{total_voices} {narrator_label} pt-BR licenciados ou PVC com amostra publicada. "
         "A lista exclui vozes de personagens, memes e figuras públicas."
     )
 
@@ -254,8 +255,9 @@ def open_voice_picker():
                         st.error(f"Não foi possível carregar a amostra pública de {voice_title}: {str(exc)[:180]}")
 
     if total_voices < 50:
+        voice_label = "voz elegível" if total_voices == 1 else "vozes elegíveis"
         st.caption(
-            f"A curadoria encontrou {total_voices} vozes elegíveis (até 25 por gênero). "
+            f"A curadoria encontrou {total_voices} {voice_label} (até 25 por gênero). "
             "Vozes sem amostra pública ou sem metadados pt-BR/narração ficam de fora."
         )
     if total_voices == 0:

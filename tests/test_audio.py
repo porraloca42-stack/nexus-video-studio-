@@ -175,7 +175,9 @@ class AudioOutputTests(unittest.TestCase):
         self.assertTrue(voices["female"][0]["licensed"])
         self.assertEqual(len(session.calls), 4)
         queried_tags = {tuple(kwargs["params"]["tag"]) for _, _, kwargs in session.calls}
-        self.assertEqual(queried_tags, {("male", "narration"), ("female", "narration")})
+        self.assertEqual(queried_tags, {("male",), ("female",)})
+        # Discovery is broadened by gender, but narration/locale are still
+        # enforced from each voice's metadata by the curator.
         licensed_queries = [kwargs for _, _, kwargs in session.calls if kwargs["params"].get("licensed") == "true"]
         self.assertEqual(len(licensed_queries), 2)
 
