@@ -174,6 +174,7 @@ def open_voice_picker():
             "conteúdo monetizado exige um plano com direitos comerciais. O NEXUS não verifica o plano da conta."
         )
     st.caption("A lista exclui vozes de personagens, memes e figuras públicas.")
+    st.caption("Rótulos como CapCut e ElevenLabs identificam perfis de referência sonora; a voz deste app é sintetizada pela Fish Audio. Confirme os direitos do perfil e do seu plano antes de publicar conteúdo monetizado.")
 
     eligible_ids = {
         str(item.get("id") or "")
