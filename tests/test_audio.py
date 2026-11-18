@@ -11,6 +11,8 @@ from nexus.audio import (
     list_curated_voice_catalog,
     _is_natural_brazilian_voice,
     _is_human_narrator_voice,
+    _is_curated_fish_official_ptbr_voice,
+    FISH_OFFICIAL_PTBR_NARRATORS,
     make_voice,
 )
 
@@ -180,6 +182,57 @@ class AudioOutputTests(unittest.TestCase):
         # enforced from each voice's metadata by the curator.
         licensed_queries = [kwargs for _, _, kwargs in session.calls if kwargs["params"].get("licensed") == "true"]
         self.assertEqual(len(licensed_queries), 2)
+
+    def test_verified_fish_official_brazilian_voices_join_the_catalog(self):
+        class OfficialFishSession:
+            def __init__(self):
+                self.calls = []
+            def get(self, url, headers=None, params=None, timeout=None):
+                self.calls.append((url, params))
+                class Response:
+                    def __init__(self, payload):
+                        self.payload = payload
+                    def raise_for_status(self):
+                        return None
+                    def json(self):
+                        return self.payload
+                voice_id = url.rsplit("/", 1)[-1]
+                if voice_id == "model":
+                    return Response({"total": 0, "items": []})
+                profile = FISH_OFFICIAL_PTBR_NARRATORS[voice_id]
+                return Response({
+                    "_id": voice_id, "type": "tts", "state": "trained",
+                    "visibility": "public", "title": profile["title"],
+                    "description": "Professional Brazilian Portuguese narration",
+                    "languages": ["pt"], "tags": ["professional"],
+                    "author": {"nickname": "Fish Official"},
+                    "samples": [{"audio": f"https://cdn.example.test/{voice_id}.mp3"}],
+                    "task_count": 100,
+                })
+
+        session = OfficialFishSession()
+        voices = list_fish_professional_narrators("test-key", session=session)
+        self.assertEqual(len(voices["male"]), 2)
+        self.assertEqual(len(voices["female"]), 2)
+        self.assertTrue(all(voice["official_verified"] for group in voices.values() for voice in group))
+        self.assertTrue(all(voice["commercial_use_requires_paid_plan"] for group in voices.values() for voice in group))
+        self.assertEqual(len(session.calls), 8)
+
+    def test_fish_official_profile_requires_exact_title_author_and_public_sample(self):
+        voice_id = "0ffee1af32254090b3630823baade12b"
+        profile = FISH_OFFICIAL_PTBR_NARRATORS[voice_id]
+        voice = {
+            "id": voice_id, "title": profile["title"], "author": "Fish Official",
+            "visibility": "public", "sample_audio": "https://cdn.example.test/sample.mp3",
+            "languages": ["pt"], "tags": ["professional"],
+            "description": "Brazilian Portuguese professional narration",
+        }
+        self.assertTrue(_is_curated_fish_official_ptbr_voice(voice, voice_id))
+        self.assertFalse(_is_curated_fish_official_ptbr_voice({**voice, "author": "Community User"}, voice_id))
+        self.assertFalse(_is_curated_fish_official_ptbr_voice({**voice, "visibility": "unlist"}, voice_id))
+        self.assertFalse(_is_curated_fish_official_ptbr_voice({**voice, "sample_audio": ""}, voice_id))
+        self.assertFalse(_is_curated_fish_official_ptbr_voice({**voice, "title": "Celebrity Voice"}, voice_id))
+
 
     def test_lists_portuguese_fish_voices_with_preview_sample(self):
         session = FakeFishSession()
