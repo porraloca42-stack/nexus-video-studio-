@@ -1,15 +1,24 @@
 # NEXUS VIDEO STUDIO — CONTEXTO OPERACIONAL
 
-## Auditoria e correção do catálogo de narração — 2026-11-17
+## Auditoria e expansão do catálogo de narração — 2026-11-18
 
 - A versão Streamlit anterior foi confirmada no commit `3d1498935906e4cda5b891e16c0db3455fa23136`; Gemini, Fish Audio, GitHub renderer e Cloudflare apareciam configurados.
 - A inspeção visual do catálogo mostrou nomes de figuras públicas/personagens (incluindo “Adolf Hitler” e “Papai Noel”) em grupos CapCut/ElevenLabs/Fish. O botão de prévia também podia chamar síntese Fish para vozes sem amostra publicada. Isso contradizia a curadoria de narradores profissionais pt-BR e o requisito de não gerar prévias pagas.
-- PR #15 (`Curate professional Portuguese narrators safely`) foi integrada por squash na main em `07579729650fa6db42d9f9f962d6c42e98c0bb56`. CI #1219 / run `44202766257`, head `23e1bebb825cd59249583f10d5ecdcda31da4468`: 244 unit tests, Remotion typecheck e Commons live smoke **success**; synthetic render **skipped**.
-- A interface lista narradores pt-BR masculinos/femininos retornados pelo catálogo Fish com metadados de narração e amostra pública, exclui personagens/figuras públicas conhecidas, e não gera síntese para prévia. Vozes anteriores fora da curadoria são removidas; não há fallback de entretenimento.
-- Verificação pós-merge no app Streamlit: Perfil mostrou o commit carregado `58ff57c6d22ae200748bbd038f28b0d359838cca`, confirmando sincronização. A lista ao vivo retornou **1 voz elegível**, masculina (“ERICK BARROSO”); nenhuma opção feminina apareceu nessa consulta. Nenhuma amostra foi reproduzida e nenhuma síntese de voz foi gerada.
-- A baixa quantidade revelou que a consulta `gênero+narration` pode ocultar modelos cuja categoria de narração está nos metadados descritivos. PR #16 (`Expand safe professional narrator discovery`) está aberta, head `a49dee8186b7d4f53d7941dac98107fad0120184`; amplia a busca pelo gênero e mantém filtros de idioma pt-BR, origem PVC/licenciada, amostra pública e exclusões de entretenimento. CI #1222 / run `44203509653`: Commons smoke e Remotion typecheck **success**, unit-tests permanece **in progress** na instalação de dependências; não integrar sem conclusão verde.
-- Estado: PR #15 **implementada, integrada e deploy Streamlit confirmado**. Curadoria de narração funcional, porém catálogo ao vivo está limitado a uma voz conhecida. PR #16 **em validação**. Nenhuma prévia Fish Audio, narração de produção ou render de vídeo foi gerada nestas etapas.
-- A geração de um MP4 TikTok completo de 40–50s e a avaliação audiovisual final continuam pendentes. Não inferir qualidade de produto final a partir do CI.
+- PR #15 (`Curate professional Portuguese narrators safely`) foi integrada por squash em `07579729650fa6db42d9f9f962d6c42e98c0bb56`. CI #1219 / run `44202766257`, head `23e1bebb825cd59249583f10d5ecdcda31da4468`: 244 unit tests, Remotion typecheck e Commons live smoke **success**; synthetic render **skipped**.
+- PR #16 (`Expand safe professional narrator discovery`) foi integrada por squash em `711b9454ff384117cfa5b5d7f48791855c7363ef`. A consulta pesquisa agora modelos por gênero e aplica os critérios de narração/pt-BR aos metadados, mantendo origem PVC/licenciada, amostra pública e exclusões. CI #1222 / run `44203509653`, head `a49dee8186b7d4f53d7941dac98107fad0120184`: unit-tests, Remotion typecheck e Commons live smoke **success**; synthetic render **skipped**.
+- A UI não gera prévias por síntese; voz antiga fora da curadoria é removida e não existe fallback para entretenimento. O critério amplo por gênero não adicionou candidatos à lista ao vivo.
+- Verificação pós-merge no Streamlit: Perfil mostrou o commit `711b9454ff384117cfa5b5d7f48791855c7363ef`. O seletor retornou uma voz elegível: masculina, “ERICK BARROSO”; nenhuma opção feminina apareceu. Nenhuma amostra foi reproduzida e nenhuma síntese de voz foi gerada.
+- A busca oficial da Fish Audio descreve vozes padrão como “Fish Official”, mas a página de planos informa que o plano Free limita o conteúdo gerado a projetos pessoais não comerciais e que usos comerciais exigem plano pago. O plano/termos efetivos da conta API NEXUS não foram confirmados. Não adicionar modelos de origem comunitária nem declarar direitos comerciais com base somente no rótulo “Official”. Fonte pública consultada: [Planos e FAQ Fish Audio](https://fish.audio/plan/).
+- Estado: curadoria de catálogo **implementada, integrada, CI aprovada e deployment Streamlit confirmado**. Catálogo ainda insuficiente para oferecer variedade (1 voz elegível); ampliar exige descobrir opções com licença adequada e confirmar o direito de uso da conta. Não executar sínteses para experimentar vozes sem consentimento de custo/uso e direitos.
+- A geração e revisão de um MP4 TikTok completo de 40–50s, incluindo custo real, narração, retenção e coerência das cenas, continuam pendentes.
+
+## Direção visual recomendada para o nicho — 2026-11-18
+
+- O catálogo tem 18 estilos selecionáveis e as direções internas exigem que tema, ação e metáfora venham do roteiro; o estilo controla fotografia, luz, paleta e textura, não deve impor símbolos ou cenas prontas.
+- Recomendação inicial (não é resultado de teste de retenção): **Quântico & Cósmico** para vídeos de lei da atração e conceitos abstratos; **Realismo Humano Emocional** para desenvolvimento pessoal e histórias de transformação; **Cinematográfico** como identidade versátil da conta; **Aura Neon** como variação pontual para energia/visualização; **Natureza Contemplativa** para afirmações e reflexão.
+- Para física quântica, preferir imagem editorial/cinematográfica de fenômenos e ideias claramente atribuídas; evitar usar cosmos, partículas ou “energia” visualmente como evidência científica de que pensamentos alteram a realidade. Lei da atração pode ser apresentada como prática de intenção/hábito, sem prometer causalidade física.
+- A adequação é uma avaliação editorial do catálogo e do nicho fornecido pelo usuário. Retenção/viralização só poderá ser avaliada com roteiros, renders e métricas reais do público.
+
 
 ## Estado operacional — pós-merge da melhoria de legendas TikTok — 2026-11-17 20:38 BRT
 
