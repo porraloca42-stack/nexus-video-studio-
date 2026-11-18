@@ -286,6 +286,14 @@ class RemoteNarrationTests(unittest.TestCase):
             self.assertEqual(report["narration_alignment"]["segments"][0]["text"], "Uma")
             self.assertEqual(report["narration_alignment"]["word_timestamps"][0]["text"], "Uma")
             self.assertNotIn("confidence", report["narration_alignment"]["word_timestamps"][0])
+            rendered_scenes = report["rendered_scenes"]
+            self.assertEqual(len(rendered_scenes), 10)
+            self.assertAlmostEqual(sum(scene["duration_seconds"] for scene in rendered_scenes), 37.6)
+            final_scenes = render.call_args.args[3]["scenes"]
+            self.assertEqual(
+                [scene["voiceover"] for scene in rendered_scenes],
+                [scene["voiceover"] for scene in final_scenes],
+            )
             self.assertAlmostEqual(report["duration"], 37.6, places=1)
             self.assertEqual(report["requested_duration"], 40.0)
             self.assertEqual(report["maximum_duration"], 50.0)
