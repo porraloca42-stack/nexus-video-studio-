@@ -1,6 +1,8 @@
 # NEXUS VIDEO STUDIO — CONTEXTO OPERACIONAL
 
 ## Atualização — guardrails editoriais do nicho TikTok — 2026-11-18
+- PR #21 integrada por squash em `2a716e377849b0f46dba33f38b079700c93736eb`. Revisão antes da produção agora permite editar por cena narração, ação filmável, busca visual e movimento; ao salvar recompõe full_narration e recalcula a pré-validação local. CI run `44214296530`: unit-tests, Remotion typecheck e Commons live smoke success; render sintético skipped.
+- Streamlit Perfil verificado após merge; commit em execução `2a716e377849` (origem git), incluindo o editor pré-render. Não fiz planejamento live com Gemini nem produção de mídia para testar a interação porque isso poderia consumir cota variável. Verificação completa do formulário no fluxo publicado ainda pendente.
 - PR #19 integrada por squash em `86e038b212df0c788e20adf7f06984b93e32abc5`; run `44213745233`: 246 unit tests, Remotion typecheck e Commons smoke passaram; synthetic render skipped. O teste do seletor agora mantém CapCut/ElevenLabs como referências e explica Fish Audio como sintetizador.
 - PR #21 aberta: revisão pré-render editável por cena (narração, ação, busca e movimento), recompõe a narração e recalcula pré-validação sem chamar provedores. CI run `44214296530` em fila; não integrar antes dos testes. Nenhuma mídia gerada.
 - Pesquisa pública Revid/CapCut aponta para fluxo controlável: roteiro segmentado, escolha do tipo de mídia, voz, captions, estimativa antes de gerar e timeline para ajuste posterior. NEXUS já tem planejamento e auditoria pós-render; controle pré-render está em PR #21. Isso descreve superfícies públicas, não o algoritmo interno dos concorrentes.
