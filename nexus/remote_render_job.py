@@ -447,6 +447,15 @@ def main(project_root=None, editorial_model_call=None):
         "narration_provider": narration_provider,
         "editorial_pipeline": plan.get("editorial_pipeline", {"status": "unknown"}),
         "captioning": plan.get("captioning", {"status": "unknown"}),
+        "rendered_scenes": [
+            {
+                "duration_seconds": scene["duration_seconds"],
+                "voiceover": scene.get("voiceover", ""),
+                "visual_action": scene.get("visual_action", ""),
+                "visual_style": scene.get("visual_style", ""),
+            }
+            for scene in plan["scenes"]
+        ],
         "narration_alignment": {
             "provider": "Fish Audio",
             "method": "fish_audio_tts_stream_with_timestamp",
@@ -499,7 +508,11 @@ def main(project_root=None, editorial_model_call=None):
     )
     output.unlink(missing_ok=True)
     report_path.unlink(missing_ok=True)
-    print(json.dumps({key: value for key, value in summary.items() if key != "images"}, ensure_ascii=False))
+    public_summary = {
+        key: value for key, value in summary.items()
+        if key not in {"images", "rendered_scenes"}
+    }
+    print(json.dumps(public_summary, ensure_ascii=False))
 
 
 if __name__ == "__main__":
