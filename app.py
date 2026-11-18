@@ -3,6 +3,23 @@ from pathlib import Path
 import requests
 import streamlit as st
 import streamlit.components.v1 as components
+import nexus.director as director_source
+import nexus.visual_styles as visual_styles_source
+
+
+@st.cache_resource(show_spinner=False)
+def refresh_director_sources(style_modified_ns, director_modified_ns):
+    """Refresh these modules once per source revision on Streamlit Cloud."""
+    importlib.reload(visual_styles_source)
+    importlib.reload(director_source)
+
+
+# The app script can be replaced while its Python imports remain in memory.
+refresh_director_sources(
+    Path(visual_styles_source.__file__).stat().st_mtime_ns,
+    Path(director_source.__file__).stat().st_mtime_ns,
+)
+
 from nexus.director import build_storyboard_preflight, create_storyboard, validate_storyboard
 from nexus.build_info import get_runtime_build_info
 from nexus.assets import search_video_sources, download_file, diverse_candidate_shortlist
