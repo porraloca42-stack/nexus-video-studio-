@@ -1,10 +1,13 @@
-## Modal GPU: custo e deployment — 2026-11-18
-- Por autorização explícita do proprietário, este registro público inclui os dados da conta Modal que ele autorizou divulgar: crédito mensal US$30,00; uso deste ciclo US$1,50, coberto integralmente por créditos; cobranças atuais US$0; spend limit US$0. Não alterei limites nem faturamento.
-- O deployment ativo observado no painel usa H100, enquanto o código atual em `nexus/ltx_config.py` pede L40S. A projeção anterior baseada em L40S não descreve o deployment ativo.
-- Preço público Modal consultado: L40S US$0,000542/GPU-s e H100 US$0,001097/GPU-s. A L40S custa cerca de 50,6% menos por segundo de GPU; a H100 só empata o custo total se sua aceleração reduzir o tempo de GPU em mais da metade. É uma comparação de tarifas, não benchmark do NEXUS.
-- O código usa LTX-Video 2B distilled, classificado pelo repositório oficial como modelo pequeno, com uso leve de VRAM e geração rápida; L40S é a escolha inicial de melhor custo para essa carga. Manter L40S e recorrer à H100 apenas se o teste comprovar que tempo/estabilidade da L40S não atendem.
-- A configuração versionada já é L40S; não houve edição técnica de GPU nem render nesta etapa. A implantação Modal é manual. Próximo passo: publicar o worker atual, confirmar L40S no runtime, executar o smoke de uma cena e verificar cobrança real; então validar um MP4 de 40–50s antes de afirmar que 22 vídeos cabem nos créditos.
-- Fontes primárias: [Modal pricing](https://modal.com/pricing) e [LTX-Video oficial](https://github.com/Lightricks/LTX-Video).
+## Modal GPU: custo, deployment e smoke test — 2026-11-18
+- Por autorização explícita do proprietário, o registro público contém o baseline de conta autorizado: crédito computacional mensal US$30,00; uso do ciclo antes do teste US$1,50, coberto por créditos; cobranças líquidas US$0; spend limit US$0. Nenhum limite financeiro foi alterado.
+- Tarifa pública Modal consultada: L40S US$0,000542/GPU-s; H100 US$0,001097/GPU-s. L40S custa cerca de 50,6% menos por segundo; H100 só empata se reduzir pela metade ou mais o tempo de GPU. Para o LTX-Video 2B distilled e formato de cena NEXUS (512×896), a opção recomendada é L40S, com H100 como fallback só se tempo/estabilidade real justificarem o prêmio.
+- Deployment manual concluído com sucesso pelo workflow #4 / run `44220662912`, SHA `7aa9d02477e8d3de4767b8a26a9ad41e94430aba`. Painel Modal confirmou a função `Inference` em L40S; nenhum container ficou ativo após deploy. O arquivo de configuração do repositório já pede `GPU_TYPE="L40S"`.
+- Smoke técnico manual passou no workflow run `44221018595` (artifact `14391246553`, expira 21/11/2026). O worker confirmou GPU `NVIDIA L40S`, identidade aprovada, pipeline LTX-Video 2B v0.9.8 distilled multi-scale, H.264 512×896, 24fps, duração 2,0417s, inferência 2,603s e carga fria do modelo 240,808s. O relatório registrou cache miss para checkpoint/upscaler; o Volume foi commitado no worker para persistir pesos.
+- Os logs mostram fallback de download HTTP por ausência de `hf_xet`; os pesos baixaram e o pipeline carregou. Considerar otimização da imagem/cache e verificar próxima execução com cache hit para reduzir inicialização e custo frio.
+- O smoke prova deployment, execução real em L40S e MP4 curto válido; não prova movimento visual de qualidade humana, áudio/captions, custo faturado isolado por vídeo, render completo de 40–50s nem 22 vídeos/mês. O smoke JSON não expõe custo faturado; a tela de cobrança mostra uso agregado do workspace/app, sem atribuição exata por run.
+- Saldo e spend limit foram apenas consultados; não alterados. Nenhum render editorial completo foi iniciado. Próxima etapa: conferir persistência do cache no próximo teste e realizar um MP4 integrado de 40–50s para medir o custo agregado antes de extrapolar a meta mensal.
+- Fontes primárias: [Modal pricing](https://modal.com/pricing), [LTX-Video oficial](https://github.com/Lightricks/LTX-Video).
+
 
 # NEXUS VIDEO STUDIO — CONTEXTO OPERACIONAL
 
