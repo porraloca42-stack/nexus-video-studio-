@@ -3,7 +3,7 @@
 ## Atualização — guardrails editoriais do nicho TikTok — 2026-11-18
 
 - PR #20 integrada por squash no commit `19870aee1ab6c5c10a729aae8b856c1458ed3a3c`. O prompt de direção do Gemini agora distingue lei da atração como filosofia/prática pessoal, aconselha ações concretas em desenvolvimento pessoal e exige separar física quântica estabelecida de metáforas/interpretações, evitando promessas garantidas e autoridade/estudos inventados.
-- CI #1261 / run `44212111300`: unit-tests, Remotion typecheck e Commons live smoke passaram; render sintético foi skipped. Testes unitários cobrem as salvaguardas do prompt. Nenhuma chamada Gemini ou mídia foi gerada para esta mudança.
+- CI run `44212111300`: unit-tests, Remotion typecheck e Commons live smoke passaram; render sintético foi skipped. Testes unitários cobrem as salvaguardas do prompt. Nenhuma chamada Gemini ou mídia foi gerada para esta mudança.
 - PR #19 permanece aberta aguardando CI para explicar os rótulos CapCut/ElevenLabs no seletor; typecheck passou, unit-tests e Commons smoke seguem em instalação de dependências no runner. Não integrada ainda.
 - Estratégia TikTok já orientada no diretor e apresentada no planejamento: hook imediato, progressão com recompensa, narração falável, cenas semânticas específicas, movimento observável, continuidade, CTA e SEO fiel. Pós-render já calcula auditoria visual por cena. Ainda não houve validação auditiva, retenção real nem teste de analytics; tratar viralização como objetivo de otimização experimental, não promessa.
 
