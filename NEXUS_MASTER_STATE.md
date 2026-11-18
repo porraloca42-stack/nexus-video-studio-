@@ -1,11 +1,11 @@
 # NEXUS VIDEO STUDIO — CONTEXTO OPERACIONAL
 
 ## Atualização — guardrails editoriais do nicho TikTok — 2026-11-18
-- PR #19 CI inicial / run `44211676384`: typecheck e Commons smoke passaram, mas 1 de 246 testes unitários falhou porque uma asserção antiga proibia a palavra “CapCut” no seletor. O proprietário esclareceu que esses nomes devem permanecer como referências de perfil; a interface explica Fish Audio como mecanismo de síntese. A asserção foi atualizada para confirmar os rótulos e o esclarecimento completo. Novo head `ed975abbf1b66c38ea8fdf02f774d169f9bfad5d`; CI #1240 / run `44213745233` em andamento. PR ainda não integrada.
+- PR #19 integrada por squash em `86e038b212df0c788e20adf7f06984b93e32abc5`. CI run `44213745233`: 246 unit tests, Remotion typecheck e Commons live smoke passaram; render sintético foi skipped. O teste que antes proibia “CapCut” foi atualizado para confirmar os nomes CapCut/ElevenLabs e a indicação de síntese Fish Audio.
 
 - PR #20 integrada por squash no commit `19870aee1ab6c5c10a729aae8b856c1458ed3a3c`. O prompt de direção do Gemini agora distingue lei da atração como filosofia/prática pessoal, aconselha ações concretas em desenvolvimento pessoal e exige separar física quântica estabelecida de metáforas/interpretações, evitando promessas garantidas e autoridade/estudos inventados.
 - CI run `44212111300`: unit-tests, Remotion typecheck e Commons live smoke passaram; render sintético foi skipped. Testes unitários cobrem as salvaguardas do prompt. Nenhuma chamada Gemini ou mídia foi gerada para esta mudança.
-- PR #19 permanece aberta aguardando CI para explicar os rótulos CapCut/ElevenLabs no seletor; typecheck passou, unit-tests e Commons smoke seguem em instalação de dependências no runner. Não integrada ainda.
+- PR #19 já integrada; a cópia do aviso no Streamlit ainda não foi revalidada após o merge.
 - Estratégia TikTok já orientada no diretor e apresentada no planejamento: hook imediato, progressão com recompensa, narração falável, cenas semânticas específicas, movimento observável, continuidade, CTA e SEO fiel. Pós-render já calcula auditoria visual por cena. Ainda não houve validação auditiva, retenção real nem teste de analytics; tratar viralização como objetivo de otimização experimental, não promessa.
 
 ## Atualização — catálogo e rotulagem de vozes — 2026-11-18
@@ -13,8 +13,8 @@
 - PR #18 integrada por squash em `fa02b99727ac15d71aefab252dcff2901524b32e`. Aceita aliases exatos documentados “Rafael” / “Rafael Brasil” e “Beatriz” / “Beatriz Brasil” sem relaxar ID, autor Fish Official, idioma, amostra pública ou visibilidade; corrige singular/plural no seletor.
 - CI da PR #18: unit-tests e Remotion typecheck passaram; Commons live smoke passou na tentativa repetida após uma falha transitória (“no video with accepted license”); render sintético foi skipped pelo workflow. Isso valida CI, não a sonoridade por escuta nem o MP4 completo.
 - Esclarecimento do proprietário: rótulos/perfis “CapCut” e “ElevenLabs” são referências de sonoridade escolhidas para o catálogo. No caminho atual todos são sintetizados pela API Fish Audio; não chamar isso de integração oficial com APIs CapCut ou ElevenLabs. Preservar os rótulos reconhecíveis e explicar sua função na interface.
-- Quatro perfis Fish Official estão na lista curada, mas a quantidade efetivamente apresentada pelo app publicado ainda requer verificação pós-sync. Direitos comerciais dependem do plano/termos aplicáveis à conta e ao perfil; não foram verificados pelo app.
-- Próxima melhoria de produto: explicitar no seletor que CapCut/ElevenLabs descrevem perfis de referência e que Fish Audio é o mecanismo de síntese. A auditoria TikTok e a validação audiovisual real de 40–50s continuam pendentes.
+- Streamlit verificado após PR #18: cinco vozes elegíveis (ERICK BARROSO, Rafael, Ricardo, Beatriz e Letícia). O seletor mostra os alertas de licenciamento. PR #19 integra explicação CapCut/ElevenLabs como rótulos de referência e Fish Audio como mecanismo de síntese; verificar o runtime após novo sync. Direitos comerciais dependem do plano/termos aplicáveis à conta e ao perfil; não foram verificados pelo app.
+- Melhorias já aplicadas: aliases exatos para os perfis oficiais, esclarecimento de origem das vozes e guardrails de credibilidade para o nicho. A auditoria audiovisual real de 40–50s e medição de retenção continuam pendentes.
 
 ## Auditoria e ampliação do catálogo de narração — 2026-11-18
 
