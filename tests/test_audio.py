@@ -235,6 +235,7 @@ class AudioOutputTests(unittest.TestCase):
             "description": "Brazilian Portuguese professional narration",
         }
         self.assertTrue(_is_curated_fish_official_ptbr_voice(voice, voice_id))
+        self.assertTrue(_is_curated_fish_official_ptbr_voice({**voice, "title": "Rafael"}, voice_id))
         self.assertFalse(_is_curated_fish_official_ptbr_voice({**voice, "author": "Community User"}, voice_id))
         self.assertFalse(_is_curated_fish_official_ptbr_voice({**voice, "visibility": "unlist"}, voice_id))
         self.assertFalse(_is_curated_fish_official_ptbr_voice({**voice, "sample_audio": ""}, voice_id))

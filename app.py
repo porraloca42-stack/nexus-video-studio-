@@ -222,7 +222,8 @@ def open_voice_picker():
         category_voices = catalog.get(gender, [])
         if not category_voices:
             continue
-        with st.expander(f"{category} · {len(category_voices)} vozes", expanded=True):
+        voice_count_label = "voz" if len(category_voices) == 1 else "vozes"
+        with st.expander(f"{category} · {len(category_voices)} {voice_count_label}", expanded=True):
             for item in category_voices:
                 voice_id = str(item.get("id") or "")
                 if not voice_id:

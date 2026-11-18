@@ -23,8 +23,12 @@ FISH_VOICE_TEXT = "Olá! Esta é uma amostra da minha voz para a narração do s
 FISH_OFFICIAL_PTBR_NARRATORS = {
     "b3c060cc41544a7da94a2c487647c902": {"title": "Letícia", "gender": "female"},
     "add7bcb8d3c8423bbfa152ca232aad6e": {"title": "Ricardo", "gender": "male"},
-    "0ffee1af32254090b3630823baade12b": {"title": "Rafael (Brasil)", "gender": "male"},
-    "0e26d2df0d0848e3b34099bfb55fd6ea": {"title": "Beatriz (Brasil)", "gender": "female"},
+    "0ffee1af32254090b3630823baade12b": {
+        "title": "Rafael (Brasil)", "title_aliases": ("Rafael", "Rafael Brasil"), "gender": "male",
+    },
+    "0e26d2df0d0848e3b34099bfb55fd6ea": {
+        "title": "Beatriz (Brasil)", "title_aliases": ("Beatriz", "Beatriz Brasil"), "gender": "female",
+    },
 }
 
 
@@ -321,7 +325,10 @@ def _is_curated_fish_official_ptbr_voice(voice, voice_id):
         return False
     if voice.get("author", "").strip().casefold() != "fish official":
         return False
-    if voice.get("title", "").strip().casefold() != expected["title"].casefold():
+    accepted_titles = {expected["title"], *expected.get("title_aliases", ())}
+    if voice.get("title", "").strip().casefold() not in {
+        title.casefold() for title in accepted_titles
+    }:
         return False
     if str(voice.get("visibility") or "public").casefold() != "public":
         return False
