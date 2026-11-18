@@ -65,7 +65,7 @@ class AppImportResilienceTests(unittest.TestCase):
         self.assertIn('st.rerun()', dialog)
         self.assertIn('CapCut', dialog)
         self.assertIn('ElevenLabs', dialog)
-        self.assertIn('sintetizada pela Fish Audio', dialog)
+        self.assertIn('a voz deste app é sintetizada pela Fish Audio', dialog)
         self.assertNotIn('Adolf Hitler', dialog)
         self.assertNotIn('st.selectbox(', dialog)
         self.assertNotIn('Usar esta voz', dialog)
