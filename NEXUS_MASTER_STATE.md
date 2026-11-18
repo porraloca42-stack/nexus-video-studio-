@@ -1,6 +1,7 @@
 # NEXUS VIDEO STUDIO — CONTEXTO OPERACIONAL
 
 ## Atualização — guardrails editoriais do nicho TikTok — 2026-11-18
+- PR #19 CI inicial / run `44211676384`: typecheck e Commons smoke passaram, mas 1 de 246 testes unitários falhou porque uma asserção antiga proibia a palavra “CapCut” no seletor. O proprietário esclareceu que esses nomes devem permanecer como referências de perfil; a interface explica Fish Audio como mecanismo de síntese. A asserção foi atualizada para confirmar os rótulos e o esclarecimento completo. Novo head `ed975abbf1b66c38ea8fdf02f774d169f9bfad5d`; CI #1240 / run `44213745233` em andamento. PR ainda não integrada.
 
 - PR #20 integrada por squash no commit `19870aee1ab6c5c10a729aae8b856c1458ed3a3c`. O prompt de direção do Gemini agora distingue lei da atração como filosofia/prática pessoal, aconselha ações concretas em desenvolvimento pessoal e exige separar física quântica estabelecida de metáforas/interpretações, evitando promessas garantidas e autoridade/estudos inventados.
 - CI run `44212111300`: unit-tests, Remotion typecheck e Commons live smoke passaram; render sintético foi skipped. Testes unitários cobrem as salvaguardas do prompt. Nenhuma chamada Gemini ou mídia foi gerada para esta mudança.
